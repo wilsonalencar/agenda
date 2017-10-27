@@ -1,0 +1,2466 @@
+Array
+(
+    [0] => Array
+        (
+            [descricao] => Entrega SPED FISCAL SP
+            [recibo] => 1
+            [status] => 1
+            [periodo_apuracao] => 032016
+            [inicio_aviso] => 2016-03-31 18:00:00
+            [limite] => 2016-04-20 18:00:00
+            [tipo_geracao] => A
+            [estemp] => Array
+                (
+                    [0] => stdClass Object
+                        (
+                            [cnpj] => 13574594000196
+                            [id] => 1
+                            [uf] => SP
+                            [nome] => Barueri
+                        )
+
+                    [1] => stdClass Object
+                        (
+                            [cnpj] => 13574594037006
+                            [id] => 1
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [2] => stdClass Object
+                        (
+                            [cnpj] => 13574594000277
+                            [id] => 2
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [3] => stdClass Object
+                        (
+                            [cnpj] => 13574594000358
+                            [id] => 3
+                            [uf] => SP
+                            [nome] => Carapicuíba
+                        )
+
+                    [4] => stdClass Object
+                        (
+                            [cnpj] => 13574594000439
+                            [id] => 4
+                            [uf] => SP
+                            [nome] => Piracicaba
+                        )
+
+                    [5] => stdClass Object
+                        (
+                            [cnpj] => 13574594000510
+                            [id] => 5
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [6] => stdClass Object
+                        (
+                            [cnpj] => 13574594000943
+                            [id] => 8
+                            [uf] => SP
+                            [nome] => Cotia
+                        )
+
+                    [7] => stdClass Object
+                        (
+                            [cnpj] => 13574594001168
+                            [id] => 9
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [8] => stdClass Object
+                        (
+                            [cnpj] => 13574594001320
+                            [id] => 11
+                            [uf] => SP
+                            [nome] => Presidente Prudente
+                        )
+
+                    [9] => stdClass Object
+                        (
+                            [cnpj] => 13574594001400
+                            [id] => 12
+                            [uf] => SP
+                            [nome] => Ribeirão Preto
+                        )
+
+                    [10] => stdClass Object
+                        (
+                            [cnpj] => 13574594001591
+                            [id] => 13
+                            [uf] => SP
+                            [nome] => Itapevi
+                        )
+
+                    [11] => stdClass Object
+                        (
+                            [cnpj] => 13574594001672
+                            [id] => 14
+                            [uf] => SP
+                            [nome] => Itu
+                        )
+
+                    [12] => stdClass Object
+                        (
+                            [cnpj] => 13574594000862
+                            [id] => 15
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [13] => stdClass Object
+                        (
+                            [cnpj] => 13574594001087
+                            [id] => 16
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [14] => stdClass Object
+                        (
+                            [cnpj] => 13574594001753
+                            [id] => 17
+                            [uf] => SP
+                            [nome] => Franca
+                        )
+
+                    [15] => stdClass Object
+                        (
+                            [cnpj] => 13574594028791
+                            [id] => 20
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [16] => stdClass Object
+                        (
+                            [cnpj] => 13574594004426
+                            [id] => 22
+                            [uf] => SP
+                            [nome] => Pindamonhangaba
+                        )
+
+                    [17] => stdClass Object
+                        (
+                            [cnpj] => 13574594015703
+                            [id] => 23
+                            [uf] => SP
+                            [nome] => Botucatu
+                        )
+
+                    [18] => stdClass Object
+                        (
+                            [cnpj] => 13574594002059
+                            [id] => 25
+                            [uf] => SP
+                            [nome] => Barueri
+                        )
+
+                    [19] => stdClass Object
+                        (
+                            [cnpj] => 13574594004507
+                            [id] => 27
+                            [uf] => SP
+                            [nome] => Catanduva
+                        )
+
+                    [20] => stdClass Object
+                        (
+                            [cnpj] => 13574594003292
+                            [id] => 28
+                            [uf] => SP
+                            [nome] => Santa Bárbara d'Oeste
+                        )
+
+                    [21] => stdClass Object
+                        (
+                            [cnpj] => 13574594009657
+                            [id] => 30
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [22] => stdClass Object
+                        (
+                            [cnpj] => 13574594034252
+                            [id] => 31
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [23] => stdClass Object
+                        (
+                            [cnpj] => 13574594006399
+                            [id] => 32
+                            [uf] => SP
+                            [nome] => São Caetano do Sul
+                        )
+
+                    [24] => stdClass Object
+                        (
+                            [cnpj] => 13574594006631
+                            [id] => 33
+                            [uf] => SP
+                            [nome] => Jundiaí
+                        )
+
+                    [25] => stdClass Object
+                        (
+                            [cnpj] => 13574594003454
+                            [id] => 36
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [26] => stdClass Object
+                        (
+                            [cnpj] => 13574594019962
+                            [id] => 41
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [27] => stdClass Object
+                        (
+                            [cnpj] => 13574594022831
+                            [id] => 42
+                            [uf] => SP
+                            [nome] => Ribeirão Preto
+                        )
+
+                    [28] => stdClass Object
+                        (
+                            [cnpj] => 13574594022750
+                            [id] => 43
+                            [uf] => SP
+                            [nome] => Votorantim
+                        )
+
+                    [29] => stdClass Object
+                        (
+                            [cnpj] => 13574594022327
+                            [id] => 44
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [30] => stdClass Object
+                        (
+                            [cnpj] => 13574594006208
+                            [id] => 45
+                            [uf] => SP
+                            [nome] => Taubaté
+                        )
+
+                    [31] => stdClass Object
+                        (
+                            [cnpj] => 13574594007441
+                            [id] => 46
+                            [uf] => SP
+                            [nome] => Mogi das Cruzes
+                        )
+
+                    [32] => stdClass Object
+                        (
+                            [cnpj] => 13574594024702
+                            [id] => 47
+                            [uf] => SP
+                            [nome] => Pindamonhangaba
+                        )
+
+                    [33] => stdClass Object
+                        (
+                            [cnpj] => 13574594029763
+                            [id] => 48
+                            [uf] => SP
+                            [nome] => São Roque
+                        )
+
+                    [34] => stdClass Object
+                        (
+                            [cnpj] => 13574594002997
+                            [id] => 49
+                            [uf] => SP
+                            [nome] => Piracicaba
+                        )
+
+                    [35] => stdClass Object
+                        (
+                            [cnpj] => 13574594020030
+                            [id] => 50
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [36] => stdClass Object
+                        (
+                            [cnpj] => 13574594012100
+                            [id] => 51
+                            [uf] => SP
+                            [nome] => Limeira
+                        )
+
+                    [37] => stdClass Object
+                        (
+                            [cnpj] => 13574594008170
+                            [id] => 52
+                            [uf] => SP
+                            [nome] => Rio Claro
+                        )
+
+                    [38] => stdClass Object
+                        (
+                            [cnpj] => 13574594007360
+                            [id] => 53
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [39] => stdClass Object
+                        (
+                            [cnpj] => 13574594007603
+                            [id] => 62
+                            [uf] => SP
+                            [nome] => Itu
+                        )
+
+                    [40] => stdClass Object
+                        (
+                            [cnpj] => 13574594002482
+                            [id] => 64
+                            [uf] => SP
+                            [nome] => Caraguatatuba
+                        )
+
+                    [41] => stdClass Object
+                        (
+                            [cnpj] => 13574594008502
+                            [id] => 65
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [42] => stdClass Object
+                        (
+                            [cnpj] => 13574594002644
+                            [id] => 66
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [43] => stdClass Object
+                        (
+                            [cnpj] => 13574594009142
+                            [id] => 67
+                            [uf] => SP
+                            [nome] => Valinhos
+                        )
+
+                    [44] => stdClass Object
+                        (
+                            [cnpj] => 13574594003020
+                            [id] => 68
+                            [uf] => SP
+                            [nome] => Catanduva
+                        )
+
+                    [45] => stdClass Object
+                        (
+                            [cnpj] => 13574594031318
+                            [id] => 69
+                            [uf] => SP
+                            [nome] => São José do Rio Preto
+                        )
+
+                    [46] => stdClass Object
+                        (
+                            [cnpj] => 13574594008685
+                            [id] => 72
+                            [uf] => SP
+                            [nome] => Itapetininga
+                        )
+
+                    [47] => stdClass Object
+                        (
+                            [cnpj] => 13574594048636
+                            [id] => 73
+                            [uf] => SP
+                            [nome] => Araraquara
+                        )
+
+                    [48] => stdClass Object
+                        (
+                            [cnpj] => 13574594006550
+                            [id] => 75
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [49] => stdClass Object
+                        (
+                            [cnpj] => 13574594004850
+                            [id] => 76
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [50] => stdClass Object
+                        (
+                            [cnpj] => 13574594009304
+                            [id] => 78
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [51] => stdClass Object
+                        (
+                            [cnpj] => 13574594010159
+                            [id] => 79
+                            [uf] => SP
+                            [nome] => Guarulhos
+                        )
+
+                    [52] => stdClass Object
+                        (
+                            [cnpj] => 13574594025857
+                            [id] => 80
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [53] => stdClass Object
+                        (
+                            [cnpj] => 13574594025261
+                            [id] => 81
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [54] => stdClass Object
+                        (
+                            [cnpj] => 13574594009223
+                            [id] => 84
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [55] => stdClass Object
+                        (
+                            [cnpj] => 13574594008332
+                            [id] => 85
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [56] => stdClass Object
+                        (
+                            [cnpj] => 13574594008413
+                            [id] => 86
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [57] => stdClass Object
+                        (
+                            [cnpj] => 13574594009576
+                            [id] => 89
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [58] => stdClass Object
+                        (
+                            [cnpj] => 13574594025180
+                            [id] => 90
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [59] => stdClass Object
+                        (
+                            [cnpj] => 13574594028015
+                            [id] => 91
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [60] => stdClass Object
+                        (
+                            [cnpj] => 13574594007794
+                            [id] => 92
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [61] => stdClass Object
+                        (
+                            [cnpj] => 13574594012283
+                            [id] => 93
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [62] => stdClass Object
+                        (
+                            [cnpj] => 13574594012364
+                            [id] => 95
+                            [uf] => SP
+                            [nome] => Bauru
+                        )
+
+                    [63] => stdClass Object
+                        (
+                            [cnpj] => 13574594007522
+                            [id] => 96
+                            [uf] => SP
+                            [nome] => Ribeirão Preto
+                        )
+
+                    [64] => stdClass Object
+                        (
+                            [cnpj] => 13574594007280
+                            [id] => 101
+                            [uf] => SP
+                            [nome] => Rio Claro
+                        )
+
+                    [65] => stdClass Object
+                        (
+                            [cnpj] => 13574594009495
+                            [id] => 102
+                            [uf] => SP
+                            [nome] => Vinhedo
+                        )
+
+                    [66] => stdClass Object
+                        (
+                            [cnpj] => 13574594009819
+                            [id] => 103
+                            [uf] => SP
+                            [nome] => Mogi das Cruzes
+                        )
+
+                    [67] => stdClass Object
+                        (
+                            [cnpj] => 13574594022912
+                            [id] => 104
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [68] => stdClass Object
+                        (
+                            [cnpj] => 13574594015118
+                            [id] => 107
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [69] => stdClass Object
+                        (
+                            [cnpj] => 13574594026403
+                            [id] => 108
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [70] => stdClass Object
+                        (
+                            [cnpj] => 13574594015037
+                            [id] => 109
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [71] => stdClass Object
+                        (
+                            [cnpj] => 13574594014227
+                            [id] => 111
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [72] => stdClass Object
+                        (
+                            [cnpj] => 13574594025342
+                            [id] => 112
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [73] => stdClass Object
+                        (
+                            [cnpj] => 13574594010230
+                            [id] => 117
+                            [uf] => SP
+                            [nome] => Mogi Guaçu
+                        )
+
+                    [74] => stdClass Object
+                        (
+                            [cnpj] => 13574594012526
+                            [id] => 118
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [75] => stdClass Object
+                        (
+                            [cnpj] => 13574594011120
+                            [id] => 119
+                            [uf] => SP
+                            [nome] => Limeira
+                        )
+
+                    [76] => stdClass Object
+                        (
+                            [cnpj] => 13574594013417
+                            [id] => 120
+                            [uf] => SP
+                            [nome] => Americana
+                        )
+
+                    [77] => stdClass Object
+                        (
+                            [cnpj] => 13574594013506
+                            [id] => 121
+                            [uf] => SP
+                            [nome] => Presidente Prudente
+                        )
+
+                    [78] => stdClass Object
+                        (
+                            [cnpj] => 13574594012879
+                            [id] => 123
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [79] => stdClass Object
+                        (
+                            [cnpj] => 13574594012607
+                            [id] => 124
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [80] => stdClass Object
+                        (
+                            [cnpj] => 13574594054601
+                            [id] => 125
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [81] => stdClass Object
+                        (
+                            [cnpj] => 13574594010310
+                            [id] => 126
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [82] => stdClass Object
+                        (
+                            [cnpj] => 13574594013174
+                            [id] => 127
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [83] => stdClass Object
+                        (
+                            [cnpj] => 13574594023641
+                            [id] => 128
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [84] => stdClass Object
+                        (
+                            [cnpj] => 13574594015207
+                            [id] => 131
+                            [uf] => SP
+                            [nome] => Itapecerica da Serra
+                        )
+
+                    [85] => stdClass Object
+                        (
+                            [cnpj] => 13574594050886
+                            [id] => 133
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [86] => stdClass Object
+                        (
+                            [cnpj] => 13574594015380
+                            [id] => 134
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [87] => stdClass Object
+                        (
+                            [cnpj] => 13574594014146
+                            [id] => 138
+                            [uf] => SP
+                            [nome] => Guaratinguetá
+                        )
+
+                    [88] => stdClass Object
+                        (
+                            [cnpj] => 13574594012950
+                            [id] => 139
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [89] => stdClass Object
+                        (
+                            [cnpj] => 13574594022599
+                            [id] => 140
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [90] => stdClass Object
+                        (
+                            [cnpj] => 13574594024966
+                            [id] => 141
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [91] => stdClass Object
+                        (
+                            [cnpj] => 13574594015541
+                            [id] => 143
+                            [uf] => SP
+                            [nome] => Mauá
+                        )
+
+                    [92] => stdClass Object
+                        (
+                            [cnpj] => 13574594015622
+                            [id] => 145
+                            [uf] => SP
+                            [nome] => São João da Boa Vista
+                        )
+
+                    [93] => stdClass Object
+                        (
+                            [cnpj] => 13574594023560
+                            [id] => 146
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [94] => stdClass Object
+                        (
+                            [cnpj] => 13574594026900
+                            [id] => 147
+                            [uf] => SP
+                            [nome] => Jacareí
+                        )
+
+                    [95] => stdClass Object
+                        (
+                            [cnpj] => 13574594015460
+                            [id] => 148
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [96] => stdClass Object
+                        (
+                            [cnpj] => 13574594030427
+                            [id] => 149
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [97] => stdClass Object
+                        (
+                            [cnpj] => 13574594015975
+                            [id] => 150
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [98] => stdClass Object
+                        (
+                            [cnpj] => 13574594016009
+                            [id] => 151
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [99] => stdClass Object
+                        (
+                            [cnpj] => 13574594016190
+                            [id] => 152
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [100] => stdClass Object
+                        (
+                            [cnpj] => 13574594016270
+                            [id] => 153
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [101] => stdClass Object
+                        (
+                            [cnpj] => 13574594016351
+                            [id] => 154
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [102] => stdClass Object
+                        (
+                            [cnpj] => 13574594016513
+                            [id] => 155
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [103] => stdClass Object
+                        (
+                            [cnpj] => 13574594016432
+                            [id] => 156
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [104] => stdClass Object
+                        (
+                            [cnpj] => 13574594016602
+                            [id] => 157
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [105] => stdClass Object
+                        (
+                            [cnpj] => 13574594016785
+                            [id] => 158
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [106] => stdClass Object
+                        (
+                            [cnpj] => 13574594016866
+                            [id] => 159
+                            [uf] => SP
+                            [nome] => Santos
+                        )
+
+                    [107] => stdClass Object
+                        (
+                            [cnpj] => 13574594017080
+                            [id] => 160
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [108] => stdClass Object
+                        (
+                            [cnpj] => 13574594017161
+                            [id] => 161
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [109] => stdClass Object
+                        (
+                            [cnpj] => 13574594019709
+                            [id] => 162
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [110] => stdClass Object
+                        (
+                            [cnpj] => 13574594016947
+                            [id] => 163
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [111] => stdClass Object
+                        (
+                            [cnpj] => 13574594017242
+                            [id] => 164
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [112] => stdClass Object
+                        (
+                            [cnpj] => 13574594017323
+                            [id] => 165
+                            [uf] => SP
+                            [nome] => São Vicente
+                        )
+
+                    [113] => stdClass Object
+                        (
+                            [cnpj] => 13574594017404
+                            [id] => 166
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [114] => stdClass Object
+                        (
+                            [cnpj] => 13574594017595
+                            [id] => 167
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [115] => stdClass Object
+                        (
+                            [cnpj] => 13574594017676
+                            [id] => 168
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [116] => stdClass Object
+                        (
+                            [cnpj] => 13574594017757
+                            [id] => 169
+                            [uf] => SP
+                            [nome] => Guarujá
+                        )
+
+                    [117] => stdClass Object
+                        (
+                            [cnpj] => 13574594017919
+                            [id] => 170
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [118] => stdClass Object
+                        (
+                            [cnpj] => 13574594018214
+                            [id] => 171
+                            [uf] => SP
+                            [nome] => Marília
+                        )
+
+                    [119] => stdClass Object
+                        (
+                            [cnpj] => 13574594017838
+                            [id] => 172
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [120] => stdClass Object
+                        (
+                            [cnpj] => 13574594018133
+                            [id] => 173
+                            [uf] => SP
+                            [nome] => Praia Grande
+                        )
+
+                    [121] => stdClass Object
+                        (
+                            [cnpj] => 13574594018052
+                            [id] => 174
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [122] => stdClass Object
+                        (
+                            [cnpj] => 13574594018303
+                            [id] => 175
+                            [uf] => SP
+                            [nome] => São Bernardo do Campo
+                        )
+
+                    [123] => stdClass Object
+                        (
+                            [cnpj] => 13574594018486
+                            [id] => 176
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [124] => stdClass Object
+                        (
+                            [cnpj] => 13574594018567
+                            [id] => 177
+                            [uf] => SP
+                            [nome] => Jundiaí
+                        )
+
+                    [125] => stdClass Object
+                        (
+                            [cnpj] => 13574594018729
+                            [id] => 178
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [126] => stdClass Object
+                        (
+                            [cnpj] => 13574594018800
+                            [id] => 179
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [127] => stdClass Object
+                        (
+                            [cnpj] => 13574594018648
+                            [id] => 180
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [128] => stdClass Object
+                        (
+                            [cnpj] => 13574594019024
+                            [id] => 181
+                            [uf] => SP
+                            [nome] => Barueri
+                        )
+
+                    [129] => stdClass Object
+                        (
+                            [cnpj] => 13574594018990
+                            [id] => 182
+                            [uf] => SP
+                            [nome] => Taboão da Serra
+                        )
+
+                    [130] => stdClass Object
+                        (
+                            [cnpj] => 13574594019105
+                            [id] => 183
+                            [uf] => SP
+                            [nome] => Barueri
+                        )
+
+                    [131] => stdClass Object
+                        (
+                            [cnpj] => 13574594019296
+                            [id] => 184
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [132] => stdClass Object
+                        (
+                            [cnpj] => 13574594020111
+                            [id] => 185
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [133] => stdClass Object
+                        (
+                            [cnpj] => 13574594019377
+                            [id] => 186
+                            [uf] => SP
+                            [nome] => Bauru
+                        )
+
+                    [134] => stdClass Object
+                        (
+                            [cnpj] => 13574594019458
+                            [id] => 187
+                            [uf] => SP
+                            [nome] => São Bernardo do Campo
+                        )
+
+                    [135] => stdClass Object
+                        (
+                            [cnpj] => 13574594019610
+                            [id] => 188
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [136] => stdClass Object
+                        (
+                            [cnpj] => 13574594019539
+                            [id] => 189
+                            [uf] => SP
+                            [nome] => Jundiaí
+                        )
+
+                    [137] => stdClass Object
+                        (
+                            [cnpj] => 13574594019881
+                            [id] => 190
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [138] => stdClass Object
+                        (
+                            [cnpj] => 13574594023803
+                            [id] => 194
+                            [uf] => SP
+                            [nome] => Barretos
+                        )
+
+                    [139] => stdClass Object
+                        (
+                            [cnpj] => 13574594023722
+                            [id] => 195
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [140] => stdClass Object
+                        (
+                            [cnpj] => 13574594029682
+                            [id] => 196
+                            [uf] => SP
+                            [nome] => Mogi Guaçu
+                        )
+
+                    [141] => stdClass Object
+                        (
+                            [cnpj] => 13574594023307
+                            [id] => 199
+                            [uf] => SP
+                            [nome] => São Vicente
+                        )
+
+                    [142] => stdClass Object
+                        (
+                            [cnpj] => 13574594023056
+                            [id] => 200
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [143] => stdClass Object
+                        (
+                            [cnpj] => 13574594024613
+                            [id] => 201
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [144] => stdClass Object
+                        (
+                            [cnpj] => 13574594024532
+                            [id] => 202
+                            [uf] => SP
+                            [nome] => Franca
+                        )
+
+                    [145] => stdClass Object
+                        (
+                            [cnpj] => 13574594022670
+                            [id] => 203
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [146] => stdClass Object
+                        (
+                            [cnpj] => 13574594023137
+                            [id] => 214
+                            [uf] => SP
+                            [nome] => Sumaré
+                        )
+
+                    [147] => stdClass Object
+                        (
+                            [cnpj] => 13574594024290
+                            [id] => 215
+                            [uf] => SP
+                            [nome] => Mauá
+                        )
+
+                    [148] => stdClass Object
+                        (
+                            [cnpj] => 13574594025938
+                            [id] => 216
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [149] => stdClass Object
+                        (
+                            [cnpj] => 13574594025504
+                            [id] => 217
+                            [uf] => SP
+                            [nome] => São Vicente
+                        )
+
+                    [150] => stdClass Object
+                        (
+                            [cnpj] => 13574594025008
+                            [id] => 218
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [151] => stdClass Object
+                        (
+                            [cnpj] => 13574594025423
+                            [id] => 219
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [152] => stdClass Object
+                        (
+                            [cnpj] => 13574594023218
+                            [id] => 221
+                            [uf] => SP
+                            [nome] => Paulínia
+                        )
+
+                    [153] => stdClass Object
+                        (
+                            [cnpj] => 13574594023480
+                            [id] => 222
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [154] => stdClass Object
+                        (
+                            [cnpj] => 13574594024370
+                            [id] => 224
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [155] => stdClass Object
+                        (
+                            [cnpj] => 13574594024451
+                            [id] => 226
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [156] => stdClass Object
+                        (
+                            [cnpj] => 13574594025695
+                            [id] => 227
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [157] => stdClass Object
+                        (
+                            [cnpj] => 13574594025776
+                            [id] => 228
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [158] => stdClass Object
+                        (
+                            [cnpj] => 13574594026152
+                            [id] => 229
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [159] => stdClass Object
+                        (
+                            [cnpj] => 13574594024109
+                            [id] => 230
+                            [uf] => SP
+                            [nome] => Araçatuba
+                        )
+
+                    [160] => stdClass Object
+                        (
+                            [cnpj] => 13574594026829
+                            [id] => 231
+                            [uf] => SP
+                            [nome] => São José do Rio Preto
+                        )
+
+                    [161] => stdClass Object
+                        (
+                            [cnpj] => 13574594026233
+                            [id] => 233
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [162] => stdClass Object
+                        (
+                            [cnpj] => 13574594026314
+                            [id] => 235
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [163] => stdClass Object
+                        (
+                            [cnpj] => 13574594028520
+                            [id] => 237
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [164] => stdClass Object
+                        (
+                            [cnpj] => 13574594028600
+                            [id] => 241
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [165] => stdClass Object
+                        (
+                            [cnpj] => 13574594032470
+                            [id] => 244
+                            [uf] => SP
+                            [nome] => Piracicaba
+                        )
+
+                    [166] => stdClass Object
+                        (
+                            [cnpj] => 13574594043081
+                            [id] => 246
+                            [uf] => SP
+                            [nome] => Jaú
+                        )
+
+                    [167] => stdClass Object
+                        (
+                            [cnpj] => 13574594044134
+                            [id] => 247
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [168] => stdClass Object
+                        (
+                            [cnpj] => 13574594027981
+                            [id] => 250
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [169] => stdClass Object
+                        (
+                            [cnpj] => 13574594028104
+                            [id] => 251
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [170] => stdClass Object
+                        (
+                            [cnpj] => 13574594028449
+                            [id] => 252
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [171] => stdClass Object
+                        (
+                            [cnpj] => 13574594027124
+                            [id] => 257
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [172] => stdClass Object
+                        (
+                            [cnpj] => 13574594029925
+                            [id] => 259
+                            [uf] => SP
+                            [nome] => Carapicuíba
+                        )
+
+                    [173] => stdClass Object
+                        (
+                            [cnpj] => 13574594030770
+                            [id] => 260
+                            [uf] => SP
+                            [nome] => Guarulhos
+                        )
+
+                    [174] => stdClass Object
+                        (
+                            [cnpj] => 13574594027205
+                            [id] => 262
+                            [uf] => SP
+                            [nome] => Taboão da Serra
+                        )
+
+                    [175] => stdClass Object
+                        (
+                            [cnpj] => 13574594027043
+                            [id] => 263
+                            [uf] => SP
+                            [nome] => Ribeirão Preto
+                        )
+
+                    [176] => stdClass Object
+                        (
+                            [cnpj] => 13574594029500
+                            [id] => 266
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [177] => stdClass Object
+                        (
+                            [cnpj] => 13574594031237
+                            [id] => 269
+                            [uf] => SP
+                            [nome] => São José do Rio Preto
+                        )
+
+                    [178] => stdClass Object
+                        (
+                            [cnpj] => 13574594031075
+                            [id] => 270
+                            [uf] => SP
+                            [nome] => São José do Rio Preto
+                        )
+
+                    [179] => stdClass Object
+                        (
+                            [cnpj] => 13574594032985
+                            [id] => 271
+                            [uf] => SP
+                            [nome] => Araçatuba
+                        )
+
+                    [180] => stdClass Object
+                        (
+                            [cnpj] => 13574594031660
+                            [id] => 273
+                            [uf] => SP
+                            [nome] => São Caetano do Sul
+                        )
+
+                    [181] => stdClass Object
+                        (
+                            [cnpj] => 13574594031741
+                            [id] => 274
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [182] => stdClass Object
+                        (
+                            [cnpj] => 13574594033523
+                            [id] => 275
+                            [uf] => SP
+                            [nome] => São Bernardo do Campo
+                        )
+
+                    [183] => stdClass Object
+                        (
+                            [cnpj] => 13574594034171
+                            [id] => 280
+                            [uf] => SP
+                            [nome] => São Bernardo do Campo
+                        )
+
+                    [184] => stdClass Object
+                        (
+                            [cnpj] => 13574594032390
+                            [id] => 281
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [185] => stdClass Object
+                        (
+                            [cnpj] => 13574594033876
+                            [id] => 282
+                            [uf] => SP
+                            [nome] => São José do Rio Preto
+                        )
+
+                    [186] => stdClass Object
+                        (
+                            [cnpj] => 13574594032209
+                            [id] => 284
+                            [uf] => SP
+                            [nome] => São Bernardo do Campo
+                        )
+
+                    [187] => stdClass Object
+                        (
+                            [cnpj] => 13574594033019
+                            [id] => 285
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [188] => stdClass Object
+                        (
+                            [cnpj] => 13574594033108
+                            [id] => 286
+                            [uf] => SP
+                            [nome] => São Bernardo do Campo
+                        )
+
+                    [189] => stdClass Object
+                        (
+                            [cnpj] => 13574594032802
+                            [id] => 287
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [190] => stdClass Object
+                        (
+                            [cnpj] => 13574594041208
+                            [id] => 289
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [191] => stdClass Object
+                        (
+                            [cnpj] => 13574594032632
+                            [id] => 290
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [192] => stdClass Object
+                        (
+                            [cnpj] => 13574594035224
+                            [id] => 293
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [193] => stdClass Object
+                        (
+                            [cnpj] => 13574594034929
+                            [id] => 296
+                            [uf] => SP
+                            [nome] => Assis
+                        )
+
+                    [194] => stdClass Object
+                        (
+                            [cnpj] => 13574594034767
+                            [id] => 297
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [195] => stdClass Object
+                        (
+                            [cnpj] => 13574594034848
+                            [id] => 298
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [196] => stdClass Object
+                        (
+                            [cnpj] => 13574594034686
+                            [id] => 299
+                            [uf] => SP
+                            [nome] => Diadema
+                        )
+
+                    [197] => stdClass Object
+                        (
+                            [cnpj] => 13574594035305
+                            [id] => 301
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [198] => stdClass Object
+                        (
+                            [cnpj] => 13574594035739
+                            [id] => 306
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [199] => stdClass Object
+                        (
+                            [cnpj] => 13574594037359
+                            [id] => 308
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [200] => stdClass Object
+                        (
+                            [cnpj] => 13574594036204
+                            [id] => 312
+                            [uf] => SP
+                            [nome] => Santos
+                        )
+
+                    [201] => stdClass Object
+                        (
+                            [cnpj] => 13574594038240
+                            [id] => 313
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [202] => stdClass Object
+                        (
+                            [cnpj] => 13574594037600
+                            [id] => 318
+                            [uf] => SP
+                            [nome] => Santa Bárbara d'Oeste
+                        )
+
+                    [203] => stdClass Object
+                        (
+                            [cnpj] => 13574594039483
+                            [id] => 319
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [204] => stdClass Object
+                        (
+                            [cnpj] => 13574594035909
+                            [id] => 329
+                            [uf] => SP
+                            [nome] => Mauá
+                        )
+
+                    [205] => stdClass Object
+                        (
+                            [cnpj] => 13574594037278
+                            [id] => 331
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [206] => stdClass Object
+                        (
+                            [cnpj] => 13574594035577
+                            [id] => 332
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [207] => stdClass Object
+                        (
+                            [cnpj] => 13574594040570
+                            [id] => 334
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [208] => stdClass Object
+                        (
+                            [cnpj] => 13574594039050
+                            [id] => 335
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [209] => stdClass Object
+                        (
+                            [cnpj] => 13574594040651
+                            [id] => 336
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [210] => stdClass Object
+                        (
+                            [cnpj] => 13574594046692
+                            [id] => 337
+                            [uf] => SP
+                            [nome] => Guarulhos
+                        )
+
+                    [211] => stdClass Object
+                        (
+                            [cnpj] => 13574594041461
+                            [id] => 356
+                            [uf] => SP
+                            [nome] => Araraquara
+                        )
+
+                    [212] => stdClass Object
+                        (
+                            [cnpj] => 13574594039645
+                            [id] => 357
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [213] => stdClass Object
+                        (
+                            [cnpj] => 13574594039564
+                            [id] => 358
+                            [uf] => SP
+                            [nome] => Embu
+                        )
+
+                    [214] => stdClass Object
+                        (
+                            [cnpj] => 13574594043243
+                            [id] => 367
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [215] => stdClass Object
+                        (
+                            [cnpj] => 13574594042948
+                            [id] => 368
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [216] => stdClass Object
+                        (
+                            [cnpj] => 13574594048717
+                            [id] => 370
+                            [uf] => SP
+                            [nome] => Suzano
+                        )
+
+                    [217] => stdClass Object
+                        (
+                            [cnpj] => 13574594046269
+                            [id] => 400
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [218] => stdClass Object
+                        (
+                            [cnpj] => 13574594043324
+                            [id] => 402
+                            [uf] => SP
+                            [nome] => Hortolândia
+                        )
+
+                    [219] => stdClass Object
+                        (
+                            [cnpj] => 13574594047311
+                            [id] => 415
+                            [uf] => SP
+                            [nome] => Cajamar
+                        )
+
+                    [220] => stdClass Object
+                        (
+                            [cnpj] => 13574594051262
+                            [id] => 419
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [221] => stdClass Object
+                        (
+                            [cnpj] => 13574594049012
+                            [id] => 420
+                            [uf] => SP
+                            [nome] => Itaquaquecetuba
+                        )
+
+                    [222] => stdClass Object
+                        (
+                            [cnpj] => 13574594049799
+                            [id] => 422
+                            [uf] => SP
+                            [nome] => São José do Rio Preto
+                        )
+
+                    [223] => stdClass Object
+                        (
+                            [cnpj] => 13574594052153
+                            [id] => 423
+                            [uf] => SP
+                            [nome] => São Carlos
+                        )
+
+                    [224] => stdClass Object
+                        (
+                            [cnpj] => 13574594050967
+                            [id] => 433
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [225] => stdClass Object
+                        (
+                            [cnpj] => 13574594049101
+                            [id] => 434
+                            [uf] => SP
+                            [nome] => Lorena
+                        )
+
+                    [226] => stdClass Object
+                        (
+                            [cnpj] => 13574594056140
+                            [id] => 444
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [227] => stdClass Object
+                        (
+                            [cnpj] => 13574594054369
+                            [id] => 445
+                            [uf] => SP
+                            [nome] => Marília
+                        )
+
+                    [228] => stdClass Object
+                        (
+                            [cnpj] => 13574594053800
+                            [id] => 449
+                            [uf] => SP
+                            [nome] => Cotia
+                        )
+
+                    [229] => stdClass Object
+                        (
+                            [cnpj] => 13574594054440
+                            [id] => 450
+                            [uf] => SP
+                            [nome] => Penápolis
+                        )
+
+                    [230] => stdClass Object
+                        (
+                            [cnpj] => 13574594051858
+                            [id] => 451
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [231] => stdClass Object
+                        (
+                            [cnpj] => 13574594051343
+                            [id] => 457
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [232] => stdClass Object
+                        (
+                            [cnpj] => 13574594052315
+                            [id] => 458
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [233] => stdClass Object
+                        (
+                            [cnpj] => 13574594053397
+                            [id] => 462
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [234] => stdClass Object
+                        (
+                            [cnpj] => 13574594051505
+                            [id] => 463
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [235] => stdClass Object
+                        (
+                            [cnpj] => 13574594053982
+                            [id] => 464
+                            [uf] => SP
+                            [nome] => Santos
+                        )
+
+                    [236] => stdClass Object
+                        (
+                            [cnpj] => 13574594053710
+                            [id] => 468
+                            [uf] => SP
+                            [nome] => Santos
+                        )
+
+                    [237] => stdClass Object
+                        (
+                            [cnpj] => 13574594055683
+                            [id] => 476
+                            [uf] => SP
+                            [nome] => Barueri
+                        )
+
+                    [238] => stdClass Object
+                        (
+                            [cnpj] => 13574594056302
+                            [id] => 477
+                            [uf] => SP
+                            [nome] => São Bernardo do Campo
+                        )
+
+                    [239] => stdClass Object
+                        (
+                            [cnpj] => 13574594054016
+                            [id] => 485
+                            [uf] => SP
+                            [nome] => Mogi das Cruzes
+                        )
+
+                    [240] => stdClass Object
+                        (
+                            [cnpj] => 13574594002210
+                            [id] => 486
+                            [uf] => SP
+                            [nome] => Itu
+                        )
+
+                    [241] => stdClass Object
+                        (
+                            [cnpj] => 13574594002300
+                            [id] => 487
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [242] => stdClass Object
+                        (
+                            [cnpj] => 13574594002563
+                            [id] => 488
+                            [uf] => SP
+                            [nome] => Franca
+                        )
+
+                    [243] => stdClass Object
+                        (
+                            [cnpj] => 13574594002725
+                            [id] => 489
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [244] => stdClass Object
+                        (
+                            [cnpj] => 13574594002806
+                            [id] => 490
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [245] => stdClass Object
+                        (
+                            [cnpj] => 13574594003101
+                            [id] => 491
+                            [uf] => SP
+                            [nome] => Santa Bárbara d'Oeste
+                        )
+
+                    [246] => stdClass Object
+                        (
+                            [cnpj] => 13574594004264
+                            [id] => 492
+                            [uf] => SP
+                            [nome] => Barueri
+                        )
+
+                    [247] => stdClass Object
+                        (
+                            [cnpj] => 13574594004345
+                            [id] => 493
+                            [uf] => SP
+                            [nome] => Itapevi
+                        )
+
+                    [248] => stdClass Object
+                        (
+                            [cnpj] => 13574594006127
+                            [id] => 494
+                            [uf] => SP
+                            [nome] => Taubaté
+                        )
+
+                    [249] => stdClass Object
+                        (
+                            [cnpj] => 13574594007875
+                            [id] => 495
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [250] => stdClass Object
+                        (
+                            [cnpj] => 13574594008251
+                            [id] => 497
+                            [uf] => SP
+                            [nome] => Rio Claro
+                        )
+
+                    [251] => stdClass Object
+                        (
+                            [cnpj] => 13574594009738
+                            [id] => 498
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [252] => stdClass Object
+                        (
+                            [cnpj] => 13574594009908
+                            [id] => 499
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [253] => stdClass Object
+                        (
+                            [cnpj] => 13574594010400
+                            [id] => 500
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [254] => stdClass Object
+                        (
+                            [cnpj] => 13574594010906
+                            [id] => 501
+                            [uf] => SP
+                            [nome] => Presidente Prudente
+                        )
+
+                    [255] => stdClass Object
+                        (
+                            [cnpj] => 13574594011040
+                            [id] => 502
+                            [uf] => SP
+                            [nome] => Valinhos
+                        )
+
+                    [256] => stdClass Object
+                        (
+                            [cnpj] => 13574594011201
+                            [id] => 503
+                            [uf] => SP
+                            [nome] => Limeira
+                        )
+
+                    [257] => stdClass Object
+                        (
+                            [cnpj] => 13574594011392
+                            [id] => 504
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [258] => stdClass Object
+                        (
+                            [cnpj] => 13574594011473
+                            [id] => 505
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [259] => stdClass Object
+                        (
+                            [cnpj] => 13574594011635
+                            [id] => 507
+                            [uf] => SP
+                            [nome] => Mogi Guaçu
+                        )
+
+                    [260] => stdClass Object
+                        (
+                            [cnpj] => 13574594012798
+                            [id] => 508
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [261] => stdClass Object
+                        (
+                            [cnpj] => 13574594013093
+                            [id] => 509
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [262] => stdClass Object
+                        (
+                            [cnpj] => 13574594013255
+                            [id] => 510
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [263] => stdClass Object
+                        (
+                            [cnpj] => 13574594014065
+                            [id] => 511
+                            [uf] => SP
+                            [nome] => Cotia
+                        )
+
+                    [264] => stdClass Object
+                        (
+                            [cnpj] => 13574594014308
+                            [id] => 512
+                            [uf] => SP
+                            [nome] => Bauru
+                        )
+
+                    [265] => stdClass Object
+                        (
+                            [cnpj] => 13574594014650
+                            [id] => 513
+                            [uf] => SP
+                            [nome] => Guaratinguetá
+                        )
+
+                    [266] => stdClass Object
+                        (
+                            [cnpj] => 13574594015894
+                            [id] => 514
+                            [uf] => SP
+                            [nome] => Botucatu
+                        )
+
+                    [267] => stdClass Object
+                        (
+                            [cnpj] => 13574594020200
+                            [id] => 515
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [268] => stdClass Object
+                        (
+                            [cnpj] => 13574594020383
+                            [id] => 516
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [269] => stdClass Object
+                        (
+                            [cnpj] => 13574594020464
+                            [id] => 517
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [270] => stdClass Object
+                        (
+                            [cnpj] => 13574594020545
+                            [id] => 518
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [271] => stdClass Object
+                        (
+                            [cnpj] => 13574594020626
+                            [id] => 519
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [272] => stdClass Object
+                        (
+                            [cnpj] => 13574594020707
+                            [id] => 520
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [273] => stdClass Object
+                        (
+                            [cnpj] => 13574594020898
+                            [id] => 521
+                            [uf] => SP
+                            [nome] => Guarujá
+                        )
+
+                    [274] => stdClass Object
+                        (
+                            [cnpj] => 13574594020979
+                            [id] => 522
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [275] => stdClass Object
+                        (
+                            [cnpj] => 13574594021002
+                            [id] => 523
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [276] => stdClass Object
+                        (
+                            [cnpj] => 13574594021193
+                            [id] => 524
+                            [uf] => SP
+                            [nome] => Praia Grande
+                        )
+
+                    [277] => stdClass Object
+                        (
+                            [cnpj] => 13574594021274
+                            [id] => 525
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [278] => stdClass Object
+                        (
+                            [cnpj] => 13574594021355
+                            [id] => 526
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [279] => stdClass Object
+                        (
+                            [cnpj] => 13574594021436
+                            [id] => 527
+                            [uf] => SP
+                            [nome] => São Vicente
+                        )
+
+                    [280] => stdClass Object
+                        (
+                            [cnpj] => 13574594021517
+                            [id] => 528
+                            [uf] => SP
+                            [nome] => São José dos Campos
+                        )
+
+                    [281] => stdClass Object
+                        (
+                            [cnpj] => 13574594021606
+                            [id] => 529
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [282] => stdClass Object
+                        (
+                            [cnpj] => 13574594021789
+                            [id] => 530
+                            [uf] => SP
+                            [nome] => Taboão da Serra
+                        )
+
+                    [283] => stdClass Object
+                        (
+                            [cnpj] => 13574594021860
+                            [id] => 531
+                            [uf] => SP
+                            [nome] => Santos
+                        )
+
+                    [284] => stdClass Object
+                        (
+                            [cnpj] => 13574594022084
+                            [id] => 533
+                            [uf] => SP
+                            [nome] => Campinas
+                        )
+
+                    [285] => stdClass Object
+                        (
+                            [cnpj] => 13574594022246
+                            [id] => 535
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [286] => stdClass Object
+                        (
+                            [cnpj] => 13574594022408
+                            [id] => 536
+                            [uf] => SP
+                            [nome] => Itapecerica da Serra
+                        )
+
+                    [287] => stdClass Object
+                        (
+                            [cnpj] => 13574594026071
+                            [id] => 537
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [288] => stdClass Object
+                        (
+                            [cnpj] => 13574594026748
+                            [id] => 538
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [289] => stdClass Object
+                        (
+                            [cnpj] => 13574594028872
+                            [id] => 540
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [290] => stdClass Object
+                        (
+                            [cnpj] => 13574594028953
+                            [id] => 541
+                            [uf] => SP
+                            [nome] => Osasco
+                        )
+
+                    [291] => stdClass Object
+                        (
+                            [cnpj] => 13574594029097
+                            [id] => 542
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [292] => stdClass Object
+                        (
+                            [cnpj] => 13574594029178
+                            [id] => 543
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [293] => stdClass Object
+                        (
+                            [cnpj] => 13574594034333
+                            [id] => 544
+                            [uf] => SP
+                            [nome] => Mauá
+                        )
+
+                    [294] => stdClass Object
+                        (
+                            [cnpj] => 13574594035062
+                            [id] => 545
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [295] => stdClass Object
+                        (
+                            [cnpj] => 13574594035810
+                            [id] => 546
+                            [uf] => SP
+                            [nome] => Mauá
+                        )
+
+                    [296] => stdClass Object
+                        (
+                            [cnpj] => 13574594037197
+                            [id] => 547
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [297] => stdClass Object
+                        (
+                            [cnpj] => 13574594037430
+                            [id] => 548
+                            [uf] => SP
+                            [nome] => São Paulo
+                        )
+
+                    [298] => stdClass Object
+                        (
+                            [cnpj] => 13574594038916
+                            [id] => 549
+                            [uf] => SP
+                            [nome] => Barretos
+                        )
+
+                    [299] => stdClass Object
+                        (
+                            [cnpj] => 13574594040490
+                            [id] => 550
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [300] => stdClass Object
+                        (
+                            [cnpj] => 13574594043405
+                            [id] => 551
+                            [uf] => SP
+                            [nome] => Araraquara
+                        )
+
+                    [301] => stdClass Object
+                        (
+                            [cnpj] => 13574594043596
+                            [id] => 552
+                            [uf] => SP
+                            [nome] => Santa Bárbara d'Oeste
+                        )
+
+                    [302] => stdClass Object
+                        (
+                            [cnpj] => 13574594044053
+                            [id] => 553
+                            [uf] => SP
+                            [nome] => Hortolândia
+                        )
+
+                    [303] => stdClass Object
+                        (
+                            [cnpj] => 13574594046188
+                            [id] => 554
+                            [uf] => SP
+                            [nome] => Sorocaba
+                        )
+
+                    [304] => stdClass Object
+                        (
+                            [cnpj] => 13574594046501
+                            [id] => 555
+                            [uf] => SP
+                            [nome] => Santo André
+                        )
+
+                    [305] => stdClass Object
+                        (
+                            [cnpj] => 13574594038673
+                            [id] => 556
+                            [uf] => SP
+                            [nome] => Barueri
+                        )
+
+                )
+
+        )
+
+)

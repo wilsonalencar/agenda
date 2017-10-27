@@ -1,0 +1,254 @@
+body {
+    font-family: "Montserrat";  /* just a custom font */
+    font-size: 16px;
+}
+
+a:-webkit-any-link{
+    text-decoration:none !important;	/* do not underline links */
+    color: black; !important;	        /* give links a default color */
+}
+
+.wrapper {
+    margin: 10em;					/* just a temp margin */
+    border: 0.1em solid #ccc;	/* wrap the calendar inside a box */
+    width: 20em;				/* define a width for the box */
+    height: 24em;				/* define a height for the box */
+    box-shadow: 0.1em 0.2em 0.8em #ccc;	/* box shadow for better view */
+
+}
+
+.header {
+    height: 4em;					/* define a height for the header */
+    background-color: #3f51b5;		/* give the header a background color */
+    color: white;					/* give the header a text color */
+    text-align: center;				/* center the text inside the header */
+}
+
+.calendar-body .col-xs-1 {
+    width: 2.5em;					/* give each column a fixed width */
+    margin-left: 0.2em;				/* have some space between columnd */
+    text-align: center;				/* align text in the center */
+}
+
+.header p {
+    padding-top: 1.2em;				/* vertical centering */
+    text-transform: uppercase;		/* all caps text  */
+}
+
+.header span {
+    padding: 1.3em;			/* vertical and horizontal centering icons */
+}
+
+.inactive {					/* inactive dates get a light gray text color */
+    color: #ccc;
+}
+
+.weekdays {
+    padding: 1em;			/* giving weekdays some space around */
+}
+
+.dates {
+    padding: 0.2em 1em 0.2em 1em;	/* giving dates some space  */
+}
+
+.line {								/* a gray line separator  */
+    height: 0.1em;
+    border: 0.1em solid #EEEEEE;
+}
+
+.current-date {					/* styling the current date section  */
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0.7em;
+}
+
+.calendar-body .row .col-xs-1 p:hover {
+    color: #4778a6;			/* hover state on all dates  */
+}
+
+#main-menu {
+
+    font-family: 'Montserrat';
+    margin-top:4px;
+}
+
+.centerBtn {
+    position:absolute;
+    right:500px;
+    top:-10px;
+}
+
+.spinner {
+    width: 100px;
+}
+.spinner input {
+    text-align: right;
+}
+.input-group-btn-vertical {
+    position: relative;
+    white-space: nowrap;
+    width: 1%;
+    vertical-align: middle;
+    display: table-cell;
+}
+.input-group-btn-vertical > .btn {
+    display: block;
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    padding: 8px;
+    margin-left: -1px;
+    position: relative;
+    border-radius: 0;
+}
+.input-group-btn-vertical > .btn:first-child {
+    border-top-right-radius: 4px;
+}
+.input-group-btn-vertical > .btn:last-child {
+    margin-top: -2px;
+    border-bottom-right-radius: 4px;
+}
+.input-group-btn-vertical i{
+    position: absolute;
+    top: 0;
+    left: 4px;
+}
+.tree {
+    /*
+    min-height:20px;
+    padding:19px;
+    margin-bottom:20px;
+    background-color:#fbfbfb;
+    border:1px solid #999;
+    -webkit-border-radius:4px;
+    -moz-border-radius:4px;
+    border-radius:4px;
+    -webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    -moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05)
+    */
+}
+.tree li {
+    list-style-type:none;
+    margin:0;
+    padding:10px 5px 0 5px;
+    position:relative
+}
+.tree li::before, .tree li::after {
+    content:'';
+    left:-20px;
+    position:absolute;
+    right:auto
+}
+.tree li::before {
+    border-left:1px solid #999;
+    bottom:50px;
+    height:100%;
+    top:0;
+    width:1px
+}
+.tree li::after {
+    border-top:1px solid #999;
+    height:20px;
+    top:25px;
+    width:25px
+}
+.tree li span {
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    border:1px solid #999;
+    border-radius:5px;
+    display:inline-block;
+    padding:3px 8px;
+    text-decoration:none;
+    color:black;
+    background-color:#fbfbfb
+}
+.tree li.parent_li>span {
+    cursor:pointer
+}
+.tree>ul>li::before, .tree>ul>li::after {
+    border:0
+}
+.tree li:last-child::before {
+    height:30px
+}
+.tree li.parent_li>span:hover, .tree li.parent_li>span:hover+ul li span {
+    background:#eee;
+    border:1px solid #94a0b4;
+    color:#000
+}
+
+@import url(//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css);
+
+.detailBox {
+    width:320px;
+    border:1px solid #bbb;
+    margin:50px;
+}
+.titleBox {
+    background-color:#fdfdfd;
+    padding:10px;
+}
+.titleBox label{
+    color:#444;
+    margin:0;
+    display:inline-block;
+}
+
+.commentBox {
+    padding:10px;
+    border-top:1px dotted #bbb;
+}
+.commentBox .form-group:first-child, .actionBox .form-group:first-child {
+    width:80%;
+}
+.commentBox .form-group:nth-child(2), .actionBox .form-group:nth-child(2) {
+    width:18%;
+}
+.actionBox .form-group * {
+    width:100%;
+}
+.taskDescription {
+    margin-top:10px 0;
+}
+.commentList {
+    padding:0;
+    list-style:none;
+    max-height:200px;
+    overflow:auto;
+}
+.commentList li {
+    margin:0;
+    margin-top:10px;
+}
+.commentList li > div {
+    display:table-cell;
+}
+.commenterName {
+    font-weight: bold;
+    font-size: small;
+    color:red;
+}
+.commenterImage {
+    width:30px;
+    margin-right:5px;
+    height:100%;
+    float:left;
+}
+.commenterImage img {
+    width:100%;
+    border-radius:50%;
+}
+.commentText p {
+    margin:0;
+}
+.sub-text {
+    color:#aaa;
+    font-family:verdana;
+    font-size:11px;
+}
+.actionBox {
+    border-top:1px dotted #bbb;
+    padding:10px;
+}

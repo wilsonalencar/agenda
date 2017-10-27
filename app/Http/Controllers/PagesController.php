@@ -1,0 +1,555 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Atividade;
+use App\Models\Cron;
+use App\Models\Empresa;
+use App\Models\Municipio;
+use App\Models\Tributo;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Models\Event;
+use App\Http\Requests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
+
+
+class PagesController extends Controller
+{
+    protected $s_emp = null;
+
+    public function __construct(Request $request = null)
+    {
+        if (!Auth::guest())
+            $this->s_emp = Empresa::findOrFail(\Illuminate\Support\Facades\Crypt::decrypt(session('seid')));
+        else {
+            $this->s_emp = Empresa::findOrFail(1);
+        }
+    }
+
+    public function home (Request $request = null)
+    {
+        Carbon::setTestNow();  //reset
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+
+        } else {
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+        // Verifica que o periodo exista
+        $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
+        if ($cron==null) {
+            $info_periodo = substr($periodo_apuracao,0,2).'/'.substr($periodo_apuracao,-4,4);
+            Session::flash('alert-warning', "O periodo $info_periodo não tem atividades cadastradas. Foi carregado o periodo padrão.");
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+
+        if (!Auth::guest()) {
+            
+            $user = User::findOrFail(Auth::user()->id);
+            $tributos = Tributo::selectRaw("nome")->whereNotIn('id',[12,13,14,15])->lists('nome','nome');
+
+            if (sizeof($user->roles)==0) {
+                return ("<br/>Este usuário está sem autorização de acesso. Entrar em contato com o administrador de sistema.<br/><br/><a href='logout'>LOGOUT</a>");
+            }
+
+            $retval = $this->_loadNotifications(); //var_dump($retval);
+            $graph = array();
+            //$graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+            //$graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+            //$graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+
+            //MANAGER
+            if ($user->hasRole('manager')) {
+                return redirect('dashboard');
+            }
+            //ADMIN / OWNER
+            else if ($user->hasRole('admin') || $user->hasRole('owner')) {
+                $graph['status_1'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+                $graph['status_2'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+                $graph['status_3'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+
+                //var_dump($retval['em_aprovacao']);
+
+                return view('pages.home')->withMessages($retval['ordinarias'])
+                    ->withVencidas($retval['vencidas'])
+                    ->withUrgentes($retval['urgentes'])
+                    ->withAprovacao($retval['em_aprovacao'])
+                    ->withGraph($graph)
+                    ->withPeriodo($periodo_apuracao)
+                    ->withCron($cron);
+            }
+            //ANALYST/SUPERVISOR/USER
+            else {
+                //$with_user = function ($query) {
+                //    $query->where('user_id', Auth::user()->id);
+                //};
+                $graph['status_1'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+                $graph['status_2'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+                $graph['status_3'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+                //whereHas('users', $with_user)
+
+                return view('pages.home')->withMessages($retval['ordinarias'])
+                    ->withVencidas($retval['vencidas'])
+                    ->withUrgentes($retval['urgentes'])
+                    ->withAprovacao($retval['em_aprovacao'])
+                    ->withGraph($graph)
+                    ->withPeriodo($periodo_apuracao)
+                    ->withCron($cron);
+            }
+
+        } else {
+
+            Session::forget('vcn');
+            Session::forget('vcp');
+            Session::forget('vco');
+        
+            return view('pages.home');
+        }
+
+    }
+
+    public function about()
+    {
+        $usuarios = User::select('*')->get();
+
+        $standing = DB::select("SELECT (X.name), SUM(X.fp) as entrega_fora_prazo, SUM(X.ep) as entrega_em_prazo, SUM(X.fp)+SUM(X.ep) as entregas_totais, ROUND(SUM(X.ep)/(SUM(X.fp)+SUM(X.ep))*100,2) as perc
+                                FROM (
+                                    select u.name as name, count(a.id) as fp, 0 as ep from atividades a, users u
+                                    where a.usuario_entregador=u.id and a.tipo_geracao='A' and a.data_entrega>a.limite
+                                    group by a.usuario_entregador
+                                    union all
+                                    select u.name as name, 0 as fp, count(a.id) as ep from atividades a, users u
+                                    where a.usuario_entregador=u.id and a.tipo_geracao='A' and a.data_entrega<=a.limite
+                                    group by a.usuario_entregador
+                                ) AS X
+                                GROUP BY X.name");
+        /*
+        $standing = DB::table('atividades')
+            ->join('users', 'atividades.usuario_entregador', '=', 'users.id')
+            ->select('users.name',DB::raw('COUNT(*) as entregas'))
+            ->groupBy('atividades.usuario_entregador')
+            ->orderBy('entregas','desc')
+            ->get();
+        */
+        return view('pages.about')->with('users',$usuarios)->with('standing',$standing);
+    }
+
+    public function upload()
+    {
+        return view('pages.upload');
+    }
+
+    public function dashboard(Request $request) {
+
+        if ($request->has('switch_periodo')) {
+            $switch = Input::get('switch_periodo');
+        } else {
+            $switch = 1;
+        }
+
+        Carbon::setTestNow();  //reset
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        $user = User::findOrFail(Auth::user()->id);
+        $tributos = Tributo::selectRaw("nome")->whereIn('tipo',['E','M'])->whereNotIn('id',[12,13,14,15])->lists('nome','nome'); //ANUAL DELIVERY
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+
+        } else {
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+        // Verifica o periodo
+        $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
+        if ($cron==null) {
+            $info_periodo = substr($periodo_apuracao,0,2).'/'.substr($periodo_apuracao,-4,4);
+            Session::flash('alert-warning', "O periodo $info_periodo não tem atividades cadastradas. Foi carregado o periodo padrão.");
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+        if ($user->hasRole('supervisor') || $user->hasRole('analyst') || $user->hasRole('manager') || $user->hasRole('admin') || $user->hasRole('owner')) {
+
+            $tipo_condition = "";
+            $tipo_check = array(true,false,false);
+
+            if ($request->has('tipo_tributos')) {
+                $tipo = Input::get("tipo_tributos");
+                switch ($tipo) {
+                    case 'T':
+                        break;
+                    case 'E':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,true);
+                        break;
+                    case 'F':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,true,false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if ($switch) {
+                $retval = DB::select( DB::raw("
+                                    select t.nome,substr(limite,1,10) as lim,substr(data_aprovacao,1,10) as dt_aprovacao,limite,count(*),a.status
+                                    from atividades a, regras r, tributos t
+                                    where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id=:empid and a.periodo_apuracao=:periodo_apuracao $tipo_condition
+                                    group by t.nome,lim,dt_aprovacao,a.status
+                                    order by t.nome,lim"), array(
+                    'empid' => $this->s_emp->id,
+                    'periodo_apuracao' => $periodo_apuracao
+                ));
+            } else {
+                $limits = array();
+                //calculateNextMonthLimit
+                $data_limite = Carbon::createFromDate(substr($periodo_apuracao,-4,4), intval(substr($periodo_apuracao,0,2)), 1);
+                Carbon::setTestNow($data_limite);
+                Carbon::setTestNow(Carbon::parse('next month'));
+                $data_limite_inicio = Carbon::now()->startOfMonth();
+                $data_limite_fim = Carbon::now()->endOfMonth();
+                Carbon::setTestNow(); //reset
+                $limits['start'] = substr($data_limite_inicio,0,10);
+                $limits['end'] = substr($data_limite_fim,0,10);
+                //
+                $retval = DB::select( DB::raw("
+                                    select t.nome,substr(limite,1,10) as lim,substr(data_aprovacao,1,10) as dt_aprovacao,limite,count(*),a.status
+                                    from atividades a, regras r, tributos t
+                                    where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id=:empid $tipo_condition
+                                    group by t.nome,lim,dt_aprovacao,a.status
+                                    having lim >= :data_limite_inf and lim <= :data_limite_sup
+                                    order by t.nome,lim"), array(
+                    'empid' => $this->s_emp->id,
+                    'data_limite_inf' => $limits['start'],
+                    'data_limite_sup' => $limits['end'],
+                ));
+            }
+
+            // Elaboração das informações
+            $array = array();
+            foreach ($retval as $val) {
+                $array[$val->nome][] = (array) $val;
+            }
+
+            foreach ($array as $key=>$el) {
+                $graph = array();
+                $count = array('s1'=>0,'s2'=>0,'s3'=>0,'v1'=>0,'v2'=>0, 'v3'=>0);
+                foreach ($el as $val) {
+                    // Vencidas
+                    if ($val['lim']<$today && $val['status']<3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['v' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] = $val['count(*)'];
+                        $count['v' . $val['status']] += $val['count(*)'];
+                    } // Entregue fora do prazo
+                    else if ($val['dt_aprovacao']>$val['lim'] && $val['status']==3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['v' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] = $val['count(*)'];
+                        $count['v' . $val['status']] += $val['count(*)'];
+                    }// Entregue no prazo
+                    else if ($val['dt_aprovacao']<=$val['lim'] && $val['status']==3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['s' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] = $val['count(*)'];
+                        $count['s' . $val['status']] += $val['count(*)'];
+
+                    }// Não vencidas
+                    else { // $val['lim']>=$today && $val['status']<3
+                        isset($graph[$this->_dateFormat($val['lim'])]['s' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] = $val['count(*)'];
+                        $count['s' . $val['status']] += $val['count(*)'];
+                    }
+                }
+                $array[$key]=$graph;
+                $array[$key]['count']=$count;
+            }
+
+            return view('pages.dashboard')->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check);
+        }
+    }
+
+    public function dashboard_analista(Request $request)
+    {
+        Carbon::setTestNow();  //reset time
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        $ufs = Municipio::selectRaw("uf, uf")->orderby('uf','asc')->lists('uf','uf');
+        $municipios = [''=>''];
+
+        $periodo_apuracao = $last_month->format('mY');
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+        }
+
+        $graph = array();
+
+        if ($request->has('tributo')) {
+            $tributo_id = Input::get("tributo");
+
+            $graph['params'] = array('p_uf'=>null,'p_onlyuf'=>null,'p_codigo'=>null,'p_tributo'=>$tributo_id);
+            $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
+
+
+            $ativ_filtered = DB::table('atividades')
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->select(array('status',DB::raw('COUNT(atividades.id) as count')))
+                ->where('periodo_apuracao',$periodo_apuracao)
+                ->where('recibo', 1)
+                ->where('regras.tributo_id',$tributo_id)
+                ->where('emp_id',$this->s_emp->id)
+                ->groupBy('status')
+                ->get();
+
+            foreach ($ativ_filtered as $at) {
+                $graph['status_'.$at->status] = $at->count;
+            }
+        }
+        else if ($request->has('uf') && $request->has('codigo')) {
+
+            $uf = Input::get("uf");
+            $only_uf = Input::get("only-uf");
+            $codigo = Input::get("codigo");
+
+
+            $graph['params'] = array('p_uf'=>$uf,'p_onlyuf'=>$only_uf,'p_codigo'=>$codigo,'p_tributo'=>null);
+            $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
+
+            $ref = $codigo;
+            if ($only_uf) {
+                $ref = $uf;
+            }
+
+            $ativ_filtered = DB::table('atividades')
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->select(array('status',DB::raw('COUNT(atividades.id) as count')))
+                ->where('ref',$ref)
+                ->where('periodo_apuracao',$periodo_apuracao)
+                ->where('recibo', 1)
+                ->where('emp_id',$this->s_emp->id)
+                ->groupBy('status')
+                ->get();
+
+            foreach ($ativ_filtered as $at) {
+                    $graph['status_'.$at->status] = $at->count;
+            }
+            //var_dump($graph);
+
+        } else {
+            $graph['params'] = array('p_uf'=>null,'p_onlyuf'=>false,'p_codigo'=>null,'p_tributo'=>null);
+
+            $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+            $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+            $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+        }
+
+        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
+
+        return view('pages.dashboard-analista')
+            ->with('ufs',$ufs)
+            ->with('municipios',$municipios)
+            ->with('tributos',$tributos)
+            ->with('periodo',$periodo_apuracao)
+            ->with('graph',$graph);
+
+    }
+
+    public function dashboard_tributo(Request $request) {
+
+        Carbon::setTestNow();  //reset time
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        $user = User::findOrFail(Auth::user()->id);
+        $tributos = Tributo::selectRaw("nome")->whereIn('tipo',['E','M'])->whereNotIn('id',[12,13,14,15])->lists('nome','nome'); //ANUAL DELIVERY
+
+        // Verifica Request
+        if ($request->has('periodo_apuracao') && $request->has('tributo')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+            $tributo = Input::get("tributo");
+        } else {
+            return Redirect::to('home');
+        }
+
+        // Verifica o periodo
+        $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
+        if ($cron==null) {
+            $info_periodo = substr($periodo_apuracao,0,2).'/'.substr($periodo_apuracao,-4,4);
+            Session::flash('alert-warning', "O periodo $info_periodo não tem atividades cadastradas. Foi carregado o periodo padrão.");
+            $periodo_apuracao = $last_month->format('mY');
+        }
+        //Verifica o role
+        if ($user->hasRole('supervisor') || $user->hasRole('manager') || $user->hasRole('admin') || $user->hasRole('owner')) {
+
+            $retval = DB::select( DB::raw("
+                                select  t.nome,substr(limite,1,10) as lim,
+                                        substr(data_aprovacao,1,10) as dt_aprovacao,
+                                        a.status,
+                                        count(*)
+                                from atividades a, regras r, tributos t
+                                where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id=:empid and a.periodo_apuracao=:periodo_apuracao
+                                group by t.nome,lim,dt_aprovacao,a.status
+                                order by t.nome,lim"), array(
+                'empid' => $this->s_emp->id,
+                'periodo_apuracao' => $periodo_apuracao,
+            ));
+            // Elaboração das informações no model TRIBUTO->DATA LIMITE->STATUS
+            $array = array();
+            foreach ($retval as $val) {
+                $array[$val->nome][] = (array) $val;
+            }
+
+            foreach ($array as $key=>$el) {
+                $graph = array();
+                $count = array('s1'=>0,'s2'=>0,'s3'=>0,'v1'=>0,'v2'=>0, 'v3'=>0);
+                foreach ($el as $val) {
+                    // Vencidas
+                    if ($val['lim']<$today && $val['status']<3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['v' . $val['status']])?
+                        $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] += $val['count(*)']:
+                        $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] = $val['count(*)'];
+                        $count['v' . $val['status']] += $val['count(*)'];
+                    } // Entregue fora do prazo
+                    else if ($val['dt_aprovacao']>$val['lim'] && $val['status']==3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['v' . $val['status']])?
+                        $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] += $val['count(*)']:
+                        $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] = $val['count(*)'];
+                        $count['v' . $val['status']] += $val['count(*)'];
+                    }// Entregue no prazo
+                    else if ($val['dt_aprovacao']<=$val['lim'] && $val['status']==3) {
+                       isset($graph[$this->_dateFormat($val['lim'])]['s' . $val['status']])?
+                       $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] += $val['count(*)']:
+                       $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] = $val['count(*)'];
+                       $count['s' . $val['status']] += $val['count(*)'];
+
+                    }// Não vencidas
+                    else { // $val['lim']>=$today && $val['status']<3
+                        isset($graph[$this->_dateFormat($val['lim'])]['s' . $val['status']])?
+                        $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] += $val['count(*)']:
+                        $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] = $val['count(*)'];
+                        $count['s' . $val['status']] += $val['count(*)'];
+                    }
+                }
+                $array[$key]=$graph;
+                //$array[$key]['count']=$count;
+            }
+
+            //var_dump($today);
+            return view('pages.dashboard-tributo')->withGraph($array)->withPeriodo($periodo_apuracao)->withTributo($tributo)->withTributos($tributos)->withCron($cron);
+        }
+    }
+
+    private function _loadNotifications() {
+
+        if (Auth::guest()) {
+
+            $retval = Array('ordinarias'=>null,'urgentes'=>null,'em_aprovacao'=>null,'vencidas');
+
+        } elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner')) {
+
+            Carbon::setTestNow();  //reset
+            $today = Carbon::now();
+
+            $atividades_em_aprovacao = Atividade::select('atividades.*','tributos.nome')
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
+                ->where('status','=',2)
+                ->orderBy('limite')
+                ->with('regra')->with('regra.tributo')->with('estemp')->get();
+
+            $atividades_vencidas = Atividade::select('atividades.*','tributos.nome')
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
+                ->where('limite', '<', $today)
+                ->where('status','=',1)
+                ->orderBy('limite')
+                ->with('regra')->with('regra.tributo')->with('estemp')->get();
+
+            $retval = array('ordinarias'=>null,'urgentes'=>null,'em_aprovacao'=>$this->_notificationOutput($atividades_em_aprovacao),'vencidas'=>$this->_notificationOutput($atividades_vencidas));
+
+        } else {
+            $with_user = function ($query) {
+                //$query->where('user_id', Auth::user()->id)->where('status',1);
+                $query->where('user_id', Auth::user()->id);
+            };
+
+            Carbon::setTestNow();  //reset
+            $today = Carbon::now();
+            $nextWeek = Carbon::now()->addWeekDays(5);
+            //$today = date("Y-m-d H:i:s");
+
+            $atividades_em_aprovacao = Atividade::select('atividades.*','tributos.nome')//->whereHas('users', $with_user)
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
+                ->where('status','=',2)
+                ->orderBy('limite')
+                ->with('regra')->with('regra.tributo')->with('estemp')->get();
+
+            $atividades_ordinarias = Atividade::select('atividades.*','tributos.nome')//->whereHas('users', $with_user)
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
+                ->where('inicio_aviso', '<', $today)
+                ->where('limite', '>', $nextWeek)
+                ->where('status',1)
+                ->orderBy('limite')
+                ->with('regra')->with('regra.tributo')->with('estemp')->get();
+
+            $atividades_urgentes = Atividade::select('atividades.*','tributos.nome')//->whereHas('users', $with_user)
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
+                ->where('limite', '<', $nextWeek)
+                ->where('limite', '>=', $today)
+                ->where('status',1)
+                ->orderBy('limite')
+                ->with('regra')->with('regra.tributo')->with('estemp')->get();
+
+            $atividades_vencidas = Atividade::select('atividades.*','tributos.nome')//->whereHas('users', $with_user)
+                ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
+                ->where('limite', '<', $today)
+                ->where('status',1)
+                ->orderBy('limite')
+                ->with('regra')->with('regra.tributo')->with('estemp')->get();
+
+            $retval = array('ordinarias'=>$this->_notificationOutput($atividades_ordinarias),
+                            'urgentes'=>$this->_notificationOutput($atividades_urgentes),
+                            'em_aprovacao'=>$this->_notificationOutput($atividades_em_aprovacao),
+                            'vencidas'=>$this->_notificationOutput($atividades_vencidas));
+
+        }
+
+        return $retval;
+    }
+
+    private function _dateFormat($datestring) {
+        $newDate = date("d-m", strtotime($datestring));
+        return $newDate;
+    }
+
+    private function _notificationOutput($input) {
+        $output = array();
+        foreach ($input as $el) {
+            $output[$el->regra->tributo->nome][$this->_dateFormat($el->limite)][] = $el;
+        }
+        //var_dump($output);
+        return $output;
+    }
+
+
+}

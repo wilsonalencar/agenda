@@ -1,7 +1,7 @@
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <div class="navbar-header">
-      <div style="display:inline; position:relative; top:5px; font-family:'Arial', 'Helvetica', sans-serif; font-size:21px;"><span><font color="red"><b>B</b></font>ravo - Tax Calendar</span> <!--- <img style="height:20px; margin-bottom: 5px" src="{{ URL::to('/') }}/assets/img/v_logo_small.png" /><span>agenda</span>--></div>
+      <div style="display:inline; position:relative; top:5px; font-family:'Arial', 'Helvetica', sans-serif; font-size:21px;"><span><font color="#B22222"><b>B</b></font>ravo - Tax Calendar</span> <!--- <img style="height:20px; margin-bottom: 5px" src="{{ URL::to('/') }}/assets/img/v_logo_small.png" /><span>agenda</span>--></div>
     </div>
      <!-- Right Side Of Navbar -->
     <ul id="main-menu" class="sm sm-clean navbar-right">

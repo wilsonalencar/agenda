@@ -82,7 +82,6 @@ class MensageriaprocadmsController extends Controller
 
     public function findProcessosMensageria($role_id, $dias)
     {
-
     	$processos = DB::select("select * FROM processosadms a inner join observacaoprocadms b ON b.id = (select id FROM observacaoprocadms where processoadm_id = a.id AND datediff(DATE_FORMAT(NOW(), '%Y/%m/%d'), DATE_FORMAT(b.created_at, '%Y/%m/%d')) = ".$dias." ORDER BY created_at DESC LIMIT 1)");
     	
     	foreach($processos as $processo)
@@ -106,10 +105,8 @@ class MensageriaprocadmsController extends Controller
     	$data['subject']      = $subject;
     	foreach($emails as $user)
     	{
-    		//$this->eService->sendMail($user, $data, 'emails.notificacao-processos');
-    	echo "Email enviado para  - ".$user->email." || "." Processo - ".$array->nro_processo." || Dias sem atualização ".$array->dias_diferenca." || role_id - ".$role_id."<br>";
+    		$this->eService->sendMail($user, $data, 'emails.notificacao-processos');
     	}
-    	echo "<br>";
     	return;
     }
 

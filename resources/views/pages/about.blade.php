@@ -3,7 +3,6 @@
 @section('content')
 <div class="row">
     <div class="col-md-9">
-        <h1>INNO<span style="color:red">V</span>AGENDA</h1>
         <p class="lead">Devido ao alto volume de estabelecimentos, localizados em áreas diferentes, existe uma
         complexidade do controle de todas as entregas tributárias a ser efetuadas no ano fiscal. Por este motivo,
         identificou-se a necessidade de construir uma ferramenta que ajude o time no gerenciamento das datas de

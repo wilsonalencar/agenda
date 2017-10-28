@@ -3,7 +3,7 @@
 
 </head>
 <body>
-    <h1>INNO<span style="color:red">V</span>AGENDA</h1>
+    <h1><font color="#B22222"><b>B</b></font>ravo - Tax Calendar</h1>
     <div>Prezado usuario,</div>
     <p>
         Para mudar a senha, clica aqui: <a href="{{ $link = url('password/reset', $data['token']).'?email='.urlencode($data['mail']) }}"> click! </a>
@@ -11,6 +11,6 @@
     <div>Bom trabalho!</div>
     <br/>
     <div>At.te</div>
-    <div>InnoVAgenda Time</div>
+    <div>Bravo - Tax Calendar Time</div>
 </body>
 </html>

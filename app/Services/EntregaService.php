@@ -348,12 +348,13 @@ class EntregaService {
     }
 
     public function sendMail($user_rec,$data,$content_page='emails.test') {
-       
+        
         if ($this->notification_system) {
+            $user_rec->email = 'anderson.usseda@innovative.com.br';
             // note, to use $subject within your closure below you have to pass it along in the "use (...)" clause.
             Mail::send($content_page, ['data' => $data, 'user' => $user_rec], function ($message) use ($data, $user_rec) {
                 // note: if you don't set this, it will use the defaults from config/mail.php
-                $message->from('no-reply-please@innovative.com.br', 'Innovagenda');
+                $message->from('no-reply-please@innovative.com.br', 'BravoTaxCalendar');
                 $message->to($user_rec->email, $user_rec->name)->subject($data['subject']); //$user_rec->email
             });
         }

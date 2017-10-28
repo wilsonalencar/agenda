@@ -10,6 +10,8 @@ app/storage/
 public/storage
 public/hot
 public/uploads
+storage
+storage/framework
 storage/*.key
 .env.*.php
 .env.php

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Atividade;
 use App\Models\Cron;
 use App\Models\Empresa;
+use App\Models\User;
+use App\Models\Tributo;
 use App\Models\Municipio;
 use App\Models\FeriadoEstadual;
 use App\Models\FeriadoMunicipal;
@@ -117,8 +119,9 @@ class EmpresasController extends Controller
     {
         $empresa = Empresa::findOrFail($id);
         $municipios = Municipio::selectRaw("concat(nome, ' - ', uf) as nome_and_uf, codigo")->orderBy('nome')->lists('nome_and_uf', 'codigo');
-
-        return view('empresas.edit')->withEmpresa($empresa)->with('municipios', $municipios);
+        $users = User::selectRaw("name, id")->lists('name','id');
+        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
+        return view('empresas.edit')->withEmpresa($empresa)->with('municipios', $municipios)->with('users', $users)->with('tributos',$tributos);
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Atividade;
 use App\Http\Requests;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Input;
 use Yajra\Datatables\Datatables;
 
@@ -33,7 +34,8 @@ class EntregasController extends Controller
     public function anyData(Request $request)
     {
         $user = User::findOrFail(Auth::user()->id);
-        $atividades = Atividade::select('*')->with('regra')->with('regra.tributo')->with('entregador')->with('entregador.roles')->with('estemp')->orderBy('data_entrega','desc');
+        $seid = Crypt::decrypt($request->session()->get('seid'));
+        $atividades = Atividade::select('*')->where('emp_id',$seid)->with('regra')->with('regra.tributo')->with('entregador')->with('entregador.roles')->with('estemp')->orderBy('data_entrega','desc');
 
 
         if ($user->hasRole('owner') || $user->hasRole('admin') )

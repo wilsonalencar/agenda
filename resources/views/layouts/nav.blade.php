@@ -7,35 +7,54 @@
     <ul id="main-menu" class="sm sm-clean navbar-right">
         @if (Auth::guest())
         <li><a href="{{ url('/login') }}"><i class="fa fa-btn fa-sign-in"></i> Login</a></li>
-        <li><a href="{{ url('/register') }}"><i class="fa fa-btn fa-user"></i> Cadastre-se</a></li>
         @else
         <li><a href="{{ route('home') }}"><i class="fa fa-btn fa-home"></i></a></li>
-        <li><a href="#">|</a></li>
-        <li><a href="{{ route('about') }}"><i class="fa fa-btn fa-info"></i> Info</a></li>
+        
+        @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
+            <li><a href="#">|</a></li>
+            <li><a href="{{ route('about') }}"><i class="fa fa-btn"></i>Tax Cockpit Calendar</a></li>
+        @endif
         <li><a href="#">|</a></li>
             @if ( Auth::user()->hasRole('user') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor'))
                 <li><a href="{{ route('calendario') }}"><i class="fa fa-btn fa-calendar"></i> Calendário</a></li>
                 <li><a href="#">|</a></li>
             @endif
-            @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
-                 <li><a href="#"><i class="fa fa-btn fa-table"></i>Integração</a>
-                        <ul>
-                            <li></li>
-                            <li><a href="{{ route('cargas') }}"><i class="fa fa-btn fa-file-text-o"></i> Por Estabelecimento</a></li>
-                            <li><a href="{{ route('cargas_grafico') }}"><i class="fa fa-btn fa-file-text-o"></i> Visualização Grafica</a></li>
-                        </ul>
-                 </li>
-                 <li><a href="#">|</a></li>
-            @endif
-
 
             @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
                  <li><a href="#"><i class="fa fa-btn fa-table"></i>Tax Calendar</a>
                         <ul>
                             <li></li>
-                            <li><a href="{{ route('movtocontacorrente') }}"><i class="fa fa-btn fa-file-text-o"></i>Conta Corrente</a></li>
-                            <li><a href="{{ route('processosadms.index') }}"><i class="fa fa-btn fa-file-text-o"></i>Processos Administrativos</a></li>
+                            <li>
+                                <a href="#"><i class="fa fa-btn fa-file-text-o"></i>Conta Corrente</a>
+                                <ul>
+                                        <li></li>
+                                        <li><a href="{{ route('movtocontacorrentes.create') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                        <li><a href="{{ route('movtocontacorrentes.search') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                        <li><a href="{{ route('movtocontacorrentes.import') }}"><i class="fa fa-btn fa-file-text-o"></i>Importar</a></li>
+                                    </ul>
+                            </li>
+                            <li>
+                                <a href="#"><i class="fa fa-btn fa-file-text-o"></i>Processos Administrativos</a>
+                                <ul>
+                                        <li></li>
+                                        <li><a href="{{ route('processosadms.create') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                        <li><a href="{{ route('processosadms.search') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                        <li><a href="{{ route('processosadms.import') }}"><i class="fa fa-btn fa-file-text-o"></i>Importar</a></li>
+                                    </ul>
+                            </li>
+                            
+                            @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
+                             <li><a href="#"><i class="fa fa-btn fa-table"></i>Integrações</a>
+                                    <ul>
+                                        <li></li>
+                                        <li><a href="{{ route('cargas') }}"><i class="fa fa-btn fa-file-text-o"></i> Por Estabelecimento</a></li>
+                                        <li><a href="{{ route('cargas_grafico') }}"><i class="fa fa-btn fa-file-text-o"></i> Visualização Grafica</a></li>
+                                    </ul>
+                             </li>
+                 
+                            @endif
                         </ul>
+
                  </li>
                  <li><a href="#">|</a></li>
             @endif
@@ -50,7 +69,7 @@
                 <li><a href="#">|</a></li>
             @endif
             @if ( Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor'))
-                <li><a href="#"><i class="fa fa-btn fa-table"></i> Configurações</a>
+                <li><a href="#"><i class="fa fa-btn fa-table"></i> Tax Configuration</a>
                     <ul>
                         <li></li>
                         @if ( Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
@@ -59,12 +78,12 @@
                         <li><a href="{{ route('regras.index') }}">Regras</a></li>
                         <li><a href="{{ route('usuarios.index') }}">Usuários</a></li>
                         <li><a href="{{ route('atividades.index') }}">Atividades</a></li>
-                        <li><a href="{{ route('mensageriaprocadms.create') }}">Mensageria</a></li>
                         @endif
                         <li><a href="{{ route('empresas.index') }}">Empresas</a></li>
                         <li><a href="{{ route('estabelecimentos.index') }}">Estabelecimentos</a></li>
                         <li><a href="{{ route('municipios.index') }}">Municipios</a></li>
                         <li><a href="{{ route('feriados') }}">Feriados</a></li>
+                        <li><a href="{{ route('mensageriaprocadms.create') }}">Mensageria Processo Administrativo</a></li>
                     </ul>
                 </li>
                 <li><a href="#">|</a></li>

@@ -41,6 +41,29 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@home'
     ]);
 
+
+});
+
+// Just the Owner, Admin, Manager, Supervisor and the Analyst
+Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner']], function () {
+
+    Route::post('home', array('as'=>'home', 'uses'=>'PagesController@home'));
+    Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
+    Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
+
+    Route::get('/download/{file}', 'DownloadsController@download');
+
+    Route::resource('entregas', 'EntregasController');
+    Route::get('entrega/data', array('as'=>'entregas.data', 'uses'=>'EntregasController@anyData'));
+
+    Route::resource('arquivos', 'ArquivosController');
+    Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));
+
+    Route::post('atividade/storeComentario', array('as'=>'atividades.storeComentario', 'uses'=>'AtividadesController@storeComentario'));
+
+    Route::get('upload/{user}/entrega', array('as'=>'upload.entrega', 'uses'=>'UploadsController@entrega'));
+    Route::post('upload/sendUpload', 'UploadsController@upload');
+
     Route::get('/about', [
         'as' => 'about',
         'uses' => 'PagesController@about'

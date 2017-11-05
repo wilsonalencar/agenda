@@ -99,11 +99,12 @@
                             <li><a href="{{ route('municipios.index') }}">Municipios</a></li>
                             <li><a href="{{ route('feriados') }}">Feriados</a></li>
                             <li><a href="{{ route('mensageriaprocadms.create') }}">Mensageria Processo Administrativo</a></li>
-                            <li><a href="{{ route('home', 'selecionar_empresa', '1') }}">Selecionar Empresa</a></li>
                         </ul>
                     </li>
                     <li><a href="#">|</a></li>
                 @endif
+            <li><a href="{{ route('home', 'selecionar_empresa', '1') }}">Selecionar Empresa</a></li>
+             <li><a href="#">|</a></li>
             <li><a href="{{ url('/logout') }}">
                 @if (!Auth::guest())
                 <img style="height:16px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/img/{{ Auth::user()->roles()->first()->name }}-icon.png" title="{{ Auth::user()->roles()->first()->display_name }}" /> ({{ Auth::user()->name.' ' }})

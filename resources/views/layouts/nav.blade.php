@@ -75,7 +75,7 @@
                         <li><a href="#"><i class="fa fa-btn fa-table"></i>Tax Repository</a>
                             <ul>
                                 <li></li>
-                                <li><a href="{{ route('arquivos.index') }}"><i class="fa fa-btn fa-upload"></i>Entregas</a></li>
+                                <li><a href="{{ route('arquivos.index') }}"><i class="fa fa-btn fa-upload"></i>Arquivos</a></li>
                             </ul>
                         <li><a href="#">|</a></li>
                     @endif

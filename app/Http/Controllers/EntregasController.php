@@ -17,9 +17,20 @@ use Yajra\Datatables\Datatables;
 
 class EntregasController extends Controller
 {
+    public $s_emp = null;
     public function __construct()
     {
+        if (!session()->get('seid')) {
+            echo "Nenhuma empresa Selecionada.<br/><br/><a href='home'>VOLTAR</a>";
+            exit;
+        }
+        
         $this->middleware('auth');
+
+        if (!Auth::guest() && $this->s_emp == null && !empty(session()->get('seid'))) {
+            $this->s_emp = Empresa::findOrFail(session()->get('seid')); 
+        }
+       
     }
     /**
      * Display a listing of the resource.
@@ -34,7 +45,7 @@ class EntregasController extends Controller
     public function anyData(Request $request)
     {
         $user = User::findOrFail(Auth::user()->id);
-        $seid = Crypt::decrypt($request->session()->get('seid'));
+        $seid = $this->s_emp->id;
         $atividades = Atividade::select('*')->where('emp_id',$seid)->with('regra')->with('regra.tributo')->with('entregador')->with('entregador.roles')->with('estemp')->orderBy('data_entrega','desc');
 
 

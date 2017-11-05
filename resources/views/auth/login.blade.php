@@ -38,19 +38,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group{{ $errors->has('company') ? ' has-error' : '' }}">
-                            <label class="col-md-4 control-label">Empresa</label>
-
-                            <div class="col-md-6">
-                                {!! Form::select('company', $empresas, null, array('class' => 'form-control')) !!}
-
-                                @if ($errors->has('company'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('company') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
+                        
 
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">

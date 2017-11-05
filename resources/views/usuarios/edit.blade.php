@@ -30,6 +30,13 @@
     </div>
 </div>
 
+<div class="form-group">
+    <div style="width:50%">
+    {!! Form::label('multiple_select_tributos[]', 'Empresas', ['class' => 'control-label'] )  !!}
+    {!!  Form::select('multiple_select_empresas[]', $empresas, $user->empresas()->getRelatedIds()->toArray(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
+    </div>
+</div>
+
 {!! Form::submit('Atualiza Usuário', ['class' => 'btn btn-default']) !!}
 
 {!! Form::close() !!}

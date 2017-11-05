@@ -26,11 +26,17 @@ class EstabelecimentosController extends Controller
 
     public function __construct(EntregaService $service)
     {
+
+        if (!session()->get('seid')) {
+            echo "Nenhuma empresa Selecionada.<br/><br/><a href='home'>VOLTAR</a>";
+            exit;
+        }
+
         $this->middleware('auth');
         $this->eService = $service;
 
-        if (!Auth::guest() && $this->s_emp == null) {
-            $this->s_emp = Empresa::findOrFail(\Illuminate\Support\Facades\Crypt::decrypt(session('seid')));
+        if (!Auth::guest() && $this->s_emp == null && !empty(session()->get('seid'))) {
+            $this->s_emp = Empresa::findOrFail(session()->get('seid')); 
         }
     }
     /**

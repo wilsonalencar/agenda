@@ -99,6 +99,7 @@ class UsuariosController extends Controller
     {
         $usuario = User::findOrFail($id);
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
 
         /*
         $regras = [''=>''];
@@ -106,7 +107,7 @@ class UsuariosController extends Controller
         $estabs = Estabelecimento::selectRaw("cnpj, cnpj")->lists('cnpj','cnpj');
         $estemp = $empresas->merge($estabs);
         */
-        return view('usuarios.edit')->withUser($usuario)->withTributos($tributos);
+        return view('usuarios.edit')->withUser($usuario)->withTributos($tributos)->withEmpresas($empresas);
     }
 
     /**
@@ -134,6 +135,13 @@ class UsuariosController extends Controller
             $usuario->tributos()->sync($tributos);
         } else {
             $usuario->tributos()->detach();
+        }
+
+        $empresas = Input::get('multiple_select_empresas');
+        if ($empresas) {
+            $usuario->empresas()->sync($empresas);
+        } else {
+            $usuario->empresas()->detach();
         }
 
         return redirect()->back()->with('status', 'User atualizado com sucesso!');

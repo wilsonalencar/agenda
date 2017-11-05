@@ -24,16 +24,14 @@ class PagesController extends Controller
     protected $s_emp = null;
 
     public function __construct(Request $request = null)
-    {
-        if (!Auth::guest())
-            $this->s_emp = Empresa::findOrFail(\Illuminate\Support\Facades\Crypt::decrypt(session('seid')));
-        else {
-            $this->s_emp = Empresa::findOrFail(1);
-        }
+    { 
+        if (!Auth::guest() && !empty(session()->get('seid')))
+            $this->s_emp = Empresa::findOrFail(session('seid'));
     }
 
     public function home (Request $request = null)
     {
+
         Carbon::setTestNow();  //reset
         $today = Carbon::today()->toDateString();
         $last_month = new Carbon('last month');
@@ -56,6 +54,33 @@ class PagesController extends Controller
 
         if (!Auth::guest()) {
             
+            if (!empty($_GET['empresa_selecionada'])) {
+
+                $key = $_GET['empresa_selecionada'];
+                $s = DB::select("Select COUNT(1) as ct FROM empresa_user where user_id = ".Auth::user()->id." AND empresa_id = ". $key . "");
+                if (!$s[0]->ct) {
+                    echo "Você não tem acesso a empresa informada.<br/><br/><a href='home'>VOLTAR</a>";
+                    exit;
+                }
+
+                $request->session()->put('seid', $key);
+
+            }
+            
+            if (!session()->get('seid') || isset($_GET['selecionar_empresa'])) {
+                $user = User::findOrFail(Auth::user()->id);
+                $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+                $empresasArray = array();
+                foreach($empresas as $key => $empresa) {
+                    $s = DB::select("Select COUNT(1) as ct FROM empresa_user where user_id = ".Auth::user()->id." AND empresa_id = ". $key . "");
+                    if ((boolean)$s[0]->ct) {
+                        $empresasArray[$key] = $empresa;
+                    }
+                }
+                
+                return view('pages.selecionarempresa')->withUser($user)->withEmpresas($empresasArray);
+            }
+
             $user = User::findOrFail(Auth::user()->id);
             $tributos = Tributo::selectRaw("nome")->whereNotIn('id',[12,13,14,15])->lists('nome','nome');
 
@@ -113,7 +138,7 @@ class PagesController extends Controller
             Session::forget('vcn');
             Session::forget('vcp');
             Session::forget('vco');
-        
+            Session::forget('seid');
             return view('pages.home');
         }
 

@@ -14,6 +14,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Yajra\Datatables\Datatables;
 use App\Services\EntregaService;
+use DB;
+use Illuminate\Support\Facades\Session;
 
 class UsuariosController extends Controller
 {
@@ -48,7 +50,12 @@ class UsuariosController extends Controller
      */
     public function create()
     {
+        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $roles = Role::all(['id', 'display_name'])->pluck('display_name', 'id');
+
         //return view('auth.register');
+        return view('usuarios.create')->withTributos($tributos)->withEmpresas($empresas)->withRoles($roles);
     }
 
     /**
@@ -61,16 +68,36 @@ class UsuariosController extends Controller
     {
         $this->validate($request, [
             'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required'
+            'email' => 'required|email'
         ],
         $messages = [
-
+            'name.required' => 'Informar nome',
+            'email.required' => 'Informar Email'
         ]);
 
         $input = $request->all();
+        $input['password'] = bcrypt('teste123');
+    
+        $create = User::create($input);
 
-        User::create($input);
+        $input['user_id'] = $create->id;
+        $create->attachRole($input['role_user']);
+        
+        $usuario = User::findOrFail($create->id);
+
+        $tributos = Input::get('multiple_select_tributos');
+        if ($tributos) {
+            $usuario->tributos()->sync($tributos);
+        } else {
+            $usuario->tributos()->detach();
+        }
+
+        $empresas = Input::get('multiple_select_empresas');
+        if ($empresas) {
+            $usuario->empresas()->sync($empresas);
+        } else {
+            $usuario->empresas()->detach();
+        }
 
         return redirect()->back()->with('status', 'Usuário adicionado com sucesso!');
     }
@@ -110,6 +137,30 @@ class UsuariosController extends Controller
         return view('usuarios.edit')->withUser($usuario)->withTributos($tributos)->withEmpresas($empresas);
     }
 
+    public function atualizarsenha(Request $request)
+    {
+        $input = $request->all();
+        $usuario = User::findOrFail($input['id']);
+            
+        if ($input['password'] != $input['password_confirmation']) {
+            Session::flash('alert', 'Senha e Confirmar senha Incorretos');
+            return redirect()->route('home');
+        }
+
+        $this->validate($request, [
+        'password' => 'required'
+        ],
+        $messages = [
+            'password.required' => 'Informar Senha'
+        ]);
+
+        $input['password'] = bcrypt($input['password']);
+        $usuario->fill($input)->save();
+        return redirect()->back();
+        
+
+    }
+
     /**
      * Update the specified resource in storage.
      *
@@ -120,13 +171,12 @@ class UsuariosController extends Controller
     public function update(Request $request, $id)
     {
         $usuario = User::findOrFail($id);
+        $input = $request->all();
 
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email'
         ]);
-
-        $input = $request->all();
 
         $usuario->fill($input)->save();
 

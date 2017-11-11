@@ -5,7 +5,8 @@
     </div>
      <!-- Right Side Of Navbar -->
     <ul id="main-menu" class="sm sm-clean navbar-right">
-        
+            
+
             @if (Auth::guest())
             <li><a href="{{ url('/login') }}"><i class="fa fa-btn fa-sign-in"></i> Login</a></li>
             @else
@@ -89,7 +90,13 @@
                             <li><a href="{{ route('categorias.index') }}">Categorias Fiscais</a></li>
                             <li><a href="{{ route('tributos.index') }}">Tributos</a></li>
                             <li><a href="{{ route('regras.index') }}">Regras</a></li>
-                            <li><a href="{{ route('usuarios.index') }}">Usuários</a></li>
+                            <li><a href="javascript:void(0);">Usuários</a>
+                                <ul>
+                                    <li></li>
+                                    <li><a href="{{ route('usuarios.create') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                    <li><a href="{{ route('usuarios.index') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                </ul>
+                            </li>
                             <li><a href="{{ route('atividades.index') }}">Atividades</a></li>
                             @endif
                             <li><a href="{{ route('empresas.index') }}">Empresas</a></li>

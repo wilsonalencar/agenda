@@ -17,6 +17,22 @@ use Yajra\Datatables\Datatables;
 
 class ArquivosController extends Controller
 {
+    public $s_emp = null;
+    public function __construct()
+    {
+        if (!session()->get('seid')) {
+            echo "Nenhuma empresa Selecionada.<br/><br/><a href='home'>VOLTAR</a>";
+            exit;
+        }
+        
+        $this->middleware('auth');
+
+        if (!Auth::guest() && $this->s_emp == null && !empty(session()->get('seid'))) {
+            $this->s_emp = Empresa::findOrFail(session()->get('seid')); 
+        }
+       
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -30,7 +46,9 @@ class ArquivosController extends Controller
     public function anyData(Request $request)
     {
         $user = User::findOrFail(Auth::user()->id);
-        $atividades = Atividade::select('*')->with('regra')->with('regra.tributo')->with('estemp')
+        $seid = $this->s_emp->id;
+
+        $atividades = Atividade::select('*')->where('emp_id', $seid)->with('regra')->with('regra.tributo')->with('estemp')
             ->where('status', 3)->where('tipo_geracao','A')
             ->orderBy('data_entrega','desc');
 

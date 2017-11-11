@@ -41,6 +41,7 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@home'
     ]);
 
+    Route::post('atualizarsenha', array('as'=>'atualizarsenha', 'uses'=>'UsuariosController@atualizarsenha'));
 
 });
 
@@ -297,7 +298,7 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
 });
 
 // Just the Owner
-Route::group(['middleware' => ['web','auth','role:owner']], function () {
+Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
 
     Route::get('usuario/{user}/elevateRole', array('as'=>'usuarios.elevateRole', 'uses'=>'UsuariosController@elevateRole'));
     Route::get('usuario/{user}/decreaseRole', array('as'=>'usuarios.decreaseRole', 'uses'=>'UsuariosController@decreaseRole'));

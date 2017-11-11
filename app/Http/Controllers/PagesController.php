@@ -82,6 +82,11 @@ class PagesController extends Controller
             }
 
             $user = User::findOrFail(Auth::user()->id);
+
+            if (crypt('teste123', $user->password) === $user->password) {
+                return view('pages.alterarsenha')->withUser($user);
+            } 
+        
             $tributos = Tributo::selectRaw("nome")->whereNotIn('id',[12,13,14,15])->lists('nome','nome');
 
             if (sizeof($user->roles)==0) {

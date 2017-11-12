@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Estabelecimento;
 use Auth;
 use DB;
+use App\Models\Empresa;
 use App\Services\EntregaService;
 use App\Http\Requests;
 use Illuminate\Support\Facades\Input;
@@ -15,10 +16,20 @@ use Illuminate\Http\Request;
 class CargasController extends Controller
 {
     protected $eService;
+    public $s_emp = null;
 
-    function __construct(EntregaService $service)
+    public function __construct(EntregaService $service)
     {
+        if (!session()->get('seid')) {
+            echo "Nenhuma empresa Selecionada.<br/><br/><a href='home'>VOLTAR</a>";
+            exit;
+        }
+
         $this->eService = $service;
+
+        if (!Auth::guest() && $this->s_emp == null && !empty(session()->get('seid'))) {
+            $this->s_emp = Empresa::findOrFail(session()->get('seid')); 
+        }
     }
 
     public function index(Request $request)
@@ -34,7 +45,8 @@ class CargasController extends Controller
 
     public function anyData(Request $request)
     {
-        $estabelecimentos = Estabelecimento::select('*')->with('municipio');
+        $seid = $this->s_emp->id;
+        $estabelecimentos = Estabelecimento::select('*')->where('empresa_id', $seid)->with('municipio');
 
         if($filter = $request->get('ativo')){
             $estabelecimentos->where('carga_msaf_entrada',1)->where('carga_msaf_saida',1);
@@ -45,14 +57,19 @@ class CargasController extends Controller
 
     public function grafico()
     {
+        $seid = $this->s_emp->id;
+
         $first = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "E" as TIPO'))
+            ->where('empresa_id', $seid)
             ->where('carga_msaf_entrada',1);
         $second = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "S" as TIPO'))
+            ->where('empresa_id', $seid)
             ->where('carga_msaf_saida',1);
         $third = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "C" as TIPO'))
+            ->where('empresa_id', $seid)
             ->where('carga_msaf_entrada',1)
             ->where('carga_msaf_saida',1);
 

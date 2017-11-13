@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Input;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Auth;
+use DB;
 
 class EstabelecimentosController extends Controller
 {
@@ -86,10 +87,15 @@ class EstabelecimentosController extends Controller
      */
     public function create()
     {
-        $empresas = Empresa::lists('cnpj', 'id');
+        $empresas = Empresa::selectRaw("cnpj, id")->lists('cnpj','id');
+        $empresasArray = array();
+        $empresasArray[0] = 'Selecione uma empresa';
+        foreach($empresas as $key => $empresa) {
+            $empresasArray[$key] = $empresa;
+        }
+        
         $municipios = Municipio::selectRaw("concat(nome, ' - ', uf) as nome_and_uf, codigo")->orderBy('nome')->lists('nome_and_uf', 'codigo');
-
-        return view('estabelecimentos.create')->with('municipios', $municipios)->with('empresas', $empresas);
+        return view('estabelecimentos.create')->with('municipios', $municipios)->with('empresas', $empresasArray);
     }
 
     /**
@@ -103,20 +109,23 @@ class EstabelecimentosController extends Controller
         $input = $request->all();
         $empresa_id = (int)$input['empresa_id'];
         $empresa = Empresa::findOrFail($empresa_id);
+
         $input['cnpj']= preg_replace("/[^0-9]/","",$input['cnpj']);
 
         $this->validate($request, [
             'cnpj' => 'required|size:18|valida_cnpj|valida_cnpj_unique|valida_cnpj_estab:'.$empresa->cnpj,
             'razao_social' => 'required',
             'cod_municipio' => 'required',
-            'empresa_id' => 'required'
+            'empresa_id' => 'required',
+            'empresa_id' => 'valida_envio_empresa'
         ],
         $messages = [
             'cnpj.valida_cnpj_estab' => 'O CNPJ indicado não é filial da empresa matriz indicada.',
             'cnpj.valida_cnpj' => 'O CNPJ é inválido.',
-            'cnpj.valida_cnpj_unique' => 'O CNPJ indicado é já cadastrado.'
+            'cnpj.valida_cnpj_unique' => 'O CNPJ indicado é já cadastrado.',
+            'empresa_id.valida_envio_empresa' => 'Informar Empresa'
         ]);
-
+        
         Estabelecimento::create($input);
 
         return redirect()->back()->with('status', 'Estabelecimento adicionada com sucesso!');

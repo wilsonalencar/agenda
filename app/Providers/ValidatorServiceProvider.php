@@ -33,6 +33,13 @@ class ValidatorServiceProvider extends ServiceProvider
             return substr($value,-7,4)=='0001';
         });
 
+        $this->app['validator']->extend('valida_envio_empresa', function($attribute, $value){
+            if ($value == 0) {
+                return false;
+            }
+            return true;
+        });
+
         $this->app['validator']->extend('valida_cnpj_estab', function($attribute, $value, $parameters){
 
             if (isset($parameters[0])) {

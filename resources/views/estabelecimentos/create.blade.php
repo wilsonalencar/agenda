@@ -5,7 +5,7 @@
 @include('partials.alerts.errors')
 
 <h1>Adicionar novo estabelecimento</h1>
-<hr><?php $empresas->prepend('Seleciona a empresa...'); ?>
+<hr>
 {!! Form::open([
     'route' => 'estabelecimentos.store'
 ]) !!}

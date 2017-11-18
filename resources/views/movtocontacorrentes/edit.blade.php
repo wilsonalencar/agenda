@@ -107,6 +107,12 @@
     </div>
 </div>
 
+<div class="form-group">
+    <div style="width:30%">
+        {!! Form::label('observacao', 'Observação:', ['class' => 'control-label']) !!}
+        {!! Form::textarea('observacao', $movtocontacorrentes->observacao, null, array('class' => 'form-control', 'id'=>'observacao')) !!}
+    </div>
+</div>
 
 {!! Form::hidden('estabelecimento_id', null, ['class' => 'form-control', 'id'=> 'estabelecimento_id']) !!}
 

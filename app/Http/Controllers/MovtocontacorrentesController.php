@@ -188,6 +188,7 @@ class MovtocontacorrentesController extends Controller
             $array['vlr_gia']               = $registro[3];
             $array['vlr_sped']              = $registro[4];
             $array['vlr_dipam']             = $registro[5];
+            $array['observacao']            = $registro[6];
             $array['dipam']                 = 'S';
 
             if ($registro[5] == 'S/M') {
@@ -357,7 +358,8 @@ class MovtocontacorrentesController extends Controller
             'estabelecimento_id' => 'required',
             'vlr_guia' => 'required',
             'vlr_gia' => 'required',
-            'vlr_sped' => 'required'
+            'vlr_sped' => 'required',
+            'observacao' => 'required'
         ],
         $messages = [
             'periodo_apuracao.required' => 'Informar um periodo de apuração',
@@ -365,7 +367,9 @@ class MovtocontacorrentesController extends Controller
             'estabelecimento_id.required' => 'Informar um código de Área de um estabelecimento válido.',
             'vlr_guia.required' => 'Informar Valor Guia.',
             'vlr_gia.required' => 'Informar Valor Gia.',
-            'vlr_sped.required' => 'Informar Valor Sped.'
+            'vlr_sped.required' => 'Informar Valor Sped.',
+            'observacao.required' => 'Informar Observação.'
+
         ]);
 
         if (!empty($input['dipam']) && !$input['vlr_dipam']) {
@@ -403,7 +407,8 @@ class MovtocontacorrentesController extends Controller
             'estabelecimento_id' => 'required',
             'vlr_guia' => 'required',
             'vlr_gia' => 'required',
-            'vlr_sped' => 'required'
+            'vlr_sped' => 'required',
+            'observacao' => 'required'
         ],
         $messages = [
             'periodo_apuracao.required' => 'Informar um periodo de apuração',
@@ -411,7 +416,8 @@ class MovtocontacorrentesController extends Controller
             'estabelecimento_id.required' => 'Informar um código de Área de um estabelecimento válido.',
             'vlr_guia.required' => 'Informar Valor Guia.',
             'vlr_gia.required' => 'Informar Valor Gia.',
-            'vlr_sped.required' => 'Informar Valor Sped.'
+            'vlr_sped.required' => 'Informar Valor Sped.',
+            'observacao.required' => 'Informar Observação.'
         ]);
 
         if (!empty($input['dipam']) && !$input['vlr_dipam']) {

@@ -22,7 +22,8 @@ class Movtocontacorrente extends Model
         'vlr_sped',
         'vlr_dipam',
         'usuario_update',
-        'dipam'
+        'dipam',
+        'observacao'
     ];
 
     /**

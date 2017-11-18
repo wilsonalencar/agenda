@@ -113,14 +113,13 @@ class EstabelecimentosController extends Controller
         $input['cnpj']= preg_replace("/[^0-9]/","",$input['cnpj']);
 
         $this->validate($request, [
-            'cnpj' => 'required|size:18|valida_cnpj|valida_cnpj_unique|valida_cnpj_estab:'.$empresa->cnpj,
+            'cnpj' => 'required|size:18|valida_cnpj|valida_cnpj_unique:'.$empresa->cnpj,
             'razao_social' => 'required',
             'cod_municipio' => 'required',
             'empresa_id' => 'required',
             'empresa_id' => 'valida_envio_empresa'
         ],
         $messages = [
-            'cnpj.valida_cnpj_estab' => 'O CNPJ indicado não é filial da empresa matriz indicada.',
             'cnpj.valida_cnpj' => 'O CNPJ é inválido.',
             'cnpj.valida_cnpj_unique' => 'O CNPJ indicado é já cadastrado.',
             'empresa_id.valida_envio_empresa' => 'Informar Empresa'

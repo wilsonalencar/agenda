@@ -81,7 +81,7 @@ class ValidatorServiceProvider extends ServiceProvider
 
         $this->app['validator']->extend('valida_cnpj_unique', function($attribute, $value){
             $value = preg_replace("/[^0-9]/","",$value);
-            if (Empresa::where('cnpj', '=', $value)->exists() || Estabelecimento::where('cnpj', '=', $value)->exists()) {
+            if (Estabelecimento::where('cnpj', '=', $value)->exists()) {
                 return false;
             } else {
                 return true;

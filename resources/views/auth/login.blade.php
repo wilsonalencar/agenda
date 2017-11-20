@@ -1,7 +1,7 @@
-@extends('layouts.master')
-
-@section('content')
-<div class="container">
+<!doctype html>
+<html lang="pt-br">
+@include('layouts.head')
+<body>
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
@@ -64,5 +64,5 @@
             </div>
         </div>
     </div>
-</div>
-@endsection
+</body>
+</html>

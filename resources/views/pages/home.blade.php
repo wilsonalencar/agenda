@@ -12,6 +12,7 @@
 }
 </style>
 
+
 @if (Auth::guest())
 
     <p class="lead">Devido ao volume de estabelecimentos localizados em áreas diferentes, existe uma complexidade do controle de todas as entregas tributárias a ser efetuadas no ano fiscal.
@@ -20,41 +21,61 @@
 
 @elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor'))
 
-<div class="row">
-    <div class="col-md-2">
-        <div class="input-group spinner">
-            <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
-            <div class="input-group-btn-vertical">
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+<div class="content-top">
+    <div class="row">
+        <div class="col-md-6">
+            <h1 class="title">Dashboard</h1>
+        </div>
+        <div class="col-md-6">
+            <div class="period">
+                <div class="input-group spinner">
+                    <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
+                    <div class="input-group-btn-vertical">
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                    </div>
+                </div>
+                <span>Período:</span>
             </div>
         </div>
     </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'dashboard'
-        ]) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {!! Form::button('<i class="fa fa-tachometer"></i> Dashboard Gerencíais', array('type' => 'submit', 'id'=>'btn_dashboard', 'class' => 'btn btn-default')) !!}
-        {!! Form::close() !!}
-    </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'dashboard_analista'
-        ]) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {!! Form::button('<i class="fa fa-pie-chart"></i> Dashboard Analista', array('type' => 'submit', 'id'=>'btn_dashboard_analista', 'class' => 'btn btn-default')) !!}
-        {!! Form::close() !!}
-    </div>
-    <div class="col-md-2">
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tab-dash">
+                <span class="active">
+                    <button class="btn-default">Início</button>
+                </span>
+                <span>
+                {!! Form::open([
+                    'route' => 'dashboard'
+                ]) !!}
+                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
+                {!! Form::button(' Gerenciais', array('type' => 'submit', 'id'=>'btn_dashboard', 'class' => 'btn btn-default')) !!}
+                {!! Form::close() !!}
+                </span>
+                <span>
+                {!! Form::open([
+                    'route' => 'dashboard_analista'
+                ]) !!}
+                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
+                {!! Form::button(' Analista', array('type' => 'submit', 'id'=>'btn_dashboard_analista', 'class' => 'btn btn-default')) !!}
+                {!! Form::close() !!}
+                </span>
+            </div>
+            <span class="refresh">
             {!! Form::open([
                 'route' => 'home'
             ]) !!}
             {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-            {!! Form::button('<i class="fa fa-refresh"></i> Atualizar', array('id' => 'btn_atualiza', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
+            {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'btn_atualiza', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
             {!! Form::close() !!}
+            </span>
         </div>
+    </div>
+
 </div>
+
 
 <div id="caixas_container">
     @if (sizeof($aprovacao)>0)

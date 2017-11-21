@@ -2,16 +2,6 @@
 
 @section('content')
 
-<style>
-#caixas_container {
-    float:right; width:40%; padding-left: 120px; font-size:small
-}
-
-.caixa {
-    position: relative; overflow: hidden; height: 75px
-}
-</style>
-
 
 @if (Auth::guest())
 
@@ -73,21 +63,22 @@
             </span>
         </div>
     </div>
-
 </div>
 
 
 <div id="caixas_container">
     @if (sizeof($aprovacao)>0)
     <div class="caixa" id="limit_aprovacao">
-            <div style="float:right" class="btn-group">
-                <button type="button" id="btn_open_aprovacao" class="btn btn-danger btn-xs">Abrir</button>
-                <button type="button" id="btn_close_aprovacao" class="btn btn-danger btn-xs">Fechar</button>
-            </div>
-            <div id="aprovacao" class="alert alert-warning">
-                <b>Entregas em fase de aprovação</b>
-                <hr/>
+            <div id="aprovacao" class="">
+                <div class="header-box box-1">
+                    Entregas em fase de aprovação
+                    <div class="btn-group">
+                        <button type="button" id="btn_close_aprovacao"><i class="fa fa-chevron-up" aria-hidden="true"></i>
+</button>
+                    </div>
+                </div>
                 <div class="tree">
+                    <p class="open-box" id="btn_open_aprovacao" class="btn-xs">Visualizar</p>
                     <ul>
                         @foreach($aprovacao as $message_trib_key=>$message_trib_val)
                             <li>
@@ -117,18 +108,18 @@
             </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($vencidas)>0)
     <div class="caixa" id="limit_vencidas">
-            <div style="float:right" class="btn-group">
-                <button type="button" id="btn_open_vencidas" class="btn btn-danger btn-xs">Abrir</button>
-                <button type="button" id="btn_close_vencidas" class="btn btn-danger btn-xs">Fechar</button>
-            </div>
-            <div id="vencidas" style="background-color:black; color:white;" class="alert alert-danger">
-                <b>Entregas vencidas!</b>
-                <hr/>
+            <div id="vencidas">
+                <div class="header-box box-2">
+                    Entregas vencidas
+                    <div class="btn-group">
+                        <button type="button" id="btn_close_vencidas"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+                    </div>
+                </div>
                 <div class="tree">
+                    <p class="open-box" id="btn_open_vencidas" class="btn-xs">Visualizar</p>
                     <ul>
                         @foreach($vencidas as $message_trib_key=>$message_trib_val)
                             <li>
@@ -158,7 +149,6 @@
             </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($urgentes)>0)
     <div class="caixa" id="limit_urgentes">
@@ -198,7 +188,6 @@
         </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($messages)>0)
     <div class="caixa" id="limit_vencimento">
@@ -308,7 +297,6 @@
             </div>
         </div>
     @endif
-    <hr/>
 
     @if (sizeof($urgentes)>0)
     <div class="caixa" id="limit_urgentes">
@@ -349,7 +337,6 @@
         </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($aprovacao)>0)
     <div class="caixa" id="limit_aprovacao">
@@ -389,7 +376,7 @@
         </div>
     </div>
     @endif
-    <hr/>
+
     @if (sizeof($messages)>0)
     <div class="caixa" id="limit_vencimento">
             <div style="float:right" class="btn-group">
@@ -432,11 +419,16 @@
 @endif
 
 @if (!Auth::guest())
-<div class="row">
-    <div class="col-md-7 col-md-2-offset">
-        <div id="graph_container" style="height: 470px">dashboard</div>
+
+    <div class="grafh-content">
+        <div class="card">
+            <div class="header-grafh">
+                Status geral das entregas
+            </div>
+            <div id="graph_container" style="height: 470px">dashboard</div>
+        </div>
     </div>
-</div>
+
 <script>
 $(function () {
 //Dashboard Graph
@@ -453,7 +445,7 @@ $(function () {
                     type: 'pie'
                 },
                 title: {
-                        text: 'Status Geral das entregas'
+                        text: ''
 
                 },
                 tooltip: {
@@ -495,13 +487,23 @@ $(function () {
         $("#limit_vencidas").animate({
             height: $("#vencidas").height()
         },{{sizeof($vencidas)*10}});
+
+        $("#btn_open_vencidas").css("display", "none");
+
+        $("#btn_close_vencidas").css("display", "block");
+    
     });
 
     $("#btn_close_vencidas").click(function(){
 
         $("#limit_vencidas").animate({
-            height: 75
+            height: 94
         },100);
+
+        $("#btn_open_vencidas").css("display", "block");
+
+        $("#btn_close_vencidas").css("display", "none");
+
     });
 
     $("#btn_open_urgentes").click(function(){
@@ -523,13 +525,22 @@ $(function () {
             $("#limit_aprovacao").animate({
                 height: $("#aprovacao").height()
             },{{sizeof($aprovacao)*10}});
+
+            $("#btn_open_aprovacao").css("display", "none");
+
+             $("#btn_close_aprovacao").css("display", "block");
         });
 
     $("#btn_close_aprovacao").click(function(){
 
         $("#limit_aprovacao").animate({
-            height: 75
+            height: 94
         },100);
+
+        $("#btn_open_aprovacao").css("display", "block");
+
+        $("#btn_close_aprovacao").css("display", "none");
+
     });
 
     $("#btn_open_vencimento").click(function(){

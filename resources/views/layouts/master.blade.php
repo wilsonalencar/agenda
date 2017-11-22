@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-br">
 @include('layouts.head')
 <body>
 
 @include('layouts.nav')
 
-<main>
-    <div class="container">
+
+    <div id="content">
         @if (session('status'))
             <div class="alert alert-success">
                 {{ session('status') }}
@@ -18,9 +18,12 @@
                   padding: 0px; /* firefox bug fix */
                 }
                 .navbar-brand {
-                  position:absolute; right: 50px; top:100px;
-                  background: url("{{ URL::to('/') }}/assets/logo/logo-{{ session('seid') }}.png") center / contain no-repeat;
-                  width: 100px;
+                    position: absolute;
+                    right: 55px;
+                    top: 10px;
+                    width: 32px;
+                    height: 32px;
+                    background: url("{{ URL::to('/') }}/assets/logo/logo-{{ session('seid') }}.png") center / contain no-repeat;
                 }
             </style>
             <div class="navbar-brand"></div>
@@ -28,6 +31,5 @@
 
         @yield('content')
     </div>
-</main>
 </body>
 </html>

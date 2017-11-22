@@ -1,21 +1,21 @@
-@extends('layouts.master')
-
-@section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Login</div>
-                <div class="panel-body">
+<!doctype html>
+<html lang="pt-br">
+@include('layouts.head')
+<body>
+    <div class="background-login" style="background-image: url('{{ URL::to('/') }}/assets/img/background-login.png');">
+        <div class="logo-login">
+            <img src="{{ URL::to('/') }}/assets/img/logo-login.png">
+            <h3>Tax calendar</h3>
+        </div>
+        <div class="box-login">
+                    <h3>LOGIN</h3>
                     <form class="form-horizontal" role="form" method="POST" action="{{ url('/login') }}">
                         {!! csrf_field() !!}
 
                         <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label class="col-md-4 control-label">E-Mail</label>
-
-                            <div class="col-md-6">
-                                <input type="email" class="form-control" name="email" value="{{ old('email') }}">
-
+                            <div class="col-md-12">
+                                <p>Informe seu e-mail</p>
+                                <input type="email" class="form-control" placeholder="EMAIL" name="email" value="{{ old('email') }}">
                                 @if ($errors->has('email'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('email') }}</strong>
@@ -25,11 +25,9 @@
                         </div>
 
                         <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label class="col-md-4 control-label">Senha</label>
-
-                            <div class="col-md-6">
-                                <input type="password" class="form-control" name="password">
-
+                            <div class="col-md-12">
+                                <p>Senha</p>
+                                <input type="password" class="form-control" name="password" placeholder="SENHA">
                                 @if ($errors->has('password'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('password') }}</strong>
@@ -38,31 +36,30 @@
                             </div>
                         </div>
 
-                        
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                <button type="submit" class="button-login">
+                                     ENTRAR
+                                </button>
+                            </div>
+                        </div>
 
                         <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
+                            <div class="col-md-6">
                                 <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" name="remember"> Mantenha-me conectado
+                                    <label class="link-bottom">
+                                        <input type="checkbox" name="remember"> Lembrar-me
                                     </label>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
-                                <button type="submit" class="btn btn-default">
-                                    <i class="fa fa-btn fa-sign-in"></i> Login
-                                </button>
-
-                                <a class="btn btn-default" href="{{ url('/password/reset') }}"><i class="fa fa-btn fa-user-md"></i> Esqueci minha senha</a>
+                            <div class="col-md-6">
+                                <label class="link-bottom text-right">
+                                    <a  href="{{ url('/password/reset') }}">Esqueceu sua senha?</a>
+                                <label>
                             </div>
                         </div>
                     </form>
-                </div>
-            </div>
         </div>
     </div>
-</div>
-@endsection
+</body>
+</html>

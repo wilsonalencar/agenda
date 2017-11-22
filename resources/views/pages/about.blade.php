@@ -41,9 +41,4 @@
     </div>
 </div>
 
-<hr/>
-<div style="text-align: center">
-    <img style="height:40px" src="{{ URL::to('/') }}/assets/img/bravo.png" />
-    <div style="font-size: small; font-weight: bold">Agenda Fiscal Versão 2.0 - COPYRIGHT © 2016 - Developed by Eng.F.Sbaratta, powered by AZURE</div>
-</div>
 @stop

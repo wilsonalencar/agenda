@@ -2,15 +2,6 @@
 
 @section('content')
 
-<style>
-#caixas_container {
-    float:right; width:40%; padding-left: 120px; font-size:small
-}
-
-.caixa {
-    position: relative; overflow: hidden; height: 75px
-}
-</style>
 
 @if (Auth::guest())
 
@@ -20,53 +11,74 @@
 
 @elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor'))
 
-<div class="row">
-    <div class="col-md-2">
-        <div class="input-group spinner">
-            <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
-            <div class="input-group-btn-vertical">
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+<div class="content-top">
+    <div class="row">
+        <div class="col-md-6">
+            <h1 class="title">Dashboard</h1>
+        </div>
+        <div class="col-md-6">
+            <div class="period">
+                <div class="input-group spinner">
+                    <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
+                    <div class="input-group-btn-vertical">
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                    </div>
+                </div>
+                <span>Período:</span>
             </div>
         </div>
     </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'dashboard'
-        ]) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {!! Form::button('<i class="fa fa-tachometer"></i> Dashboard Gerencíais', array('type' => 'submit', 'id'=>'btn_dashboard', 'class' => 'btn btn-default')) !!}
-        {!! Form::close() !!}
-    </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'dashboard_analista'
-        ]) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {!! Form::button('<i class="fa fa-pie-chart"></i> Dashboard Analista', array('type' => 'submit', 'id'=>'btn_dashboard_analista', 'class' => 'btn btn-default')) !!}
-        {!! Form::close() !!}
-    </div>
-    <div class="col-md-2">
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tab-dash">
+                <span class="active">
+                    <button class="btn-default">Início</button>
+                </span>
+                <span>
+                {!! Form::open([
+                    'route' => 'dashboard'
+                ]) !!}
+                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
+                {!! Form::button(' Gerenciais', array('type' => 'submit', 'id'=>'btn_dashboard', 'class' => 'btn btn-default')) !!}
+                {!! Form::close() !!}
+                </span>
+                <span>
+                {!! Form::open([
+                    'route' => 'dashboard_analista'
+                ]) !!}
+                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
+                {!! Form::button(' Analista', array('type' => 'submit', 'id'=>'btn_dashboard_analista', 'class' => 'btn btn-default')) !!}
+                {!! Form::close() !!}
+                </span>
+            </div>
+            <span class="refresh">
             {!! Form::open([
                 'route' => 'home'
             ]) !!}
             {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-            {!! Form::button('<i class="fa fa-refresh"></i> Atualizar', array('id' => 'btn_atualiza', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
+            {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'btn_atualiza', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
             {!! Form::close() !!}
+            </span>
         </div>
+    </div>
 </div>
+
 
 <div id="caixas_container">
     @if (sizeof($aprovacao)>0)
     <div class="caixa" id="limit_aprovacao">
-            <div style="float:right" class="btn-group">
-                <button type="button" id="btn_open_aprovacao" class="btn btn-danger btn-xs">Abrir</button>
-                <button type="button" id="btn_close_aprovacao" class="btn btn-danger btn-xs">Fechar</button>
-            </div>
-            <div id="aprovacao" class="alert alert-warning">
-                <b>Entregas em fase de aprovação</b>
-                <hr/>
+            <div id="aprovacao" class="">
+                <div class="header-box box-1">
+                    Entregas em fase de aprovação
+                    <div class="btn-group">
+                        <button type="button" id="btn_close_aprovacao"><i class="fa fa-chevron-up" aria-hidden="true"></i>
+</button>
+                    </div>
+                </div>
                 <div class="tree">
+                    <p class="open-box" id="btn_open_aprovacao" class="btn-xs">Visualizar</p>
                     <ul>
                         @foreach($aprovacao as $message_trib_key=>$message_trib_val)
                             <li>
@@ -96,18 +108,18 @@
             </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($vencidas)>0)
     <div class="caixa" id="limit_vencidas">
-            <div style="float:right" class="btn-group">
-                <button type="button" id="btn_open_vencidas" class="btn btn-danger btn-xs">Abrir</button>
-                <button type="button" id="btn_close_vencidas" class="btn btn-danger btn-xs">Fechar</button>
-            </div>
-            <div id="vencidas" style="background-color:black; color:white;" class="alert alert-danger">
-                <b>Entregas vencidas!</b>
-                <hr/>
+            <div id="vencidas">
+                <div class="header-box box-2">
+                    Entregas vencidas
+                    <div class="btn-group">
+                        <button type="button" id="btn_close_vencidas"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+                    </div>
+                </div>
                 <div class="tree">
+                    <p class="open-box" id="btn_open_vencidas" class="btn-xs">Visualizar</p>
                     <ul>
                         @foreach($vencidas as $message_trib_key=>$message_trib_val)
                             <li>
@@ -137,7 +149,6 @@
             </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($urgentes)>0)
     <div class="caixa" id="limit_urgentes">
@@ -177,7 +188,6 @@
         </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($messages)>0)
     <div class="caixa" id="limit_vencimento">
@@ -287,7 +297,6 @@
             </div>
         </div>
     @endif
-    <hr/>
 
     @if (sizeof($urgentes)>0)
     <div class="caixa" id="limit_urgentes">
@@ -328,7 +337,6 @@
         </div>
     </div>
     @endif
-    <hr/>
 
     @if (sizeof($aprovacao)>0)
     <div class="caixa" id="limit_aprovacao">
@@ -368,7 +376,7 @@
         </div>
     </div>
     @endif
-    <hr/>
+
     @if (sizeof($messages)>0)
     <div class="caixa" id="limit_vencimento">
             <div style="float:right" class="btn-group">
@@ -411,11 +419,16 @@
 @endif
 
 @if (!Auth::guest())
-<div class="row">
-    <div class="col-md-7 col-md-2-offset">
-        <div id="graph_container" style="height: 470px">dashboard</div>
+
+    <div class="grafh-content">
+        <div class="card">
+            <div class="header-grafh">
+                Status geral das entregas
+            </div>
+            <div id="graph_container" style="height: 470px">dashboard</div>
+        </div>
     </div>
-</div>
+
 <script>
 $(function () {
 //Dashboard Graph
@@ -432,7 +445,7 @@ $(function () {
                     type: 'pie'
                 },
                 title: {
-                        text: 'Status Geral das entregas'
+                        text: ''
 
                 },
                 tooltip: {
@@ -474,13 +487,23 @@ $(function () {
         $("#limit_vencidas").animate({
             height: $("#vencidas").height()
         },{{sizeof($vencidas)*10}});
+
+        $("#btn_open_vencidas").css("display", "none");
+
+        $("#btn_close_vencidas").css("display", "block");
+    
     });
 
     $("#btn_close_vencidas").click(function(){
 
         $("#limit_vencidas").animate({
-            height: 75
+            height: 94
         },100);
+
+        $("#btn_open_vencidas").css("display", "block");
+
+        $("#btn_close_vencidas").css("display", "none");
+
     });
 
     $("#btn_open_urgentes").click(function(){
@@ -502,13 +525,22 @@ $(function () {
             $("#limit_aprovacao").animate({
                 height: $("#aprovacao").height()
             },{{sizeof($aprovacao)*10}});
+
+            $("#btn_open_aprovacao").css("display", "none");
+
+             $("#btn_close_aprovacao").css("display", "block");
         });
 
     $("#btn_close_aprovacao").click(function(){
 
         $("#limit_aprovacao").animate({
-            height: 75
+            height: 94
         },100);
+
+        $("#btn_open_aprovacao").css("display", "block");
+
+        $("#btn_close_aprovacao").css("display", "none");
+
     });
 
     $("#btn_open_vencimento").click(function(){

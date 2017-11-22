@@ -1,17 +1,28 @@
 @extends('...layouts.master')
 
 @section('content')
-<form action="home" method="get">
-<h1>Selecionar Empresa</h1>
-<p class="lead"> 
-   <div class="form-group">
-    <div style="width:50%">
-    {!! Form::label('multiple_select_tributos[]', 'Empresas', ['class' => 'control-label'] )  !!} <br>
-    {!!  Form::select('empresa_selecionada', $empresas, array(), []) !!}
+<div class="content-top">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="title">Início </h1><span class="current-page">/ Selecionar empresa</span>
+        </div>
     </div>
-    {!! Form::submit('Selecionar Empresa', ['class' => 'btn btn-default']) !!}
 </div>
-</p>
+<form action="home" method="get">
+<div class="main">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="sub-title">{!! Form::label('multiple_select_tributos[]', 'Selecionar empresa', ['class' => 'control-label'] )  !!}</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10">
+            {!!  Form::select('empresa_selecionada', $empresas, array(), ['class' => 'form-control']) !!}
+        </div>
+        <div class="col-md-2">
+            {!! Form::submit('Selecionar', ['class' => 'btn btn-success-block']) !!}
+        </div>
+    </div>
+</div>
 </form>
-<hr>
 @stop

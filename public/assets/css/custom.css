@@ -661,6 +661,7 @@ a:-webkit-any-link{
     min-width: 270px;
     max-width: 270px;
     transition: all 0.3s;
+    overflow-x: auto;
 }
 
 #content {
@@ -741,6 +742,7 @@ a:-webkit-any-link{
     padding: 20px;
     padding-bottom: 0px;
     margin-bottom: 20px;
+    min-height: 70px;
 }
 
 .content-top .title {
@@ -749,6 +751,12 @@ a:-webkit-any-link{
     font-size: 18px;
     font-weight: 600;
     color: #444;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.current-page {
+    font-size: 14px;
 }
 
 .content-top .period .spinner {
@@ -1057,4 +1065,54 @@ a:-webkit-any-link{
 .box-login .form-control:-moz-placeholder { 
   font-weight: 500;
   font-size: 12px;
+}
+
+.main {
+    background: #fff;
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(209, 209, 209, 0.55);
+}
+
+.main .sub-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 2px;
+    margin-bottom: 20px;
+    margin-right: -20px;
+    margin-left: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.main .sub-title label {
+    font-weight: 500;
+}
+
+.btn-success-block {
+    color: #fff;
+    background-color: #00b955;
+    display: block;
+    border-color: #00b955;
+    width: 100%;
+    border-radius: 3px;
+    font-family: 'Roboto';
+    text-transform: uppercase;
+    min-height: 38px;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.btn-success-block:hover {
+    color: #fff;
+} 
+
+.main .form-control {
+    margin-bottom: 5px;
+}
+
+.form-control {
+    height: 38px;
 }

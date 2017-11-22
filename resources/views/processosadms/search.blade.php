@@ -214,6 +214,7 @@ $(function() {
                 url = url.replace(':id_show', data);
                 return url;
             }},
+            {data: 'observacoesGroupConcat', name: 'observacoesGroupConcat'},
         ],
         "columnDefs": [
             { "width": "1%", "targets": 0 },
@@ -225,7 +226,8 @@ $(function() {
             { "width": "1%", "targets": 6 },
             { "width": "1%", "targets": 7 },
             { "width": "1%", "targets": 8 },
-            { "width": "20%", "targets": 9 }
+            { "width": "20%", "targets": 9 },
+            { "width": "12%", "targets": 10, "visible":false, "title": "Observações"},
         ],
         language: {
             //"searchPlaceholder": "ID, P.A. ou descrição",
@@ -237,14 +239,14 @@ $(function() {
              {
                 extend: 'excelHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10]
                 }
              },
             
              {
                 extend: 'csvHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10]
                 }
              },
 

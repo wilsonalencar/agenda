@@ -240,14 +240,16 @@ class ProcessosadmsController extends Controller
     }
 
     public function anyData(Request $request)
-    {
-        $processosadms = Processosadm::select(
-                '*'
+    {   
+        $processosadms = Processosadm::from('processosadms as A')->select(
+                '*',
+                DB::raw('(select GROUP_CONCAT("Observação: ", descricao SEPARATOR " - ") FROM observacaoprocadms where processoadm_id = A.id) as observacoesGroupConcat')
             )
             ->with('estabelecimentos')
             ->with('estabelecimentos.municipio')
             ->with('statusprocadm')
-            ->with('respfinanceiro');
+            ->with('respfinanceiro')
+            ->with('observacoes');
 
         if ($filter_cnpj = $request->get('cnpj')){
             $cnpj = preg_replace("/[^0-9]/","",$filter_cnpj);
@@ -278,13 +280,13 @@ class ProcessosadmsController extends Controller
         foreach($estabelecimentos as $row) {
             $array[] = $row->id;
         }
-
+        /*
         $processosadms = $processosadms->whereIn('estabelecimento_id', $array);
-
+        */
         if ( isset($request['search']) && $request['search']['value'] != '' ) {
             $str_filter = $request['search']['value'];
         }
-
+        
         return Datatables::of($processosadms)->make(true);
     }
 

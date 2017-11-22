@@ -209,7 +209,8 @@ class MovtocontacorrentesController extends Controller
 	    $movtocontacorrentes = Movtocontacorrente::select(
                 '*', 
                 DB::raw('(CASE WHEN vlr_guia = vlr_gia AND vlr_gia = vlr_sped AND (dipam = "N" OR (vlr_dipam = vlr_guia AND vlr_gia = vlr_dipam AND vlr_sped = vlr_dipam)) THEN 1 ELSE 0 END) as diferenca'),
-                DB::raw('(CASE WHEN dipam = "S" THEN vlr_dipam ELSE "S/M" END) as dipam')
+                DB::raw('(CASE WHEN dipam = "S" THEN vlr_dipam ELSE "S/M" END) as dipam'),
+                DB::raw('substring(observacao, 1, 5) as observacaoSubstr')
             )
             ->with('estabelecimentos')->with('estabelecimentos.municipio');
 
@@ -248,7 +249,7 @@ class MovtocontacorrentesController extends Controller
         if ( isset($request['search']) && $request['search']['value'] != '' ) {
             $str_filter = $request['search']['value'];
         }
-
+        
         return Datatables::of($movtocontacorrentes)->make(true);
     }
 

@@ -64,6 +64,7 @@ class PagesController extends Controller
                 }
 
                 $request->session()->put('seid', $key);
+                return redirect('home');
 
             }
             
@@ -105,9 +106,9 @@ class PagesController extends Controller
             }
             //ADMIN / OWNER
             else if ($user->hasRole('admin') || $user->hasRole('owner')) {
-                $graph['status_1'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
-                $graph['status_2'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
-                $graph['status_3'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+                $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+                $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+                $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
 
                 //var_dump($retval['em_aprovacao']);
 
@@ -124,9 +125,9 @@ class PagesController extends Controller
                 //$with_user = function ($query) {
                 //    $query->where('user_id', Auth::user()->id);
                 //};
-                $graph['status_1'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
-                $graph['status_2'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
-                $graph['status_3'] = Atividade::where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+                $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+                $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+                $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
                 //whereHas('users', $with_user)
 
                 return view('pages.home')->withMessages($retval['ordinarias'])
@@ -500,6 +501,7 @@ class PagesController extends Controller
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
                 ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
                 ->where('status','=',2)
+                ->where('emp_id', $this->s_emp->id)
                 ->orderBy('limite')
                 ->with('regra')->with('regra.tributo')->with('estemp')->get();
 
@@ -508,6 +510,7 @@ class PagesController extends Controller
                 ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
                 ->where('limite', '<', $today)
                 ->where('status','=',1)
+                ->where('emp_id', $this->s_emp->id)
                 ->orderBy('limite')
                 ->with('regra')->with('regra.tributo')->with('estemp')->get();
 
@@ -528,6 +531,7 @@ class PagesController extends Controller
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
                 ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
                 ->where('status','=',2)
+                ->where('emp_id', $this->s_emp->id)
                 ->orderBy('limite')
                 ->with('regra')->with('regra.tributo')->with('estemp')->get();
 
@@ -536,6 +540,7 @@ class PagesController extends Controller
                 ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
                 ->where('inicio_aviso', '<', $today)
                 ->where('limite', '>', $nextWeek)
+                ->where('emp_id', $this->s_emp->id)
                 ->where('status',1)
                 ->orderBy('limite')
                 ->with('regra')->with('regra.tributo')->with('estemp')->get();
@@ -545,6 +550,7 @@ class PagesController extends Controller
                 ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
                 ->where('limite', '<', $nextWeek)
                 ->where('limite', '>=', $today)
+                ->where('emp_id', $this->s_emp->id)
                 ->where('status',1)
                 ->orderBy('limite')
                 ->with('regra')->with('regra.tributo')->with('estemp')->get();
@@ -553,6 +559,7 @@ class PagesController extends Controller
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
                 ->join('tributos', 'regras.tributo_id', '=', 'tributos.id')
                 ->where('limite', '<', $today)
+                ->where('emp_id', $this->s_emp->id)
                 ->where('status',1)
                 ->orderBy('limite')
                 ->with('regra')->with('regra.tributo')->with('estemp')->get();

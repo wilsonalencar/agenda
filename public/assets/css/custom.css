@@ -615,7 +615,7 @@ a:-webkit-any-link{
 }
 
 .top-header {
-    background: #c51b1b;
+    background: #000;
     height: 55px;
 }
 
@@ -911,12 +911,12 @@ a:-webkit-any-link{
 }
 
 .box-1 {
-    background: #00bee0;
+    background: #f7e513;
     color: #fff;
 }
 
 .box-2 {
-    background: #ff885f;
+    background: #e02525;
     color: #fff;
 }
 

@@ -469,7 +469,8 @@ $(function () {
                     colorByPoint: true,
                     data: [{
                         name: 'Não efetuada',
-                        y: tot_status_1
+                        y: tot_status_1, 
+                        color: '#5268ff'
                     }, {
                         name: 'Em aprovação',
                         y: tot_status_2,

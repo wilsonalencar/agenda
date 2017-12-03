@@ -155,7 +155,7 @@ class PagesController extends Controller
             Session::forget('vcp');
             Session::forget('vco');
             Session::forget('seid');
-            return view('pages.home');
+            return Redirect::to('login');
         }
 
     }

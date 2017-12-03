@@ -41,6 +41,11 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@home'
     ]);
 
+    Route::get('/graficos', [
+        'as' => 'graficos',
+        'uses' => 'PagesController@graficos'
+    ]);
+
     Route::post('atualizarsenha', array('as'=>'atualizarsenha', 'uses'=>'UsuariosController@atualizarsenha'));
 
 });
@@ -156,6 +161,7 @@ Route::group(['middleware' => ['web','auth','role:user|analyst|supervisor|manage
 Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|admin|owner']], function () {
 
     Route::post('home', array('as'=>'home', 'uses'=>'PagesController@home'));
+    Route::post('graficos', array('as'=>'graficos', 'uses'=>'PagesController@graficos'));
     Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
     Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
 

@@ -154,6 +154,7 @@
                         </li>
                     @endif
                 <li><a href="{{ route('home', 'selecionar_empresa', '1') }}"><i class="fa fa-building-o" aria-hidden="true"></i> Selecionar empresa</a></li>
+                <li><a href="{{ route('graficos') }}"><i class="fa fa-building-o" aria-hidden="true"></i>Gráficos</a></li>
                 @endif 
             </ul>
         </div><!-- /.navbar-collapse -->

@@ -32,6 +32,13 @@ class PagesController extends Controller
 
     public function home (Request $request = null)
     {
+        $iframe = false;
+        $layoutgraficos = '';
+        if (!empty($_GET['layout'])) {
+            $iframe = true;
+            $layoutgraficos = 'graficos';
+            $this->s_emp->id = $_GET['emp_id'];
+        }
 
         Carbon::setTestNow();  //reset
         $today = Carbon::today()->toDateString();
@@ -113,13 +120,14 @@ class PagesController extends Controller
 
                 //var_dump($retval['em_aprovacao']);
 
-                return view('pages.home')->withMessages($retval['ordinarias'])
+                return view('pages.home'.$layoutgraficos)->withMessages($retval['ordinarias'])
                     ->withVencidas($retval['vencidas'])
                     ->withUrgentes($retval['urgentes'])
                     ->withAprovacao($retval['em_aprovacao'])
                     ->withGraph($graph)
                     ->withPeriodo($periodo_apuracao)
-                    ->withCron($cron);
+                    ->withCron($cron)
+                    ->with('iframe', $iframe);
             }
             //ANALYST/SUPERVISOR/USER
             else {
@@ -131,13 +139,14 @@ class PagesController extends Controller
                 $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
                 //whereHas('users', $with_user)
 
-                return view('pages.home')->withMessages($retval['ordinarias'])
+                return view('pages.home'.$layoutgraficos)->withMessages($retval['ordinarias'])
                     ->withVencidas($retval['vencidas'])
                     ->withUrgentes($retval['urgentes'])
                     ->withAprovacao($retval['em_aprovacao'])
                     ->withGraph($graph)
                     ->withPeriodo($periodo_apuracao)
-                    ->withCron($cron);
+                    ->withCron($cron)
+                    ->with('iframe', $iframe);
             }
 
         } else {
@@ -182,7 +191,47 @@ class PagesController extends Controller
         return view('pages.upload');
     }
 
+
+    public function graficos(Request $request)
+    {   
+        $empresasSelecionadas = array();
+        $empresasSelected     = array();
+        $user = User::findOrFail(Auth::user()->id);
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $empresasArray = array();
+        foreach($empresas as $key => $empresa) {
+            $s = DB::select("Select COUNT(1) as ct FROM empresa_user where user_id = ".Auth::user()->id." AND empresa_id = ". $key . "");
+            if ((boolean)$s[0]->ct) {
+                $empresasArray[$key] = $empresa;
+            }
+        }
+        
+        $input = $request->all();
+        if (!empty($input['multiple_select_empresas'][0])) {
+
+            foreach($input['multiple_select_empresas'] as $company)
+            {
+                $empresasSelecionadas[]['dashboard'] = $company;
+                $empresasSelecionadas[]['gerencial'] = $company;
+                $empresasSelected = $input['multiple_select_empresas'];  
+            }
+        }
+
+        return view('pages.graficos')
+        ->with('empresas', $empresasArray)
+        ->with('empresas_selecionadas', $empresasSelecionadas)
+        ->with('empresas_selected', $empresasSelected);
+    }
+
     public function dashboard(Request $request) {
+
+        $iframe = false;
+        $layoutgraficos = '';
+        if (!empty($_GET['layout'])) {
+            $iframe = true;
+            $layoutgraficos = 'graficos';
+            $this->s_emp->id = $_GET['emp_id'];
+        }
 
         if ($request->has('switch_periodo')) {
             $switch = Input::get('switch_periodo');
@@ -311,7 +360,7 @@ class PagesController extends Controller
                 $array[$key]['count']=$count;
             }
 
-            return view('pages.dashboard')->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check);
+            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check);
         }
     }
 

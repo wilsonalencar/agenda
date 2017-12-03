@@ -8,7 +8,7 @@
     <div>
         <div class="card">
             <div class="header-grafh">
-                Status geral das entregas
+                Status geral das entregas - {{$nome_empresa}}
             </div>
             <div id="graph_container" style="height: 50%">dashboard</div>
         </div>

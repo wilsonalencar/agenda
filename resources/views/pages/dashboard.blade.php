@@ -111,7 +111,10 @@
     }
 
 
-
+    $divisao = 0;
+    if ($tot_entregas_periodo > 0) {
+        $divisao = round(($tot_entregas_efetuadas*100)/$tot_entregas_periodo,2);
+    }
 ?>
 var graph_categories = [<?= "'" . implode("','", array_keys($graph)) . "'" ?>];
 var graph_data = [[{{implode(',',$array_nentregue)}}],[{{implode(',',$array_aprovacao)}}],[{{implode(',',$array_entregue)}}],[{{implode(',',$array_nentregue_vencidas)}}],[{{implode(',',$array_aprovacao_vencidas)}}],[{{implode(',',$array_entregue_vencidas)}}]];
@@ -300,7 +303,7 @@ $(function () {
 
             series: [{
                 name: 'Entregue: ',
-                data: [{{round(($tot_entregas_efetuadas*100)/$tot_entregas_periodo,2)}}],
+                data: [{{$divisao}}],
                 tooltip: {
                     valueSuffix: ' %'
                 }

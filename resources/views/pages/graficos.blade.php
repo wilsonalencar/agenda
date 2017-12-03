@@ -56,17 +56,17 @@
     chamadas++;
     setTimeout(function() {
         AjaxFunctionGrafico(key, array)
-    }, chamadas*10000);
+    }, chamadas*60000);
   }
 
   function AjaxFunctionGrafico(key, array)
   {
      if (typeof array.dashboard != 'undefined') {
         var iframe = document.getElementById('frameGrafico');
-        iframe.src = 'http://localhost/home?layout=graficos&emp_id='+array.dashboard;
+        iframe.src = 'home?layout=graficos&emp_id='+array.dashboard;
      } else {
         var iframe = document.getElementById('frameGrafico');
-        iframe.src = 'http://localhost/dashboard?layout=graficos&emp_id='+array.gerencial;
+        iframe.src = 'dashboard?layout=graficos&emp_id='+array.gerencial;
      }
   }
 

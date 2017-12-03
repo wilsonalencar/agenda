@@ -59,9 +59,7 @@
     $divisao = 0;
     if ($tot_entregas_periodo > 0) {
         $divisao = round(($tot_entregas_efetuadas*100)/$tot_entregas_periodo,2);
-    }
-
-    
+    }    
 
 ?>
 var graph_categories = [<?= "'" . implode("','", array_keys($graph)) . "'" ?>];
@@ -80,7 +78,7 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Status geral das entregas mensais'
+            text: 'Status geral das entregas - {{$nome_empresa}}' 
         },
         xAxis: {
             categories: graph_categories

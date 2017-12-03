@@ -34,10 +34,13 @@ class PagesController extends Controller
     {
         $iframe = false;
         $layoutgraficos = '';
+        $nomeEmpresa = '';
         if (!empty($_GET['layout'])) {
             $iframe = true;
             $layoutgraficos = 'graficos';
             $this->s_emp->id = $_GET['emp_id'];
+            $empresa = Empresa::findOrFail($_GET['emp_id']);
+            $nomeEmpresa = $empresa->razao_social;
         }
 
         Carbon::setTestNow();  //reset
@@ -127,7 +130,8 @@ class PagesController extends Controller
                     ->withGraph($graph)
                     ->withPeriodo($periodo_apuracao)
                     ->withCron($cron)
-                    ->with('iframe', $iframe);
+                    ->with('iframe', $iframe)
+                    ->with('nome_empresa', $nomeEmpresa);
             }
             //ANALYST/SUPERVISOR/USER
             else {
@@ -146,7 +150,8 @@ class PagesController extends Controller
                     ->withGraph($graph)
                     ->withPeriodo($periodo_apuracao)
                     ->withCron($cron)
-                    ->with('iframe', $iframe);
+                    ->with('iframe', $iframe)
+                    ->with('nome_empresa', $nomeEmpresa);
             }
 
         } else {
@@ -227,10 +232,14 @@ class PagesController extends Controller
 
         $iframe = false;
         $layoutgraficos = '';
+        $nomeEmpresa = '';
+
         if (!empty($_GET['layout'])) {
             $iframe = true;
             $layoutgraficos = 'graficos';
             $this->s_emp->id = $_GET['emp_id'];
+            $empresa = Empresa::findOrFail($_GET['emp_id']);
+            $nomeEmpresa = $empresa->razao_social;
         }
 
         if ($request->has('switch_periodo')) {
@@ -360,7 +369,7 @@ class PagesController extends Controller
                 $array[$key]['count']=$count;
             }
 
-            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check);
+            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check)->with('nome_empresa', $nomeEmpresa);
         }
     }
 

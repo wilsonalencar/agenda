@@ -206,8 +206,10 @@ class MovtocontacorrentesController extends Controller
 
     public function anyData(Request $request)
     {
-	    $movtocontacorrentes = Movtocontacorrente::select(
-                '*', 
+	    $movtocontacorrentes = Movtocontacorrente::join('estabelecimentos', 'movtocontacorrentes.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->select(
+                '*',
+                'estabelecimentos.*',
+                'municipios.*', 
                 DB::raw('(CASE WHEN vlr_guia = vlr_gia AND vlr_gia = vlr_sped AND (dipam = "N" OR (vlr_dipam = vlr_guia AND vlr_gia = vlr_dipam AND vlr_sped = vlr_dipam)) THEN 1 ELSE 0 END) as diferenca'),
                 DB::raw('(CASE WHEN dipam = "S" THEN vlr_dipam ELSE "S/M" END) as dipam'),
                 DB::raw('substring(observacao, 1, 5) as observacaoSubstr')

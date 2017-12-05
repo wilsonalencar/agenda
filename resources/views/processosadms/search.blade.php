@@ -206,7 +206,7 @@ $(function() {
             {data: 'resp_acompanhamento', name: 'resp_acompanhamento'},
             {data: 'statusprocadm.descricao', name: 'statusprocadm.descricao'},
             
-            {data: 'id', name:'edit', searchable: false, orderable: false, render: function (data) {
+            {data: 'IdProcessosAdms', name:'edit', searchable: false, orderable: false, render: function (data) {
                 var url = '<a href="javascript:void(0);" onclick="getObservacoes('+data+')" class="btn btn-default btn-sm">Detalhes</a>';
                 url += '<a href="{{ route('processosadms.edit', ':id_edit') }}" class="btn btn-default btn-sm">Editar</a>';
                 url += '<a href="{{ route('processosadms.delete', ':id_show') }}" style="margin-left:10px" class="btn btn-default btn-sm">X</a>';

@@ -213,7 +213,7 @@ $(function() {
                    return data;
                }
             },
-            {data: 'id', name:'edit', searchable: false, orderable: false, render: function (data) {
+            {data: 'IdMovtoContaCorrente', name:'edit', searchable: false, orderable: false, render: function (data) {
 
                 var url = '<a href="{{ route('movtocontacorrentes.edit', ':id_edit') }}" class="btn btn-default btn-sm">Editar</a>';
                 url += '<a href="{{ route('movtocontacorrentes.delete', ':id_show') }}" style="margin-left:10px" class="btn btn-default btn-sm">X</a>';

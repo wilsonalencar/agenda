@@ -214,8 +214,8 @@ $(function() {
                 url = url.replace(':id_show', data);
                 return url;
             }},
-            {data: 'estabelecimentos.codigo', name: 'estabelecimentos.codigo'},
-            {data: 'observacoesGroupConcat', name: 'observacoesGroupConcat'},
+            {data: 'estabelecimentos.codigo', name: 'estabelecimentos.codigo', searchable: false},
+            {data: 'observacoesGroupConcat', name: 'observacoesGroupConcat', searchable: false},
         ],
         "columnDefs": [
             { "width": "1%", "targets": 0 },

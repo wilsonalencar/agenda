@@ -31,10 +31,6 @@
                     @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
                         <li><a href="{{ route('about') }}"><i class="fa fa-dot-circle-o" aria-hidden="true"></i>Cockpit Calendar</a></li>
                     @endif
-                        @if ( Auth::user()->hasRole('user') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor'))
-                            <li><a href="{{ route('calendario') }}"><i class="fa fa-btn fa-calendar"></i> Calendário</a></li>
-                        @endif
-
 
                         @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
                             <li class="panel panel-default" id="dropdown">
@@ -66,7 +62,7 @@
                                                     </div>
                                                     </div>
                                                 </li>
-                                                
+                                                <li><a href="{{ route('calendario') }}"><i class="fa fa-btn fa-calendar"></i> Calendário</a></li>
                                                 @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
                                                 <li class="panel panel-default" id="dropdown">
                                                     <a data-toggle="collapse" href="#integracoes"><i class="fa fa-exchange" aria-hidden="true"></i> Integrações</a>

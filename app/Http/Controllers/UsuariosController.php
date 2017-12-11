@@ -228,6 +228,8 @@ class UsuariosController extends Controller
         $isAnalyst = $user->hasRole('analyst');
         $isMsaf = $user->hasRole('msaf');
         $isUser = $user->hasRole('user');
+        $isGBravo = $user->hasRole('gbravo');
+        $isCliente = $user->hasRole('gcliente');
 
         $owner_role = Role::where('name', '=', 'owner')->first();
         $admin_role = Role::where('name', '=', 'admin')->first();
@@ -236,6 +238,8 @@ class UsuariosController extends Controller
         $analyst_role = Role::where('name', '=', 'analyst')->first();
         $msaf_role = Role::where('name', '=', 'msaf')->first();
         $user_role = Role::where('name', '=', 'user')->first();
+        $gbravo_role = Role::where('name', '=', 'gbravo')->first();
+        $gcliente_role = Role::where('name', '=', 'gcliente')->first();
 
         if ($isOwner) {
             return redirect()->back()->with('status', 'O usuário já possue o máximo nivel alcançável!');
@@ -257,8 +261,14 @@ class UsuariosController extends Controller
         } else if ($isUser) {
             $user->attachRole($msaf_role);
             $user->detachRole($user_role);
-        } else {
+        } else if($isGBravo){
             $user->attachRole($user_role);
+            $user->detachRole($gbravo_role);
+        }else if($isCliente){
+            $user->attachRole($gbravo_role);
+            $user->detachRole($gcliente_role);
+        }else {
+            $user->attachRole($gcliente_role);
         }
 
         return redirect()->back()->with('status', 'O nivel de acesso do usuário foi incrementado!');
@@ -275,6 +285,8 @@ class UsuariosController extends Controller
         $isAnalyst = $user->hasRole('analyst');
         $isMsaf = $user->hasRole('msaf');
         $isUser = $user->hasRole('user');
+        $isGBravo = $user->hasRole('gbravo');
+        $isCliente = $user->hasRole('gcliente');
 
         $owner_role = Role::where('name', '=', 'owner')->first();
         $admin_role = Role::where('name', '=', 'admin')->first();
@@ -283,6 +295,8 @@ class UsuariosController extends Controller
         $analyst_role = Role::where('name', '=', 'analyst')->first();
         $msaf_role = Role::where('name', '=', 'msaf')->first();
         $user_role = Role::where('name', '=', 'user')->first();
+        $gbravo_role = Role::where('name', '=', 'gbravo')->first();
+        $gcliente_role = Role::where('name', '=', 'gcliente')->first();
 
         if ($isOwner) {
             $user->attachRole($admin_role);
@@ -303,7 +317,13 @@ class UsuariosController extends Controller
             $user->attachRole($user_role);
             $user->detachRole($msaf_role);
         } else if ($isUser) {
+            $user->attachRole($gbravo_role);
             $user->detachRole($user_role);
+        } else if ($isGBravo){
+            $user->attachRole($gcliente_role);
+            $user->detachRole($gbravo_role);    
+        }else if ($isCliente){
+            $user->detachRole($gcliente_role);  
         } else {
             return redirect()->back()->with('status', 'O usuário não possue credenciais de acesso!');
         }

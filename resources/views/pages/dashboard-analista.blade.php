@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('content')
-<h2>Dashboard Analista</h2>
+<h2>Entregas por UF e Municípios</h2>
 <hr>
 {!! Form::open([
     'route' => 'dashboard_analista'

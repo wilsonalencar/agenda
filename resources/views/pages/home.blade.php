@@ -14,7 +14,7 @@
 <div class="content-top">
     <div class="row">
         <div class="col-md-6">
-            <h1 class="title">Dashboard</h1>
+            <h1 class="title">Entregas Gerais</h1>
         </div>
         <div class="col-md-6">
             <div class="period">

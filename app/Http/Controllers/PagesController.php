@@ -75,8 +75,7 @@ class PagesController extends Controller
                 }
 
                 $request->session()->put('seid', $key);
-                return redirect('home');
-
+                return view('pages.home_ini');
             }
             
             if (!session()->get('seid') || isset($_GET['selecionar_empresa'])) {
@@ -116,7 +115,7 @@ class PagesController extends Controller
                 return redirect('dashboard');
             }
             //ADMIN / OWNER
-            else if ($user->hasRole('admin') || $user->hasRole('owner')) {
+            else if ($user->hasRole('admin') || $user->hasRole('owner') || $user->hasRole('gbravo')) {
                 $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
                 $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
                 $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
@@ -270,7 +269,7 @@ class PagesController extends Controller
             $periodo_apuracao = $last_month->format('mY');
         }
 
-        if ($user->hasRole('supervisor') || $user->hasRole('analyst') || $user->hasRole('manager') || $user->hasRole('admin') || $user->hasRole('owner')) {
+        if ($user->hasRole('supervisor') || $user->hasRole('gbravo') || $user->hasRole('analyst') || $user->hasRole('manager') || $user->hasRole('admin') || $user->hasRole('owner')) {
 
             $tipo_condition = "";
             $tipo_check = array(true,false,false);

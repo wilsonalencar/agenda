@@ -2,7 +2,7 @@
 
 @section('content')
 
-@if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor'))
+@if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo'))
 
 <div style="float:right; width:50%" class="flash-message">
   @foreach (['danger', 'warning', 'success', 'info'] as $msg)
@@ -25,13 +25,10 @@
         <div title="P.A. (Periodo Apuração) / D.E. (Data Entrega do mês subsequente)" style="height:28px" class="col-lg-4">
         <input type="checkbox" name="pa-checkbox" <?= $switch==1?'checked':'' ?> ></div>
     </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'dashboard_analista'
-        ]) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {{Form::button('<i class="fa fa-pie-chart"></i> Dashboard Analista', array('type' => 'submit', 'id'=>'btn_dashboard_analista', 'class' => 'btn btn-default'))}}
-        {!! Form::close() !!}
+    <div class="col-md-4">
+        
+        <h3>Entregas por Obrigação</h1>
+        
     </div>
     <div class="col-md-2">
         {!! Form::open([

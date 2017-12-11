@@ -2,7 +2,7 @@
 
 @section('content')
 
-@if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor'))
+@if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor')  || Auth::user()->hasRole('gbravo'))
 
 <hr/>
 <div class="row hidden">

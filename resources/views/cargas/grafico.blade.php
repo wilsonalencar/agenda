@@ -2,7 +2,7 @@
 
 @section('content')
 
-<h1>Dashboard Cargas</h1>
+<h1>Status das Integrações</h1>
 
 <div class="row">
     <div class="col-md-6">

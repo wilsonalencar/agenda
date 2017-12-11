@@ -25,17 +25,34 @@
                 <li class="active"><a href="{{ url('/login') }}"><i class="fa fa-btn fa-sign-in"></i> Login</a></li>
                 @else
 
+                    <li class="active"><a href="{{ route('home', 'selecionar_empresa', '1') }}"><i class="fa fa-btn fa-home"></i>Home</a></li>
                 <?php if (!empty(session()->get('seid'))){ ?> 
-                    <li class="active"><a href="{{ route('home') }}"><i class="fa fa-btn fa-home"></i> Dashboard</a></li>
                     
-                    @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
-                        <li><a href="{{ route('about') }}"><i class="fa fa-dot-circle-o" aria-hidden="true"></i>Cockpit Calendar</a></li>
+                    @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('gbravo'))
+                        <li class="panel panel-default" id="dropdown">
+                                <a data-toggle="collapse" href="#tax-calendar"><i class="fa fa-dot-circle-o"></i>Cockpit</a>
+                                    <div id="tax-calendar" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul class="nav navbar-nav">
+                                                <li class="panel panel-default" id="dropdown">
+                                                    <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
+                                                    <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
+                                                    <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
+                                                    <li><a href="{{ route('about') }}">Performance</a></li>
+                                                    <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
+                                                    <li><a href="{{ route('graficos') }}">Visão Geral</a></li>
+                                                </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </li>
                     @endif
 
                         @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
                             <li class="panel panel-default" id="dropdown">
-                                <a data-toggle="collapse" href="#tax-calendar"><i class="fa fa-btn fa-calendar"></i>Calendar</a>
-                                    <div id="tax-calendar" class="panel-collapse collapse">
+                                <a data-toggle="collapse" href="#tax-calendar2"><i class="fa fa-btn fa-calendar"></i>Paralegal</a>
+                                    <div id="tax-calendar2" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <ul class="nav navbar-nav">
                                                 <li class="panel panel-default" id="dropdown">
@@ -62,27 +79,29 @@
                                                     </div>
                                                     </div>
                                                 </li>
-                                                <li><a href="{{ route('calendario') }}"><i class="fa fa-btn fa-calendar"></i> Calendário</a></li>
-                                                @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
-                                                <li class="panel panel-default" id="dropdown">
-                                                    <a data-toggle="collapse" href="#integracoes"><i class="fa fa-exchange" aria-hidden="true"></i> Integrações</a>
-                                                        <div id="integracoes" class="panel-collapse collapse">
-                                                            <div class="panel-body">
-                                                            <ul class="nav navbar-nav">
-                                                                <li><a href="{{ route('cargas') }}"> Por Estabelecimento</a></li>
-                                                                <li><a href="{{ route('cargas_grafico') }}"> Visualização Grafica</a></li>
-                                                            </ul>
-                                                            </div>
-                                                        </div>
-                                                </li>
-                                    
-                                                @endif
+                                                
                                         </ul>
                                     </div>
                                 </div>
 
                             </li>
                         @endif
+
+                        @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
+                        <li class="panel panel-default" id="dropdown">
+                                <a data-toggle="collapse" href="#integracoes"><i class="fa fa-exchange" aria-hidden="true"></i>Integrações</a>
+                                    <div id="integracoes" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul class="nav navbar-nav">
+                                                <li class="panel panel-default" id="dropdown">
+                                                    <li><a href="{{ route('cargas') }}">Cargas</a></li>
+                                                </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </li>
+                    @endif
 
 
                         @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
@@ -149,8 +168,6 @@
                             </a>
                         </li>
                     @endif
-                <li><a href="{{ route('home', 'selecionar_empresa', '1') }}"><i class="fa fa-building-o" aria-hidden="true"></i> Selecionar empresa</a></li>
-                <li><a href="{{ route('graficos') }}"><i class="fa fa-building-o" aria-hidden="true"></i>Gráficos</a></li>
                 @endif 
             </ul>
         </div><!-- /.navbar-collapse -->

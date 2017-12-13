@@ -2,7 +2,7 @@
 
 @section('content')
 
-@if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo'))
+@if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo')  || Auth::user()->hasRole('gcliente'))
 
 <div style="float:right; width:50%" class="flash-message">
   @foreach (['danger', 'warning', 'success', 'info'] as $msg)

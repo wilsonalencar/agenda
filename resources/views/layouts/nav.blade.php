@@ -1,3 +1,18 @@
+@if (session('seid') && !Auth::guest())
+    <style>
+        
+        .navbar-brand {
+            position: absolute;
+            
+            
+            width: 230px;
+            height: 45px;
+            background: url("{{ URL::to('/') }}/assets/logo/logo-{{ session('seid') }}.png") center / contain no-repeat;
+        }
+    </style>
+    
+@endif
+
 <div class="side-menu" id="sidebar">
     <nav class="navbar navbar-default" role="navigation">
         <div class="navbar-header">
@@ -12,7 +27,8 @@
                 <div class="brand-name-wrapper">
                     <a class="" href="#">
                         <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
-                        <span>Tax Calendar</span>
+                        <span>Tax Calendar</span><p>
+                        <div class="navbar-brand"></div><br><br><Br>
                     </a>
                 </div>
         </div>
@@ -28,7 +44,7 @@
                     <li class="active"><a href="{{ route('home', 'selecionar_empresa', '1') }}"><i class="fa fa-btn fa-home"></i>Home</a></li>
                 <?php if (!empty(session()->get('seid'))){ ?> 
                     
-                    @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('gbravo'))
+                    @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente'))
                         <li class="panel panel-default" id="dropdown">
                                 <a data-toggle="collapse" href="#tax-calendar"><i class="fa fa-dot-circle-o"></i>Cockpit</a>
                                     <div id="tax-calendar" class="panel-collapse collapse">
@@ -38,9 +54,11 @@
                                                     <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
                                                     <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
                                                     <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
-                                                    <li><a href="{{ route('about') }}">Performance</a></li>
-                                                    <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
-                                                    <li><a href="{{ route('graficos') }}">Visão Geral</a></li>
+                                                    @if ( !Auth::user()->hasRole('gcliente'))
+                                                        <li><a href="{{ route('about') }}">Performance</a></li>
+                                                        <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
+                                                        <li><a href="{{ route('graficos') }}">Visão Geral</a></li>
+                                                    @endif
                                                 </li>
                                         </ul>
                                     </div>

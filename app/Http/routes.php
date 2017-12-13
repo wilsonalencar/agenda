@@ -51,7 +51,7 @@ Route::group(['middleware' => ['web']], function () {
 });
 
 // Just the Owner, Admin, Manager, Supervisor and the Analyst
-Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo']], function () {
+Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente']], function () {
 
     Route::post('home', array('as'=>'home', 'uses'=>'PagesController@home'));
     Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
@@ -158,7 +158,7 @@ Route::group(['middleware' => ['web','auth','role:user|analyst|supervisor|manage
 });
 
 // Just the Owner, Admin, Manager, Supervisor and the Analyst
-Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|admin|owner|gbravo']], function () {
+Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|admin|owner|gbravo|gcliente']], function () {
 
     Route::post('home', array('as'=>'home', 'uses'=>'PagesController@home'));
     Route::post('graficos', array('as'=>'graficos', 'uses'=>'PagesController@graficos'));
@@ -207,7 +207,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
 });
 
 // Just the Owner, Admin, Manager and the Supervisor
-Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo']], function () {
+Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente']], function () {
 
     Route::resource('atividades', 'AtividadesController');
     Route::get('atividade/data', array('as'=>'atividades.data', 'uses'=>'AtividadesController@anyData'));

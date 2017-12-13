@@ -9,7 +9,7 @@
     Por isto identificou-se a necessidade de construir uma ferramenta que ajude o time com o gerenciamento das datas de entrega para torná-lo mais eficiente e, ao mesmo tempo, minimizar o risco de erros ou atrasos.</p>
     <img src="{{ URL::to('/') }}/assets/img/agenda-fiscal.png" />
 
-@elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor'))
+@elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente'))
 
 <div class="content-top">
     <div class="row">
@@ -29,40 +29,7 @@
             </div>
         </div>
     </div>
-    
-    <div class="row">
-        <div class="col-md-12">
-            <div class="tab-dash">
-                <span class="active">
-                    <button class="btn-default">Início</button>
-                </span>
-                <span>
-                {!! Form::open([
-                    'route' => 'dashboard'
-                ]) !!}
-                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-                {!! Form::button(' Gerenciais', array('type' => 'submit', 'id'=>'btn_dashboard', 'class' => 'btn btn-default')) !!}
-                {!! Form::close() !!}
-                </span>
-                <span>
-                {!! Form::open([
-                    'route' => 'dashboard_analista'
-                ]) !!}
-                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-                {!! Form::button(' Analista', array('type' => 'submit', 'id'=>'btn_dashboard_analista', 'class' => 'btn btn-default')) !!}
-                {!! Form::close() !!}
-                </span>
-            </div>
-            <span class="refresh">
-            {!! Form::open([
-                'route' => 'home'
-            ]) !!}
-            {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-            {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'btn_atualiza', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
-            {!! Form::close() !!}
-            </span>
-        </div>
-    </div>
+
 </div>
 
 
@@ -150,7 +117,7 @@
     </div>
     @endif
 
-    @if (sizeof($urgentes)>0)
+    @if (sizeof($urgentes)>0 && !Auth::user()->hasRole('gcliente') && !Auth::user()->hasRole('gbravo'))
     <div class="caixa" id="limit_urgentes">
         <div style="float:right" class="btn-group">
             <button type="button" id="btn_open_urgentes" class="btn btn-danger btn-xs">Abrir</button>
@@ -189,7 +156,7 @@
     </div>
     @endif
 
-    @if (sizeof($messages)>0)
+    @if (sizeof($messages)>0 && !Auth::user()->hasRole('gcliente') && !Auth::user()->hasRole('gbravo'))
     <div class="caixa" id="limit_vencimento">
             <div style="float:right" class="btn-group">
                 <button type="button" id="btn_open_vencimento" class="btn btn-info btn-xs">Abrir</button>

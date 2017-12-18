@@ -57,7 +57,7 @@
                                                     @if ( !Auth::user()->hasRole('gcliente'))
                                                         <li><a href="{{ route('about') }}">Performance</a></li>
                                                         <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
-                                                        <!--- <li><a href="{{ route('graficos') }}">Visão Geral</a></li> -->
+                                                        <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
                                                     @endif
                                                 </li>
                                         </ul>

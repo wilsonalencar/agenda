@@ -30,7 +30,7 @@ class PagesController extends Controller
             $this->s_emp = Empresa::findOrFail(session('seid'));
     }
 
-    public function home (Request $request = null)
+    public function home (Request $request = null, $empresaID=false)
     {
         $iframe = false;
         $layoutgraficos = '';
@@ -41,6 +41,10 @@ class PagesController extends Controller
             $this->s_emp->id = $_GET['emp_id'];
             $empresa = Empresa::findOrFail($_GET['emp_id']);
             $nomeEmpresa = $empresa->razao_social;
+        }
+
+        if ($empresaID > 0 ) {
+            $this->s_emp->id = $empresaID;
         }
 
         Carbon::setTestNow();  //reset
@@ -120,8 +124,15 @@ class PagesController extends Controller
                 $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
                 $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
 
-                //var_dump($retval['em_aprovacao']);
+                if ($empresaID > 0) {
 
+                    if ($graph['status_1'] == 0) {
+                        return false;
+                    }
+
+                    return true;
+                }
+                
                 return view('pages.home'.$layoutgraficos)->withMessages($retval['ordinarias'])
                     ->withVencidas($retval['vencidas'])
                     ->withUrgentes($retval['urgentes'])
@@ -130,7 +141,8 @@ class PagesController extends Controller
                     ->withPeriodo($periodo_apuracao)
                     ->withCron($cron)
                     ->with('iframe', $iframe)
-                    ->with('nome_empresa', $nomeEmpresa);
+                    ->with('nome_empresa', $nomeEmpresa)
+                    ->with('emp_id', $this->s_emp->id);
             }
             //ANALYST/SUPERVISOR/USER
             else {
@@ -142,6 +154,15 @@ class PagesController extends Controller
                 $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
                 //whereHas('users', $with_user)
 
+                if ($empresaID > 0) {
+
+                    if ($graph['status_1'] == 0) {
+                        return false;
+                    }
+
+                    return true;
+                }
+                
                 return view('pages.home'.$layoutgraficos)->withMessages($retval['ordinarias'])
                     ->withVencidas($retval['vencidas'])
                     ->withUrgentes($retval['urgentes'])
@@ -150,8 +171,8 @@ class PagesController extends Controller
                     ->withPeriodo($periodo_apuracao)
                     ->withCron($cron)
                     ->with('iframe', $iframe)
-                    ->with('nome_empresa', $nomeEmpresa);
-            }
+                    ->with('nome_empresa', $nomeEmpresa)
+                    ->with('emp_id', $this->s_emp->id);            }
 
         } else {
 
@@ -204,8 +225,9 @@ class PagesController extends Controller
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $empresasArray = array();
         foreach($empresas as $key => $empresa) {
+
             $s = DB::select("Select COUNT(1) as ct FROM empresa_user where user_id = ".Auth::user()->id." AND empresa_id = ". $key . "");
-            if ((boolean)$s[0]->ct) {
+            if ((boolean)$s[0]->ct && $this->home($request, $key)) {
                 $empresasArray[$key] = $empresa;
             }
         }
@@ -368,7 +390,7 @@ class PagesController extends Controller
                 $array[$key]['count']=$count;
             }
 
-            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check)->with('nome_empresa', $nomeEmpresa);
+            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check)->with('nome_empresa', $nomeEmpresa)->with('emp_id', $this->s_emp->id);
         }
     }
 

@@ -1,4 +1,7 @@
 @extends('layouts.graficos')
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-3d.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
 
 @section('content')
 
@@ -8,9 +11,10 @@
     <div>
         <div class="card">
             <div class="header-grafh">
-                Status geral das entregas - {{$nome_empresa}}
+                Status geral das entregas - {{$nome_empresa}} 
+                <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
             </div>
-            <div id="graph_container" style="height: 50%">dashboard</div>
+            <div id="graph_container" style="height: 80%">dashboard</div>
         </div>
     </div>
 
@@ -22,51 +26,50 @@ $(function () {
     var tot_status_3 = {{ ($graph['status_3']) }};
     var tot = tot_status_1+tot_status_2+tot_status_3;
 
-    $('#graph_container').highcharts({
-        chart: {
-                    plotBackgroundColor: null,
-                    plotBorderWidth: null,
-                    plotShadow: false,
-                    type: 'pie'
-                },
-                title: {
-                        text: ''
-
-                },
-                tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Entregas (efet./total): <b>{point.y} / {point.total}</b>'
-                },
-                plotOptions: {
-                    pie: {
-                        allowPointSelect: true,
-                        cursor: 'pointer',
-                        dataLabels: {
-                            enabled: true,
-                            format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                            style: {
-                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                            }
-                        }
-                    }
-                },
-                series: [{
-                    name: 'Percentual entregas',
-                    colorByPoint: true,
-                    data: [{
-                        name: 'Não efetuada',
-                        y: tot_status_1, 
-                        color: '#5268ff'
-                    }, {
-                        name: 'Em aprovação',
-                        y: tot_status_2,
-                        sliced: true,
-                        selected: true
-                    }, {
-                        name: 'Aprovada',
-                        y: tot_status_3
-                    }]
-                }]
-    });
+    Highcharts.chart('graph_container', {
+    chart: {
+        type: 'pie',
+        options3d: {
+            enabled: true,
+            alpha: 45,
+            beta: 0
+        }
+    },
+    title: {
+        text: ''
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            depth: 35,
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+            }
+        }
+    },
+    series: [{
+        name: 'Percentual entregas',
+        colorByPoint: true,
+        data: [{
+            name: 'Não efetuada',
+            y: tot_status_1, 
+            color: '#5268ff'
+        }, {
+            name: 'Em aprovação',
+            y: tot_status_2,
+            sliced: true,
+            selected: true
+        }, {
+            name: 'Aprovada',
+            y: tot_status_3
+        }]
+    }]
+});
 //Dashboard Messages
     $("#btn_open_vencidas").click(function(){
 

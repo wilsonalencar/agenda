@@ -5,18 +5,19 @@
 @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor')  || Auth::user()->hasRole('gbravo'))
 
 <hr/>
-<div class="row hidden">
-{!! Form::open([
-    'route' => 'dashboard_tributo'
-]) !!}
-{!! Form::select('tributo', $tributos, ['class' => 'form-control'],['placeholder' => 'Seleciona um tributo...']) !!}
-{!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-{!! Form::button('<i class="fa fa-bar-chart"></i> Detalhe entregas estad/municip', array('id'=>'dtrib_btn','class'=>'hidden btn btn-default', 'type'=>'submit')) !!}
-{!! Form::close() !!}
-</div>
+
+<div>
+        <div class="card">
+            <div class="header-grafh">
+                Status geral das entregas - {{$nome_empresa}} 
+                <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
+            </div>
+            <div id="container" style="height:69%" class="col-md-9">Dashboard</div>
+            <div id="container_gauge" style="height:40%" class="col-md-3">Gauge</div>
+        </div>
+    </div>
 <div class="row">
-    <div id="container" style="height:69%" class="col-md-9">Dashboard</div>
-    <div id="container_gauge" style="height:40%" class="col-md-3">Gauge</div>
+    
 </div>
 
 <script>
@@ -78,7 +79,7 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Status geral das entregas - {{$nome_empresa}}' 
+            text: '' 
         },
         xAxis: {
             categories: graph_categories

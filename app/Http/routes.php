@@ -221,6 +221,9 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::post('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
     Route::get('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
 
+    Route::post('status_empresas', array('as'=>'status_empresas', 'uses'=>'PagesController@status_empresas'));
+    Route::get('status_empresas', array('as'=>'status_empresas', 'uses'=>'PagesController@status_empresas'));
+
     Route::post('sendEmailExport', array('as'=>'sendEmailExport', 'uses'=>'UsuariosController@sendEmailExport'));
 
 });

@@ -249,6 +249,155 @@ class PagesController extends Controller
         ->with('empresas_selected', $empresasSelected);
     }
 
+    public function status_empresas(Request $request) {
+
+        $iframe = false;
+        $layoutgraficos = '';
+        $nomeEmpresa = '';
+
+        if ($request->has('switch_periodo')) {
+            $switch = Input::get('switch_periodo');
+        } else {
+            $switch = 1;
+        }
+
+        Carbon::setTestNow();  //reset
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        $user = User::findOrFail(Auth::user()->id);
+        $tributos = Tributo::selectRaw("nome")->whereIn('tipo',['E','M'])->whereNotIn('id',[12,13,14,15])->lists('nome','nome'); //ANUAL DELIVERY
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+
+        } else {
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+        // Verifica o periodo
+        $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
+        if ($cron==null) {
+            $info_periodo = substr($periodo_apuracao,0,2).'/'.substr($periodo_apuracao,-4,4);
+            Session::flash('alert-warning', "O periodo $info_periodo não tem atividades cadastradas. Foi carregado o periodo padrão.");
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+        if ($user->hasRole('supervisor')  || $user->hasRole('gcliente') || $user->hasRole('gbravo') || $user->hasRole('analyst') || $user->hasRole('manager') || $user->hasRole('admin') || $user->hasRole('owner')) {
+
+            $tipo_condition = "";
+            $tipo_check = array(true,false,false);
+
+            if ($request->has('tipo_tributos')) {
+                $tipo = Input::get("tipo_tributos");
+                switch ($tipo) {
+                    case 'T':
+                        break;
+                    case 'E':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,true);
+                        break;
+                    case 'F':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,true,false);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $empresasSelecionadas = array();
+            $empresasSelected     = array();
+            $user = User::findOrFail(Auth::user()->id);
+            $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+            
+            foreach($empresas as $key => $empresa) {
+                
+                $this->s_emp->id = $key;
+
+                if ($switch) {
+                    $retval = DB::select( DB::raw("
+                                        select t.nome,substr(limite,1,10) as lim,substr(data_aprovacao,1,10) as dt_aprovacao,limite,count(*),a.status
+                                        from atividades a, regras r, tributos t
+                                        where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id=:empid and a.periodo_apuracao=:periodo_apuracao $tipo_condition
+                                        group by t.nome,lim,dt_aprovacao,a.status
+                                        order by t.nome,lim"), array(
+                        'empid' => $this->s_emp->id,
+                        'periodo_apuracao' => $periodo_apuracao
+                    ));
+                } else {
+                    $limits = array();
+                    //calculateNextMonthLimit
+                    $data_limite = Carbon::createFromDate(substr($periodo_apuracao,-4,4), intval(substr($periodo_apuracao,0,2)), 1);
+                    Carbon::setTestNow($data_limite);
+                    Carbon::setTestNow(Carbon::parse('next month'));
+                    $data_limite_inicio = Carbon::now()->startOfMonth();
+                    $data_limite_fim = Carbon::now()->endOfMonth();
+                    Carbon::setTestNow(); //reset
+                    $limits['start'] = substr($data_limite_inicio,0,10);
+                    $limits['end'] = substr($data_limite_fim,0,10);
+                    //
+                    $retval = DB::select( DB::raw("
+                                        select t.nome,substr(limite,1,10) as lim,substr(data_aprovacao,1,10) as dt_aprovacao,limite,count(*),a.status
+                                        from atividades a, regras r, tributos t
+                                        where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id=:empid $tipo_condition
+                                        group by t.nome,lim,dt_aprovacao,a.status
+                                        having lim >= :data_limite_inf and lim <= :data_limite_sup
+                                        order by t.nome,lim"), array(
+                        'empid' => $this->s_emp->id,
+                        'data_limite_inf' => $limits['start'],
+                        'data_limite_sup' => $limits['end'],
+                    ));
+                }
+                
+                
+                // Elaboração das informações
+                
+                $NewArray = array();
+                foreach ($retval as $val) {
+                    $NewArray[] = (array) $val;
+                }
+                
+                $graph = array();
+                $count = array('s1'=>0,'s2'=>0,'s3'=>0,'v1'=>0,'v2'=>0, 'v3'=>0);
+                foreach ($NewArray as $val) {
+                    
+                    // Vencidas
+                    if ($val['lim']<$today && $val['status']<3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['v' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] = $val['count(*)'];
+                        $count['v' . $val['status']] += $val['count(*)'];
+                    } // Entregue fora do prazo
+                    else if ($val['dt_aprovacao']>$val['lim'] && $val['status']==3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['v' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['v' . $val['status']] = $val['count(*)'];
+                        $count['v' . $val['status']] += $val['count(*)'];
+                    }// Entregue no prazo
+                    else if ($val['dt_aprovacao']<=$val['lim'] && $val['status']==3) {
+                        isset($graph[$this->_dateFormat($val['lim'])]['s' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] = $val['count(*)'];
+                        $count['s' . $val['status']] += $val['count(*)'];
+
+                    }// Não vencidas
+                    else { // $val['lim']>=$today && $val['status']<3
+                        isset($graph[$this->_dateFormat($val['lim'])]['s' . $val['status']])?
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] += $val['count(*)']:
+                            $graph[$this->_dateFormat($val['lim'])]['s' . $val['status']] = $val['count(*)'];
+                        $count['s' . $val['status']] += $val['count(*)'];
+                    }
+                }
+
+                $array[$empresa]=$graph;
+                $array[$empresa]['count']=$count;
+            }            
+            
+            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check)->with('nome_empresa', $nomeEmpresa)->with('emp_id', $this->s_emp->id);
+        }
+    }
+
     public function dashboard(Request $request) {
 
         $iframe = false;

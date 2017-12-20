@@ -54,6 +54,7 @@
                                                     <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
                                                     <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
                                                     <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
+                                                    <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
                                                     @if ( !Auth::user()->hasRole('gcliente'))
                                                         <li><a href="{{ route('about') }}">Performance</a></li>
                                                         <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>

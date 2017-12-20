@@ -394,7 +394,7 @@ class PagesController extends Controller
                 $array[$empresa]['count']=$count;
             }            
             
-            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check)->with('nome_empresa', $nomeEmpresa)->with('emp_id', $this->s_emp->id);
+            return view('pages.status_empresas'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check)->with('nome_empresa', $nomeEmpresa)->with('emp_id', $this->s_emp->id);
         }
     }
 

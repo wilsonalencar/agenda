@@ -27,7 +27,7 @@
     </div>
     <div class="col-md-4">
         
-        <h3>Entregas por Obrigação</h1>
+        <h3>Status por Empresa</h1>
         
     </div>
     <div class="col-md-2">
@@ -53,6 +53,22 @@
     </div>
 </div>
 
+
+
+<hr/>
+<div class="row hidden">
+{!! Form::open([
+    'route' => 'dashboard_tributo'
+]) !!}
+{!! Form::select('tributo', $tributos, ['class' => 'form-control'],['placeholder' => 'Seleciona um tributo...']) !!}
+{!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
+{!! Form::button('<i class="fa fa-bar-chart"></i> Detalhe entregas estad/municip', array('id'=>'dtrib_btn','class'=>'hidden btn btn-default', 'type'=>'submit')) !!}
+{!! Form::close() !!}
+</div>
+<div class="row">
+    <div id="container" style="height:69%" class="col-md-9">Dashboard</div>
+    <div id="container_gauge" style="height:40%" class="col-md-3">Gauge</div>
+</div>
 
 <script>
 <?php

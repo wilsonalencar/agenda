@@ -178,14 +178,7 @@ $(function () {
             series: {
                 cursor: 'pointer',
                 point: {
-                    events: {
-                        click: function () {
-                            $("body").css("cursor", "progress");
-                            var tributo = this.category;
-                            $("select[name='tributo']").val(tributo);
-                            $( "#dtrib_btn" ).click();
-                        }
-                    }
+                    
                 }
             }
         },

@@ -60,6 +60,7 @@
                                                         <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
                                                         <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
                                                     @endif
+                                                    <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
                                                 </li>
                                         </ul>
                                     </div>

@@ -69,6 +69,12 @@ class PagesController extends Controller
 
         if (!Auth::guest()) {
             
+            $user = User::findOrFail(Auth::user()->id);
+
+            if (crypt('teste123', $user->password) === $user->password) {
+                return view('pages.alterarsenha')->withUser($user);
+            } 
+
             if (!empty($_GET['empresa_selecionada'])) {
 
                 $key = $_GET['empresa_selecionada'];
@@ -96,11 +102,7 @@ class PagesController extends Controller
                 return view('pages.selecionarempresa')->withUser($user)->withEmpresas($empresasArray);
             }
 
-            $user = User::findOrFail(Auth::user()->id);
-
-            if (crypt('teste123', $user->password) === $user->password) {
-                return view('pages.alterarsenha')->withUser($user);
-            } 
+            
         
             $tributos = Tributo::selectRaw("nome")->whereNotIn('id',[12,13,14,15])->lists('nome','nome');
 

@@ -65,6 +65,9 @@
     @endif
     <br/>
     <div>
+
+    @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
+
                 {!! Form::open([
                     'route' => 'atividades.storeComentario'
                 ]) !!}
@@ -132,6 +135,7 @@
                 </div>
             </div>
     </div>
+     @endif
 </div>
 <script>
     $(function () {

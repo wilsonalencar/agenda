@@ -62,6 +62,7 @@
         </td>
     </tr>
     <tr>
+        <th>CÓDIGO</th>
         <th>PERÍODO</th>
         <th>CNPJ</th>
         <th>I.E</th>
@@ -194,6 +195,7 @@ $(function() {
                 }
         },
         columns: [
+            {data: 'CodigoA', name: 'CodigoA'},
             {data: 'periodo_apuracao', name: 'periodo_apuracao'},
             {data: 'estabelecimentos.cnpj', name: 'estabelecimentos.cnpj',render: function ( data ) {
                                                       return printMask(data);
@@ -209,9 +211,8 @@ $(function() {
             {data: 'IdProcessosAdms', name:'edit', searchable: false, orderable: false, render: function (data) {
                 var url = '<a href="javascript:void(0);" onclick="getObservacoes('+data+')" class="btn btn-default btn-sm">Detalhes</a>';
                 url += '<a href="{{ route('processosadms.edit', ':id_edit') }}" class="btn btn-default btn-sm">Editar</a>';
-                url += '<a href="{{ route('processosadms.delete', ':id_show') }}" style="margin-left:10px" class="btn btn-default btn-sm">X</a>';
                 url = url.replace(':id_edit', data);
-                url = url.replace(':id_show', data);
+                
                 return url;
             }},
             {data: 'estabelecimentos.codigo', name: 'estabelecimentos.codigo', searchable: false},
@@ -228,8 +229,9 @@ $(function() {
             { "width": "1%", "targets": 7 },
             { "width": "1%", "targets": 8 },
             { "width": "20%", "targets": 9 },
-            { "width": "12%", "targets": 10, "visible":false, "title": "Codigo Filial"},
-            { "width": "12%", "targets": 11, "visible":false, "title": "Observações"},
+             { "width": "20%", "targets": 10 },
+            { "width": "12%", "targets": 11, "visible":false, "title": "Codigo Filial"},
+            { "width": "12%", "targets": 12, "visible":false, "title": "Observações"},
         ],
         language: {
             //"searchPlaceholder": "ID, P.A. ou descrição",
@@ -241,27 +243,27 @@ $(function() {
              {
                 extend: 'excelHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12]
                 }
              },
             
              {
                 extend: 'csvHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12]
                 }
              },
 
              {
                 extend: 'copyHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                 }
              },
              {
                 extend: 'pdfHtml5',
                 exportOptions: {
-                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8]
+                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                 },
                 customize: function(doc) {
                   doc.pageMargins = [ 180, 20, 120, 20 ];

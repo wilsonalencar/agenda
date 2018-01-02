@@ -24,4 +24,12 @@ class Statusprocadm extends Model
     {
         return $this->hasMany('App\Models\Processosadm');
     }
+
+    /**
+     * Get the estabelecimentos for this empresa.
+     */
+    public function movtocontacorrente()
+    {
+        return $this->hasMany('App\Models\Movtocontacorrente');
+    }
 }

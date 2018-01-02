@@ -99,7 +99,12 @@
     {!! Form::checkbox('dipam', 'S', $checked) !!}
    </div>
 </div>
-
+<div class="form-group">
+    <div style="width:30%">
+        {!! Form::label('status', 'Status:', ['class' => 'control-label']) !!}
+        {!! Form::select('status_id', $status, $movtocontacorrentes->status_id, array('class' => 'form-control')) !!}
+    </div>
+</div>
 <div class="form-group" id="vlr_dipam_div" style="display: none">
     <div style="width:30%">
     {!! Form::label('vlr_dipam', 'Valor Dipam R$:', ['class' => 'control-label']) !!}
@@ -118,6 +123,7 @@
 
 
 {!! Form::submit('Update Conta Corrente', ['class' => 'btn btn-default']) !!}
+<a href="{{ route('movtocontacorrentes.delete', $movtocontacorrentes->id) }}" class="btn btn-default" onclick="return confirm('Tem certeza que deseja excluir o registro?')">Excluir</a>
 <a href="{{ route('movtocontacorrentes.search') }}" class="btn btn-default">Voltar</a>
 
 {!! Form::close() !!}

@@ -244,6 +244,7 @@ class ProcessosadmsController extends Controller
         $processosadms = Processosadm::join('estabelecimentos', 'processosadms.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->select(
                 'processosadms.*',
                 'processosadms.id as IdProcessosAdms',
+                'processosadms.id as CodigoA',
                 'estabelecimentos.*',
                 'municipios.*',
                 DB::raw('(select GROUP_CONCAT("Observação: ", descricao SEPARATOR " - ") FROM observacaoprocadms where processoadm_id = processosadms.id) as observacoesGroupConcat')
@@ -565,6 +566,6 @@ class ProcessosadmsController extends Controller
         }
 
         Processosadm::destroy($id);
-        return redirect()->back()->with('status', 'Registro excluido com sucesso!');
+        return redirect()->route('processosadms.search')->with('status', 'Registro excluido com sucesso!');
     }
 }

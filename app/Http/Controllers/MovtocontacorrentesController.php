@@ -11,6 +11,7 @@ use App\Models\FeriadoEstadual;
 use App\Models\FeriadoMunicipal;
 use App\Models\Movtocontacorrente;
 use App\Services\EntregaService;
+use App\Models\Statusprocadm;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -180,6 +181,15 @@ class MovtocontacorrentesController extends Controller
                 Session::flash('alert', 'Periodo de apuração inválido - Linha - '.$i);
                 return redirect()->back()->with('movtocontacorrentes.import');
             }   
+
+            $status = str_replace(" ", "", $registro[6]);
+            if ($status == 'EMANDAMENTO') {
+                $status_id = 2;
+            }
+
+            else if ($status == 'BAIXADO') {
+                $status_id = 1;
+            }
             
             //populando array para insert
             $array['periodo_apuracao']      = $registro[0];
@@ -188,7 +198,8 @@ class MovtocontacorrentesController extends Controller
             $array['vlr_gia']               = $registro[3];
             $array['vlr_sped']              = $registro[4];
             $array['vlr_dipam']             = $registro[5];
-            $array['observacao']            = $registro[6];
+            $array['status_id']             = $status_id;
+            $array['observacao']            = $registro[7];
             $array['dipam']                 = 'S';
 
             if ($registro[5] == 'S/M') {
@@ -206,16 +217,17 @@ class MovtocontacorrentesController extends Controller
 
     public function anyData(Request $request)
     {
-	    $movtocontacorrentes = Movtocontacorrente::join('estabelecimentos', 'movtocontacorrentes.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->select(
+	    $movtocontacorrentes = Movtocontacorrente::join('estabelecimentos', 'movtocontacorrentes.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->leftjoin('statusprocadms', 'movtocontacorrentes.status_id', '=', 'statusprocadms.id')->select(
                 'movtocontacorrentes.*',
                 'movtocontacorrentes.id as IdMovtoContaCorrente',
                 'estabelecimentos.*',
                 'municipios.*', 
+                DB::raw('(IFNULL(statusprocadms.descricao, "")) as descricaoStatus'),
                 DB::raw('(CASE WHEN vlr_guia = vlr_gia AND vlr_gia = vlr_sped AND (dipam = "N" OR (vlr_dipam = vlr_guia AND vlr_gia = vlr_dipam AND vlr_sped = vlr_dipam)) THEN 1 ELSE 0 END) as diferenca'),
                 DB::raw('(CASE WHEN dipam = "S" THEN vlr_dipam ELSE "S/M" END) as dipam'),
                 DB::raw('substring(observacao, 1, 5) as observacaoSubstr')
             )
-            ->with('estabelecimentos')->with('estabelecimentos.municipio');
+            ->with('estabelecimentos')->with('estabelecimentos.municipio')->with('statusprocadm');
 
         if ($filter_cnpj = $request->get('cnpj')){
             $cnpj = preg_replace("/[^0-9]/","",$filter_cnpj);
@@ -327,6 +339,7 @@ class MovtocontacorrentesController extends Controller
     public function create(Request $request = null)
     {
         
+        $status = Statusprocadm::all(['id', 'descricao'])->pluck('descricao', 'id');
         $data = $request->session()->all();
         $periodo_apuracao = '';
         if (!empty($data['periodo_apuracao'])) {
@@ -334,12 +347,13 @@ class MovtocontacorrentesController extends Controller
             Session::forget('periodo_apuracao');
         }
 
-       return view('movtocontacorrentes.create')->with('periodo_apuracao', $periodo_apuracao);
+       return view('movtocontacorrentes.create')->with('periodo_apuracao', $periodo_apuracao)->with('status', $status);
     }
 
 
     public function edit($id)
-    {
+    {   
+        $status         = Statusprocadm::all(['id', 'descricao'])->pluck('descricao', 'id');
         $movtocontacorrentes = Movtocontacorrente::findOrFail($id);
         $movtocontacorrentes->vlr_gia  = number_format($movtocontacorrentes->vlr_gia, 2, ',', '.');
         $movtocontacorrentes->vlr_guia = number_format($movtocontacorrentes->vlr_guia, 2, ',', '.');
@@ -348,7 +362,7 @@ class MovtocontacorrentesController extends Controller
             $movtocontacorrentes->vlr_dipam = number_format($movtocontacorrentes->vlr_dipam, 2, ',', '.');
         }
         
-        return view('movtocontacorrentes.edit')->withMovtocontacorrentes($movtocontacorrentes);
+        return view('movtocontacorrentes.edit')->withMovtocontacorrentes($movtocontacorrentes)->with('status', $status);
     }
 
 
@@ -363,6 +377,7 @@ class MovtocontacorrentesController extends Controller
             'vlr_guia' => 'required',
             'vlr_gia' => 'required',
             'vlr_sped' => 'required',
+            'status_id' => 'required',
             'observacao' => 'required'
         ],
         $messages = [
@@ -372,6 +387,7 @@ class MovtocontacorrentesController extends Controller
             'vlr_guia.required' => 'Informar Valor Guia.',
             'vlr_gia.required' => 'Informar Valor Gia.',
             'vlr_sped.required' => 'Informar Valor Sped.',
+            'status_id.required' => 'Informar Status.',
             'observacao.required' => 'Informar Observação.'
 
         ]);
@@ -412,6 +428,7 @@ class MovtocontacorrentesController extends Controller
             'vlr_guia' => 'required',
             'vlr_gia' => 'required',
             'vlr_sped' => 'required',
+            'status_id' => 'required',
             'observacao' => 'required'
         ],
         $messages = [
@@ -421,6 +438,7 @@ class MovtocontacorrentesController extends Controller
             'vlr_guia.required' => 'Informar Valor Guia.',
             'vlr_gia.required' => 'Informar Valor Gia.',
             'vlr_sped.required' => 'Informar Valor Sped.',
+            'status_id.required' => 'Informar Status.',
             'observacao.required' => 'Informar Observação.'
         ]);
 
@@ -451,7 +469,7 @@ class MovtocontacorrentesController extends Controller
         }
 
         Movtocontacorrente::destroy($id);
-        return redirect()->back()->with('status', 'Registro excluido com sucesso!');
+        return redirect()->route('movtocontacorrentes.search')->with('status', 'Registro excluido com sucesso!');
     }
 
     private function validate_dipam($dipam, $valor_dipam)

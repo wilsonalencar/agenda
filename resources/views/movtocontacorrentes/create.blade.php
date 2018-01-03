@@ -94,19 +94,19 @@
     {!! Form::checkbox('dipam', 'S', false) !!}
    </div>
 </div>
-<div class="form-group">
-    <div style="width:30%">
-        {!! Form::label('status', 'Status:', ['class' => 'control-label']) !!}
-        {!! Form::select('status_id', $status, null, array('class' => 'form-control')) !!}
-    </div>
-</div>
+
 <div class="form-group" id="vlr_dipam_div" style="display: none">
     <div style="width:30%">
     {!! Form::label('vlr_dipam', 'Valor Dipam R$:', ['class' => 'control-label']) !!}
     {!! Form::text('vlr_dipam', null, ['class' => 'form-control', 'id'=> 'vlr_dipam']) !!}
     </div>
 </div>
-
+<div class="form-group">
+    <div style="width:30%">
+        {!! Form::label('status', 'Status:', ['class' => 'control-label']) !!}
+        {!! Form::select('status_id', $status, null, array('class' => 'form-control')) !!}
+    </div>
+</div>
 <div class="form-group">
     <div style="width:30%">
         {!! Form::label('observacao', 'Observação:', ['class' => 'control-label']) !!}

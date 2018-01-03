@@ -195,7 +195,7 @@ $(function() {
                 }
         },
         columns: [
-            {data: 'CodigoA', name: 'CodigoA'},
+            {data: 'id', name: 'id'},
             {data: 'periodo_apuracao', name: 'periodo_apuracao'},
             {data: 'estabelecimentos.cnpj', name: 'estabelecimentos.cnpj',render: function ( data ) {
                                                       return printMask(data);

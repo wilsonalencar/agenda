@@ -244,9 +244,11 @@ class ProcessosadmsController extends Controller
         $processosadms = Processosadm::join('estabelecimentos', 'processosadms.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->select(
                 'processosadms.*',
                 'processosadms.id as IdProcessosAdms',
-                'processosadms.id as CodigoA',
-                'estabelecimentos.*',
-                'municipios.*',
+                'estabelecimentos.insc_estadual', 
+                'estabelecimentos.cnpj',
+                'estabelecimentos.codigo',
+                'municipios.uf',
+                'municipios.nome',
                 DB::raw('(select GROUP_CONCAT("Observação: ", descricao SEPARATOR " - ") FROM observacaoprocadms where processoadm_id = processosadms.id) as observacoesGroupConcat')
             )
             ->with('estabelecimentos')

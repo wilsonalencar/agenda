@@ -18,6 +18,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
 use Yajra\Datatables\Datatables;
+use Illuminate\Support\Facades\Input;
 
 class EmpresasController extends Controller
 {
@@ -155,6 +156,22 @@ class EmpresasController extends Controller
         $input['cnpj']= preg_replace("/[^0-9]/","",$input['cnpj']);
 
         $empresa->fill($input)->save();
+
+        $users = Input::get('multiple_select_users');
+        if ($users) {
+            $empresa->users()->sync($users);
+        } else {
+            $empresa->users()->detach();
+        }
+
+        //MULTISELECT
+        $tributos = Input::get('multiple_select_tributos');
+        if ($tributos) {
+            $empresa->tributos()->sync($tributos);
+        } else {
+            $empresa->tributos()->detach();
+        }
+
 
         return redirect()->back()->with('status', 'Empresa atualizada com sucesso!');
 

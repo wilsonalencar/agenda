@@ -109,7 +109,7 @@
                             </li>
                         @endif
 
-                        @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
+                        @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('analyst'))
                         <li class="panel panel-default" id="dropdown">
                                 <a data-toggle="collapse" href="#integracoes"><i class="fa fa-exchange" aria-hidden="true"></i>Integrações</a>
                                     <div id="integracoes" class="panel-collapse collapse">

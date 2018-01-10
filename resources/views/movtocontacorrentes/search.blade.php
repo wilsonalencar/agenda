@@ -52,6 +52,7 @@
         <th>SPED</th>
         <th>DIPAM</th>
         <th>DIF</th>
+        <th>STATUS</th>
         <th>OBS</th>
         <th></th>
     </tr>
@@ -209,16 +210,22 @@ $(function() {
                    }
                }
             },
+            {data: 'descricaoStatus', name: 'descricaoStatus', searchable: false, render: function (data) {
+                    if (data != null) {
+                        return data;
+                    }
+               }
+            },
             {data: 'observacaoSubstr', name: 'observacaoSubstr', searchable: false, render: function (data) {
                    return data;
                }
             },
+            
+            
             {data: 'IdMovtoContaCorrente', name:'edit', searchable: false, orderable: false, render: function (data) {
 
                 var url = '<a href="{{ route('movtocontacorrentes.edit', ':id_edit') }}" class="btn btn-default btn-sm">Editar</a>';
-                url += '<a href="{{ route('movtocontacorrentes.delete', ':id_show') }}" style="margin-left:10px" class="btn btn-default btn-sm">X</a>';
                 url = url.replace(':id_edit', data);
-                url = url.replace(':id_show', data);
                 return url;
             }},
             {data: 'observacao', name: 'observacao'},
@@ -235,9 +242,10 @@ $(function() {
             { "width": "8%", "targets": 8, className: "dt-right"},
             { "width": "8%", "targets": 9, className: "dt-right"},
             { "width": "5%", "targets": 10, className: "dt-right"},
-            { "width": "1%", "targets": 11 },
-            { "width": "12%", "targets": 12 },
-            { "width": "12%", "targets": 13, "visible":false, "title": "Observação"},
+            { "width": "5%", "targets": 11, className: "dt-right"},
+            { "width": "1%", "targets": 12 },
+            { "width": "12%", "targets": 13 },
+            { "width": "12%", "targets": 14, "visible":false, "title": "Observação"},
         ],
         language: {
             //"searchPlaceholder": "ID, P.A. ou descrição",
@@ -249,27 +257,27 @@ $(function() {
              {
                 extend: 'excelHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13  ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14  ]
                 }
              },
             
              {
                 extend: 'csvHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13 ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14 ]
                 }
              },
 
              {
                 extend: 'copyHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13 ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14 ]
                 }
              },
              {
                 extend: 'pdfHtml5',
                 exportOptions: {
-                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13]
+                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14]
                 },
                 customize: function(doc) {
                   //pageMargins [left, top, right, bottom] 

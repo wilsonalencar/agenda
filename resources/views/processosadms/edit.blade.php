@@ -40,6 +40,13 @@
 
 <div class="form-group">
     <div style="width:30%">
+    {!! Form::label('codigo', 'Código:', ['class' => 'control-label']) !!}
+    <b><?php echo $processosadms->id; ?></b>
+    </div>
+</div>
+
+<div class="form-group">
+    <div style="width:30%">
     {!! Form::label('periodo_apuracao', 'Período de Apuração:', ['class' => 'control-label']) !!}
     {!! Form::text('periodo_apuracao', $processosadms->periodo_apuracao, ['class' => 'form-control']) !!}
     </div>
@@ -128,6 +135,7 @@
 
 
 {!! Form::submit('Update Processo Administrativo', ['class' => 'btn btn-default']) !!}
+<a href="{{ route('processosadms.delete', $processosadms->id) }}" class="btn btn-default" onclick="return confirm('Tem certeza que deseja excluir o registro?')">Excluir</a>
 <a href="javascript:void(0);" class="btn btn-default" onclick="getObservacao();">Observações</a>
 <a href="{{ route('processosadms.search') }}" class="btn btn-default">Voltar</a>
 

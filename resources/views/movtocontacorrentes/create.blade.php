@@ -101,7 +101,12 @@
     {!! Form::text('vlr_dipam', null, ['class' => 'form-control', 'id'=> 'vlr_dipam']) !!}
     </div>
 </div>
-
+<div class="form-group">
+    <div style="width:30%">
+        {!! Form::label('status', 'Status:', ['class' => 'control-label']) !!}
+        {!! Form::select('status_id', $status, null, array('class' => 'form-control')) !!}
+    </div>
+</div>
 <div class="form-group">
     <div style="width:30%">
         {!! Form::label('observacao', 'Observação:', ['class' => 'control-label']) !!}

@@ -99,8 +99,8 @@ class MensageriaprocadmsController extends Controller
     		return;
     	}
 
-    	$subject = "BravoTaxCalendar - Processo ".$array->nro_processo." sem atualização.";
-    	$data['nro_processo'] = $array->nro_processo;
+    	$subject = "BravoTaxCalendar - Processo ".$array->id." sem atualização.";
+    	$data['nro_processo'] = $array->id;
     	$data['dias'] 	      = $array->dias_diferenca;		
     	$data['subject']      = $subject;
     	foreach($emails as $user)

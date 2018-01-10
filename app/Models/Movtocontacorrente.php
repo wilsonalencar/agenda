@@ -23,6 +23,7 @@ class Movtocontacorrente extends Model
         'vlr_dipam',
         'usuario_update',
         'dipam',
+        'status_id',
         'observacao'
     ];
 
@@ -40,5 +41,13 @@ class Movtocontacorrente extends Model
     public function municipios()
     {
         return $this->belongsTo('App\Models\Municipio');
+    }
+
+    /**
+     * Get the empresa record associated with the estabelecimento.
+     */
+    public function statusprocadm()
+    {
+        return $this->belongsTo('App\Models\Statusprocadm','status_id');
     }
 }

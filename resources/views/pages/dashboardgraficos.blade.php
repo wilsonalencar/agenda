@@ -14,8 +14,11 @@
             </div>
             <div id="container" style="height:69%" class="col-md-9">Dashboard</div>
             <div id="container_gauge" style="height:40%" class="col-md-3">Gauge</div>
+            <div id="graph_container" style="width: 30%; display: none">dashboard</div>
         </div>
+
     </div>
+
 <div class="row">
     
 </div>
@@ -68,6 +71,58 @@ var graph_data = [[{{implode(',',$array_nentregue)}}],[{{implode(',',$array_apro
 
 $(function () {
 
+    var tot_status_1 = {{ ($graphdash['status_1']) }};
+    var tot_status_2 = {{ ($graphdash['status_2']) }};
+    var tot_status_3 = {{ ($graphdash['status_3']) }};
+    var tot = tot_status_1+tot_status_2+tot_status_3;
+    
+    $('#graph_container').highcharts({
+        chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+                title: {
+                        text: ''
+
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Entregas (efet./total): <b>{point.y} / {point.total}</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Percentual entregas',
+                    colorByPoint: true,
+                    data: [{
+                        name: 'Não efetuada',
+                        y: tot_status_1, 
+                        color: '#5268ff'
+                    }, {
+                        name: 'Em aprovação',
+                        y: tot_status_2,
+                        sliced: true,
+                        selected: true
+                    }, {
+                        name: 'Aprovada',
+                        y: tot_status_3
+                    }]
+                }]
+    });
+
+    
     setInterval(function(){ $( '#atualiza_btn' ).click() }, 300000);
 
     $.fn.bootstrapSwitch.defaults.onText = 'P.A.';

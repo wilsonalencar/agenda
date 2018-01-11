@@ -239,8 +239,7 @@ class PagesController extends Controller
 
             foreach($input['multiple_select_empresas'] as $company)
             {
-                $empresasSelecionadas[]['dashboard'] = $company;
-                $empresasSelecionadas[]['gerencial'] = $company;
+                $empresasSelecionadas[] = $company;
                 $empresasSelected = $input['multiple_select_empresas'];  
             }
         }
@@ -541,7 +540,23 @@ class PagesController extends Controller
                 $array[$key]['count']=$count;
             }
 
-            return view('pages.dashboard'.$layoutgraficos)->withGraph($array)->withPeriodo($periodo_apuracao)->withSwitch($switch)->withTributos($tributos)->withCron($cron)->withTipo($tipo_check)->with('nome_empresa', $nomeEmpresa)->with('emp_id', $this->s_emp->id);
+            $retvalDash = $this->_loadNotifications(); //var_dump($retval);
+
+            $graphDash = array();
+            $graphDash['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+            $graphDash['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+            $graphDash['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+
+            return view('pages.dashboard'.$layoutgraficos)
+                        ->withGraph($array)
+                        ->withPeriodo($periodo_apuracao)
+                        ->withSwitch($switch)
+                        ->withTributos($tributos)
+                        ->withCron($cron)
+                        ->withTipo($tipo_check)
+                        ->withGraphdash($graphDash)
+                        ->with('nome_empresa', $nomeEmpresa)
+                        ->with('emp_id', $this->s_emp->id);
         }
     }
 

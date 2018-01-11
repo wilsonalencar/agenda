@@ -60,14 +60,9 @@
   }
 
   function AjaxFunctionGrafico(key, array)
-  {
-     if (typeof array.dashboard != 'undefined') {
-        var iframe = document.getElementById('frameGrafico');
-        iframe.src = 'home?layout=graficos&emp_id='+array.dashboard;
-     } else {
-        var iframe = document.getElementById('frameGrafico');
-        iframe.src = 'dashboard?layout=graficos&emp_id='+array.gerencial;
-     }
+  { 
+     var iframe = document.getElementById('frameGrafico');
+     iframe.src = 'dashboard?layout=graficos&emp_id='+array;
   }
 
 </script>

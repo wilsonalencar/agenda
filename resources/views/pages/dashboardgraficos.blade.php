@@ -6,22 +6,24 @@
 
 <hr/>
 
-<div>
-        <div class="card">
-            <div class="header-grafh">
-                Status geral das entregas - {{$nome_empresa}} 
-                <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
-            </div>
-            <div id="container" style="height:69%" class="col-md-9">Dashboard</div>
-            <div id="container_gauge" style="height:40%" class="col-md-3">Gauge</div>
-            <div id="graph_container" style="width: 30%; display: none">dashboard</div>
-        </div>
-
+<div class="row">
+    <div class="header-grafh">
+        Status geral das entregas - {{$nome_empresa}} 
+        <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
     </div>
+</div>
 
 <div class="row">
-    
+    <div class="col-md-9">
+        <div id="container" style="height: 800px;">Dashboard</div>
+    </div>
+    <div class="col-md-3">
+        <div id="container_gauge">Gauge</div>
+        <div id="graph_container" style="height: 300px;">dashboard</div>
+    </div>
 </div>
+</div>
+
 
 <script>
 <?php

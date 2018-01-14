@@ -19,7 +19,7 @@
     </div>
     <div class="col-md-3">
         <div id="container_gauge">Gauge</div>
-        <div id="graph_container" style="height: 300px;">dashboard</div>
+        <div id="graph_container" style="height: 400px;">dashboard</div>
     </div>
 </div>
 </div>
@@ -77,53 +77,51 @@ $(function () {
     var tot_status_2 = {{ ($graphdash['status_2']) }};
     var tot_status_3 = {{ ($graphdash['status_3']) }};
     var tot = tot_status_1+tot_status_2+tot_status_3;
-    
-    $('#graph_container').highcharts({
-        chart: {
-                    plotBackgroundColor: null,
-                    plotBorderWidth: null,
-                    plotShadow: false,
-                    type: 'pie'
-                },
-                title: {
-                        text: ''
 
-                },
-                tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Entregas (efet./total): <b>{point.y} / {point.total}</b>'
-                },
-                plotOptions: {
-                    pie: {
-                        allowPointSelect: true,
-                        cursor: 'pointer',
-                        dataLabels: {
-                            enabled: true,
-                            format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                            style: {
-                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                            }
-                        }
-                    }
-                },
-                series: [{
-                    name: 'Percentual entregas',
-                    colorByPoint: true,
-                    data: [{
-                        name: 'Não efetuada',
-                        y: tot_status_1, 
-                        color: '#5268ff'
-                    }, {
-                        name: 'Em aprovação',
-                        y: tot_status_2,
-                        sliced: true,
-                        selected: true
-                    }, {
-                        name: 'Aprovada',
-                        y: tot_status_3
-                    }]
-                }]
-    });
-
+    Highcharts.chart('graph_container', {
+    chart: {
+        type: 'pie',
+        options3d: {
+            enabled: true,
+            alpha: 45,
+            beta: 0
+        }
+    },
+    title: {
+        text: ''
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            depth: 35,
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+            }
+        }
+    },
+    series: [{
+        name: 'Percentual entregas',
+        colorByPoint: true,
+        data: [{
+            name: 'Não efetuada',
+            y: tot_status_1, 
+            color: '#5268ff'
+        }, {
+            name: 'Em aprovação',
+            y: tot_status_2,
+            sliced: true,
+            selected: true
+        }, {
+            name: 'Aprovada',
+            y: tot_status_3
+        }]
+    }]
+});
     
     setInterval(function(){ $( '#atualiza_btn' ).click() }, 300000);
 

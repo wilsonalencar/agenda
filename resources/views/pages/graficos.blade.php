@@ -31,7 +31,7 @@
     <a href="">Nova Busca</a>
 </div>
 
-<iframe src="" id="frameGrafico" width=100% e height=1000px scrolling="no" frameborder="0" style="border:0"></iframe>
+<iframe src="" id="frameGrafico" width=100% e height=1000px scrolling="no" frameborder="0" style="border:0" align="center"></iframe>
 
 <script type="text/javascript">
   $('select').select2();
@@ -61,8 +61,19 @@
 
   function AjaxFunctionGrafico(key, array)
   { 
-     var iframe = document.getElementById('frameGrafico');
-     iframe.src = 'dashboard?layout=graficos&emp_id='+array;
+     if (array == 'img-1') {
+        //alert('mostrar img 1 ');
+        var iframe = document.getElementById('frameGrafico');
+        iframe.src = "{{ URL::to('/') }}/assets/img/grafico1.jpg";
+     }
+     else if (array == 'img-2') {
+        var iframe = document.getElementById('frameGrafico');
+        iframe.src = "{{ URL::to('/') }}/assets/img/grafico2.jpg";
+     }else {
+      var iframe = document.getElementById('frameGrafico');
+      iframe.src = 'dashboard?layout=graficos&emp_id='+array; 
+     }
+     
   }
 
 </script>

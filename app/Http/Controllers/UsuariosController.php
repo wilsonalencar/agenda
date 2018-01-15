@@ -76,6 +76,13 @@ class UsuariosController extends Controller
         ]);
 
         $input = $request->all();
+
+        $input['reset_senha'] = 0;
+        if ($input['reset_sim']) {
+            $input['reset_senha'] = 1;
+        }
+
+        
         $input['password'] = bcrypt('teste123');
     
         $create = User::create($input);
@@ -127,14 +134,22 @@ class UsuariosController extends Controller
         $usuario = User::findOrFail($id);
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $roles = Role::all(['id', 'display_name'])->pluck('display_name', 'id');
 
+        $usuario->role_id = 0;
+        $role_id = DB::select('select role_id from role_user where user_id = '. $usuario->id);
+        if (!empty($role_id)) {
+            $usuario->role_id = $role_id[0]->role_id;
+        }
+        
+    
         /*
         $regras = [''=>''];
         $empresas = Empresa::selectRaw("cnpj, cnpj")->lists('cnpj','cnpj');
         $estabs = Estabelecimento::selectRaw("cnpj, cnpj")->lists('cnpj','cnpj');
         $estemp = $empresas->merge($estabs);
         */
-        return view('usuarios.edit')->withUser($usuario)->withTributos($tributos)->withEmpresas($empresas);
+        return view('usuarios.edit')->withUser($usuario)->withTributos($tributos)->withEmpresas($empresas)->withRoles($roles);
     }
 
     public function atualizarsenha(Request $request)
@@ -178,7 +193,15 @@ class UsuariosController extends Controller
             'email' => 'required|email'
         ]);
 
+        $input['reset_senha'] = 0;
+        if (!empty($input['reset_sim'])) {
+            $input['reset_senha'] = 1;
+        }
+
         $usuario->fill($input)->save();
+
+        $delete = DB::select("Delete FROM role_user where user_id = ".$id);
+        $usuario->attachRole($input['role_user']);
 
         $tributos = Input::get('multiple_select_tributos');
         if ($tributos) {

@@ -10,7 +10,7 @@
     <tr>
         <th>NOME</th>
         <th>E-MAIL</th>
-        <th></th>
+        <th>PERFIL</th>
         <th></th>
     </tr>
     </thead>
@@ -31,12 +31,12 @@ $(function() {
                 var html = '';
 
                 if (data=='') {
-                    html = '<img src="{{ URL::to('/') }}/assets/img/inactive-icon.png" title="Inactive user" />';
+                    html = 'Inativo';
                 } else {
                     $.each(data, function() {
                       var key = Object.keys(this)[1];
                       var value = this[key];
-                      html += '<img src="{{ URL::to('/') }}/assets/img/'+value+'-icon.png" title="'+value+'" />';
+                      html += value;
                     });
                 }
                  return html;
@@ -46,11 +46,7 @@ $(function() {
                 var url = '<a href="{{ route('usuarios.show', ':id_show') }}" class="btn btn-default btn-sm">Mostrar</a>';
                 @if ( Auth::user()->hasRole('owner') || Auth::user()->hasRole('admin'))
                 url += '<a href="{{ route('usuarios.edit', ':id_edit') }}" style="margin-left:10px" class="btn btn-default btn-sm">Alterar</a>';
-                url += '<a href="{{ route('usuarios.elevateRole', ':id_elevate') }}" style="margin-left:10px" class="btn btn-default btn-sm">Nivel Up (+)</a>';
-                url += '<a href="{{ route('usuarios.decreaseRole', ':id_decrease') }}" style="margin-left:10px" class="btn btn-default btn-sm">Nivel Down (-)</a>';
                 url = url.replace(':id_edit', data);
-                url = url.replace(':id_elevate', data);
-                url = url.replace(':id_decrease', data);
                 @endif;
                 url = url.replace(':id_show', data);
                 return url;
@@ -62,10 +58,30 @@ $(function() {
         },
         dom: 'l<"centerBtn"B>frtip',
         buttons: [
-             'copyHtml5',
-             'excelHtml5',
-             'csvHtml5',
-             'pdfHtml5'
+             {
+                extend: 'copyHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2]
+                }
+             },
+             {
+                extend: 'excelHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2]
+                }
+             },
+             {
+                extend: 'csvHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2]
+                }
+             },
+             {
+                extend: 'pdfHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2]
+                }
+             },
          ]
 
     });

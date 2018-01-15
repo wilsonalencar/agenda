@@ -37,6 +37,23 @@
     </div>
 </div>
 
+<div class="form-group">
+    <div style="width:30%">
+        {!! Form::label('role_user', 'Tipo de Usuario:', ['class' => 'control-label']) !!}
+        {!! Form::select('role_user', $roles, $user->role_id, ['class' => 'form-control']) !!}
+    </div>
+</div>
+
+<div class="form-group">
+    <div style="width:30%">
+        Resetar Senha:
+        {{ Form::label('Sim', 'SIM') }}
+        {!! Form::radio('reset_sim', true, '', ['id' => 'Resetar_Senha_SIM']) !!}
+        {{ Form::label('Nao', 'NAO') }}
+        {!! Form::radio('reset_nao', false, true, ['id' => 'Resetar_Senha_NAO']) !!}
+    </div>
+</div>
+
 {!! Form::submit('Atualiza Usuário', ['class' => 'btn btn-default']) !!}
 
 {!! Form::close() !!}

@@ -58,7 +58,7 @@
         {{ Form::label('Sim', 'SIM') }}
         {!! Form::radio('reset_sim', true, '', ['id' => 'Resetar_Senha_SIM']) !!}
         {{ Form::label('Nao', 'NAO') }}
-        {!! Form::radio('reset_nao', false, true, ['id' => 'Resetar_Senha_NAO']) !!}
+        {!! Form::radio('reset_sim', false, true, ['id' => 'Resetar_Senha_NAO']) !!}
     </div>
 </div>
 

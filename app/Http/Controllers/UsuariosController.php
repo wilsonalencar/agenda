@@ -194,8 +194,9 @@ class UsuariosController extends Controller
         ]);
 
         $input['reset_senha'] = 0;
-        if (!empty($input['reset_sim'])) {
+        if ($input['reset_sim']) {
             $input['reset_senha'] = 1;
+            $input['password'] = bcrypt('teste123');
         }
 
         $usuario->fill($input)->save();

@@ -52,6 +52,16 @@
     </div>
 </div>
 
+<div class="form-group">
+    <div style="width:30%">
+        Resetar Senha:
+        {{ Form::label('Sim', 'SIM') }}
+        {!! Form::radio('reset_sim', true, '', ['id' => 'Resetar_Senha_SIM']) !!}
+        {{ Form::label('Nao', 'NAO') }}
+        {!! Form::radio('reset_sim', false, true, ['id' => 'Resetar_Senha_NAO']) !!}
+    </div>
+</div>
+
 
 {!! Form::submit('Cadastrar', ['class' => 'btn btn-default']) !!}
 

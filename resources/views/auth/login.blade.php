@@ -44,20 +44,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <div class="col-md-6">
-                                <div class="checkbox">
-                                    <label class="link-bottom">
-                                        <input type="checkbox" name="remember"> Lembrar-me
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="link-bottom text-right">
-                                    <a  href="{{ url('/password/reset') }}">Esqueceu sua senha?</a>
-                                <label>
-                            </div>
-                        </div>
+                        
                     </form>
         </div>
     </div>

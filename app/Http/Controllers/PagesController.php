@@ -71,7 +71,7 @@ class PagesController extends Controller
             
             $user = User::findOrFail(Auth::user()->id);
 
-            if (crypt('teste123', $user->password) === $user->password) {
+            if (crypt('teste123', $user->password) === $user->password && $user->reset_senha) {
                 return view('pages.alterarsenha')->withUser($user);
             } 
 

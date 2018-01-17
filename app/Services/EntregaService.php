@@ -420,8 +420,13 @@ class EntregaService {
                     ->where('tributos.id',$regra->tributo->id)
                     ->where('empresas.cnpj',$empresa->cnpj)
                     ->get();
+
                 //VERIFICA ADIANTAMENTO DE ENTREGA
-                $offset = $trib[0]->adiantamento_entrega;
+                $offset = null;
+                if (!empty($trib[0]->adiantamento_entrega)) {
+                    $offset = $trib[0]->adiantamento_entrega;
+                }
+                
                 //VERIFICA REGRA PARA GESTAO DAS ATIVIDADES QUE CAEM NO FIM DA SEMANA
                 $adiant_fds = $regra->afds;
 

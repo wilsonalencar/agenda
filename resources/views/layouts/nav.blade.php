@@ -71,13 +71,16 @@
                             </li>
                     @endif
 
-                        @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
+                        @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
                             <li class="panel panel-default" id="dropdown">
                                 <a data-toggle="collapse" href="#tax-calendar2"><i class="fa fa-btn fa-calendar"></i>Paralegal</a>
                                     <div id="tax-calendar2" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <ul class="nav navbar-nav">
                                                 <li class="panel panel-default" id="dropdown">
+                                                    <ul class="nav navbar-nav">
+                                                        <li><a href="{{ route('calendario') }}"><i class="fa fa-btn fa-calendar"></i>Calendário</a></li>
+                                                    </ul>
                                                     <a data-toggle="collapse" href="#conta-corrente"><i class="fa fa-usd" aria-hidden="true"></i> Conta Corrente</a>
                                                     <div id="conta-corrente" class="panel-collapse collapse">
                                                     <div class="panel-body">

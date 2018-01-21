@@ -2,21 +2,44 @@
 
 @section('content')
 
-<h1>Status das Integrações</h1>
+<div class="content-top">
+    <div class="row">
+        <div class="col-md-4">
+            <h1 class="title">Status das Integrações</h1>
+        </div>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-md-6">
-        <div id="graph_container_1" style="height: 300px">Entrada</div>
+        <div class="card">
+            <div class="header-grafh blue">
+                Status Cargas (Entrada)
+            </div>
+            <div id="graph_container_1" style="height: 300px">Entrada</div>
+        </div>
     </div>
     <div class="col-md-6">
-        <div id="graph_container_2" style="height: 300px">Saida</div>
+        <div class="card">
+            <div class="header-grafh red">
+                Status Cargas (Saída)
+            </div>
+            <div id="graph_container_2" style="height: 300px">Saida</div>
+        </div>
     </div>
 </div>
-<div class="row">
+
+<div class="row mgT30">
     <div class="col-md-12">
-        <div id="graph_container_3" style="height: 350px">Consolidado</div>
+        <div class="card">
+            <div class="header-grafh">
+                Status Cargas (Consolidado)
+            </div>
+            <div id="graph_container_3" style="height: 350px">Consolidado</div>
+        </div>
     </div>
 </div>
+
 <script>
 
 var cargas_entrada = {{ $graph_data['E'] }};
@@ -32,7 +55,7 @@ $('#graph_container_1').highcharts({
             type: 'pie'
         },
         title: {
-                text: 'Status Cargas (Entrada)'
+                text: ''
 
         },
         tooltip: {
@@ -74,7 +97,7 @@ $('#graph_container_2').highcharts({
             type: 'pie'
         },
         title: {
-                text: 'Status Cargas (Saida)'
+                text: ''
 
         },
         tooltip: {
@@ -116,7 +139,7 @@ $('#graph_container_3').highcharts({
             type: 'pie'
         },
         title: {
-                text: 'Status Cargas (Consolidado)'
+                text: ''
         },
         tooltip: {
             pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Cargas (efet./total): <b>{point.y} / {point.total}</b>'

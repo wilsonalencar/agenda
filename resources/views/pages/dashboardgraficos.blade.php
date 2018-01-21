@@ -4,22 +4,35 @@
 
 @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor')  || Auth::user()->hasRole('gbravo'))
 
-<hr/>
 
-<div>
-        <div class="card">
-            <div class="header-grafh">
-                Status geral das entregas - {{$nome_empresa}} 
-                <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
-            </div>
-            <div id="container" style="height:69%" class="col-md-9">Dashboard</div>
-            <div id="container_gauge" style="height:40%" class="col-md-3">Gauge</div>
-        </div>
-    </div>
-<div class="row">
-    
+
+<div class="top-graficos">
+    <h2>Dashboard</h2>
+    <h5><span>Empresa:</span> {{$nome_empresa}} </h5>
+    <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
 </div>
 
+
+<div class="grafico-content">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="header-grafh darkcyan">
+                    Status geral das entregas mensais
+                </div>
+                <div id="container" style="height:550px">Dashboard</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="header-grafh yellow">
+                    Entregômetro
+                </div>
+                <div id="container_gauge">Gauge</div>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 <?php
     $array_entregue = array();

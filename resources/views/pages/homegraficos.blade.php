@@ -8,13 +8,22 @@
 
 @if (!Auth::guest())
 
-    <div>
-        <div class="card">
-            <div class="header-grafh">
-                Status geral das entregas - {{$nome_empresa}} 
-                <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
+<div class="top-graficos">
+    <h2>Dashboard</h2>
+    <h5><span>Empresa:</span> {{$nome_empresa}} </h5>
+    <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
+</div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="grafico-content">
+                <div class="card">
+                    <div class="header-grafh gray">
+                        Status geral das entregas mensais
+                    </div>
+                    <div id="graph_container" style="height: 750px">dashboard</div>
+                </div>
             </div>
-            <div id="graph_container" style="height: 80%">dashboard</div>
         </div>
     </div>
 

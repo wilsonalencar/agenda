@@ -4,35 +4,27 @@
 
 @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor')  || Auth::user()->hasRole('gbravo'))
 
+<hr/>
 
-
-<div class="top-graficos">
-    <h2>Dashboard</h2>
-    <h5><span>Empresa:</span> {{$nome_empresa}} </h5>
-    <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
-</div>
-
-
-<div class="grafico-content">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="header-grafh darkcyan">
-                    Status geral das entregas mensais
-                </div>
-                <div id="container" style="height:550px">Dashboard</div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="header-grafh yellow">
-                    Entregômetro
-                </div>
-                <div id="container_gauge">Gauge</div>
-            </div>
-        </div>
+<div class="row">
+    <div class="header-grafh">
+        Status geral das entregas - {{$nome_empresa}} 
+        <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
     </div>
 </div>
+
+<div class="row">
+    <div class="col-md-9">
+        <div id="container" style="height: 800px;">Dashboard</div>
+    </div>
+    <div class="col-md-3">
+        <div id="container_gauge">Gauge</div>
+        <div id="graph_container" style="height: 400px;">dashboard</div>
+    </div>
+</div>
+</div>
+
+
 <script>
 <?php
     $array_entregue = array();
@@ -81,6 +73,56 @@ var graph_data = [[{{implode(',',$array_nentregue)}}],[{{implode(',',$array_apro
 
 $(function () {
 
+    var tot_status_1 = {{ ($graphdash['status_1']) }};
+    var tot_status_2 = {{ ($graphdash['status_2']) }};
+    var tot_status_3 = {{ ($graphdash['status_3']) }};
+    var tot = tot_status_1+tot_status_2+tot_status_3;
+
+    Highcharts.chart('graph_container', {
+    chart: {
+        type: 'pie',
+        options3d: {
+            enabled: true,
+            alpha: 45,
+            beta: 0
+        }
+    },
+    title: {
+        text: ''
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            depth: 35,
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+            }
+        }
+    },
+    series: [{
+        name: 'Percentual entregas',
+        colorByPoint: true,
+        data: [{
+            name: 'Não efetuada',
+            y: tot_status_1, 
+            color: '#5268ff'
+        }, {
+            name: 'Em aprovação',
+            y: tot_status_2,
+            sliced: true,
+            selected: true
+        }, {
+            name: 'Aprovada',
+            y: tot_status_3
+        }]
+    }]
+});
+    
     setInterval(function(){ $( '#atualiza_btn' ).click() }, 300000);
 
     $.fn.bootstrapSwitch.defaults.onText = 'P.A.';

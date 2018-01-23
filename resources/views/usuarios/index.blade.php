@@ -26,21 +26,8 @@ $(function() {
         columns: [
             {data: 'name', name: 'name'},
             {data: 'email', name: 'email'},
-            {data: 'roles', name:'roles', searchable: false, orderable: false, render: function (data) {
-
-                var html = '';
-
-                if (data=='') {
-                    html = 'Inativo';
-                } else {
-                    $.each(data, function() {
-                      var key = Object.keys(this)[1];
-                      var value = this[key];
-                      html += value;
-                    });
-                }
-                 return html;
-            }},
+            {data: 'roles[0].display_name', name: 'roles.display_name'},
+            
             {data: 'id', name:'edit', searchable: false, orderable: false, render: function (data) {
 
                 var url = '<a href="{{ route('usuarios.show', ':id_show') }}" class="btn btn-default btn-sm">Mostrar</a>';

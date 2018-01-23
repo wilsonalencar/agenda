@@ -3,25 +3,41 @@
 @section('content')
 
 @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor')  || Auth::user()->hasRole('gbravo'))
+ 
+<div class="top-graficos">
+    <h2>Dashboard</h2>
+    <h5><span>Empresa:</span> {{$nome_empresa}} </h5>
+    <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
+</div> 
 
-<hr/>
 
-<div class="row">
-    <div class="header-grafh">
-        Status geral das entregas - {{$nome_empresa}} 
-        <img style="height:32px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right">
-    </div>
-</div>
+<div class="grafico-content">
+    <div class="row">
+        <div class="col-md-8 mgT30">
+            <div class="card">
+                <div class="header-grafh darkcyan">
+                    Status geral das entregas mensais
+                </div>
+                <div id="container" style="height:815px">Dashboard</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mgT30">
+                <div class="header-grafh yellow">
+                    Entregômetro
+                </div>
+                <div id="container_gauge" style="height:367px">Gauge</div>
+            </div>
 
-<div class="row">
-    <div class="col-md-9">
-        <div id="container" style="height: 800px;">Dashboard</div>
+            <div class="card mgT30">
+                <div class="header-grafh blue">
+                    Percentual de entregas
+                </div>
+                <div id="graph_container" style="height:367px">Dashboard</div>
+            </div>
+
+        </div>
     </div>
-    <div class="col-md-3">
-        <div id="container_gauge">Gauge</div>
-        <div id="graph_container" style="height: 400px;">dashboard</div>
-    </div>
-</div>
 </div>
 
 
@@ -105,7 +121,7 @@ $(function () {
         }
     },
     series: [{
-        name: 'Percentual entregas',
+        name: '',
         colorByPoint: true,
         data: [{
             name: 'Não efetuada',

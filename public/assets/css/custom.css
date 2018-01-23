@@ -1182,7 +1182,7 @@ a:-webkit-any-link{
     font-weight: 600;
     line-height: 21px;
     font-size: 12px;
-    height: 28px;
+    height: 30px;
 }
 
 .option-checkbox .bootstrap-switch-label {
@@ -1460,7 +1460,6 @@ a:-webkit-any-link{
 
 .top-graficos {
     background: #000;
-    margin-bottom: 15px;
 }
 
 .top-graficos h2 {
@@ -1483,6 +1482,7 @@ a:-webkit-any-link{
     padding: 2px 20px 20px 20px;
     color: #fff;
     font-weight: 500;
+    margin-bottom: 0px;
     font-size: 10px;
 }
 
@@ -1513,5 +1513,5 @@ a:-webkit-any-link{
     color: #fff;
     border-radius: 4px;
     padding: 7px 15px;
-    border: 1px solid #eee;
+    border: 1px solid #fff;
 }

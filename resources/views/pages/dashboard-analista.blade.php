@@ -1,51 +1,69 @@
 @extends('layouts.master')
 
 @section('content')
-<h2>Entregas por UF e Municípios</h2>
-<hr>
+
 {!! Form::open([
     'route' => 'dashboard_analista'
 ]) !!}
 
-<div class="form-group">
+<div class="content-top">
     <div class="row">
-        <div class="col-md-2">
-        {!! Form::label('uf', 'UF:', ['class' => 'control-label']) !!}
-        {!! Form::select('uf', $ufs, $graph['params']['p_uf'], ['class' => 'form-control','placeholder' => 'Seleciona...']) !!}
+        <div class="col-md-4">
+            <h1 class="title">Entregas por UF e Municípios</h1>
         </div>
-        <div id="codigo_input" class="col-md-5">
-        {!! Form::label('codigo', 'Municipio:', ['class' => 'control-label']) !!}
-        {!! Form::select('codigo', $municipios, null, ['class' => 'form-control']) !!}
-        </div>
-        <div class="col-md-2">
-            {!! Form::label('tributo', 'Tributo:', ['class' => 'control-label']) !!}
-            {!! Form::select('tributo', $tributos, $graph['params']['p_tributo'], ['class' => 'form-control','placeholder' => 'Todos']) !!}
-        </div>
-        <div class="col-md-2">
-            {!! Form::label('codigo', 'Periodo Apuração:', ['class' => 'control-label']) !!}
-            <div class="input-group spinner">
-                <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
-                <div class="input-group-btn-vertical">
-                  <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-                  <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
-                </div>
+        <div class="col-md-8">
+            <div class="refresh-option">
+                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
+                {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'atualiza_btn', 'class'=>'refresh-icon', 'type'=>'submit')) !!}
+                {!! Form::close() !!}
             </div>
-        </div>
-    </div>
-    <div class="row"><br/></div>
-    <div class="row">
-        <div class="col-md-2">
-        {!! Form::label('only-uf', 'Somente por UF?', ['class' => 'control-label']) !!}
-        {!! Form::checkbox('only-uf',1,$graph['params']['p_onlyuf'], ['class' => 'form-control','style' => 'width:30px']) !!}
+            <div class="period">
+                
+                <div class="input-group spinner">
+                    <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
+                    <div class="input-group-btn-vertical">
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                    </div>
+                </div>
+                <span>{!! Form::label('codigo', 'Periodo apuração:', ['class' => 'control-label']) !!}</span>
+            </div>
         </div>
     </div>
 </div>
 
-{!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-{!! Form::submit('Atualizar', ['id' => 'atualiza_btn', 'class' => 'btn btn-default']) !!}
-{!! Form::close() !!}
+<div class="select-options">
+    <div class="row">
+        <div class="col-md-4">
+            {!! Form::label('uf', 'UF:', ['class' => 'control-label']) !!}
+            {!! Form::select('uf', $ufs, $graph['params']['p_uf'], ['class' => 'form-control','placeholder' => 'Selecionar UF']) !!}
+            {!! Form::checkbox('only-uf',1,$graph['params']['p_onlyuf'], ['class' => 'checkbox-left']) !!}{!! Form::label('only-uf', 'Somente por UF?', ['class' => 'label-checkox']) !!}
+        </div>
+        <div id="codigo_input" class="col-md-4">
+            {!! Form::label('codigo', 'Municipio:', ['class' => 'control-label']) !!}
+            {!! Form::select('codigo', $municipios, null, ['class' => 'form-control']) !!}
+        </div>
+        <div class="col-md-4">
+            {!! Form::label('tributo', 'Tributo:', ['class' => 'control-label']) !!}
+            {!! Form::select('tributo', $tributos, $graph['params']['p_tributo'], ['class' => 'form-control','placeholder' => 'Todos']) !!}
+        </div>
+    </div>
+</div>
 
-<div id="container" style="position:absolute; right:150px; top:250px;">dashboard-analista</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="header-grafh darkcyan">
+                Status entregas 
+            </div>
+            <div id="container" style="height: 450px;">dashboard-analista</div>
+        </div>
+    </div>
+</div>
+
+
+
+
 
 <script>
 $(function () {
@@ -63,7 +81,7 @@ $(function () {
                     type: 'pie'
                 },
                 title: {
-                        text: 'Status Entregas'
+                        text: ''
 
                 },
                 tooltip: {

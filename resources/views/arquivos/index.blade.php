@@ -5,32 +5,43 @@
 @if (Session::has('message'))
    <div class="alert alert-info">{{ Session::get('message') }}</div>
 @endif
+
+<div class="content-top">
+    <div class="row">
+        <div class="col-md-4">
+            <h1 class="title">Arquivos</h1>
+        </div>
+    </div>
+</div>
+
         <!--span>Prezado usuário, selecione a atividade a qual se refere a entrega:</span><br/><br/-->
-        <table class="table table-bordered display" id="entregas-table">
-            <thead>
-                <tr>
-                    <td colspan="10">
-                        <input style="width: 145px; position:relative; left:10px; " placeholder="codigo" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
-                        <input style="width: 145px; position:relative; left:10px; " placeholder="cnpj" type="text" id="src_cnpj" name="src_cnpj" value="<?= $filter_cnpj ?>">
-                        <button id="adv_search" style="position:relative; left:10px;">BUSCAR</button>
-                    </td>
-                </tr>
-                <tr>
-                    <th>ID</th>
-                    <th>DESCRIÇÃO</th>
-                    <th>TRIBUTO</th>
-                    <!--th>REF</th-->
-                    <th>P.A.</th>
-                    <!--th>DATA LIMITE</th-->
-                    <th>DATA ENTREGA</th>
-                    <th>F.P.</th>
-                    <th>CNPJ</th>
-                    <th>COD</th>
-                    <th>DET.</th>
-                    <th>ARQUIVO</th>
-                </tr>
-            </thead>
-        </table>
+        <div class="table-default">
+            <table class="table display" id="entregas-table">
+                <thead>
+                    <tr class="search-table">
+                        <td colspan="10">
+                            <input placeholder="Código" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
+                            <input placeholder="CNPJ" type="text" id="src_cnpj" name="src_cnpj" value="<?= $filter_cnpj ?>">
+                            <button id="adv_search">Buscar</button>
+                        </td>
+                    </tr>
+                    <tr class="top-table">
+                        <th>Id</th>
+                        <th>Descrição</th>
+                        <th>Tributo</th>
+                        <!--th>REF</th-->
+                        <th>P.A.</th>
+                        <!--th>DATA LIMITE</th-->
+                        <th>Entrega</th>
+                        <th>F.P.</th>
+                        <th>CNPJ</th>
+                        <th>COD</th>
+                        <th>DET.</th>
+                        <th>Arquivo</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
 <script>
 
 $(function() {

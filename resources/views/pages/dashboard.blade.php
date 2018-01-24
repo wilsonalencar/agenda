@@ -4,58 +4,73 @@
 
 @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo')  || Auth::user()->hasRole('gcliente'))
 
-<div style="float:right; width:50%" class="flash-message">
-  @foreach (['danger', 'warning', 'success', 'info'] as $msg)
-    @if(Session::has('alert-' . $msg))
-    <p class="alert alert-{{ $msg }}">{{ Session::get('alert-' . $msg) }}</p>
-    @endif
-  @endforeach
-</div>
-<div class="row">
-    <div class="col-md-1">
-        <div class="input-group spinner">
-            <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
-            <div class="input-group-btn-vertical">
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+
+
+<div class="content-top">
+    <div class="row">
+        <div class="col-md-4">
+            <h1 class="title">Entregas por obrigação</h1>
+        </div>
+        <div class="col-md-8">
+            <div class="refresh-option">
+                {!! Form::open([
+                        'route' => 'dashboard'
+                    ]) !!}
+                {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'atualiza_btn', 'class'=>'refresh-icon', 'type'=>'submit')) !!}
+                {!! Form::close() !!}
+            </div>
+            <div class="period">
+                <div class="input-group spinner">
+                    <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
+                    <div class="input-group-btn-vertical">
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
+                    <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
+                    </div>
+                </div>
+                <span>Período:</span>
+            </div>
+            <div class="option-checkbox">
+                <div title="P.A (Periodo Apuração) / D.E (Data Entrega do mês subsequente)" style="height:28px" class="col-lg-4">
+                <input type="checkbox" name="pa-checkbox" <?= $switch==1?'checked':'' ?> ></div>
+            </div>
+            <div class="option-all">
+                <div class="item">
+                    {!! Form::open([
+                        'route' => 'dashboard'
+                    ]) !!}
+                    {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
+                    {!! Form::hidden('switch_periodo', $switch, ['class' => 'form-control']) !!}
+                </div>
+                <div class="item">
+                    {!! Form::radio('tipo_tributos', 'T', $tipo[0], ['id' => 'tipo_T']) !!}
+                    {{ Form::label('tipo_T', 'Todos') }}
+                </div>
+                <div class="item">
+                    {!! Form::radio('tipo_tributos', 'F',$tipo[1], ['id' => 'tipo_F']) !!}
+                    {{ Form::label('tipo_F', 'FED') }}
+                </div>
+                <div class="item">
+                    {!! Form::radio('tipo_tributos', 'E',$tipo[2], ['id' => 'tipo_E']) !!}
+                    {{ Form::label('tipo_E', 'EST') }}
+                    {!! Form::close() !!}
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-2">
-        <div title="P.A. (Periodo Apuração) / D.E. (Data Entrega do mês subsequente)" style="height:28px" class="col-lg-4">
-        <input type="checkbox" name="pa-checkbox" <?= $switch==1?'checked':'' ?> ></div>
-    </div>
-    <div class="col-md-4">
-        
-        <h3>Entregas por Obrigação</h1>
-        
-    </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'dashboard'
-        ]) !!}
-        {!! Form::button('<i class="fa fa-refresh"></i> Atualizar', array('id' => 'atualiza_btn', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {!! Form::hidden('switch_periodo', $switch, ['class' => 'form-control']) !!}
-    </div>
-    <div class="col-md-1 ">
-        {{ Form::label('tipo_T', 'TODO') }}
-        {!! Form::radio('tipo_tributos', 'T', $tipo[0], ['id' => 'tipo_T']) !!}
-    </div>
-    <div class="col-md-1 ">
-        {{ Form::label('tipo_F', 'FED') }}
-        {!! Form::radio('tipo_tributos', 'F',$tipo[1], ['id' => 'tipo_F']) !!}
-    </div>
-    <div class="col-md-1 ">
-        {{ Form::label('tipo_E', 'EST') }}
-        {!! Form::radio('tipo_tributos', 'E',$tipo[2], ['id' => 'tipo_E']) !!}
-        {!! Form::close() !!}
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="flash-message">
+        @foreach (['danger', 'warning', 'success', 'info'] as $msg)
+            @if(Session::has('alert-' . $msg))
+            <p class="alert alert-{{ $msg }}">{{ Session::get('alert-' . $msg) }}</p>
+            @endif
+        @endforeach
+        </div>
     </div>
 </div>
 
-
-
-<hr/>
 <div class="row hidden">
 {!! Form::open([
     'route' => 'dashboard_tributo'
@@ -66,8 +81,22 @@
 {!! Form::close() !!}
 </div>
 <div class="row">
-    <div id="container" style="height:69%" class="col-md-9">Dashboard</div>
-    <div id="container_gauge" style="height:40%" class="col-md-3">Gauge</div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="header-grafh darkcyan">
+                Status geral das entregas mensais
+            </div>
+            <div id="container" style="height: 500px;">Dashboard</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="header-grafh yellow">
+                Entregômetro
+            </div>
+            <div  id="container_gauge" >Gauge</div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -129,7 +158,7 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Status geral das entregas mensais'
+            text: ''
         },
         xAxis: {
             categories: graph_categories
@@ -226,7 +255,7 @@ $(function () {
                 plotShadow: false
             },
             title: {
-                text: 'Entregômetro'
+                text: ''
             },
             pane: {
                         startAngle: -150,

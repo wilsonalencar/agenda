@@ -7,12 +7,8 @@
     <div class="content-top">
         <div class="row">
             <div class="col-md-12">
-                <h1 class="title">@foreach($users as $user)
-                    @if ($user->isOnline())
-                        <img src="{{ URL::to('/') }}/assets/img/{{$user->roles[0]->name}}-icon.png" class="top-image" title="{{$user->name}}" />
-                        <!--i title="{{$user->name}} online" class="fa fa-user"></i-->
-                    @endif
-                @endforeach Online <span>/ Entregas</span></h1>
+                <h1 class="title">
+                Entregas</h1>
             </div>
         </div>
     </div>

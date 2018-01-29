@@ -649,6 +649,16 @@ class PagesController extends Controller
 
     }
 
+    public function imgGrafico1()
+    {
+        return view('pages.grafico1');
+    }
+
+    public function imgGrafico2()
+    {
+        return view('pages.grafico2');
+    }
+
     public function dashboard_tributo(Request $request) {
 
         Carbon::setTestNow();  //reset time

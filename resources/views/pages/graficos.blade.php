@@ -73,14 +73,12 @@
      if (array == 'img-1') {
         //alert('mostrar img 1 ');
         var iframe = document.getElementById('frameGrafico');
-        iframe.src = "{{ URL::to('/') }}/assets/img/grafico1.jpg";
-        //INSERIR A CLASSE 'img-responsive' nesta imagem
+        iframe.src = "grafico1";
 
      }
      else if (array == 'img-2') {
         var iframe = document.getElementById('frameGrafico');
-        iframe.src = "{{ URL::to('/') }}/assets/img/grafico2.jpg";
-        //INSERIR A CLASSE 'img-responsive' nesta imagem
+        iframe.src = "grafico2";
      }else {
       var iframe = document.getElementById('frameGrafico');
       iframe.src = 'dashboard?layout=graficos&emp_id='+array; 

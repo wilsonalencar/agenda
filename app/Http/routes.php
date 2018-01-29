@@ -48,6 +48,15 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::post('atualizarsenha', array('as'=>'atualizarsenha', 'uses'=>'UsuariosController@atualizarsenha'));
 
+    Route::get('/grafico1', [
+        'as' => 'grafico1',
+        'uses' => 'PagesController@imgGrafico1'
+    ]);
+
+    Route::get('/grafico2', [
+        'as' => 'grafico2',
+        'uses' => 'PagesController@imgGrafico2'
+    ]);
 });
 
 // Just the Owner, Admin, Manager, Supervisor and the Analyst

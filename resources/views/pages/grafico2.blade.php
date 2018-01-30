@@ -2,7 +2,7 @@
 
 @section('content')
 
-<img src="{{ URL::to('/') }}/assets/img/grafico2.jpg">
+<img src="{{ URL::to('/') }}/assets/img/grafico2.jpg" class="img-responsive">
 
 @stop
 <footer>

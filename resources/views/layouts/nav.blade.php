@@ -54,6 +54,7 @@
                                                     <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
                                                     <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
                                                     <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
+
                                                     @if ( Auth::user()->hasRole('gbravo'))
                                                         <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
                                                     @endif
@@ -61,6 +62,7 @@
                                                         <li><a href="{{ route('about') }}">Performance</a></li>
                                                         <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
                                                         <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
+                                                        <li><a href="{{ route('dashboard_analista') }}">Desempenho das Entregas</a></li>
                                                     @endif
                                                     <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
                                                 </li>

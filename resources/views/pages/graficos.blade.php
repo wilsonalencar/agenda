@@ -37,7 +37,7 @@
         <a href="">Nova Busca</a>
     </div>
 
-    <iframe src="" id="frameGrafico" width="100%" scrolling="no" frameborder="0" style="border:0; min-height: 1000px;">
+    <iframe src="" id="frameGrafico" width="100%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 1000px;">
     </iframe>
     
 </div>

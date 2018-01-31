@@ -2,7 +2,7 @@
 
 @section('content')
 
-<img src="{{ URL::to('/') }}/assets/img/grafico1.jpg" class="img-responsive">
+<img src="{{ URL::to('/') }}/assets/img/grafico-entregometro.png" class="img-responsive">
 
 
 @stop

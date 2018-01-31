@@ -233,7 +233,7 @@ $(function () {
         }, {
              name: 'Entregue (f.p.)',
              data: graph_data[5],
-             color: Highcharts.getOptions().colors[2]
+             color: '#F7F970'
          }]
     });
 

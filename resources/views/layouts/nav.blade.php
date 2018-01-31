@@ -62,7 +62,6 @@
                                                         <li><a href="{{ route('about') }}">Performance</a></li>
                                                         <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
                                                         <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
-                                                        <li><a href="{{ route('grafico1') }}">Desempenho das Entregas</a></li>
                                                     @endif
                                                     <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
                                                 </li>

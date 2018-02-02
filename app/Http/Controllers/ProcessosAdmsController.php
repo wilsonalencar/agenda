@@ -286,9 +286,9 @@ class ProcessosadmsController extends Controller
         foreach($estabelecimentos as $row) {
             $array[] = $row->id;
         }
-        /*
+        
         $processosadms = $processosadms->whereIn('estabelecimento_id', $array);
-        */
+        
         if ( isset($request['search']) && $request['search']['value'] != '' ) {
             $str_filter = $request['search']['value'];
         }

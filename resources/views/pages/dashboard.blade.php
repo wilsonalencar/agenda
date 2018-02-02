@@ -17,7 +17,7 @@
                         'route' => 'dashboard'
                     ]) !!}
                 {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'atualiza_btn', 'class'=>'refresh-icon', 'type'=>'submit')) !!}
-                {!! Form::close() !!}
+                
             </div>
             <div class="period">
                 <div class="input-group spinner">
@@ -35,9 +35,7 @@
             </div>
             <div class="option-all">
                 <div class="item">
-                    {!! Form::open([
-                        'route' => 'dashboard'
-                    ]) !!}
+                   
                     {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
                     {!! Form::hidden('switch_periodo', $switch, ['class' => 'form-control']) !!}
                 </div>
@@ -52,10 +50,11 @@
                 <div class="item">
                     {!! Form::radio('tipo_tributos', 'E',$tipo[2], ['id' => 'tipo_E']) !!}
                     {{ Form::label('tipo_E', 'EST') }}
-                    {!! Form::close() !!}
+                   
                 </div>
             </div>
         </div>
+        {!! Form::close() !!}
     </div>
 </div>
 
@@ -72,13 +71,7 @@
 </div>
 
 <div class="row hidden">
-{!! Form::open([
-    'route' => 'dashboard_tributo'
-]) !!}
-{!! Form::select('tributo', $tributos, ['class' => 'form-control'],['placeholder' => 'Seleciona um tributo...']) !!}
-{!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-{!! Form::button('<i class="fa fa-bar-chart"></i> Detalhe entregas estad/municip', array('id'=>'dtrib_btn','class'=>'hidden btn btn-default', 'type'=>'submit')) !!}
-{!! Form::close() !!}
+
 </div>
 <div class="row">
     <div class="col-md-8">

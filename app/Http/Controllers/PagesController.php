@@ -465,7 +465,7 @@ class PagesController extends Controller
                         break;
                 }
             }
-
+            
             if ($switch) {
                 $retval = DB::select( DB::raw("
                                     select t.nome,substr(limite,1,10) as lim,substr(data_aprovacao,1,10) as dt_aprovacao,limite,count(*),a.status

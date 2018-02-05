@@ -44,11 +44,15 @@
                     <thead>
                         <th>Usuário</th>
                         <th>Entregas / Prazo</th>
+                        <th>Usuário</th>
+                        <th>Entregas / Prazo</th>
                     </thead>
                     @foreach($standing as $user)
                     <tr>
-                    <td>{{$user->name}}</td>
-                    <td><i class="fa fa-info" title="{{$user->entrega_em_prazo}} de {{$user->entregas_totais}}"></i> {{$user->perc}} %</td>
+                        <td>{{$user[0]->name}}</td>
+                        <td><i class="fa fa-info" title="{{$user[0]->entrega_em_prazo}} de {{$user[0]->entregas_totais}}"></i> {{$user[0]->perc}} %</td>
+                        <td> <?php if (!empty($user[1])){ ?> {{$user[1]->name}} <?php } ?></td>
+                        <td><?php if (!empty($user[1])){ ?><i class="fa fa-info" title="{{$user[1]->entrega_em_prazo}} de {{$user[1]->entregas_totais}}"></i> {{$user[1]->perc}} %<?php } ?></td>
                     </tr>
                     @endforeach
                     </table>

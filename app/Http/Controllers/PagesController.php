@@ -215,7 +215,19 @@ class PagesController extends Controller
                                 ) AS X
                                 GROUP BY X.name");
 
-        return view('pages.about')->with('users',$usuarios)->with('standing',$standing)->with('periodo',$periodo_apuracao);
+        $array = array();
+        $i = 0;
+        if (count($standing) > 0) {
+            foreach($standing as $row) {
+
+                $array[$i][] = $row;
+                if (count($array[$i]) > 1) {
+                    $i++;
+                }
+            }
+        }
+       
+        return view('pages.about')->with('users',$usuarios)->with('standing',$array)->with('periodo',$periodo_apuracao);
     }
 
     public function upload()

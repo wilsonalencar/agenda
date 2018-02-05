@@ -79,6 +79,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('upload/{user}/entrega', array('as'=>'upload.entrega', 'uses'=>'UploadsController@entrega'));
     Route::post('upload/sendUpload', 'UploadsController@upload');
 
+    Route::post('about', array('as'=>'about', 'uses'=>'PagesController@about'));
     Route::get('/about', [
         'as' => 'about',
         'uses' => 'PagesController@about'

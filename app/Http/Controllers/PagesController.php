@@ -187,30 +187,35 @@ class PagesController extends Controller
 
     }
 
-    public function about()
+    public function about(Request $request)
     {
+        Carbon::setTestNow();  //reset time
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        $periodo_apuracao = $last_month->format('mY');
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+        }
+
         $usuarios = User::select('*')->get();
 
         $standing = DB::select("SELECT (X.name), SUM(X.fp) as entrega_fora_prazo, SUM(X.ep) as entrega_em_prazo, SUM(X.fp)+SUM(X.ep) as entregas_totais, ROUND(SUM(X.ep)/(SUM(X.fp)+SUM(X.ep))*100,2) as perc
                                 FROM (
                                     select u.name as name, count(a.id) as fp, 0 as ep from atividades a, users u
                                     where a.usuario_entregador=u.id and a.tipo_geracao='A' and a.data_entrega>a.limite
+                                    and a.periodo_apuracao = ".$periodo_apuracao."
                                     group by a.usuario_entregador
                                     union all
                                     select u.name as name, 0 as fp, count(a.id) as ep from atividades a, users u
                                     where a.usuario_entregador=u.id and a.tipo_geracao='A' and a.data_entrega<=a.limite
+                                    and a.periodo_apuracao = ".$periodo_apuracao."
                                     group by a.usuario_entregador
                                 ) AS X
                                 GROUP BY X.name");
-        /*
-        $standing = DB::table('atividades')
-            ->join('users', 'atividades.usuario_entregador', '=', 'users.id')
-            ->select('users.name',DB::raw('COUNT(*) as entregas'))
-            ->groupBy('atividades.usuario_entregador')
-            ->orderBy('entregas','desc')
-            ->get();
-        */
-        return view('pages.about')->with('users',$usuarios)->with('standing',$standing);
+
+        return view('pages.about')->with('users',$usuarios)->with('standing',$standing)->with('periodo',$periodo_apuracao);
     }
 
     public function upload()

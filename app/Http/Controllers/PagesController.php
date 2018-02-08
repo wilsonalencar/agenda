@@ -213,17 +213,26 @@ class PagesController extends Controller
                                     and a.periodo_apuracao = ".$periodo_apuracao."
                                     group by a.usuario_entregador
                                 ) AS X
-                                GROUP BY X.name");
-
+                                GROUP BY X.name order by perc desc");
         $array = array();
-        $i = 0;
-        if (count($standing) > 0) {
-            foreach($standing as $row) {
 
-                $array[$i][] = $row;
-                if (count($array[$i]) > 1) {
-                    $i++;
-                }
+        $div = count($standing) / 2;
+
+        if (floor($div) != $div) {
+            $div = $div + 0.5;
+        }
+        
+        if (count($standing) > 0) {
+
+            for($u=0;$u<count($standing);$u++) {
+
+                if (empty($array[$u][0]) && !empty($standing[$u]) && $u<$div) {
+
+                    $array[$u][0] = $standing[$u];
+                    if (!empty($standing[$u+$div])) {
+                        $array[$u][1] = $standing[$u+$div];    
+                    }
+                }    
             }
         }
        

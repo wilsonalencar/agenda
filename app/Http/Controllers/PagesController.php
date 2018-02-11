@@ -278,6 +278,35 @@ class PagesController extends Controller
         ->with('empresas_selected', $empresasSelected);
     }
 
+    public function desempenho_entregas(Request $request)
+    {
+
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $empresasArray = array();
+        $i = 0;
+        $u = 0;
+        foreach($empresas as $key => $empresa) {
+
+            $s = DB::select("Select COUNT(1) as ct FROM empresa_user where user_id = ".Auth::user()->id." AND empresa_id = ". $key . "");
+            if ((boolean)$s[0]->ct && $this->home($request, $key)) {
+
+                if (!empty($empresasArray[$i]) && count($empresasArray[$i]) > 3) {
+                    $u = 0;
+                    $i++;
+                }
+
+                $empresasArray[$i][$u]['empresa'] = $empresa;
+                $empresasArray[$i][$u]['key'] = $key;
+                
+            }
+
+            $u++;
+        }   
+        
+        return view('pages.desempenho_entregas')
+        ->with('empresas_selecionadas', $empresasArray);
+    }
+
     public function status_empresas(Request $request) {
 
         $iframe = false;
@@ -432,13 +461,18 @@ class PagesController extends Controller
         $iframe = false;
         $layoutgraficos = '';
         $nomeEmpresa = '';
+        $cor = '';
 
         if (!empty($_GET['layout'])) {
             $iframe = true;
-            $layoutgraficos = 'graficos';
+            $layoutgraficos = $_GET['layout'];
             $this->s_emp->id = $_GET['emp_id'];
             $empresa = Empresa::findOrFail($_GET['emp_id']);
             $nomeEmpresa = $empresa->razao_social;
+            if ($layoutgraficos == 'entregometro') {
+                $cor = $_GET['cor'];
+            }
+            
         }
 
         if ($request->has('switch_periodo')) {
@@ -574,7 +608,7 @@ class PagesController extends Controller
             $graphDash['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
             $graphDash['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
             $graphDash['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
-
+             
             return view('pages.dashboard'.$layoutgraficos)
                         ->withGraph($array)
                         ->withPeriodo($periodo_apuracao)
@@ -584,6 +618,7 @@ class PagesController extends Controller
                         ->withTipo($tipo_check)
                         ->withGraphdash($graphDash)
                         ->with('nome_empresa', $nomeEmpresa)
+                        ->with('cor', $cor)
                         ->with('emp_id', $this->s_emp->id);
         }
     }

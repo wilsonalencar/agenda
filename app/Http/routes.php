@@ -46,6 +46,11 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@graficos'
     ]);
 
+    Route::get('/desempenho_entregas', [
+        'as' => 'desempenho_entregas',
+        'uses' => 'PagesController@desempenho_entregas'
+    ]);
+
     Route::post('atualizarsenha', array('as'=>'atualizarsenha', 'uses'=>'UsuariosController@atualizarsenha'));
 
     Route::get('/grafico1', [
@@ -172,6 +177,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
 
     Route::post('home', array('as'=>'home', 'uses'=>'PagesController@home'));
     Route::post('graficos', array('as'=>'graficos', 'uses'=>'PagesController@graficos'));
+    Route::post('desempenho_entregas', array('as'=>'desempenho_entregas', 'uses'=>'PagesController@desempenho_entregas'));
     Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
     Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
 

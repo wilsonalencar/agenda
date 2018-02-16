@@ -8,10 +8,9 @@
 <div class="grafico-content">
     <div class="row">
         
-        <div class="col-md-4">
-            <div class="card mgT30">
+            <div class="card" style="margin-top: 17px;">
                 <div class="header-grafh {{$cor}}">
-                    {{$nome_empresa}}  <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right" width="35px" height="35px">
+                    {{$nome_empresa}}  <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right" style="margin-top: -2px;" height="22px">
                 </div>
                 <div id="container_gauge" style="height:367px">Gauge</div>
             </div>
@@ -23,7 +22,6 @@
                 <div id="graph_container" style="height:367px">Dashboard</div>
             </div>
 
-        </div>
     </div>
 </div>
 
@@ -234,7 +232,7 @@ $(function () {
                 plotShadow: false
             },
             title: {
-                text: 'Entregômetro'
+                text: ''
             },
             pane: {
                         startAngle: -150,

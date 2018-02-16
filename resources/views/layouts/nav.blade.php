@@ -5,8 +5,10 @@
             position: absolute;
             
             
-            width: 230px;
-            height: 45px;
+            width: 100%;
+            margin-left: -12px;
+            margin-top: 5px;
+            height: 35px;
             background: url("{{ URL::to('/') }}/assets/logo/logo-{{ session('seid') }}.png") center / contain no-repeat;
         }
     </style>

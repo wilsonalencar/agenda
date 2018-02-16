@@ -14,18 +14,18 @@
     }
 ?>
 
-<div class="graficos">
+<div class="graficos" style="background: #eceff3";>
 
-    <iframe src="" id="frameGrafico" width="49%" height="24%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 500px;">
+    <iframe src="" id="frameGrafico" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
     </iframe>
 
-    <iframe src="" id="frameGrafico2" width="49%" height="24%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 500px;">
+    <iframe src="" id="frameGrafico2" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
     </iframe>
 
-    <iframe src="" id="frameGrafico3" width="49%" height="24%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 500px;">
+    <iframe src="" id="frameGrafico3" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
     </iframe>
 
-    <iframe src="" id="frameGrafico4" width="49%" height="24%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 500px;">
+    <iframe src="" id="frameGrafico4" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
     </iframe>
     
 </div>
@@ -75,12 +75,12 @@
 
     if (array[1].key != undefined) {
         var iframe = document.getElementById('frameGrafico2');
-        iframe.src = 'dashboard?layout=entregometro&cor=blue&emp_id='+array[1].key;
+        iframe.src = 'dashboard?layout=entregometro&cor=red&emp_id='+array[1].key;
     }
 
      if (array[2].key != undefined) {
         var iframe = document.getElementById('frameGrafico3');
-        iframe.src = 'dashboard?layout=entregometro&cor=red&emp_id='+array[2].key;
+        iframe.src = 'dashboard?layout=entregometro&cor=blue&emp_id='+array[2].key;
     }
 
      if (array[3].key != undefined) {

@@ -13,69 +13,33 @@
         $displayCombo   = 'none';
     }
 ?>
-
+<!---
 <div class="graficos">
+   <div class="col-md-6" id="link0">
+                
+   </div>
+   <div class="col-md-6" id="link1">
+                
+   </div>
+   <div class="col-md-6" id="link2">
+                
+   </div>
+   <div class="col-md-6" id="link3">
+                
+   </div>
+    
+</div>
+-->
 
-    <div class="grafico-content">
-        <div class="row">
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="header-grafh yellow">
-                        Nome da empresa  <img src="/assets/logo/Logo-1.png" align="right" style="margin-top: -2px;" height="22px">
-                    </div>
-                    <div id="container_gauge" style="height:367px">Gauge</div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="header-grafh red">
-                        Nome da empresa  <img src="/assets/logo/Logo-4.png" align="right" style="margin-top: -2px;" height="22px">
-                    </div>
-                    <div id="container_gauge" style="height:367px">Gauge</div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="header-grafh blue">
-                        Nome da empresa  <img src="/assets/logo/Logo-5.png" align="right" style="margin-top: -2px;" height="22px">
-                    </div>
-                    <div id="container_gauge" style="height:367px">Gauge</div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="header-grafh">
-                        Nome da empresa  <img src="/assets/logo/Logo-6.png" align="right" style="margin-top: -2px;" height="22px">
-                    </div>
-                    <div id="container_gauge" style="height:367px">Gauge</div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
-    <!-- <iframe src="" id="frameGrafico" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
+    <iframe src="" id="frameGrafico" width="100%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 1000px;">
     </iframe>
-
-    <iframe src="" id="frameGrafico2" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
-    </iframe>
-
-    <iframe src="" id="frameGrafico3" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
-    </iframe>
-
-    <iframe src="" id="frameGrafico4" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
-    </iframe> -->
     
 </div>
 
 <script type="text/javascript">
   
   var arrayFromPHP = <?php echo json_encode($empresas_selecionadas) ?>;
+  
   var chamadas = 0;   
   count = 0;
   setInterval(function(){
@@ -100,39 +64,29 @@
 
   function AjaxFunctionGrafico(key, array)
   { 
+    var ids = '';
+    if (array[0] != undefined) {
+        ids = array[0].key;
+    }
 
+    if (array[1] != undefined) {
+        ids = ids+','+array[1].key;
+    }
+
+    if (array[2] != undefined) {
+        ids = ids+','+array[2].key;
+    }
+
+    if (array[3] != undefined) {
+        ids = ids+','+array[3].key;
+    }
+  
     var iframe = document.getElementById('frameGrafico');
-    iframe.src = '';
-    var iframe = document.getElementById('frameGrafico2');
-    iframe.src = '';
-    var iframe = document.getElementById('frameGrafico3');
-    iframe.src = '';
-    var iframe = document.getElementById('frameGrafico4');
-    iframe.src = '';
+    iframe.src = 'dashboard?layout=entregometro&empresas='+ids+'&cor=yellow&emp_id=1';
 
-
-    if (array[0].key != undefined) {
-        var iframe = document.getElementById('frameGrafico');
-        iframe.src = 'dashboard?layout=entregometro&cor=yellow&emp_id='+array[0].key;
-    }
-
-    if (array[1].key != undefined) {
-        var iframe = document.getElementById('frameGrafico2');
-        iframe.src = 'dashboard?layout=entregometro&cor=red&emp_id='+array[1].key;
-    }
-
-     if (array[2].key != undefined) {
-        var iframe = document.getElementById('frameGrafico3');
-        iframe.src = 'dashboard?layout=entregometro&cor=blue&emp_id='+array[2].key;
-    }
-
-     if (array[3].key != undefined) {
-        var iframe = document.getElementById('frameGrafico4');
-        iframe.src = 'dashboard?layout=entregometro&cor=black&emp_id='+array[3].key;
-    } 
      
   }
 
 </script>
 @stop
-
+ 

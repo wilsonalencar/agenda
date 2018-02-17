@@ -36,6 +36,7 @@ class PagesController extends Controller
         $layoutgraficos = '';
         $nomeEmpresa = '';
         if (!empty($_GET['layout'])) {
+
             $iframe = true;
             $layoutgraficos = 'graficos';
             $this->s_emp->id = $_GET['emp_id'];
@@ -295,14 +296,12 @@ class PagesController extends Controller
                     $i++;
                 }
 
-                $empresasArray[$i][$u]['empresa'] = $empresa;
                 $empresasArray[$i][$u]['key'] = $key;
-                
             }
 
             $u++;
         }   
-        
+           
         return view('pages.desempenho_entregas')
         ->with('empresas_selecionadas', $empresasArray);
     }
@@ -456,14 +455,39 @@ class PagesController extends Controller
         }
     }
 
-    public function dashboard(Request $request) {
+    public function returnEmpresasSearch(Request $request, $empresas) {
+        $arrayEmpresas = explode(',', $empresas);
+        $array = array();
+
+        $cores[0] = 'yellow';
+        $cores[1] = 'blue';
+        $cores[2] = 'red';
+        $cores[3] = 'black';
+
+        $i = 0;
+        foreach($arrayEmpresas as $row) {
+            $array[$i] = $this->dashboard($request, $row, true);
+            $array[$i]['cor'] = $cores[$i];
+            $i++;
+        }
+        
+        return view('pages.dashboardentregometro')
+                        ->with('array', $array);
+    }
+
+    public function dashboard(Request $request, $empresaID=0, $returnArray=false) {
 
         $iframe = false;
         $layoutgraficos = '';
         $nomeEmpresa = '';
         $cor = '';
 
+        if (!empty($_GET['empresas']) && !$returnArray) {
+            return $this->returnEmpresasSearch($request, $_GET['empresas']);
+        } 
+
         if (!empty($_GET['layout'])) {
+
             $iframe = true;
             $layoutgraficos = $_GET['layout'];
             $this->s_emp->id = $_GET['emp_id'];
@@ -473,6 +497,12 @@ class PagesController extends Controller
                 $cor = $_GET['cor'];
             }
             
+        }
+
+        if ($returnArray) {
+            $this->s_emp->id = $empresaID;
+            $empresa = Empresa::findOrFail($empresaID);
+            $nomeEmpresa = $empresa->razao_social;
         }
 
         if ($request->has('switch_periodo')) {
@@ -608,7 +638,22 @@ class PagesController extends Controller
             $graphDash['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
             $graphDash['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
             $graphDash['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
-             
+            
+            if ($returnArray) {
+                $array['graph'] = $array;
+                $array['periodo'] = $periodo_apuracao;
+                $array['switch'] = $switch;
+                $array['tributos'] = $tributos;
+                $array['cron'] = $cron;
+                $array['tipo'] = $tipo_check;
+                $array['graphdash'] = $graphDash;
+                $array['nome_empresa'] = $nomeEmpresa;
+                $array['cor'] = $cor;
+                $array['emp_id'] = $this->s_emp->id;
+
+                return $array;
+            }
+
             return view('pages.dashboard'.$layoutgraficos)
                         ->withGraph($array)
                         ->withPeriodo($periodo_apuracao)

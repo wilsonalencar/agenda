@@ -3,83 +3,98 @@
 @section('content')
 
 @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('supervisor')  || Auth::user()->hasRole('gbravo'))
- 
 
 <div class="grafico-content">
     <div class="row">
-        
-            <div class="card" style="margin-top: 17px;">
-                <div class="header-grafh {{$cor}}">
-                    {{$nome_empresa}}  <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $emp_id }}.png" align="right" style="margin-top: -2px;" height="22px">
-                </div>
-                <div id="container_gauge" style="height:367px">Gauge</div>
-            </div>
+            <?php 
+            $contador = 0;
+            foreach($array as $row){ ?>
 
-            <div class="card mgT30" style="display: none">
-                <div class="header-grafh blue">
-                    Percentual de entregas
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="header-grafh {{$row['cor']}}">
+                        <?php echo $row['nome_empresa'] ?>  <img src="{{ URL::to('/') }}/assets/logo/logo-{{ $row['emp_id'] }}.png" align="right" style="margin-top: -2px;" height="22px">
+                    </div>
+                    <div id="container_gauge<?php echo $contador; ?>" style="height:367px">Gauge</div>        
+                    </div>
                 </div>
-                <div id="graph_container" style="height:367px">Dashboard</div>
-            </div>
 
+                
+
+                <div class="card mgT30" style="display: none;">
+                    <div class="header-grafh blue">
+                        Percentual de entregas
+                    </div>
+                    <div id="graph_container<?php echo $contador; ?>" style="height:367px">Dashboard</div>
+                </div>
+            <?php 
+                $contador++;
+                } 
+            ?>
     </div>
 </div>
-
-
 <script>
 <?php
-    $array_entregue = array();
-    $array_nentregue = array();
-    $array_aprovacao = array();
-    $array_entregue_vencidas = array();
-    $array_nentregue_vencidas = array();
-    $array_aprovacao_vencidas = array();
+    for ($u=0;$u<$contador;$u++) {
 
-    foreach ($graph as $el) {
-        $array_nentregue[] = isset($el['count']['s1'])?$el['count']['s1']:0;
-        $array_aprovacao[] = isset($el['count']['s2'])?$el['count']['s2']:0;
-        $array_entregue[] = isset($el['count']['s3'])?$el['count']['s3']:0;
-        $array_nentregue_vencidas[] = isset($el['count']['v1'])?$el['count']['v1']:0;
-        $array_aprovacao_vencidas[] = isset($el['count']['v2'])?$el['count']['v2']:0;
-        $array_entregue_vencidas[] = isset($el['count']['v3'])?$el['count']['v3']:0;
-    }
+        $array_entregue = array();
+        $array_nentregue = array();
+        $array_aprovacao = array();
+        $array_entregue_vencidas = array();
+        $array_nentregue_vencidas = array();
+        $array_aprovacao_vencidas = array();
 
-    $sum = array_map(function () {
-        return array_sum(func_get_args());
-    }, $array_entregue, $array_nentregue, $array_aprovacao,$array_entregue_vencidas,$array_nentregue_vencidas,$array_aprovacao_vencidas );
-
-    $tot_entregas_efetuadas = array_sum($array_entregue) + array_sum($array_entregue_vencidas);
-    $tot_entregas_periodo = $tot_entregas_efetuadas + array_sum($array_nentregue) + array_sum($array_aprovacao) + array_sum($array_nentregue_vencidas) + array_sum($array_aprovacao_vencidas);
-
-    //Valor percentual
-    for ($i=0; $i<sizeof($sum); $i++) {
-        if ($sum[$i]>0) {
-            $array_nentregue[$i] = round($array_nentregue[$i]/$sum[$i]*100,0);
-            $array_aprovacao[$i] = round($array_aprovacao[$i]/$sum[$i]*100,0);
-            $array_entregue[$i]  = round($array_entregue[$i]/$sum[$i]*100,0);
-            $array_nentregue_vencidas[$i] = round($array_nentregue_vencidas[$i]/$sum[$i]*100,0);
-            $array_aprovacao_vencidas[$i] = round($array_aprovacao_vencidas[$i]/$sum[$i]*100,0);
-            $array_entregue_vencidas[$i]  = round($array_entregue_vencidas[$i]/$sum[$i]*100,0);
+        foreach ($array[$u]['graph'] as $el) {
+            $array_nentregue[] = isset($el['count']['s1'])?$el['count']['s1']:0;
+            $array_aprovacao[] = isset($el['count']['s2'])?$el['count']['s2']:0;
+            $array_entregue[] = isset($el['count']['s3'])?$el['count']['s3']:0;
+            $array_nentregue_vencidas[] = isset($el['count']['v1'])?$el['count']['v1']:0;
+            $array_aprovacao_vencidas[] = isset($el['count']['v2'])?$el['count']['v2']:0;
+            $array_entregue_vencidas[] = isset($el['count']['v3'])?$el['count']['v3']:0;
         }
-    }
 
-    $divisao = 0;
-    if ($tot_entregas_periodo > 0) {
-        $divisao = round(($tot_entregas_efetuadas*100)/$tot_entregas_periodo,2);
-    }    
+        $sum = array_map(function () {
+            return array_sum(func_get_args());
+        }, $array_entregue, $array_nentregue, $array_aprovacao,$array_entregue_vencidas,$array_nentregue_vencidas,$array_aprovacao_vencidas );
+
+        $tot_entregas_efetuadas = array_sum($array_entregue) + array_sum($array_entregue_vencidas);
+        $tot_entregas_periodo = $tot_entregas_efetuadas + array_sum($array_nentregue) + array_sum($array_aprovacao) + array_sum($array_nentregue_vencidas) + array_sum($array_aprovacao_vencidas);
+
+        //Valor percentual
+        for ($i=0; $i<sizeof($sum); $i++) {
+            if ($sum[$i]>0) {
+                $array_nentregue[$i] = round($array_nentregue[$i]/$sum[$i]*100,0);
+                $array_aprovacao[$i] = round($array_aprovacao[$i]/$sum[$i]*100,0);
+                $array_entregue[$i]  = round($array_entregue[$i]/$sum[$i]*100,0);
+                $array_nentregue_vencidas[$i] = round($array_nentregue_vencidas[$i]/$sum[$i]*100,0);
+                $array_aprovacao_vencidas[$i] = round($array_aprovacao_vencidas[$i]/$sum[$i]*100,0);
+                $array_entregue_vencidas[$i]  = round($array_entregue_vencidas[$i]/$sum[$i]*100,0);
+            }
+        }
+
+        $divisao[$u] = 0;
+        if ($tot_entregas_periodo > 0) {
+            $divisao[$u] = round(($tot_entregas_efetuadas*100)/$tot_entregas_periodo,2);
+        }
+        
 
 ?>
-var graph_categories = [<?= "'" . implode("','", array_keys($graph)) . "'" ?>];
-var graph_data = [[{{implode(',',$array_nentregue)}}],[{{implode(',',$array_aprovacao)}}],[{{implode(',',$array_entregue)}}],[{{implode(',',$array_nentregue_vencidas)}}],[{{implode(',',$array_aprovacao_vencidas)}}],[{{implode(',',$array_entregue_vencidas)}}]];
+var graph_categories<?php echo $u; ?> = [<?= "'" . implode("','", array_keys($array[$u]['graph'])) . "'" ?>];
+var graph_data<?php echo $u; ?> = [[{{implode(',',$array_nentregue)}}],[{{implode(',',$array_aprovacao)}}],[{{implode(',',$array_entregue)}}],[{{implode(',',$array_nentregue_vencidas)}}],[{{implode(',',$array_aprovacao_vencidas)}}],[{{implode(',',$array_entregue_vencidas)}}]];
+<?php } ?>
 
 $(function () {
 
-    var tot_status_1 = {{ ($graphdash['status_1']) }};
-    var tot_status_2 = {{ ($graphdash['status_2']) }};
-    var tot_status_3 = {{ ($graphdash['status_3']) }};
-    var tot = tot_status_1+tot_status_2+tot_status_3;
+    <?php 
+        for ($u=0;$u<$contador;$u++) {
+    ?>
 
-    Highcharts.chart('graph_container', {
+    var tot_status_1 = {{ ($array[$u]['graphdash']['status_1']) }};
+    var tot_status_2 = {{ ($array[$u]['graphdash']['status_2']) }};
+    var tot_status_3 = {{ ($array[$u]['graphdash']['status_3']) }};
+    var tot = tot_status_1+tot_status_2+tot_status_3;
+    
+    Highcharts.chart('graph_container0', {
     chart: {
         type: 'pie',
         options3d: {
@@ -130,7 +145,7 @@ $(function () {
     $.fn.bootstrapSwitch.defaults.offText = 'D.E.';
     $("[name='pa-checkbox']").bootstrapSwitch();
 
-    $('#container').highcharts({
+    $('#container0').highcharts({
         chart: {
             type: 'column'
         },
@@ -138,7 +153,7 @@ $(function () {
             text: '' 
         },
         xAxis: {
-            categories: graph_categories
+            categories: graph_categories<?php echo $u; ?>
         },
         yAxis: {
             min: 0,
@@ -197,33 +212,32 @@ $(function () {
         },
         series: [{
             name: 'Não entregue',
-            data: graph_data[0],
+            data: graph_data<?php echo $u; ?>[0],
             color: '#DDDDDD'
         }, {
             name: 'Em aprovação',
-            data: graph_data[1],
+            data: graph_data<?php echo $u; ?>[1],
             color: Highcharts.getOptions().colors[0]
         }, {
             name: 'Entregue',
-            data: graph_data[2],
+            data: graph_data<?php echo $u; ?>[2],
             color: Highcharts.getOptions().colors[2]
         }, {
              name: 'Não entregue (f.p.)',
-             data: graph_data[3],
+             data: graph_data<?php echo $u; ?>[3],
              color: '#FC6F6F'
         }, {
              name: 'Em aprovação (f.p.)',
-             data: graph_data[4],
+             data: graph_data<?php echo $u; ?>[4],
              color: '#f2b44b'
         }, {
              name: 'Entregue (f.p.)',
-             data: graph_data[5],
+             data: graph_data<?php echo $u; ?>[5],
              color: '#F7F970'
          }]
     });
 
-    $('#container_gauge').highcharts({
-
+    $('#container_gauge'+<?php echo $u; ?>).highcharts({
             chart: {
                 type: 'gauge',
                 plotBackgroundColor: null,
@@ -306,7 +320,7 @@ $(function () {
 
             series: [{
                 name: 'Entregue: ',
-                data: [{{$divisao}}],
+                data: [{{$divisao[$u]}}],
                 tooltip: {
                     valueSuffix: ' %'
                 }
@@ -331,7 +345,10 @@ $(function () {
                 }, 3000);
             }
         });
+    <?php } ?>
 });
+
+
 
 (function ($) {
         $('.spinner .btn:first-of-type').on('click', function() { //UP

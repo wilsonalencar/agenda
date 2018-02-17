@@ -952,6 +952,7 @@ a:-webkit-any-link{
     border-radius: 4px;
     background-color: #fff;
     box-shadow: 0 3px 6px rgba(0,0,0,0.08), 0 3px 6px rgba(0,0,0,0.13);
+    margin-top: 15px;
 }
 
 .background-login {
@@ -1215,8 +1216,6 @@ a:-webkit-any-link{
     font-weight: 400;
     font-size: 13px;
 }
-
-
 
 .gray{
     background-color: #cccccc;

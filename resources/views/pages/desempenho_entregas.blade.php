@@ -14,9 +14,52 @@
     }
 ?>
 
-<div class="graficos" style="background: #eceff3";>
+<div class="graficos">
 
-    <iframe src="" id="frameGrafico" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
+    <div class="grafico-content">
+        <div class="row">
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="header-grafh yellow">
+                        Nome da empresa  <img src="/assets/logo/Logo-1.png" align="right" style="margin-top: -2px;" height="22px">
+                    </div>
+                    <div id="container_gauge" style="height:367px">Gauge</div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="header-grafh red">
+                        Nome da empresa  <img src="/assets/logo/Logo-4.png" align="right" style="margin-top: -2px;" height="22px">
+                    </div>
+                    <div id="container_gauge" style="height:367px">Gauge</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="header-grafh blue">
+                        Nome da empresa  <img src="/assets/logo/Logo-5.png" align="right" style="margin-top: -2px;" height="22px">
+                    </div>
+                    <div id="container_gauge" style="height:367px">Gauge</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="header-grafh">
+                        Nome da empresa  <img src="/assets/logo/Logo-6.png" align="right" style="margin-top: -2px;" height="22px">
+                    </div>
+                    <div id="container_gauge" style="height:367px">Gauge</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- <iframe src="" id="frameGrafico" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
     </iframe>
 
     <iframe src="" id="frameGrafico2" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
@@ -26,7 +69,7 @@
     </iframe>
 
     <iframe src="" id="frameGrafico4" width="49.75%" height="25%" scrolling="no" frameborder="0" style="border:0; background: #eceff3; min-height: 440px;">
-    </iframe>
+    </iframe> -->
     
 </div>
 

@@ -90,7 +90,13 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
         'uses' => 'PagesController@about'
     ]);
 
+    Route::get('/dropdown-municipios', function(Request $request){
 
+        $input = $request->input('option');
+        $municipios = Municipio::where('uf',$input);
+
+        return Response::make($municipios->get(['codigo','nome']));
+    });
 });
 
 //Everyone registered
@@ -151,14 +157,6 @@ Route::group(['middleware' => ['web','auth','role:user|analyst|supervisor|manage
         $regras = $tributo->regras();
 
         return Response::make($regras->get(['id','nome_especifico','ref','regra_entrega']));
-    });
-
-    Route::get('/dropdown-municipios', function(Request $request){
-
-        $input = $request->input('option');
-        $municipios = Municipio::where('uf',$input);
-
-        return Response::make($municipios->get(['codigo','nome']));
     });
 
     Route::get('/calendar', [

@@ -15,7 +15,7 @@
             <div class="refresh-option">
                 {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
                 {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'atualiza_btn', 'class'=>'refresh-icon', 'type'=>'submit')) !!}
-                {!! Form::close() !!}
+                
             </div>
             <div class="period">
                 
@@ -62,7 +62,7 @@
 </div>
 
 
-
+{!! Form::close() !!}
 
 
 <script>

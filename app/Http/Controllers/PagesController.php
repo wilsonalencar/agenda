@@ -687,8 +687,11 @@ class PagesController extends Controller
 
         if ($request->has('tributo')) {
             $tributo_id = Input::get("tributo");
+            $uf = Input::get("uf");
+            $only_uf = Input::get("only-uf");
+            $codigo = Input::get("codigo");
 
-            $graph['params'] = array('p_uf'=>null,'p_onlyuf'=>null,'p_codigo'=>null,'p_tributo'=>$tributo_id);
+            $graph['params'] = array('p_uf'=>$uf,'p_onlyuf'=>$only_uf,'p_codigo'=>$codigo,'p_tributo'=>$tributo_id);
             $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
 
 

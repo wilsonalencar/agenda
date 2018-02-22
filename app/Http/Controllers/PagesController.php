@@ -694,11 +694,16 @@ class PagesController extends Controller
             $graph['params'] = array('p_uf'=>$uf,'p_onlyuf'=>$only_uf,'p_codigo'=>$codigo,'p_tributo'=>$tributo_id);
             $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
 
+            $ref = $codigo;
+            if ($only_uf) {
+                $ref = $uf;
+            }
 
             $ativ_filtered = DB::table('atividades')
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
                 ->select(array('status',DB::raw('COUNT(atividades.id) as count')))
                 ->where('periodo_apuracao',$periodo_apuracao)
+                ->where('ref',$ref)
                 ->where('recibo', 1)
                 ->where('regras.tributo_id',$tributo_id)
                 ->where('emp_id',$this->s_emp->id)

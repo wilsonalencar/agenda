@@ -30,6 +30,64 @@ class PagesController extends Controller
             $this->s_emp = Empresa::findOrFail(session('seid'));
     }
 
+    public function aprovacao (Request $request = null)
+    {
+        
+        Carbon::setTestNow();  //reset
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+
+        } else {
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+        // Verifica que o periodo exista
+        $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
+        if ($cron==null) {
+            $info_periodo = substr($periodo_apuracao,0,2).'/'.substr($periodo_apuracao,-4,4);
+            Session::flash('alert-warning', "O periodo $info_periodo não tem atividades cadastradas. Foi carregado o periodo padrão.");
+            $periodo_apuracao = $last_month->format('mY');
+        }
+   
+        
+        $tributos = Tributo::selectRaw("nome")->whereNotIn('id',[12,13,14,15])->lists('nome','nome');
+
+        $retval = $this->_loadNotifications(); //var_dump($retval);
+        $graph = array();
+        
+        $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+        $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+        $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+
+        $graphUF = DB::select('SELECT 
+                                C.UF,
+                                SUM(if(Status = 1, 1, 0)) as Status1,
+                                SUM(if(Status = 2, 1, 0)) as Status2,
+                                SUM(if(Status = 3, 1, 0)) as Status3
+                            FROM
+                                agenda.atividades A
+                                    INNER JOIN
+                                estabelecimentos B ON A.estemp_id = B.id
+                                    INNER JOIN
+                                municipios C ON B.cod_municipio = C.codigo
+                                where A.recibo = 1 AND periodo_apuracao = "'.$periodo_apuracao.'"
+                            GROUP BY (C.UF)');
+
+
+        return view('pages.aprovacao')->withMessages($retval['ordinarias'])
+            ->withVencidas($retval['vencidas'])
+            ->withUrgentes($retval['urgentes'])
+            ->withAprovacao($retval['em_aprovacao'])
+            ->withGraph($graph)
+            ->withPeriodo($periodo_apuracao)
+            ->withCron($cron)
+            ->with('graph_uf', $graphUF);
+
+    }
+
     public function home (Request $request = null, $empresaID=false)
     {
         $iframe = false;

@@ -41,6 +41,12 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@home'
     ]);
 
+    Route::get('/aprovacao', [
+        'as' => 'aprovacao',
+        'uses' => 'PagesController@aprovacao'
+    ]);
+
+
     Route::get('/graficos', [
         'as' => 'graficos',
         'uses' => 'PagesController@graficos'
@@ -68,6 +74,7 @@ Route::group(['middleware' => ['web']], function () {
 Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente']], function () {
 
     Route::post('home', array('as'=>'home', 'uses'=>'PagesController@home'));
+    Route::post('aprovacao', array('as'=>'aprovacao', 'uses'=>'PagesController@aprovacao'));
     Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
     Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
 

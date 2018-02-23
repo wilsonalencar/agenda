@@ -46,6 +46,11 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@graficos'
     ]);
 
+    Route::get('/consulta_conta_corrente', [
+        'as' => 'consulta_conta_corrente',
+        'uses' => 'PagesController@consulta_conta_corrente'
+    ]);
+
     Route::get('/desempenho_entregas', [
         'as' => 'desempenho_entregas',
         'uses' => 'PagesController@desempenho_entregas'

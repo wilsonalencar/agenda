@@ -215,8 +215,8 @@ class PagesController extends Controller
                                     group by a.usuario_entregador
                                 ) AS X
                                 GROUP BY X.name order by perc desc");
+        
         $array = array();
-
         $div = count($standing) / 2;
 
         if (floor($div) != $div) {
@@ -304,6 +304,82 @@ class PagesController extends Controller
            
         return view('pages.desempenho_entregas')
         ->with('empresas_selecionadas', $empresasArray);
+    }
+
+    public function consulta_conta_corrente(Request $request)
+    {
+        $dataBusca = array();
+
+        if (empty($dataBusca)) {
+            $timestamp = strtotime("-12 months");
+            $datInicial = date('d-m-Y', $timestamp);
+            $datAtual = date('d-m-Y');
+
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+         
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+            $dataBusca = substr($dataBusca,0,-1);   
+        }
+        
+
+        //Grafico 1
+        $retval = DB::select("SELECT 
+                                    A.id,
+                                    A.periodo_apuracao, 
+                                    A.estabelecimento_id,
+                                    (A.vlr_guia * A.vlr_sped)  as GUIASPED, 
+                                    (A.vlr_gia * A.vlr_sped)   as GIASPED, 
+                                    (A.vlr_guia * A.vlr_gia)   as GUIAGIA, 
+                                    (A.vlr_guia * A.dipam)     as GUIADIPAM, 
+                                    (A.vlr_gia * A.dipam)      as GIADIPAM, 
+                                    (A.vlr_sped * A.dipam)     as SPEDDIPAM 
+                                FROM 
+                                    movtocontacorrentes A
+                                INNER JOIN 
+                                    estabelecimentos B on A.estabelecimento_id = B.id
+                                WHERE 
+                                    B.empresa_id = ".$this->s_emp->id."
+                                AND
+                                    1 = 1
+                                AND 
+                                    A.periodo_apuracao 
+                                IN
+                                    (".$dataBusca.") 
+                                ORDER BY 
+                                    A.periodo_apuracao desc");
+        $array = json_decode( json_encode($retval), true);
+        $graph1 = json_encode($retval);
+
+        //Fim Gráfico 1
+
+        //Grafico 2
+
+
+        $graph2 = '';
+        //Fim Gráfico 2
+
+
+
+        //Grafico 3
+
+
+        $graph2 = '';
+        //Fim Gráfico 3
+
+
+        return view('processosadms.consulta')->with('graph1',$graph1)->with('graph2',$graph2);
     }
 
     public function status_empresas(Request $request) {

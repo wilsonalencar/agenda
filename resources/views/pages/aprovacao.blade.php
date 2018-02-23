@@ -36,84 +36,59 @@
 
 <div id="caixas_container">
     @if (sizeof($aprovacao)>0)
-    <div class="caixa" id="limit_aprovacao">
-            <div id="aprovacao" class="">
-                <div class="header-box box-1">
+    <div class="caixa" style="height: 130%;" id="limit_aprovacao">
+            <div id="aprovacao">
+                <div class="header-box box-2">
                     Entregas em fase de aprovação
                     <div class="btn-group">
                         <button type="button" id="btn_close_aprovacao"><i class="fa fa-chevron-up" aria-hidden="true"></i>
-</button>
+                        </button>
                     </div>
                 </div>
                 <div class="tree">
-                    <p class="open-box" id="btn_open_aprovacao" class="btn-xs">Visualizar</p>
-                    <ul>
-                        @foreach($aprovacao as $message_trib_key=>$message_trib_val)
-                            <li>
-                                <span><i class="icon-folder-open"></i> {{ $message_trib_key }}</span>
-                                <ul>
-                                    @foreach($message_trib_val as $message_limit_key => $message_limit_val)
-                                    <li>
-                                        <span><i class="icon-folder-open"></i> {{ $message_limit_key }}</span>
-                                        <ul>
-                                            @foreach($message_limit_val as $message_estab_val)
-                                            <li>
-                                                <span><i class="icon-leaf"></i>
-                                                    {{ mask($message_estab_val->estemp->cnpj,'##.###.###/####-##') }}
-                                                    <a href="{{ route('atividades.show', $message_estab_val->id) }}" style="margin-left:10px" class="btn btn-default btn-sm">Visualizar</a>
-                                                </span>
-                                            </li>
-                                            @endforeach
-                                        </ul>
-                                    </li>
-                                    @endforeach
-                                </ul>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-                <br/>
-            </div>
-    </div>
-    @endif
+                    <table class="table table display" style=" font-size: 9px; height: 85%" id="myTableAprovacao">   
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Data</th>
+                                <th>Área</th>
+                                <th>CNPJ</th>
+                                <th>Atividade</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($aprovacao as $key => $value)
+                            <?php
+                                $timestamp = strtotime($value['data_entrega']);
+                                $value['data_entrega'] = date("d/m/Y", $timestamp);
+                                $antes  = substr($value['periodo_apuracao'], 0, 2);
+                                $depois = substr($value['periodo_apuracao'], 1 + 1);
+                                $value['periodo_apuracao'] = $antes . "/" . $depois;
+                            ?>
 
-    @if (sizeof($vencidas)>0)
-    <div class="caixa" id="limit_vencidas">
-            <div id="vencidas">
-                <div class="header-box box-2">
-                    Entregas vencidas
-                    <div class="btn-group">
-                        <button type="button" id="btn_close_vencidas"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
-                    </div>
+                            <tr>
+                                <td><?php echo $value['periodo_apuracao']; ?></td>
+                                <td><?php echo $value['data_entrega']; ?></td>
+                                <td><?php echo $value['area']; ?></td>
+                                <td><?php echo mask($value['cnpj'], '##.###.###/####-##'); ?></td>
+                                <td><?php echo $value['descricao']; ?></td>
+                                <td><a href="{{ route('atividades.show', $value['id']) }}" style="margin-left:10px" class="btn btn-default btn-sm"><i class="fa fa-search"></i></a></td>
+                            </tr> 
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>                            
                 </div>
-                <div class="tree">
-                    <p class="open-box" id="btn_open_vencidas" class="btn-xs">Visualizar</p>
-                    <ul>
-                        @foreach($vencidas as $message_trib_key=>$message_trib_val)
-                            <li>
-                                <span><i class="icon-folder-open"></i> {{ $message_trib_key }}</span>
-                                <ul>
-                                    @foreach($message_trib_val as $message_limit_key => $message_limit_val)
-                                    <li>
-                                        <span><i class="icon-folder-open"></i> {{ $message_limit_key }}</span>
-                                        <ul>
-                                            @foreach($message_limit_val as $message_estab_val)
-                                            <li>
-                                                <span><i class="icon-leaf"></i>
-                                                    {{ mask($message_estab_val->estemp->cnpj,'##.###.###/####-##') }}
-                                                    <a href="{{ route('atividades.show', $message_estab_val->id) }}" style="margin-left:10px" class="btn btn-default btn-sm">Visualizar</a>
-                                                </span>
-                                            </li>
-                                            @endforeach
-                                        </ul>
-                                    </li>
-                                    @endforeach
-                                </ul>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-                <br/>
             </div>
     </div>
     @endif
@@ -235,7 +210,6 @@
             <div id="vencidas" style="background-color:black; color:white;" class="alert alert-danger">
                 <b>Entregas Vencidas</b> (Máxima prioridade!!!)
                 <hr/>
-                <div class="tree">
                     <ul>
                         @foreach($vencidas as $message_trib_key=>$message_trib_val)
                             <li>
@@ -260,10 +234,9 @@
                             </li>
                         @endforeach
                     </ul>
-                </div>
                 <br/>
             </div>
-        </div>
+        
     @endif
 
     @if (sizeof($urgentes)>0)
@@ -419,11 +392,23 @@
     $dataDifStringStatus3 = implode(",", $dataStatus3);
 ?>
 
+<script type="text/javascript">
+    $(document).ready(function (){
+    $('#myTableAprovacao').dataTable({
+        language: {                        
+            "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
+        },
+        "bInfo" : false,
+        "lengthChange": false,
+        "pageLength": 15
+    });        
+});
+
+</script>
+
 
 
 <script>
-
-
 $(function () {
 //Dashboard Graph
     var tot_status_1 = {{ ($graph['status_1']) }};
@@ -659,7 +644,6 @@ $(function () {
         e.stopPropagation();
     });
 });
-
 </script>
 @endif
 

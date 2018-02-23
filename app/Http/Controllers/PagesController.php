@@ -76,6 +76,29 @@ class PagesController extends Controller
                                 where A.recibo = 1 AND periodo_apuracao = "'.$periodo_apuracao.'"
                             GROUP BY (C.UF)');
 
+        $retval['em_aprovacao'] = DB::select('SELECT 
+                                    A.id,
+                                    C.UF,
+                                    A.descricao,
+                                    A.data_entrega,
+                                    B.codigo as area,
+                                    B.cnpj,
+                                    A.periodo_apuracao
+                                FROM
+                                    agenda.atividades A
+                                        INNER JOIN
+                                    estabelecimentos B ON A.estemp_id = B.id
+                                        INNER JOIN
+                                    municipios C ON B.cod_municipio = C.codigo
+                                        INNER JOIN 
+                                    empresas D ON B.empresa_id = D.id
+                                    WHERE 
+                                        A.recibo = 1 
+                                            AND periodo_apuracao = "'.$periodo_apuracao.'" AND D.id = "'.$this->s_emp->id.'"');
+        
+        if (!empty($retval['em_aprovacao'])) {
+            $retval['em_aprovacao'] = json_decode(json_encode($retval['em_aprovacao']), true);
+        }
 
         return view('pages.aprovacao')->withMessages($retval['ordinarias'])
             ->withVencidas($retval['vencidas'])

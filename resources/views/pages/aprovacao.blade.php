@@ -10,7 +10,7 @@
     Por isto identificou-se a necessidade de construir uma ferramenta que ajude o time com o gerenciamento das datas de entrega para torná-lo mais eficiente e, ao mesmo tempo, minimizar o risco de erros ou atrasos.</p>
     <img src="{{ URL::to('/') }}/assets/img/agenda-fiscal.png" />
 
-@elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente'))
+@elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente') || uth::user()->hasRole('analyst'))
 
 <div class="content-top">
     <div class="row">
@@ -290,27 +290,7 @@
             <hr/>
             <div class="tree">
                 <ul>
-                    @foreach($aprovacao as $message_trib_key=>$message_trib_val)
-                    <li>
-                        <span><i class="icon-folder-open"></i> {{ $message_trib_key }}</span>
-                        <ul>
-                            @foreach($message_trib_val as $message_limit_key => $message_limit_val)
-                            <li>
-                                <span><i class="icon-folder-open"></i> {{ $message_limit_key }}</span>
-                                <ul>
-                                    @foreach($message_limit_val as $message_estab_val)
-                                    <li>
-                                        <span><i class="icon-leaf"></i>
-                                            {{ mask($message_estab_val->estemp->cnpj,'##.###.###/####-##') }}
-                                        </span>
-                                    </li>
-                                    @endforeach
-                                </ul>
-                            </li>
-                            @endforeach
-                        </ul>
-                    </li>
-                    @endforeach
+                    
                 </ul>
             </div>
             <br/>

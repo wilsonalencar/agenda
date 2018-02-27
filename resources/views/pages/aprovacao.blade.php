@@ -10,7 +10,9 @@
     Por isto identificou-se a necessidade de construir uma ferramenta que ajude o time com o gerenciamento das datas de entrega para torná-lo mais eficiente e, ao mesmo tempo, minimizar o risco de erros ou atrasos.</p>
     <img src="{{ URL::to('/') }}/assets/img/agenda-fiscal.png" />
 
-@elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente'))
+@elseif(Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente') || uth::user()->hasRole('analyst'))
+
+
 
 <div class="content-top">
     <div class="row">
@@ -18,6 +20,14 @@
             <h1 class="title">Aprovação</h1>
         </div>
         <div class="col-md-6">
+            <div class="refresh-option">
+                {!! Form::open([
+                        'route' => 'aprovacao'
+                    ]) !!}
+                {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}    
+                {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'atualiza_btn', 'class'=>'refresh-icon', 'type'=>'submit')) !!}
+                
+            </div>
             <div class="period">
                 <div class="input-group spinner">
                     <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
@@ -171,35 +181,11 @@
     </div>
     @endif
 </div>
-
+    
+        
+    
 @else
-<div class="row">
-    <div class="col-md-2">
-        <div class="input-group spinner">
-            <input type="text" class="form-control" value="{{substr($periodo,0,2)}}/{{substr($periodo,-4,4)}}">
-            <div class="input-group-btn-vertical">
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
-              <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'dashboard_analista'
-        ]) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {!! Form::button('<i class="fa fa-pie-chart"></i> Dashboard Analista', array('type' => 'submit', 'id'=>'btn_dashboard_analista', 'class' => 'btn btn-default')) !!}
-        {!! Form::close() !!}
-    </div>
-    <div class="col-md-2">
-        {!! Form::open([
-            'route' => 'aprovacao'
-        ]) !!}
-        {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-        {!! Form::button('<i class="fa fa-refresh"></i> Atualizar', array('id' => 'btn_atualiza', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
-        {!! Form::close() !!}
-    </div>
-</div>
+
 <div style="float:right; width:40%; padding-left: 120px; font-size:small">
     @if (sizeof($vencidas)>0)
         <div class="caixa" id="limit_vencidas">
@@ -286,27 +272,7 @@
             <hr/>
             <div class="tree">
                 <ul>
-                    @foreach($aprovacao as $message_trib_key=>$message_trib_val)
-                    <li>
-                        <span><i class="icon-folder-open"></i> {{ $message_trib_key }}</span>
-                        <ul>
-                            @foreach($message_trib_val as $message_limit_key => $message_limit_val)
-                            <li>
-                                <span><i class="icon-folder-open"></i> {{ $message_limit_key }}</span>
-                                <ul>
-                                    @foreach($message_limit_val as $message_estab_val)
-                                    <li>
-                                        <span><i class="icon-leaf"></i>
-                                            {{ mask($message_estab_val->estemp->cnpj,'##.###.###/####-##') }}
-                                        </span>
-                                    </li>
-                                    @endforeach
-                                </ul>
-                            </li>
-                            @endforeach
-                        </ul>
-                    </li>
-                    @endforeach
+                    
                 </ul>
             </div>
             <br/>
@@ -572,7 +538,7 @@ Highcharts.chart('container_uf', {
 });
 //Spinner
 (function ($) {
-        $('.spinner .btn:first-of-type').on('click', function() { //UP
+       $('.spinner .btn:first-of-type').on('click', function() { //UP
               var value = $('.spinner input').val();
 
               var mes = parseInt(value.substr(0,2));
@@ -585,10 +551,10 @@ Highcharts.chart('container_uf', {
                   mes = '0'+mes;
               }
               year = ''+year;
-              $('.spinner input').val('loading..');
+              $('.spinner input').val(mes+'/'+year);
 
               $('input[name="periodo_apuracao"]').val(mes+year);
-              $( "#btn_atualiza" ).click();
+              $( "#atualiza_btn" ).click();
 
         });
 
@@ -605,10 +571,10 @@ Highcharts.chart('container_uf', {
                   mes = '0'+mes;
               }
               year = ''+year;
-              $('.spinner input').val('loading..');
+              $('.spinner input').val(mes+'/'+year);
 
               $('input[name="periodo_apuracao"]').val(mes+year);
-              $( "#btn_atualiza" ).click();
+              $( "#atualiza_btn" ).click();
        });
 })(jQuery);
 

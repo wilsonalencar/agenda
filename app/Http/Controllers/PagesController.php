@@ -73,7 +73,7 @@ class PagesController extends Controller
                                 estabelecimentos B ON A.estemp_id = B.id
                                     INNER JOIN
                                 municipios C ON B.cod_municipio = C.codigo
-                                where A.recibo = 1 AND periodo_apuracao = "'.$periodo_apuracao.'"
+                                where A.recibo = 1 AND periodo_apuracao = "'.$periodo_apuracao.'" AND A.emp_id = "'.$this->s_emp->id.'"
                             GROUP BY (C.UF)');
 
         $retval['em_aprovacao'] = DB::select('SELECT 
@@ -94,7 +94,7 @@ class PagesController extends Controller
                                     empresas D ON B.empresa_id = D.id
                                     WHERE 
                                         A.recibo = 1 
-                                            AND periodo_apuracao = "'.$periodo_apuracao.'" AND D.id = "'.$this->s_emp->id.'"');
+                                            AND periodo_apuracao = "'.$periodo_apuracao.'" AND A.emp_id = "'.$this->s_emp->id.'"');
         
         if (!empty($retval['em_aprovacao'])) {
             $retval['em_aprovacao'] = json_decode(json_encode($retval['em_aprovacao']), true);

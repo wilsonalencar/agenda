@@ -20,7 +20,7 @@
                 <thead>
                     <tr class="search-table">
                         <td colspan="10">
-                            <input placeholder="Código" maxlength="5" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
+                            <input placeholder="Código" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
                             <input placeholder="CNPJ" type="text" id="src_cnpj" name="src_cnpj" value="<?= $filter_cnpj ?>">
                             <button id="adv_search">Buscar</button>
                         </td>

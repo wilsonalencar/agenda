@@ -20,7 +20,7 @@
                 <thead>
                     <tr class="search-table">
                         <td colspan="10">
-                            <input placeholder="Código" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
+                            <input placeholder="Código" maxlength="5" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
                             <input placeholder="CNPJ" type="text" id="src_cnpj" name="src_cnpj" value="<?= $filter_cnpj ?>">
                             <button id="adv_search">Buscar</button>
                         </td>
@@ -120,7 +120,7 @@ $(function() {
                 var val_cnpj = $('#src_cnpj').val();
                 var val_codigo = $('#src_codigo').val();
                 if (val_cnpj || val_codigo) {
-                    var url = "{{ route('arquivos.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo.replace(/[^0-9]/g,'');
+                    var url = "{{ route('arquivos.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo;
                 } else {
                     var url = "{{ route('arquivos.index') }}";
                 }
@@ -131,7 +131,6 @@ $(function() {
 });
 jQuery(function($){
     $('input[name="src_cnpj"]').mask("99.999.999/9999-99");
-    $('input[name="src_codigo"]').mask("9999");
 });
 </script>
 

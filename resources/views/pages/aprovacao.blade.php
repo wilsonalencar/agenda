@@ -34,9 +34,9 @@
 </div>
 
 
-<div id="caixas_container">
+<div id="caixas_container-aprovacao">
     @if (sizeof($aprovacao)>0)
-    <div class="caixa" style="height: 130%;" id="limit_aprovacao">
+    <div class="caixa-aprovacao" style="height: 130%;" id="limit_aprovacao">
             <div id="aprovacao">
                 <div class="header-box box-2">
                     Entregas em fase de aprovação
@@ -281,10 +281,6 @@
 
     @if (sizeof($aprovacao)>0)
     <div class="caixa" id="limit_aprovacao">
-        <div style="float:right" class="btn-group">
-            <button type="button" id="btn_open_aprovacao" class="btn btn-warning btn-xs">Abrir</button>
-            <button type="button" id="btn_close_aprovacao" class="btn btn-warning btn-xs">Fechar</button>
-        </div>
         <div id="aprovacao" class="alert alert-warning">
             <b>Entregas em fase de aprovação</b>
             <hr/>
@@ -361,13 +357,13 @@
 
 @if (!Auth::guest())
 
-    <div class="grafh-content">
+    <div class="grafh-content-aprovacao">
         <div class="card">
             <div class="header-grafh">
                 Status geral das entregas
             </div>
-            <div id="graph_container" style="height: 470px">dashboard</div>
-            <div id="container_uf" style="height: 470px">dashboard</div>
+            <div id="graph_container" style="height: 70%; width: 100%">dashboard</div>
+            <div id="container_uf" style="height: 52%; width: 100%">dashboard</div>
         </div>
     </div>
 

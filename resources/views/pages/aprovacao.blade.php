@@ -46,7 +46,7 @@
 
 <div id="caixas_container-aprovacao">
     @if (sizeof($aprovacao)>0)
-    <div class="caixa-aprovacao" style="height: 130%;" id="limit_aprovacao">
+    <div class="caixa-aprovacao" style="height: 80%;" id="limit_aprovacao">
             <div id="aprovacao">
                 <div class="header-box box-2">
                     Entregas em fase de aprovação
@@ -328,8 +328,8 @@
             <div class="header-grafh">
                 Status geral das entregas
             </div>
-            <div id="graph_container" style="height: 70%; width: 100%">dashboard</div>
-            <div id="container_uf" style="height: 52%; width: 100%">dashboard</div>
+            <div id="graph_container" style="height: 33.6%; width: 100%">dashboard</div>
+            <div id="container_uf" style="height: 40%; width: 100%">dashboard</div>
         </div>
     </div>
 
@@ -360,9 +360,10 @@
         language: {                        
             "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
+        "bFilter": false,
         "bInfo" : false,
         "lengthChange": false,
-        "pageLength": 15
+        "pageLength": 10
     });        
 });
 

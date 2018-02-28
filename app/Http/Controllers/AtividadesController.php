@@ -135,7 +135,14 @@ class AtividadesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
+    {   
+        $aprovacao = false;
+        $aprovacao_referer = $_SERVER['HTTP_REFERER'];
+        $pos = strpos( $aprovacao_referer, 'aprovacao' );
+        if ($pos) {
+            $aprovacao = true;
+        }
+        
         $atividade = Atividade::findOrFail($id);
         $destinationPath = '#';
 
@@ -156,7 +163,7 @@ class AtividadesController extends Controller
             }
             $destinationPath = url('uploads') .'/'. substr($atividade->estemp->cnpj, 0, 8) . '/' . $atividade->estemp->cnpj . '/' . $tipo_label . '/' . $atividade->regra->tributo->nome . '/' . $atividade->periodo_apuracao . '/' . $atividade->arquivo_entrega; // upload path
         }
-        return view('atividades.show')->withAtividade($atividade)->withDownload($destinationPath);
+        return view('atividades.show')->withAtividade($atividade)->withDownload($destinationPath)->with('aprovacao', $aprovacao);
 
     }
 

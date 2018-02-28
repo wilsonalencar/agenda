@@ -85,21 +85,25 @@ class PagesController extends Controller
                                     B.cnpj,
                                     A.periodo_apuracao
                                 FROM
-                                    agenda.atividades A
+                                    atividades A
                                         INNER JOIN
+                                    regras R ON R.id = A.regra_id
+                                        INNER JOIN 
+                                    tributos T ON T.id = R.tributo_id
+                                        INNER JOIN 
                                     estabelecimentos B ON A.estemp_id = B.id
                                         INNER JOIN
                                     municipios C ON B.cod_municipio = C.codigo
                                         INNER JOIN 
                                     empresas D ON B.empresa_id = D.id
-                                    WHERE 
-                                        A.recibo = 1 
-                                            AND periodo_apuracao = "'.$periodo_apuracao.'" AND A.emp_id = "'.$this->s_emp->id.'"');
-        
+                                    WHERE  
+                                        A.status = 2 AND
+                                        A.emp_id = "'.$this->s_emp->id.'" ORDER BY A.limite');
+
         if (!empty($retval['em_aprovacao'])) {
             $retval['em_aprovacao'] = json_decode(json_encode($retval['em_aprovacao']), true);
         }
-
+        
         return view('pages.aprovacao')->withMessages($retval['ordinarias'])
             ->withVencidas($retval['vencidas'])
             ->withUrgentes($retval['urgentes'])

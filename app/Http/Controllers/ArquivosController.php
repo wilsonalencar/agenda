@@ -89,16 +89,16 @@ class ArquivosController extends Controller
 
         if($filter_codigo = $request->get('codigo')){
 
-            if ($filter_codigo == '1001') {
-                $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
-                $type = 'emp';
-            } else {
+            $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
+            $type = 'emp';
+
+            if (sizeof($estemp)==0) { 
                 $estemp = Estabelecimento::select('id')->where('codigo','like','%'.$filter_codigo)->get();
                 $type = 'estab';
             }
 
             if (sizeof($estemp)>0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type',$type);
+                $atividades = $atividades->whereIn('estemp_id', $estemp)->where('estemp_type',$type);
             } else {
                 $atividades = new Collection();
             }

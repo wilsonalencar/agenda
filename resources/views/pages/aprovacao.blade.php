@@ -337,6 +337,9 @@
     $categoria = array();
     $dataDif = array();
     $dataNDif = array();
+    $dataStatus1 = array();
+    $dataStatus2 = array();
+    $dataStatus3 = array();
     $dataDifString = '';
     $dataNDifString = '';
     if (count($graph_uf) > 0) {

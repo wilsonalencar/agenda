@@ -29,7 +29,6 @@ class CampoStatusContaCorrente extends Migration
      */
     public function down()
     {
-        //
         if (Schema::hasColumn('movtocontacorrentes', 'status_id')) {
             Schema::table('movtocontacorrentes', function (Blueprint $table) {
                 $table->dropColumn('status_id');

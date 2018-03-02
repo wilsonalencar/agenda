@@ -14,7 +14,7 @@ class AlterTableTributos extends Migration
     {
         if (! Schema::hasColumn('tributos', 'pasta_arquivos')) {
             Schema::table('tributos', function (Blueprint $table) {
-                $table->string('pasta_arquivos', 255)->nullable()->after('alerta');
+                $table->string('pasta_arquivos', 255)->nullable()->default(NULL)->after('alerta');
             });
         }
     }

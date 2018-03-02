@@ -176,8 +176,8 @@
                                                 <div id="usuarios" class="panel-collapse collapse">
                                                     <div class="panel-body">
                                                         <ul class="nav navbar-nav">
-                                                            <li><a href="{{ route('regras.envio_lote') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
-                                                            <li><a href="{{ route('regras.lote_consulta') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                                            <li><a href="{{ route('regraslotes.envio_lote') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                                            <li><a href="{{ route('regraslotes.lote_consulta') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
                                                         </ul>
                                                     </div>
                                                 </div>

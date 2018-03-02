@@ -309,13 +309,14 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
 
     Route::resource('regras', 'RegrasController');
     Route::get('regra/data', array('as'=>'regras.data', 'uses'=>'RegrasController@anyData'));
-    Route::get('regra/envio_lote', array('as'=>'regras.envio_lote', 'uses'=>'RegrasController@envio_lote'));
-    Route::get('regra/edit_lote', array('as'=>'regras.edit_lote', 'uses'=>'RegrasController@edit_lote'));
-    Route::get('regra/lote_consulta', array('as'=>'regras.lote_consulta', 'uses'=>'RegrasController@lote_consulta'));
-    Route::get('regra/excluir', array('as'=>'regras.excluir', 'uses'=>'RegrasController@excluir'));
-    Route::get('regra/excluirFilial', array('as'=>'regras.excluirFilial', 'uses'=>'RegrasController@excluirFilial'));
-
     Route::get('regra/{regra}/{estabelecimento}/{enable}/setBlacklist', array('as'=>'regras.setBlacklist', 'uses'=>'RegrasController@setBlacklist'));
+
+    Route::resource('regraslotes', 'RegrasenviolotesController');
+    Route::get('regra/envio_lote', array('as'=>'regraslotes.envio_lote', 'uses'=>'RegrasenviolotesController@envio_lote'));
+    Route::get('regra/edit_lote', array('as'=>'regraslotes.edit_lote', 'uses'=>'RegrasenviolotesController@edit_lote'));
+    Route::get('regra/lote_consulta', array('as'=>'regraslotes.lote_consulta', 'uses'=>'RegrasenviolotesController@lote_consulta'));
+    Route::get('regra/excluir', array('as'=>'regraslotes.excluir', 'uses'=>'RegrasenviolotesController@excluir'));
+    Route::get('regra/excluirFilial', array('as'=>'regraslotes.excluirFilial', 'uses'=>'RegrasenviolotesController@excluirFilial'));
 
     Route::resource('usuarios', 'UsuariosController');
     Route::get('usuario/data', array('as'=>'usuarios.data', 'uses'=>'UsuariosController@anyData'));

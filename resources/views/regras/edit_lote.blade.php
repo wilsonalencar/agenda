@@ -19,7 +19,7 @@ foreach ($dados as $key => $value) {
 <h1>Regras de envio por lote</h1>
 <hr>
 {!! Form::open([
-    'route' => 'regras.store'
+    'route' => 'regraslotes.store'
 ]) !!}
 
 <div class="form-group">
@@ -79,7 +79,7 @@ foreach ($dados as $key => $value) {
 
 <div id="hidden_div" style="display:none;">
     {!! Form::open([
-        'route' => 'regras.store'
+        'route' => 'regraslotes.store'
     ]) !!}
 
     <div class="form-group">
@@ -128,7 +128,7 @@ foreach ($dados as $key => $value) {
 function confirma() {
     if (confirm("Você tem certeza que quer deletar o registro?") == true) {
         <?php if (!empty($date['id'])) { ?>
-        window.location="{{ route('regras.excluirFilial', $date['id']) }}";
+        window.location="{{ route('regraslotes.excluirFilial', $date['id']) }}";
         <?php } ?>
     }
 }

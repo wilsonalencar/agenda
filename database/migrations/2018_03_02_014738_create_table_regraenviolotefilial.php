@@ -14,8 +14,10 @@ class CreateTableRegraenviolotefilial extends Migration
     {
         Schema::create('regraenviolotefilial', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('id_regraenviolote')->references('id')->on('regraenviolote')->onDelete('cascade');
-            $table->integer('id_estabelecimento')->references('id')->on('estabelecimentos')->onDelete('cascade');            
+            $table->integer('id_regraenviolote')->unsigned();
+            $table->integer('id_estabelecimento')->unsigned();
+            $table->foreign('id_regraenviolote')->references('id')->on('regraenviolote');
+            $table->foreign('id_estabelecimento')->references('id')->on('estabelecimentos');            
         });
     }
 

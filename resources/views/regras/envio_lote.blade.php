@@ -14,7 +14,7 @@
 <h1>Regras de envio por lote</h1>
 <hr>
 {!! Form::open([
-    'route' => 'regras.store'
+    'route' => 'regraslotes.store'
 ]) !!}
 
 <div class="form-group">

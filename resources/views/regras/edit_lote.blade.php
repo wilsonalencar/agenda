@@ -11,11 +11,6 @@
    
 @endif
 
-<?php
-foreach ($dados as $key => $value) {
-}
-?>
-
 <h1>Regras de envio por lote</h1>
 <hr>
 {!! Form::open([
@@ -25,16 +20,16 @@ foreach ($dados as $key => $value) {
 <div class="form-group">
     <div style="width:50%">
     {!! Form::label('select_tributos', 'Empresas', ['class' => 'control-label'] )  !!}
-    {!! Form::select('empresasview', $empresas, $value['id_empresa'], ['class' => 'form-control s2', 'disabled' => 'true']) !!}
-    {!! Form::hidden('select_empresas', $value['id_empresa'], ['class' => 'form-control']) !!}    
+    {!! Form::select('empresasview', $empresas, $dados['id_empresa'], ['class' => 'form-control s2', 'disabled' => 'true']) !!}
+    {!! Form::hidden('select_empresas', $dados['id_empresa'], ['class' => 'form-control']) !!}    
     </div>
 </div>
 
 <div class="form-group">
     <div style="width:50%">
     {!! Form::label('select_tributos', 'Responsabilidade Tributos', ['class' => 'control-label'] )  !!}
-    {!! Form::select('tributosview', $tributos, $value['id_tributo'], ['class' => 'form-control s2', 'disabled' => 'true']) !!}
-    {!! Form::hidden('select_tributos', $value['id_tributo'], ['class' => 'form-control']) !!}    
+    {!! Form::select('tributosview', $tributos, $dados['id_tributo'], ['class' => 'form-control s2', 'disabled' => 'true']) !!}
+    {!! Form::hidden('select_tributos', $dados['id_tributo'], ['class' => 'form-control']) !!}    
 
     </div>
 </div>
@@ -43,9 +38,9 @@ foreach ($dados as $key => $value) {
     <div style="width:30%">
         Regra geral:
         {{ Form::label('Sim', 'SIM') }}
-        {!! Form::radio('label_regra', true, ( $value['regra_geral'] == "S" ? true : false ), ['id' => 'regra_geral_SIM', 'onClick' => 'hideDiv()']) !!}
+        {!! Form::radio('label_regra', true, ( $dados['regra_geral'] == "S" ? true : false ), ['id' => 'regra_geral_SIM', 'onClick' => 'hideDiv()']) !!}
         {{ Form::label('Nao', 'NAO') }}
-        {!! Form::radio('label_regra', false, ( $value['regra_geral'] == "N" ? true : false ), ['id' => 'regra_geral_NAO', 'onClick' => 'showDiv()']) !!}
+        {!! Form::radio('label_regra', false, ( $dados['regra_geral'] == "N" ? true : false ), ['id' => 'regra_geral_NAO', 'onClick' => 'showDiv()']) !!}
 
     </div>
 </div>
@@ -53,25 +48,31 @@ foreach ($dados as $key => $value) {
 <div class="form-group">
     <div style="width:50%">
     {!! Form::label('email_1', 'E-Mail obrigatório:', ['class' => 'control-label']) !!}
-    {!! Form::text('email_1', $value['email_1'], ['class' => 'form-control']) !!}
+    {!! Form::text('email_1', $dados['email_1'], ['class' => 'form-control']) !!}
     </div>
 </div>
 
 <div class="form-group">
     <div style="width:50%">
     {!! Form::label('email_2', 'E-Mail opcional:', ['class' => 'control-label']) !!}
-    {!! Form::text('email_2', $value['email_2'], ['class' => 'form-control']) !!}
+    {!! Form::text('email_2', $dados['email_2'], ['class' => 'form-control']) !!}
     </div>
 </div>
 
 <div class="form-group">
     <div style="width:50%">
     {!! Form::label('email_3', 'E-Mail opcional:', ['class' => 'control-label']) !!}
-    {!! Form::text('email_3', $value['email_3'], ['class' => 'form-control']) !!}
+    {!! Form::text('email_3', $dados['email_3'], ['class' => 'form-control']) !!}
     </div>
 </div>
 
-{!! Form::hidden('id', $value['id'], ['class' => 'form-control']) !!}
+<div style="width: 50%">
+    <div class="pull-right">
+        <a href="{{ route('regraslotes.lote_consulta') }}" class="btn btn-default">Voltar</a>
+    </div>
+</div>
+
+{!! Form::hidden('id', $dados['id'], ['class' => 'form-control']) !!}
 {!! Form::hidden('add_cnpj', 0, ['class' => 'form-control']) !!}    
 {!! Form::submit('Salvar', ['class' => 'btn btn-default']) !!}
 {!! Form::close() !!}
@@ -86,10 +87,14 @@ foreach ($dados as $key => $value) {
         <div style="width:50%">
         {!! Form::label('cnpj', 'CNPJ:', ['class' => 'control-label']) !!}
         {!! Form::text('cnpj', '', ['class' => 'form-control']) !!}
-        {!! Form::submit('Adicionar', ['class' => 'btn btn-default']) !!}
+            <div class="pull-right">
+            <br>
+                {!! Form::submit('Adicionar', ['class' => 'btn btn-default']) !!}
+            </div>
         </div>
         
     </div>
+    <br><br><br>
     <table style="width: 50%" class="table table-bordered display">   
         <thead>
             <tr>
@@ -112,8 +117,8 @@ foreach ($dados as $key => $value) {
         </tbody>
     </table>            
     <br />  
-    {!! Form::hidden('id', $value['id'], ['class' => 'form-control']) !!}
-    {!! Form::hidden('id_empresa', $value['id_empresa'], ['class' => 'form-control']) !!}
+    {!! Form::hidden('id', $dados['id'], ['class' => 'form-control']) !!}
+    {!! Form::hidden('id_empresa', $dados['id_empresa'], ['class' => 'form-control']) !!}
     {!! Form::hidden('add_cnpj', 1, ['class' => 'form-control']) !!}    
     {!! Form::close() !!}    
 </div>

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
-use App\Models\Regra;
+use App\Models\Regraenviolote;
+use App\Models\Estabelecimento;
+use App\Models\Regraenviolotefilial;
 use App\Models\Empresa;
 use App\Models\Tributo;
 use App\Models\Municipio;
@@ -48,11 +50,7 @@ class RegrasenviolotesController extends Controller
     }
 
     private function validaCampos($input){
-        
-        if (empty($input['email_1'])) {
-            $this->msg = "Favor informar o e-mail obrigatório";
-            return false;
-        }
+
         if (!empty($input['email_1']) && !$this->validaEmail($input['email_1'])) {
             return false;
         }
@@ -71,13 +69,9 @@ class RegrasenviolotesController extends Controller
         return true;
     }    
 
-    private function validaCamposCNPJ($input){
-        if (empty($input['cnpj'])) {
-            $this->msg = "Favor informar o cnpj para salvar";
-            return false;
-        }
+    private function getCNPJ($input){
 
-        if (!$this->validaCNPJ($input['cnpj'], $input['id_empresa'])) {
+        if (!$this->carregaCNPJ($input['cnpj'], $input['id_empresa'])) {
             return false;
         }
 
@@ -95,14 +89,15 @@ class RegrasenviolotesController extends Controller
         }
     }
 
-    private function validaCNPJ($cnpj, $id_empresa) 
+    private function carregaCNPJ($cnpj, $id_empresa) 
     {        
+        $cnpj = $this->clearCNPJ($cnpj);
         $existe = DB::SELECT("SELECT id FROM estabelecimentos WHERE empresa_id = ".$id_empresa." AND cnpj = ".$cnpj."");
-        if (empty($existe)) {
-            $this->msg = 'Esse CNPJ não consta como estabelecimento dessa empresa.';
-            return false;
-        }        
         $var = json_decode(json_encode($existe),true);
+        if (empty($var)) {
+            $this->msg = 'CNPJ não consta para essa empresa';
+            return false;
+        }
         foreach ($var as $key => $value) {        
         }
 
@@ -129,79 +124,64 @@ class RegrasenviolotesController extends Controller
     public function store(Request $request)
     {   
         $input = $request->all();
-     
+        
+        //se estiver adicionando CNPJ
         if ($input['add_cnpj']) {
-            if (!$this->cnpj_save($input)) {
+            $this->validate($request, [
+            'cnpj' => 'required'
+            ],
+            $messages = [
+                'cnpj.required' => 'Informar o CNPJ desejado.'
+
+            ]);
+
+            if (!$this->getCNPJ($input)) {
                 return redirect()->back()->with('alert', $this->msg);
             }
-            return redirect()->back()->with('status', $this->msg);
+                
+            $value['id_regraenviolote'] = $input['id'];
+            $value['id_estabelecimento'] = $this->estabelecimento_id;
+            Regraenviolotefilial::create($value);
+            return redirect()->back()->with('status', 'Filial adicionada com sucesso.');
         }
 
+        //se não continua
+        $this->validate($request, [
+            'email_1' => 'required'
+        ],
+        $messages = [
+            'email_1.required' => 'Informar o email obrigatório.'
+
+        ]);
+        
         $input['regra_geral'] = 'N';
         if ($input['label_regra']) {
             $input['regra_geral'] = 'S';
         }
 
-        
         if (!empty($input)) {
             if (!$this->validaCampos($input)) {
                 return redirect()->back()->with('alert', $this->msg);
             }
         }
 
-        foreach ($input as $key => $value) {
-            if (empty($input[$key])) {
-                $input[$key] = 'NULL';
-            }
-        }
-
         //edit
         if ($input['id'] > 0) {
-            $standing = "UPDATE regraenviolote SET id_empresa = ".$input['select_empresas'].", id_tributo = ".$input['select_tributos'].", email_1 = '".$input['email_1']."', regra_geral = '".$input['regra_geral']."', ";
-                if ($input['email_2'] == 'NULL') {
-                    $standing .= "email_2 = ".$input['email_2'].", ";
-                }
-
-                if ($input['email_2'] != 'NULL') {
-                    $standing .= "email_2 = '".$input['email_2']."', ";
-                }
-
-                if ($input['email_3'] == 'NULL') {
-                    $standing .= "email_3 = ".$input['email_3']."";
-                }
-
-                if ($input['email_3'] != 'NULL') {
-                    $standing .= "email_3 = '".$input['email_3']."'";
-                }
-
-                $standing .= " WHERE id = ".$input['id']."";
-                $insert = DB::update($standing);
-                return redirect()->back()->with('status', 'Regra atualizada com sucesso!');
+            $Regraenviolote = Regraenviolote::findOrFail($input['id']);
+            $Regraenviolote->fill($input)->save();
+            return redirect()->back()->with('status', 'Regra atualizada com sucesso!');
         }
+        
+        $value['id_empresa'] = $input['select_empresas'];
+        $value['id_tributo'] = $input['select_tributos'];
+        $value['email_1'] = $input['email_1'];
+        $value['email_2'] = $input['email_2'];
+        $value['email_3'] = $input['email_3'];
+        $value['regra_geral'] = $input['regra_geral'];
 
-        //insert
-        $standing = "INSERT INTO regraenviolote(id_empresa, id_tributo, email_1, regra_geral, email_2, email_3) VALUES (".$input['select_empresas'].",".$input['select_tributos'].",'".$input['email_1']."','".$input['regra_geral']."',";
-
-        if ($input['email_2'] == 'NULL') {
-            $standing .= $input['email_2'].",";
-        }
-
-        if ($input['email_2'] != 'NULL') {
-            $standing .= "'".$input['email_2']."',";
-        }
-
-        if ($input['email_3'] == 'NULL') {
-            $standing .= $input['email_3'].")";
-        }
-
-        if ($input['email_3'] != 'NULL') {
-            $standing .= "'".$input['email_3']."')";
-        }
-    
-        $insert = DB::insert($standing);
-
-        //return redirect()->route('regras.store')->with('status', 'Atividade adicionada com sucesso!');
-        return redirect()->back()->with('status', 'Regra adicionada com sucesso!');
+        //se Não, ele cria
+        Regraenviolote::create($value);
+        return redirect()->route('regraslotes.edit_lote', Regraenviolote::create($value)->id)->with('status', 'Regra adicionada com sucesso!');
     }
 
     private function clearCNPJ($cnpj)
@@ -214,34 +194,13 @@ class RegrasenviolotesController extends Controller
         return $cnpj;
     }
 
-    public function cnpj_save($dados)
-    {       
-        if (!empty($dados)) {
-
-            if (!empty($dados['cnpj'])) {
-                $dados['cnpj'] = $this->clearCNPJ($dados['cnpj']);
-            }
-
-            if (!$this->validaCamposCNPJ($dados)) {
-                return false;
-            }
-        }
-
-        $standing = "INSERT INTO regraenviolotefilial(id_regraenviolote, id_estabelecimento) VALUES (".$dados['id'].",".$this->estabelecimento_id.")";
-        
-        $insert = DB::insert($standing);
-        $this->msg = 'CNPJ inserido com sucesso';
-        return true;
-    }
-
     public function edit_lote(request $request)
     {
         $id = $request->all();
         foreach ($id as $key => $value) {
         }
 
-        $dados = DB::select("SELECT 
-            id, id_empresa, id_tributo, email_1, email_2, email_3, regra_geral FROM regraenviolote WHERE id = ".$key."");
+        $dados = Regraenviolote::findOrFail($key);
 
         $dadosfiliais = DB::select("SELECT 
             A.id, B.CNPJ, B.codigo FROM regraenviolotefilial A INNER JOIN estabelecimentos B on A.id_estabelecimento = B.id WHERE A.id_regraenviolote = ".$key."");
@@ -254,14 +213,27 @@ class RegrasenviolotesController extends Controller
         return view('regras.edit_lote')->with('dados', $dados)->with('dadosfiliais', $dadosfiliais)->withTributos($tributos)->withEmpresas($empresas);   
     }
 
+    private function checkFiliais($id_regra)
+    {
+        $dados = DB::SELECT("SELECT id FROM regraenviolotefilial WHERE id_regraenviolote = ".$id_regra."");
+        if (!empty($dados)) {
+            return false;
+        }        
+        return true;
+    }
+
     public function excluir(request $request)
     {
         $id = $request->all();
         foreach ($id as $key => $value) {
         }
 
+        if (!$this->checkFiliais($key)) {
+            return redirect()->back()->with('alert', 'Para excluir esse registro, você terá que excluir os registros internos (Filiais cadastradas)!');
+        }
+
         if (!empty($key)) {
-            $insert = DB::delete('DELETE FROM regraenviolote WHERE id = '.$key.' ');
+            Regraenviolote::destroy($key);
         }
 
         return redirect()->back()->with('status', 'Regra excluída com sucesso!');
@@ -274,7 +246,7 @@ class RegrasenviolotesController extends Controller
         }
 
         if (!empty($key)) {
-            $insert = DB::delete('DELETE FROM regraenviolotefilial WHERE id = '.$key.' ');
+            Regraenviolotefilial::destroy($key);
         }
 
         return redirect()->back()->with('status', 'Filial excluída com sucesso!');

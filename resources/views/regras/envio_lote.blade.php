@@ -62,6 +62,12 @@
     </div>
 </div>
 
+<div style="width: 50%">
+    <div class="pull-right">
+        <a href="{{ route('regraslotes.lote_consulta') }}" class="btn btn-default">Voltar</a>
+    </div>
+</div>
+
 {!! Form::hidden('id', 0, ['class' => 'form-control']) !!}
 {!! Form::hidden('add_cnpj', 0, ['class' => 'form-control']) !!}
 {!! Form::submit('Cadastrar', ['class' => 'btn btn-default']) !!}

@@ -170,6 +170,18 @@
                                             <li><a href="{{ route('categorias.index') }}">Categorias Fiscais</a></li>
                                             <li><a href="{{ route('tributos.index') }}">Tributos</a></li>
                                             <li><a href="{{ route('regras.index') }}">Regras</a></li>
+
+                                            <li class="panel panel-default" id="dropdown">
+                                                <a data-toggle="collapse" href="#usuarios">Regras Envio por Lote</a>
+                                                <div id="usuarios" class="panel-collapse collapse">
+                                                    <div class="panel-body">
+                                                        <ul class="nav navbar-nav">
+                                                            <li><a href="{{ route('regras.envio_lote') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                                            <li><a href="{{ route('regras.lote_consulta') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
                                             
                                             <li class="panel panel-default" id="dropdown">
                                                 <a data-toggle="collapse" href="#usuarios">Usuários</a>

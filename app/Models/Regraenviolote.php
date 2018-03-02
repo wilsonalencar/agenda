@@ -25,6 +25,11 @@ class Regraenviolote extends Model
     /**
         * Get the tributo that owns the regra.
     */
+
+    public function filiais(){
+        return $this->hasMany(Regraenviolotefilial::class, 'id_regraenviolote');
+    }
+
     public function tributo()
     {
         return $this->belongsTo('App\Models\Tributo');

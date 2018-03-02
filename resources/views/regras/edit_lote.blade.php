@@ -82,7 +82,6 @@
     {!! Form::open([
         'route' => 'regraslotes.store'
     ]) !!}
-
     <div class="form-group">
         <div style="width:50%">
         {!! Form::label('cnpj', 'CNPJ:', ['class' => 'control-label']) !!}
@@ -95,6 +94,7 @@
         
     </div>
     <br><br><br>
+
     <table style="width: 50%" class="table table-bordered display">   
         <thead>
             <tr>
@@ -107,8 +107,8 @@
         @if (!empty($dadosfiliais))
             @foreach ($dadosfiliais as $chave => $date)        
             <tr>
-               <td><?php echo mask($date['CNPJ'],'##.###.###/####-##'); ?></td>
-               <td><?php echo $date['codigo']; ?></td>
+               <td><?php echo mask($date['dadosFilial'][0]['cnpj'],'##.###.###/####-##'); ?></td>
+               <td><?php echo $date['dadosFilial'][0]['codigo']; ?></td>
                <td><a id="excluiRegFilial" style="margin-left:10px" class="btn btn-default btn-sm" onclick="confirma()"><i class="fa fa-trash"></i></a></td>
             </tr> 
             @endforeach

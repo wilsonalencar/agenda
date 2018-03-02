@@ -201,14 +201,17 @@ class RegrasenviolotesController extends Controller
         }
 
         $dados = Regraenviolote::findOrFail($key);
+        $dadosfiliais = $dados->filiais;
+        $dadosfiliais = json_decode(json_encode($dadosfiliais),true);
 
-        $dadosfiliais = DB::select("SELECT 
-            A.id, B.CNPJ, B.codigo FROM regraenviolotefilial A INNER JOIN estabelecimentos B on A.id_estabelecimento = B.id WHERE A.id_regraenviolote = ".$key."");
-
+        foreach ($dadosfiliais as $key => $value) {
+            $dadosfiliais[$key]['dadosFilial'] = Estabelecimento::select('cnpj', 'codigo')->where('id', $value['id_estabelecimento'])->get();
+        }
+        
+        $dadosfiliais = json_decode(json_encode($dadosfiliais),true);    
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $dados = json_decode(json_encode($dados),true);
-        $dadosfiliais = json_decode(json_encode($dadosfiliais),true);
 
         return view('regras.edit_lote')->with('dados', $dados)->with('dadosfiliais', $dadosfiliais)->withTributos($tributos)->withEmpresas($empresas);   
     }

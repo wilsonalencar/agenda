@@ -15,7 +15,7 @@
 </div>
 
         <!--span>Prezado usuário, selecione a atividade a qual se refere a entrega:</span><br/><br/-->
-        <div class="table-default">
+        <div class="table-default table-responsive">
             <table class="table display" id="entregas-table">
                 <thead>
                     <tr class="search-table">
@@ -49,6 +49,7 @@ $(function() {
         processing: true,
         serverSide: true,
         stateSave: true,
+        responsive: true,
         ajax: {
                     url: "{!! route('arquivos.data') !!}",
                     data: function (d) {

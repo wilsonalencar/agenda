@@ -69,6 +69,7 @@
 </div>
 
 {!! Form::hidden('id', 0, ['class' => 'form-control']) !!}
+{!! Form::hidden('envio_manual', FALSE, ['class' => 'form-control']) !!}        
 {!! Form::hidden('add_cnpj', 0, ['class' => 'form-control']) !!}
 {!! Form::submit('Cadastrar', ['class' => 'btn btn-default']) !!}
 {!! Form::close() !!}

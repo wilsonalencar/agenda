@@ -113,7 +113,9 @@ class RegrasenviolotesController extends Controller
                             $l['tipo'] = $this->getTipo($l['tipo']);
                             $link[] = $path.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
                         }
-
+                        echo "<Pre>";
+                        print_r($_SERVER);
+                        echo "</pre>";exit;
                         //Define no array o caminho da pasta
                         $value['dadosRegra']['dadosFiliais'][$key]['path'] = $link;
                     
@@ -156,7 +158,7 @@ class RegrasenviolotesController extends Controller
             }
         }
     }
-    
+
     private function getLastPeriodoApuracao($id_empresa)
     {
         $periodo = DB::select("SELECT periodo_apuracao FROM crons where emp_id = ".$id_empresa." ORDER BY id DESC LIMIT 1");

@@ -91,9 +91,9 @@ class RegrasenviolotesController extends Controller
             if (!empty($value['dadosRegra']['dadosFiliais'])){
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
                     $path = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
-                    echo $path;exit;
-                    if (file_exists($path)) {
 
+                    if (file_exists($path)) {
+                        echo "oi";exit;
                         //Carrega Ultimo periodo_apuracao
                         $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
                         

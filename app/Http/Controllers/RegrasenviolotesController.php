@@ -29,10 +29,6 @@ class RegrasenviolotesController extends Controller
 
     public function lote_consulta(Request $request)
     {
-        $regra_geral = Regraenviolote::all("id","regra_geral");
-        $parametro_regra_geral = json_decode(json_encode($regra_geral),true);
-        $this->findRegrasenviolote($parametro_regra_geral);
-
         $standing = DB::select("SELECT 
             A.id, C.razao_social, B.nome, A.regra_geral
         FROM
@@ -113,9 +109,7 @@ class RegrasenviolotesController extends Controller
                             $l['tipo'] = $this->getTipo($l['tipo']);
                             $link[] = $path.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
                         }
-                        echo "<Pre>";
-                        print_r($_SERVER);
-                        echo "</pre>";exit;
+
                         //Define no array o caminho da pasta
                         $value['dadosRegra']['dadosFiliais'][$key]['path'] = $link;
                     

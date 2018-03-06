@@ -30,6 +30,8 @@ class RegrasenviolotesController extends Controller
     public function lote_consulta(Request $request)
     {
 
+        $envio_manual = false;
+        $data_envio = '';
         $regra_geral = Regraenviolote::all("id","regra_geral");
         $parametro_regra_geral = json_decode(json_encode($regra_geral),true);
         $this->findRegrasenviolote($parametro_regra_geral, $envio_manual, $data_envio);

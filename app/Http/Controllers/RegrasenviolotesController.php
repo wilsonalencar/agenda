@@ -113,7 +113,6 @@ class RegrasenviolotesController extends Controller
                         //Verificando se arquivo existe e se data é igual agora a hoje.
                         foreach ($value['dadosRegra']['dadosFiliais'][$key]['path'] as $chave => $path) {
                             if (file_exists($path)) {
-                                echo "pelo menos existe";
                                 $anexo = scandir($path);
                                 $item = '';
                                 if(count($anexo) > 2) {
@@ -129,9 +128,7 @@ class RegrasenviolotesController extends Controller
                                     $data_m = date('d/m/Y', filemtime($path.$item));
                                     $data_n = date('d/m/Y');
                                     if ((!$envio_manual && $data_m == $data_n) || ($envio_manual && $data_m == $data_envio)) {
-                                        echo "passou aqui";
                                         if (empty($path) && empty($item)) {
-                                            echo "caiu aqui";
                                             $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = '';
                                         } 
                                         $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $link_path.$item;
@@ -142,16 +139,10 @@ class RegrasenviolotesController extends Controller
                     }
                 }
             }
-            echo "<Pre>";
-            print_r($value);
-            echo "</pre>";
+
             //Fim dos caminhos
             foreach ($value['dadosRegra']['dadosFiliais'] as $array) {
                 if (!empty($array['download_link'])) {
-                    echo "Array : ";
-                    echo "<prE>";
-                    print_r($array);
-                    echo "</pre>";exit;
                     $this->enviarEmailLote($array, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3']);
                 }
             }

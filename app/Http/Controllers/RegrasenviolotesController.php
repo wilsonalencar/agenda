@@ -29,13 +29,6 @@ class RegrasenviolotesController extends Controller
 
     public function lote_consulta(Request $request)
     {
-
-        $envio_manual = false;
-        $data_envio = '';
-        $regra_geral = Regraenviolote::all("id","regra_geral");
-        $parametro_regra_geral = json_decode(json_encode($regra_geral),true);
-        $this->findRegrasenviolote($parametro_regra_geral, $envio_manual, $data_envio);
-
         $standing = DB::select("SELECT 
             A.id, C.razao_social, B.nome, A.regra_geral
         FROM
@@ -98,9 +91,6 @@ class RegrasenviolotesController extends Controller
             if (!empty($value['dadosRegra']['dadosFiliais'])){
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
                     $path = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
-                    echo "<pre>";
-                    print_r($path);
-                    echo "</pre>";exit;
                     
                     if (file_exists($path)) {
 

@@ -96,11 +96,8 @@ class RegrasenviolotesController extends Controller
             //Pegando os caminhos dos arquivos
             $value = json_decode(json_encode($value),true);
             if (!empty($value['dadosRegra']['dadosFiliais'])){
-                echo "<pre>";
-                print_r($_SERVER);
-                exit;
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
-                    $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
+                    $path = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
                     
                     
                     if (file_exists($path)) {

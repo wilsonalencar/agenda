@@ -91,7 +91,7 @@ class RegrasenviolotesController extends Controller
             if (!empty($value['dadosRegra']['dadosFiliais'])){
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
                     $path = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
-                    
+                    echo $path;exit;
                     if (file_exists($path)) {
 
                         //Carrega Ultimo periodo_apuracao
@@ -108,11 +108,9 @@ class RegrasenviolotesController extends Controller
                             $link[] = $path.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
                         }
 
-                        echo "<Pre>";
-                        print_r($link);exit;
                         //Define no array o caminho da pasta
                         $value['dadosRegra']['dadosFiliais'][$key]['path'] = $link;
-
+                    
                         //Verificando se arquivo existe e se data é igual agora a hoje.
                         foreach ($value['dadosRegra']['dadosFiliais'][$key]['path'] as $chave => $path) {
                             if (file_exists($path)) {

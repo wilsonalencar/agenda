@@ -129,8 +129,6 @@ class RegrasenviolotesController extends Controller
                                     $data_n = date('d/m/Y');
                                     if ((!$envio_manual && $data_m == $data_n) || ($envio_manual && $data_m == $data_envio)) {
                                         if (empty($path) && empty($item)) {
-                                            echo "<pre>";
-                                            print_r($path);exit;
                                             $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = '';
                                         } 
                                         $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $link_path.$item;

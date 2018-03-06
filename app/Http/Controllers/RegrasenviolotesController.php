@@ -85,15 +85,15 @@ class RegrasenviolotesController extends Controller
                     }   
                 } 
             }
-
             //Pegando os caminhos dos arquivos
             $value = json_decode(json_encode($value),true);
             if (!empty($value['dadosRegra']['dadosFiliais'])){
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
-                    $path = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
+                    $path_link = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
+
+                    $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
 
                     if (file_exists($path)) {
-                        echo "oi";exit;
                         //Carrega Ultimo periodo_apuracao
                         $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
                         
@@ -133,7 +133,7 @@ class RegrasenviolotesController extends Controller
                                         if (empty($path) && empty($item)) {
                                             $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = '';
                                         } 
-                                        $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $path.$item;
+                                        $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $path_link.$item;
                                     }
                                 }
                             }

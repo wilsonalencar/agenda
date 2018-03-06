@@ -31,14 +31,9 @@ class RegrasenviolotesController extends Controller
     {
 
         $regra_geral = Regraenviolote::all("id","regra_geral");
-
-        if ($envio_manual) {
-           $regra_geral = Regraenviolote::select("id","regra_geral")->where("id", $id)->get();    
-        }
-
         $parametro_regra_geral = json_decode(json_encode($regra_geral),true);
         $this->findRegrasenviolote($parametro_regra_geral, $envio_manual, $data_envio);
-        
+
         $standing = DB::select("SELECT 
             A.id, C.razao_social, B.nome, A.regra_geral
         FROM

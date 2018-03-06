@@ -66,18 +66,32 @@
     </div>
 </div>
 
-<div style="width: 50%">
-    <div class="pull-right">
-        <a href="{{ route('regraslotes.lote_consulta') }}" class="btn btn-default">Voltar</a>
-    </div>
-</div>
 
 {!! Form::hidden('id', $dados['id'], ['class' => 'form-control']) !!}
 {!! Form::hidden('add_cnpj', 0, ['class' => 'form-control']) !!}    
+{!! Form::hidden('envio_manual', FALSE, ['class' => 'form-control']) !!}
 {!! Form::submit('Salvar', ['class' => 'btn btn-default']) !!}
 {!! Form::close() !!}
 <hr/>
 
+<!-- envio manual -->
+
+{!! Form::open([ 'route' => 'regraslotes.store' ]) !!}
+<div class="form-group">
+    <div style="width:50%">
+    {!! Form::label('data_envio', 'Enviar Manual:', ['class' => 'control-label']) !!}
+    {!! Form::date('data_envio', '', ['class' => 'form-control']) !!}
+        <div class="pull-right">
+        <br>
+            {!! Form::submit('Enviar e-mail', ['class' => 'btn btn-default']) !!}
+        </div>
+    </div>
+</div>
+{!! Form::hidden('envio_manual', TRUE, ['class' => 'form-control']) !!}
+{!! Form::hidden('id', $dados['id'], ['class' => 'form-control']) !!}
+{!! Form::close() !!}  
+<br />
+<br />
 <div id="hidden_div" style="display:none;">
     {!! Form::open([
         'route' => 'regraslotes.store'
@@ -120,6 +134,7 @@
     {!! Form::hidden('id', $dados['id'], ['class' => 'form-control']) !!}
     {!! Form::hidden('id_empresa', $dados['id_empresa'], ['class' => 'form-control']) !!}
     {!! Form::hidden('add_cnpj', 1, ['class' => 'form-control']) !!}    
+    {!! Form::hidden('envio_manual', FALSE, ['class' => 'form-control']) !!}    
     {!! Form::close() !!}    
 </div>
 

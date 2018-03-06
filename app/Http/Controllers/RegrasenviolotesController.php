@@ -29,6 +29,10 @@ class RegrasenviolotesController extends Controller
 
     public function lote_consulta(Request $request)
     {
+        $regra_geral = Regraenviolote::all("id","regra_geral");
+        $parametro_regra_geral = json_decode(json_encode($regra_geral),true);
+        $this->findRegrasenviolote($parametro_regra_geral);
+
         $standing = DB::select("SELECT 
             A.id, C.razao_social, B.nome, A.regra_geral
         FROM
@@ -42,6 +46,145 @@ class RegrasenviolotesController extends Controller
         return view('regras.consulta_lote')->with('array', $array);
     }
 
+    public function Job($envio_manual=false, $data_envio = '', $id= '')
+    {
+        $regra_geral = Regraenviolote::all("id","regra_geral");
+
+        if ($envio_manual) {
+           $regra_geral = Regraenviolote::select("id","regra_geral")->where("id", $id)->get();    
+        }
+
+        $parametro_regra_geral = json_decode(json_encode($regra_geral),true);
+        $this->findRegrasenviolote($parametro_regra_geral, $envio_manual, $data_envio);
+    }
+
+    public function findRegrasenviolote($param, $envio_manual=false, $data_envio = '')
+    {
+
+        //montando array mestre
+        foreach ($param as $key => $value) {
+            $value['dadosRegra'] = Regraenviolote::findOrFail($value['id']);
+            $value['dadosRegra']['Matriz'] = Empresa::select('id', 'cnpj')->where('id', $value['dadosRegra']['id_empresa'])->get();
+
+            if ($value['regra_geral'] == 'S') {
+            $value = json_decode(json_encode($value), true);
+                $dados = $this->getEstabelecimentos($value['dadosRegra']['Matriz'][0]['id']);
+                foreach ($dados as $id => $date) {  
+                    $value['dadosRegra']['dadosFiliais'][$date['id']] = $date;            
+                }
+            }
+
+            if ($value['regra_geral'] == 'N') {
+                $dadosfiliais = $value['dadosRegra']->filiais;
+                $dadosfiliais = json_decode(json_encode($dadosfiliais),true);
+                $value['dadosRegra']['dadosFiliais'] = $dadosfiliais;
+                echo "<PrE>";
+                $value = json_decode(json_encode($value),true);
+                foreach ($value['dadosRegra']['dadosFiliais'] as $key => $date) {
+                    $dadosfiliais = Estabelecimento::select('cnpj', 'id')->where('id', $date['id_estabelecimento'])->get();
+                    $dadosfiliais = json_decode(json_encode($dadosfiliais),true);
+                    unset($value['dadosRegra']['dadosFiliais'][0]);
+                    foreach ($dadosfiliais as $key => $id) {
+                        $value['dadosRegra']['dadosFiliais'][$id['id']] = $id;                        
+                    }   
+                } 
+            }
+
+            //Pegando os caminhos dos arquivos
+            $value = json_decode(json_encode($value),true);
+            if (!empty($value['dadosRegra']['dadosFiliais'])){
+
+                foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
+                    $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
+                    
+                    
+                    if (file_exists($path)) {
+
+                        //Carrega Ultimo periodo_apuracao
+                        $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
+                        
+                        //Carrega parametros (estadual, municipal, federal) e Pasta
+                        $parametros = DB::select("SELECT B.pasta_arquivos, B.tipo FROM empresa_tributo A INNER JOIN tributos B on A.tributo_id = B.id WHERE A.empresa_id = ".$value['dadosRegra']['id_empresa']." AND B.pasta_arquivos IS NOT NULL");
+
+                        $parametros = json_decode(json_encode($parametros), true);
+                        
+                        //Define Path
+                        foreach ($parametros as $q => $l) {
+                            $l['tipo'] = $this->getTipo($l['tipo']);
+                            $link[] = $path.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
+                        }
+
+                        //Define no array o caminho da pasta
+                        $value['dadosRegra']['dadosFiliais'][$key]['path'] = $link;
+                    
+                        //Verificando se arquivo existe e se data é igual agora a hoje.
+                        foreach ($value['dadosRegra']['dadosFiliais'][$key]['path'] as $chave => $path) {
+                            if (file_exists($path)) {
+                                $anexo = scandir($path);
+                                $item = '';
+                                if(count($anexo) > 2) {
+                                    $ponteiro  = opendir($path);
+                                    while ($nome_itens = readdir($ponteiro)) {
+                                        $itens[] = $nome_itens;
+                                        foreach ($itens as $i => $q) {
+                                            if (preg_match("/[A-Za-z0-9]/", $q)) {
+                                                $item = $q;
+                                            }
+                                        }
+                                    }
+
+                                    $data_m = date('d/m/Y', filemtime($path.$item));
+                                    $data_n = date('d/m/Y');
+                                    if ((!$envio_manual && $data_m == $data_n) || ($envio_manual && $data_m == $data_envio)) {
+                                        if (empty($path) && empty($item)) {
+                                            $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = '';
+                                        } 
+                                        $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $path.$item;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Fim dos caminhos
+            foreach ($value['dadosRegra']['dadosFiliais'] as $array) {
+                if (!empty($array['download_link'])) {
+                    $this->enviarEmailLote($array, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3']);
+                }
+            }
+        }
+    }
+    
+    private function getLastPeriodoApuracao($id_empresa)
+    {
+        $periodo = DB::select("SELECT periodo_apuracao FROM crons where emp_id = ".$id_empresa." ORDER BY id DESC LIMIT 1");
+        $periodo = json_decode(json_encode($periodo),true);
+        return $periodo[0]['periodo_apuracao'];
+    }
+
+    public function getEstabelecimentos($id_empresa)
+    {
+        $value = Estabelecimento::select('id', 'cnpj')->where('empresa_id', $id_empresa)->get(); 
+        $value = json_decode(json_encode($value),true);
+        return $value; 
+    }
+
+    public function enviarEmailLote($array, $email_1, $email_2, $email_3)
+    {
+        $dados = array('dados' => $array, 'emails' => array($email_1, $email_2, $email_3));
+        $data['linkDownload'] = $dados['dados']['download_link'];
+
+        $subject = "TAX CALENDAR - Entrega das obrigações em ".date('d/m/Y').".";
+        $data['subject']      = $subject;
+        $data['data']         = date('d/m/Y');
+        foreach($dados['emails'] as $user)
+        {
+            $this->eService->sendMail($user, $data, 'emails.notification-envio-lote', true);
+        }
+        return;
+    }
     public function envio_lote(Request $request)
     {
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
@@ -115,6 +258,22 @@ class RegrasenviolotesController extends Controller
         return true;
     }
 
+    private function getTipo($tipo)
+    {
+        if ($tipo == 'E') {
+            return 'ESTADUAIS';
+        }
+
+        if($tipo == 'M'){
+            return 'MUNICIPAIS';
+        }
+
+        if ($tipo == 'F') {
+            return 'FEDERAIS';
+        }
+    }
+
+
     /**
      * Store a newly created resource in storage.
      *
@@ -125,6 +284,16 @@ class RegrasenviolotesController extends Controller
     {   
         $input = $request->all();
         
+        if ($input['envio_manual']) {
+            if (empty($input['data_envio'])) {
+                return redirect()->back()->with('alert', 'A data é obrigatória para busca.');
+            }
+            $timestamp = strtotime($input['data_envio']);
+            $input['data_envio'] = date("d/m/Y", $timestamp);
+            $this->Job($input['envio_manual'], $input['data_envio'], $input['id']);
+            return redirect()->back()->with('status', 'Envio manual efetuado com sucesso.');
+        }
+
         //se estiver adicionando CNPJ
         if ($input['add_cnpj']) {
             $this->validate($request, [

@@ -89,7 +89,7 @@ class RegrasenviolotesController extends Controller
             $value = json_decode(json_encode($value),true);
             if (!empty($value['dadosRegra']['dadosFiliais'])){
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
-                    $path_link = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
+                    $path_link = "http://".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
 
                     $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
 
@@ -98,16 +98,15 @@ class RegrasenviolotesController extends Controller
                         $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
                         
                         //Carrega parametros (estadual, municipal, federal) e Pasta
-                        $parametros = DB::select("SELECT B.pasta_arquivos, B.tipo FROM empresa_tributo A INNER JOIN tributos B on A.tributo_id = B.id WHERE A.empresa_id = ".$value['dadosRegra']['id_empresa']." AND B.pasta_arquivos IS NOT NULL");
-
-                        $parametros = json_decode(json_encode($parametros), true);
+                        $parametros = DB::select("SELECT B.pasta_arquivos, B.tipo FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id WHERE A.id = ".$value['dadosRegra']['id']." AND B.pasta_arquivos IS NOT NULL");
                         
+                        $parametros = json_decode(json_encode($parametros), true);
                         //Define Path
                         foreach ($parametros as $q => $l) {
                             $l['tipo'] = $this->getTipo($l['tipo']);
                             $link[] = $path.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
+                            $link_path =  $path_link.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
                         }
-
                         //Define no array o caminho da pasta
                         $value['dadosRegra']['dadosFiliais'][$key]['path'] = $link;
                     
@@ -126,14 +125,15 @@ class RegrasenviolotesController extends Controller
                                             }
                                         }
                                     }
-
                                     $data_m = date('d/m/Y', filemtime($path.$item));
                                     $data_n = date('d/m/Y');
                                     if ((!$envio_manual && $data_m == $data_n) || ($envio_manual && $data_m == $data_envio)) {
                                         if (empty($path) && empty($item)) {
+                                            echo "<pre>";
+                                            print_r($path);exit;
                                             $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = '';
                                         } 
-                                        $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $path_link.$item;
+                                        $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $link_path.$item;
                                     }
                                 }
                             }

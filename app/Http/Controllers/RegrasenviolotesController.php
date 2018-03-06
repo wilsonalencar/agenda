@@ -29,6 +29,16 @@ class RegrasenviolotesController extends Controller
 
     public function lote_consulta(Request $request)
     {
+
+        $regra_geral = Regraenviolote::all("id","regra_geral");
+
+        if ($envio_manual) {
+           $regra_geral = Regraenviolote::select("id","regra_geral")->where("id", $id)->get();    
+        }
+
+        $parametro_regra_geral = json_decode(json_encode($regra_geral),true);
+        $this->findRegrasenviolote($parametro_regra_geral, $envio_manual, $data_envio);
+        
         $standing = DB::select("SELECT 
             A.id, C.razao_social, B.nome, A.regra_geral
         FROM
@@ -74,7 +84,7 @@ class RegrasenviolotesController extends Controller
                 $dadosfiliais = $value['dadosRegra']->filiais;
                 $dadosfiliais = json_decode(json_encode($dadosfiliais),true);
                 $value['dadosRegra']['dadosFiliais'] = $dadosfiliais;
-                echo "<PrE>";
+
                 $value = json_decode(json_encode($value),true);
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $date) {
                     $dadosfiliais = Estabelecimento::select('cnpj', 'id')->where('id', $date['id_estabelecimento'])->get();
@@ -89,7 +99,9 @@ class RegrasenviolotesController extends Controller
             //Pegando os caminhos dos arquivos
             $value = json_decode(json_encode($value),true);
             if (!empty($value['dadosRegra']['dadosFiliais'])){
-
+                echo "<pre>";
+                print_r($_SERVER);
+                exit;
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
                     $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
                     

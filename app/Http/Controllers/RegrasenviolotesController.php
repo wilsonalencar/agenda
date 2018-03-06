@@ -108,9 +108,11 @@ class RegrasenviolotesController extends Controller
                             $link[] = $path.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
                         }
 
+                        echo "<Pre>";
+                        print_r($link);exit;
                         //Define no array o caminho da pasta
                         $value['dadosRegra']['dadosFiliais'][$key]['path'] = $link;
-                    
+
                         //Verificando se arquivo existe e se data é igual agora a hoje.
                         foreach ($value['dadosRegra']['dadosFiliais'][$key]['path'] as $chave => $path) {
                             if (file_exists($path)) {

@@ -98,7 +98,9 @@ class RegrasenviolotesController extends Controller
             if (!empty($value['dadosRegra']['dadosFiliais'])){
                 foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
                     $path = "".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
-                    
+                    echo "<pre>";
+                    print_r($path);
+                    echo "</pre>";exit;
                     
                     if (file_exists($path)) {
 

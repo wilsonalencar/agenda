@@ -15,7 +15,7 @@
 </div>
 
         <!--span>Prezado usuário, selecione a atividade a qual se refere a entrega:</span><br/><br/-->
-        <div class="table-default">
+        <div class="table-default table-responsive">
             <table class="table display" id="entregas-table">
                 <thead>
                     <tr class="search-table">
@@ -49,6 +49,7 @@ $(function() {
         processing: true,
         serverSide: true,
         stateSave: true,
+        responsive: true,
         ajax: {
                     url: "{!! route('arquivos.data') !!}",
                     data: function (d) {
@@ -120,7 +121,7 @@ $(function() {
                 var val_cnpj = $('#src_cnpj').val();
                 var val_codigo = $('#src_codigo').val();
                 if (val_cnpj || val_codigo) {
-                    var url = "{{ route('arquivos.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo.replace(/[^0-9]/g,'');
+                    var url = "{{ route('arquivos.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo;
                 } else {
                     var url = "{{ route('arquivos.index') }}";
                 }
@@ -131,7 +132,6 @@ $(function() {
 });
 jQuery(function($){
     $('input[name="src_cnpj"]').mask("99.999.999/9999-99");
-    $('input[name="src_codigo"]').mask("9999");
 });
 </script>
 

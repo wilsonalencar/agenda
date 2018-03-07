@@ -4,3 +4,14 @@
 function printMaskCnpj(data) {
     return data.substring(0,2)+'.'+data.substring(2,5)+'.'+data.substring(5,8)+'/'+data.substring(8,12)+'-'+data.substring(12,14);
 }
+
+
+$(document).ready(function () {
+
+    $(window).resize(function() {
+        var scre = $("body").width();
+        if ( scre >= 992 ) {
+            $(".navbar-nav").removeClass("slide-in");
+        }
+    });
+});

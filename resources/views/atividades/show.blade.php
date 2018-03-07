@@ -126,7 +126,11 @@
             </div>
             <div class="panel-footer clearfix">
                 <div class="pull-right">
-                    <a href="{{ route('atividades.index') }}" class="btn btn-default">Voltar</a>
+                    <?php if($aprovacao) { ?>
+                        <a href="{{ route('aprovacao') }}" class="btn btn-default">Voltar</a>
+                    <?php }else{ ?>
+                        <a href="{{ route('atividades.index') }}" class="btn btn-default">Voltar</a>
+                    <?php } ?>
                 </div>
             </div>
     </div>

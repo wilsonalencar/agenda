@@ -173,8 +173,8 @@
                                             <li><a href="{{ route('regras.index') }}">Regras</a></li>
 
                                             <li class="panel panel-default" id="dropdown">
-                                                <a data-toggle="collapse" href="#usuarios">Regras Envio por Lote</a>
-                                                <div id="usuarios" class="panel-collapse collapse">
+                                                <a data-toggle="collapse" href="#regrasLote">Regras Envio por Lote</a>
+                                                <div id="regrasLote" class="panel-collapse collapse">
                                                     <div class="panel-body">
                                                         <ul class="nav navbar-nav">
                                                             <li><a href="{{ route('regraslotes.envio_lote') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>

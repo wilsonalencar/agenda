@@ -341,8 +341,8 @@ class RegrasenviolotesController extends Controller
         $value['regra_geral'] = $input['regra_geral'];
 
         //se Não, ele cria
-        Regraenviolote::create($value);
-        return redirect()->route('regraslotes.edit_lote', Regraenviolote::create($value)->id)->with('status', 'Regra adicionada com sucesso!');
+        $create = Regraenviolote::create($value);
+        return redirect()->route('regraslotes.envio_lote')->with('status', 'Regra adicionada com sucesso!');
     }
 
     private function clearCNPJ($cnpj)

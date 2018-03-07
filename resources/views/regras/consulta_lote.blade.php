@@ -38,7 +38,8 @@
                <td><?php echo $value['razao_social']; ?></td>
                <td><?php echo $value['nome']; ?></td>
                <td><?php echo $value['regra_geral']; ?></td>
-               <td><a href="{{ route('regraslotes.edit_lote', $value['id']) }}" style="margin-left:10px" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a><a id="excluiReg" style="margin-left:10px" class="btn btn-default btn-sm" onclick="confirma()"><i class="fa fa-trash"></i></a></td>
+               <td><a href="{{ route('regraslotes.edit_lote', $value['id']) }}" style="margin-left:10px" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+               <a href="{{ route('regraslotes.excluir', $value['id']) }}" id="excluiReg" onclick="return confirm('Tem certeza que deseja excluir Regra?')" style="margin-left:10px" class="btn btn-default btn-sm"><i class="fa fa-trash"></i></a></td>
             </tr> 
             @endforeach
         @endif
@@ -60,12 +61,5 @@
     });        
 });
 
-function confirma() {
-    if (confirm("Você tem certeza que quer deletar o registro?") == true) {
-        <?php if (!empty($value['id'])) { ?>
-            window.location="{{ route('regraslotes.excluir', $value['id']) }}";
-        <?php } ?>
-    }
-}
 </script>
 @stop

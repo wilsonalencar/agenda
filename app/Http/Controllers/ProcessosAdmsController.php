@@ -109,6 +109,228 @@ class ProcessosadmsController extends Controller
         echo json_encode(array('success'=>true, 'dataApuracaoDiferente'=>false));exit;
     }
 
+    public function consulta_procadm(Request $request)
+    {
+        $fim = Input::get("periodo_fim");
+        $inicio = Input::get("periodo_inicio");
+        $dataBuscaIni = array();
+        if (empty($fim) || empty($inicio)) {
+            $timestamp = strtotime("-4 months");
+            $datInicial = date('d-m-Y', $timestamp);
+            $datAtual = date('d-m-Y');
+
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+         
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+        }
+        if (!empty($inicio) && !empty($fim)) {
+            $datInicial = date('d/'.$inicio.'');
+            $datAtual = date('d/'.$fim.'');
+            $datInicial = str_replace('/', '-', $datInicial);
+            $datAtual = str_replace('/', '-', $datAtual);
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+            if ($meses < 0) {
+                return redirect()->back()->with('alert','Favor informar uma data Válida');
+            }
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+
+        }
+
+        $dataBusca = substr($dataBusca,0,-1);   
+        $datas = $dataBusca;
+        $datas = substr($datas ,0,-1);
+        $datas = substr($datas,1);
+        $datas = explode("','",$datas);
+        
+        foreach ($datas as $key => $final) {
+            $standing[$final] = DB::select(" SELECT ( select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and B.empresa_id = ".$this->s_emp->id.") as total ,
+           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 1 and B.empresa_id = ".$this->s_emp->id.") as baixados,
+           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 2 and B.empresa_id = ".$this->s_emp->id.") as em_andamento;");
+        }
+
+    return view('processosadms.consulta')->with('standing',$standing)->with('datas', $datas)->with('dataBusca', $dataBusca);
+    }
+    public function rlt_detalhado(Request $request)
+    {
+        $fim = Input::get("periodo_fim");
+        $inicio = Input::get("periodo_inicio");
+        
+        $dataBuscaIni = array();
+        if (empty($fim) || empty($inicio)) {
+            $timestamp = strtotime("-4 months");
+            $datInicial = date('d-m-Y', $timestamp);
+            $datAtual = date('d-m-Y');
+
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+             
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+        }
+        if (!empty($inicio) && !empty($fim)) {
+            $datInicial = date('d/'.$inicio.'');
+            $datAtual = date('d/'.$fim.'');
+            $datInicial = str_replace('/', '-', $datInicial);
+            $datAtual = str_replace('/', '-', $datAtual);
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+            if ($meses < 0) {
+                return redirect()->back()->with('alert','Favor informar uma data Válida');
+            }
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+
+        }
+
+        $dataBusca = substr($dataBusca,0,-1);   
+        $datas = $dataBusca;
+        $datas = substr($datas ,0,-1);
+        $datas = substr($datas,1);
+        $datas = explode("','",$datas);
+
+        $graphs = array();
+        
+        $where = ' 1 = 1 ';
+
+        //$request->session()->put('filter_cnpj', $input['periodo_apuracao']);
+        if (!empty(Input::get("vcn")) || !empty(Input::get("vco")) || !empty(Input::get("vcp"))) {
+
+            $request->session()->put('vcn', Input::get("vcn"));
+            $request->session()->put('vco', Input::get("vco"));
+            $request->session()->put('vcp', Input::get("vcp"));
+        }
+
+        if (!empty(Input::get("clear"))) {
+
+            Session::forget('vcn');
+            Session::forget('vcp');
+            Session::forget('vco');
+        }
+
+        if (!sizeof(Input::get())) {
+
+            $data = $request->session()->all();
+            if (!empty($data['vcn']) || !empty($data['vco']) || !empty($data['vcp'])) {
+                Input::merge(array('vcn' => $data['vcn']));
+                Input::merge(array('vco' => $data['vco']));
+                Input::merge(array('vcp' => $data['vcp']));
+            } 
+        }
+
+        
+
+        $where .= ' AND b.empresa_id = '.$this->s_emp->id.' AND a.periodo_apuracao in ('.$dataBusca.')';
+
+        $graphs = DB::select('select c.uf,
+                                      SUM(if(status_id = 1, 1, 0)) as Baixada,
+                                    SUM(if(status_id = 2, 1, 0)) as Andamento,
+                                    COUNT(*) as total
+                                      FROM processosadms a
+                                      inner join estabelecimentos b on a.estabelecimento_id = b.id
+                                      inner join municipios c on b.cod_municipio = c.codigo
+                                      WHERE '.$where.'                              
+                                      group by c.uf');
+
+        return view('processosadms.graph')   
+            ->with('filter_cnpj',Input::get("vcn"))
+            ->with('filter_area',Input::get("vco"))
+            ->with('filter_periodo',Input::get("vcp"))
+            ->with('graphs', $graphs)->with('periodo_inicio', $inicio)->with('periodo_fim', $fim);
+
+    }
+    
+    public function rlt_processos(Request $request)
+    {
+        $dataBuscaIni = array();
+        if (empty($dataBuscaIni)) {
+            $timestamp = strtotime("-4 months");
+            $datInicial = date('d-m-Y', $timestamp);
+            $datAtual = date('d-m-Y');
+
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+         
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+            $dataBusca = substr($dataBusca,0,-1);   
+        }
+
+        $rpt = DB::Select("SELECT 
+                            A.id,
+                            A.periodo_apuracao,
+                            B.cnpj,
+                            C.uf,
+                            A.nro_processo,
+                            D.descricao as resp_financeiro,
+                            A.resp_acompanhamento,
+                            E.descricao
+                        FROM
+                            processosadms A
+                                INNER JOIN
+                            estabelecimentos B ON A.estabelecimento_id = B.id
+                                INNER JOIN
+                            municipios C ON B.cod_municipio = C.codigo
+                                INNER JOIN
+                            respfinanceiros D ON A.resp_financeiro_id = D.id
+                                INNER JOIN
+                            statusprocadms E ON A.Status_ID = E.id
+                        WHERE 
+                            A.periodo_apuracao in (".$dataBusca.") 
+                        AND 
+                            B.empresa_id = ".$this->s_emp->id."");
+        
+        return Datatables::of($rpt)->make(true);
+    }
+
     public function action_import(Request $request)
     {        
         $input = $request->all();
@@ -281,6 +503,96 @@ class ProcessosadmsController extends Controller
             $processosadms = $processosadms->where('periodo_apuracao', $filter_periodo);
         }
 
+        $array = array();
+        $estabelecimentos = Estabelecimento::select('id')->where('empresa_id', $this->s_emp->id)->get();
+        foreach($estabelecimentos as $row) {
+            $array[] = $row->id;
+        }
+        
+        $processosadms = $processosadms->whereIn('estabelecimento_id', $array);
+        
+        if ( isset($request['search']) && $request['search']['value'] != '' ) {
+            $str_filter = $request['search']['value'];
+        }
+        
+        return Datatables::of($processosadms)->make(true);
+    }
+
+    public function anyDataRLT(Request $request)
+    {   
+
+        //e com esses( que tinha funcionado na outra página )
+        $fim = Input::get("periodo_fim");
+        $inicio = Input::get("periodo_inicio");
+
+        $dataBuscaIni = array();
+        if (empty($fim) || empty($inicio)) {
+            $timestamp = strtotime("-4 months");
+            $datInicial = date('d-m-Y', $timestamp);
+            $datAtual = date('d-m-Y');
+
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+             
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+        }
+        if (!empty($inicio) && !empty($fim)) {
+            $datInicial = date('d/'.$inicio.'');
+            $datAtual = date('d/'.$fim.'');
+            $datInicial = str_replace('/', '-', $datInicial);
+            $datAtual = str_replace('/', '-', $datAtual);
+            list($dia, $mes, $ano) = explode( "-",$datInicial);
+            $datInicial = getdate(strtotime($datInicial));
+            $datAtual = getdate(strtotime($datAtual));
+            $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+            if ($meses < 0) {
+                return redirect()->back()->with('alert','Favor informar uma data Válida');
+            }
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+
+        }
+
+        $dataBusca = substr($dataBusca,0,-1);   
+        $datas = $dataBusca;
+        $datas = substr($datas ,0,-1);
+        $datas = substr($datas,1);
+        $datas = explode("','",$datas);
+
+        $processosadms = Processosadm::join('estabelecimentos', 'processosadms.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->select(
+                'processosadms.*',
+                'processosadms.id as IdProcessosAdms',
+                'estabelecimentos.insc_estadual', 
+                'estabelecimentos.cnpj',
+                'estabelecimentos.codigo',
+                'municipios.uf',
+                'municipios.nome',
+                DB::raw('(select GROUP_CONCAT("Observação: ", descricao SEPARATOR " - ") FROM observacaoprocadms where processoadm_id = processosadms.id) as observacoesGroupConcat')
+            )
+            ->with('estabelecimentos')
+            ->with('estabelecimentos.municipio')
+            ->with('statusprocadm')
+            ->with('respfinanceiro')
+            ->with('observacoes');
+
+        $processosadms = $processosadms->whereIn('periodo_apuracao', $datas);
         $array = array();
         $estabelecimentos = Estabelecimento::select('id')->where('empresa_id', $this->s_emp->id)->get();
         foreach($estabelecimentos as $row) {

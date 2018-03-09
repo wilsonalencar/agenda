@@ -56,95 +56,69 @@ class RegrasenviolotesController extends Controller
 
     public function findRegrasenviolote($param, $envio_manual=false, $data_envio = '')
     {
-
         //montando array mestre
         foreach ($param as $key => $value) {
             $value['dadosRegra'] = Regraenviolote::findOrFail($value['id']);
             $value['dadosRegra']['Matriz'] = Empresa::select('id', 'cnpj')->where('id', $value['dadosRegra']['id_empresa'])->get();
+            $value = json_decode(json_encode($value), true);
+            
+            $query = "SELECT 
+                        A.arquivo_entrega, 
+                        C.cnpj as EmpresaCNPJ, 
+                        B.cnpj as EstabelecimentoCNPJ, 
+                        (SELECT B.pasta_arquivos FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id where A.id = ".$value['dadosRegra']['id'].") as tributo, 
+                        (SELECT B.tipo FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id where A.id = ".$value['dadosRegra']['id'].") as tipo
+                        FROM
+                            atividades A
+                                INNER JOIN
+                            estabelecimentos B ON A.estemp_id = B.id
+                                INNER JOIN
+                            empresas C ON A.emp_id = C.id";
 
             if ($value['regra_geral'] == 'S') {
-            $value = json_decode(json_encode($value), true);
-                $dados = $this->getEstabelecimentos($value['dadosRegra']['Matriz'][0]['id']);
-                foreach ($dados as $id => $date) {  
-                    $value['dadosRegra']['dadosFiliais'][$date['id']] = $date;            
-                }
+                $query .= " WHERE A.emp_id = ".$value['dadosRegra']['id_empresa']."";                
             }
 
             if ($value['regra_geral'] == 'N') {
-                $dadosfiliais = $value['dadosRegra']->filiais;
-                $dadosfiliais = json_decode(json_encode($dadosfiliais),true);
-                $value['dadosRegra']['dadosFiliais'] = $dadosfiliais;
-
-                $value = json_decode(json_encode($value),true);
-                foreach ($value['dadosRegra']['dadosFiliais'] as $key => $date) {
-                    $dadosfiliais = Estabelecimento::select('cnpj', 'id')->where('id', $date['id_estabelecimento'])->get();
-                    $dadosfiliais = json_decode(json_encode($dadosfiliais),true);
-                    unset($value['dadosRegra']['dadosFiliais'][0]);
-                    foreach ($dadosfiliais as $key => $id) {
-                        $value['dadosRegra']['dadosFiliais'][$id['id']] = $id;                        
-                    }   
-                } 
+                $query .= " WHERE
+                            A.estemp_id IN (SELECT 
+                                    id_estabelecimento
+                                FROM
+                                    regraenviolotefilial
+                                WHERE
+                                    id_regraenviolote = ".$value['dadosRegra']['id'].")";
             }
-            //Pegando os caminhos dos arquivos
-            $value = json_decode(json_encode($value),true);
-            if (!empty($value['dadosRegra']['dadosFiliais'])){
-                foreach ($value['dadosRegra']['dadosFiliais'] as $key => $cnpjFilial) {
-                    $path_link = "http://".$_SERVER['SERVER_NAME']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
 
-                    $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($value['dadosRegra']['Matriz'][0]['cnpj'], 0, 8)."/".$cnpjFilial['cnpj']."";
+            $dataBusca = date('d/m/Y');
+            if (!empty($data_envio)) {
+                $dataBusca = $data_envio;
+            }
+
+            $query .= " AND DATE_FORMAT(A.data_entrega,'%d/%m/%Y') = '".$dataBusca."'; ";
+
+            $data = DB::select($query);
+
+            $data = json_decode(json_encode($data),true);
+
+            if (!empty($data)){
+                foreach ($data as $campo) {
+                    $path_link = "http://".$_SERVER['SERVER_NAME']."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
+
+                    $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
+
+                    $campo['tipo'] = $this->getTipo($campo['tipo']);
+                    $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
+                    $path .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
+                    $path_link .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
 
                     if (file_exists($path)) {
-                        //Carrega Ultimo periodo_apuracao
-                        $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
-                        
-                        //Carrega parametros (estadual, municipal, federal) e Pasta
-                        $parametros = DB::select("SELECT B.pasta_arquivos, B.tipo FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id WHERE A.id = ".$value['dadosRegra']['id']." AND B.pasta_arquivos IS NOT NULL");
-                        
-                        $parametros = json_decode(json_encode($parametros), true);
-                        //Define Path
-                        foreach ($parametros as $q => $l) {
-                            $l['tipo'] = $this->getTipo($l['tipo']);
-                            $link[] = $path.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
-                            $link_path =  $path_link.'/'.$l['tipo'].'/'.$l['pasta_arquivos'].'/'.$ult_periodo_apuracao.'/';
-                        }
-                        //Define no array o caminho da pasta
-                        $value['dadosRegra']['dadosFiliais'][$key]['path'] = $link;
-                    
-                        //Verificando se arquivo existe e se data é igual agora a hoje.
-                        foreach ($value['dadosRegra']['dadosFiliais'][$key]['path'] as $chave => $path) {
-                            if (file_exists($path)) {
-                                $anexo = scandir($path);
-                                $item = '';
-                                if(count($anexo) > 2) {
-                                    $ponteiro  = opendir($path);
-                                    while ($nome_itens = readdir($ponteiro)) {
-                                        $itens[] = $nome_itens;
-                                        foreach ($itens as $i => $q) {
-                                            if (preg_match("/[A-Za-z0-9]/", $q)) {
-                                                $item = $q;
-                                            }
-                                        }
-                                    }
-                                    $data_m = date('d/m/Y', filemtime($path.$item));
-                                    $data_n = date('d/m/Y');
-                                    if ((!$envio_manual && $data_m == $data_n) || ($envio_manual && $data_m == $data_envio)) {
-                                        if (empty($path) && empty($item)) {
-                                            $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = '';
-                                        } 
-                                        $value['dadosRegra']['dadosFiliais'][$key]['download_link'][] = $link_path.$item;
-                                    }
-                                }
-                            }
-                        }
+                        $download_link[] = $path_link;
                     }
                 }
-            }
+            }   
 
-            //Fim dos caminhos
-            foreach ($value['dadosRegra']['dadosFiliais'] as $array) {
-                if (!empty($array['download_link'])) {
-                    $this->enviarEmailLote($array, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3']);
-                }
+            if (!empty($download_link)) {
+                $this->enviarEmailLote($download_link, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3'], $data_envio);
             }
         }
     }
@@ -163,14 +137,19 @@ class RegrasenviolotesController extends Controller
         return $value; 
     }
 
-    public function enviarEmailLote($array, $email_1, $email_2, $email_3)
-    {
+    public function enviarEmailLote($array, $email_1, $email_2, $email_3, $data_envio = '')
+    {   
         $dados = array('dados' => $array, 'emails' => array($email_1, $email_2, $email_3));
-        $data['linkDownload'] = $dados['dados']['download_link'];
+        $data['linkDownload'] = $dados['dados'];
 
-        $subject = "TAX CALENDAR - Entrega das obrigações em ".date('d/m/Y').".";
+        $dataExibe = date('d/m/Y');
+        if (!empty($data_envio)) {
+            $dataExibe = $data_envio;
+        }
+        $subject = "TAX CALENDAR - Entrega das obrigações em ".$dataExibe.".";
         $data['subject']      = $subject;
-        $data['data']         = date('d/m/Y');
+        $data['data']         = $dataExibe;
+
         foreach($dados['emails'] as $user)
         {
             $this->eService->sendMail($user, $data, 'emails.notification-envio-lote', true);

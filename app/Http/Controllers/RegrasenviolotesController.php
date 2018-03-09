@@ -151,8 +151,11 @@ class RegrasenviolotesController extends Controller
         $data['data']         = $dataExibe;
 
         foreach($dados['emails'] as $user)
-        {
-            $this->eService->sendMail($user, $data, 'emails.notification-envio-lote', true);
+        {   
+            if (!empty($user)) {
+                $this->eService->sendMail($user, $data, 'emails.notification-envio-lote', true);
+            }
+            
         }
         return;
     }

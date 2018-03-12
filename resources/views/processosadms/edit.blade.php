@@ -133,11 +133,19 @@
 
 {!! Form::hidden('estabelecimento_id', null, ['class' => 'form-control', 'id'=> 'estabelecimento_id']) !!}
 
+<?php if (@!$_GET['view']) { ?>
+    {!! Form::submit('Update Processo Administrativo', ['class' => 'btn btn-default']) !!}
+    <a href="{{ route('processosadms.delete', $processosadms->id) }}" class="btn btn-default" onclick="return confirm('Tem certeza que deseja excluir o registro?')">Excluir</a>
+    <a href="javascript:void(0);" class="btn btn-default" onclick="getObservacao();">Observações</a>
+    <a href="{{ route('processosadms.search') }}" class="btn btn-default">Voltar</a>
+    
+<?php } else { 
+        if (!empty($_GET['periodo_inicio']) && !empty($_GET['periodo_fim'])) { ?>
+            <a href="{{ route('rlt_detalhado') }}?periodo_inicio=<?php echo $_GET['periodo_inicio']; ?>&periodo_fim=<?php echo $_GET['periodo_fim']; ?>" class="btn btn-default">Voltar</a>
+        <?php } else { ?>
+            <a href="{{ route('rlt_detalhado') }}" class="btn btn-default">Voltar</a>
 
-{!! Form::submit('Update Processo Administrativo', ['class' => 'btn btn-default']) !!}
-<a href="{{ route('processosadms.delete', $processosadms->id) }}" class="btn btn-default" onclick="return confirm('Tem certeza que deseja excluir o registro?')">Excluir</a>
-<a href="javascript:void(0);" class="btn btn-default" onclick="getObservacao();">Observações</a>
-<a href="{{ route('processosadms.search') }}" class="btn btn-default">Voltar</a>
+<?php } }  ?>
 
 {!! Form::close() !!}
 <hr/>

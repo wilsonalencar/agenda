@@ -99,10 +99,6 @@ class RegrasenviolotesController extends Controller
 
             $query .= " AND DATE_FORMAT(A.data_entrega,'%d/%m/%Y') = '".$dataBusca."' AND D.tributo_id = (SELECT id_tributo FROM regraenviolote WHERE id = ".$value['dadosRegra']['id']."); ";
             
-            echo "<prE>";
-            print_r($query);
-            echo "</pre>";
-            
             $data = DB::select($query);
             $data = json_decode(json_encode($data),true);
 
@@ -116,13 +112,11 @@ class RegrasenviolotesController extends Controller
                     $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
                     $path .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
                     $path_link .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
+
                     if (file_exists($path)) {
                         $download_link[] = $path_link;
                     }
                 }
-            echo "<pre>";
-            print_r($path);
-            echo "</pre>";exit;
             }   
 
             if (!empty($download_link)) {

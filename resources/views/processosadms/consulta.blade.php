@@ -79,7 +79,7 @@ foreach ($datas as $index => $periodo) {
 		$baixadosTT += $dados['baixados'];	
 		$totalTT += $dados['total'];
 		$em_andamentoTT += $dados['em_andamento'];
-		$media .= round(($dados['em_andamento']+$dados['total']+$dados['baixados'])/3).',';
+		$media .= round(($dados['em_andamento']+$dados['baixados'])/2).',';
 	}
 }
 //Prepara para exibir em gráfico

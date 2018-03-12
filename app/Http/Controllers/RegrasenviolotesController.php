@@ -95,7 +95,10 @@ class RegrasenviolotesController extends Controller
             $dataBusca = date('d/m/Y');
             if (!empty($data_envio)) {
                 $dataBusca = $data_envio;
-            }
+            }  
+
+            $periodo = str_replace("/", "", $dataBusca);
+            $periodo = substr($periodo, -6);
 
             $query .= " AND DATE_FORMAT(A.data_entrega,'%d/%m/%Y') = '".$dataBusca."' AND D.tributo_id = (SELECT id_tributo FROM regraenviolote WHERE id = ".$value['dadosRegra']['id']."); ";
             
@@ -109,7 +112,7 @@ class RegrasenviolotesController extends Controller
                     $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
 
                     $campo['tipo'] = $this->getTipo($campo['tipo']);
-                    $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
+                    $ult_periodo_apuracao = $periodo;
                     $path .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
                     $path_link .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
 
@@ -123,13 +126,6 @@ class RegrasenviolotesController extends Controller
                 $this->enviarEmailLote($download_link, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3'], $data_envio);
             }
         }
-    }
-
-    private function getLastPeriodoApuracao($id_empresa)
-    {
-        $periodo = DB::select("SELECT periodo_apuracao FROM crons where emp_id = ".$id_empresa." ORDER BY id DESC LIMIT 1");
-        $periodo = json_decode(json_encode($periodo),true);
-        return $periodo[0]['periodo_apuracao'];
     }
 
     public function getEstabelecimentos($id_empresa)

@@ -98,7 +98,7 @@ class RegrasenviolotesController extends Controller
             }
 
             $query .= " AND DATE_FORMAT(A.data_entrega,'%d/%m/%Y') = '".$dataBusca."' AND D.tributo_id = (SELECT id_tributo FROM regraenviolote WHERE id = ".$value['dadosRegra']['id']."); ";
-
+            
             $data = DB::select($query);
             $data = json_decode(json_encode($data),true);
 

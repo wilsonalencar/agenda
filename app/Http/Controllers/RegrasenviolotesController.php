@@ -73,7 +73,10 @@ class RegrasenviolotesController extends Controller
                                 INNER JOIN
                             estabelecimentos B ON A.estemp_id = B.id
                                 INNER JOIN
-                            empresas C ON A.emp_id = C.id";
+                            empresas C ON A.emp_id = C.id
+                                INNER JOIN
+                            regras D ON A.regra_id = D.id";
+
 
             if ($value['regra_geral'] == 'S') {
                 $query .= " WHERE A.emp_id = ".$value['dadosRegra']['id_empresa']."";                
@@ -94,10 +97,9 @@ class RegrasenviolotesController extends Controller
                 $dataBusca = $data_envio;
             }
 
-            $query .= " AND DATE_FORMAT(A.data_entrega,'%d/%m/%Y') = '".$dataBusca."'; ";
+            $query .= " AND DATE_FORMAT(A.data_entrega,'%d/%m/%Y') = '".$dataBusca."' AND D.tributo_id = (SELECT id_tributo FROM regraenviolote WHERE id = ".$value['dadosRegra']['id']."); ";
 
             $data = DB::select($query);
-
             $data = json_decode(json_encode($data),true);
 
             if (!empty($data)){

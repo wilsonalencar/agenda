@@ -17,16 +17,16 @@
         
         </div>
             <div class="period">
-                <div class="input-group spinner">
-                    <input type="text" name="periodo_fim" class="form-control" value="{{$datas[$last]}}">
+                <div class="input-group spinner" id="spinner">
+                    <input type="text" id="INPUTFIM" name="periodo_fim" class="form-control" value="{{substr($datas[$last], 0,2)}}/{{substr($datas[$last], -4,4)}}">
                     <div class="input-group-btn-vertical">
                     <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
                     <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
                     </div>
                 </div>
                 <span>Fim:</span>
-                <div class="input-group spinner">
-                    <input type="text" class="form-control" name="periodo_inicio" value="{{$datas[$first]}}">
+                <div class="input-group spinner" id="spinner2">
+                    <input type="text" id="INPUTINI" class="form-control" name="periodo_inicio" value="{{substr($datas[$first], 0,2)}}/{{substr($datas[$first], -4,4)}}">
                     <div class="input-group-btn-vertical">
                     <button class="btn btn-default" type="button"><i class="fa fa-caret-up"></i></button>
                     <button class="btn btn-default" type="button"><i class="fa fa-caret-down"></i></button>
@@ -50,7 +50,7 @@
    
 @endif
     <div class="row" onclick="rlt_detalhado()">
-    	<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+    	<div id="container" style="min-width: 310px; height: 650px; margin: 0 auto"></div>
     </div>
 </div>
 <hr>
@@ -156,6 +156,73 @@ Highcharts.chart('container', {
         }
     }]
 });
+$('#spinner2 .btn:first-of-type').on('click', function() { //UP
+            var value = $('#spinner2 input').val();
+            var mes = parseInt(value.substr(0,2));
+            var year = parseInt(value.substr(3,4));
+            mes += 1;
+            if (mes>12) {
+                mes = 1;
+                year += 1;
+            } else if (mes<10) {
+                mes = '0'+mes;
+            }
+            year = ''+year;
+            $('#INPUTINI').val(mes+'/'+year);
+
+      });
+
+$('#spinner2 .btn:last-of-type').on('click', function() {  //DOWN
+            var value = $('#spinner2 input').val();
+            var mes = parseInt(value.substr(0,2));
+            var year = parseInt(value.substr(3,4));
+            mes -= 1;
+            if (mes<1) {
+                mes = 12;
+                year -= 1;
+            } else if (mes<10) {
+                mes = '0'+mes;
+            }
+            year = ''+year;
+            $('#INPUTINI').val(mes+'/'+year);
+     });
+
+$('#spinner .btn:first-of-type').on('click', function() { //UP
+            var value = $('#spinner input').val();
+            var mes = parseInt(value.substr(0,2));
+            var year = parseInt(value.substr(3,4));
+            mes += 1;
+            if (mes>12) {
+                mes = 1;
+                year += 1;
+            } else if (mes<10) {
+                mes = '0'+mes;
+            }
+            year = ''+year;
+            $('#INPUTFIM').val(mes+'/'+year);
+
+      });
+
+$('#spinner .btn:last-of-type').on('click', function() {  //DOWN
+            var value = $('#spinner input').val();
+            var mes = parseInt(value.substr(0,2));
+            var year = parseInt(value.substr(3,4));
+            mes -= 1;
+            if (mes<1) {
+                mes = 12;
+                year -= 1;
+            } else if (mes<10) {
+                mes = '0'+mes;
+            }
+            year = ''+year;
+            $('#INPUTFIM').val(mes+'/'+year);
+     });
+
+jQuery(function($){
+    $('#INPUTINI').mask("99/9999");
+    $('#INPUTFIM').mask("99/9999");
+});
+
 </script>
 
 @stop

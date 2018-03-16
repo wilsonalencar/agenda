@@ -179,9 +179,7 @@ a:-webkit-any-link{
 @import url(//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css);
 
 .detailBox {
-    width:320px;
     border:1px solid #bbb;
-    margin:50px;
 }
 .titleBox {
     background-color:#fdfdfd;
@@ -1596,6 +1594,9 @@ a:-webkit-any-link{
     .content-top .title {
         margin-bottom: 20px;
     }
+    .grafico-visao{
+      min-height: 1850px !important;
+    }
 }
 
 @media (max-width: 670px){
@@ -1636,4 +1637,78 @@ a:-webkit-any-link{
     right: 0px;
     top: 0px;
     z-index: 999;
+}
+
+.navbar-brand {
+	display: none !important;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}
+
+.text-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 2px;
+}
+
+.lead {
+  font-size: 15px;
+  font-family: 'Roboto';
+}
+
+.lead b{
+  font-weight: 600;
+}
+
+.lead-bold{
+  font-size: 15px;
+  font-family: 'Roboto';
+  font-weight: 600;
+}
+
+.detailBox {
+    border: 1px solid #bbb;
+    border-radius: 5px;
+}
+
+.titleBox {
+    padding: 15px;
+    background: transparent;
+}
+
+.btn-black {
+    position: relative;
+    margin-left: 4px;
+    padding: 7px 15px;
+    background: black;
+    color: #fff;
+    border: 0px none;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.btn-back {
+    background: #dc2020 !important;
+    border: 0px none;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 8px 15px;
 }

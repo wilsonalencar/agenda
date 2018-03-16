@@ -13,7 +13,7 @@
 
 <div class="grafico-content">
     <div class="row">
-        <div class="col-md-8 mgT30">
+        <div class="col-md-8 mgT20">
             <div class="card">
                 <div class="header-grafh darkcyan">
                     Status geral das entregas mensais

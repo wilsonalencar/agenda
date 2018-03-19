@@ -38,4 +38,25 @@ class DownloadsController extends Controller
             return response()->download($file_path);
         }
     }
+
+    public function download_comprovante($id)
+    {
+        $atividade = Atividade::findOrFail($id);
+        if ($atividade->arquivo_comprovante == '-') {
+            Session::flash('message', "$atividade->descricao sem comprovante.");
+            return Redirect::back();
+
+        } else {
+
+            
+            $destinationPath = $id.'/'.$atividade->arquivo_comprovante; // upload path
+            $headers = array(
+                'Content-Type' => 'application/pdf',
+            );
+
+            $file_path = public_path('uploads/'.$destinationPath);
+
+            return response()->download($file_path);
+        }
+    }
 }

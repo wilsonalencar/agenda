@@ -79,6 +79,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
 
     Route::get('/download/{file}', 'DownloadsController@download');
+    Route::get('/download_comprovante/{file}', 'DownloadsController@download_comprovante');
 
     Route::resource('entregas', 'EntregasController');
     Route::get('entrega/data', array('as'=>'entregas.data', 'uses'=>'EntregasController@anyData'));
@@ -195,6 +196,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
     Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));
 
     Route::post('atividade/storeComentario', array('as'=>'atividades.storeComentario', 'uses'=>'AtividadesController@storeComentario'));
+    Route::post('arquivos/upload', 'ArquivosController@upload');
 
     Route::get('upload/{user}/entrega', array('as'=>'upload.entrega', 'uses'=>'UploadsController@entrega'));
     Route::post('upload/sendUpload', 'UploadsController@upload');

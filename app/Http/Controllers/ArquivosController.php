@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
 use Yajra\Datatables\Datatables;
 
 class ArquivosController extends Controller
@@ -40,7 +42,7 @@ class ArquivosController extends Controller
      */
     public function index()
     {
-        return view('arquivos.index')->with('filter_cnpj',Input::get("vcn"))->with('filter_codigo',Input::get("vco"));
+        return view('arquivos.index')->with('filter_cnpj',Input::get("vcn"))->with('filter_codigo',Input::get("vco"))->with('filter_tributo',Input::get("vct"));
     }
 
     public function anyData(Request $request)
@@ -104,6 +106,20 @@ class ArquivosController extends Controller
             }
 
         }
+
+        if($filter_tributo = $request->get('tributo')){
+
+            $tributosearch = Tributo::select('id')->where('nome', 'like', '%'.$filter_tributo.'%')->get();
+            if (sizeof($tributosearch)>0) {
+
+                $atividades = $atividades->whereHas('regra.tributo', function ($query) use ($tributosearch) {
+                $query->whereIn('id', $tributosearch);
+            });
+
+            } else {
+                $atividades = new Collection();
+            }
+        }
 /*
         if ( isset($request['search']) && $request['search']['value'] != '' ) {
             $str_filter = $request['search']['value'];
@@ -120,6 +136,39 @@ class ArquivosController extends Controller
     public function create()
     {
         //
+    }
+
+    public function upload()
+    {
+        // getting all of the post data
+        $file = array('image' => Input::file('image'));
+        // checking file is valid.
+        if (Input::file('image')->isValid()) {
+
+            $atividade_id = Input::get('atividade_id');
+
+            $atividade = Atividade::findOrFail($atividade_id);
+            
+            $destinationPath = 'uploads/'.$atividade_id; // upload path
+            $extension = Input::file('image')->getClientOriginalExtension(); // getting image extension
+            $fileName = time().'.'.$extension; // renameing image
+            $fileName = preg_replace('/\s+/', '', $fileName); //clear whitespaces
+
+            Input::file('image')->move($destinationPath, $fileName); // uploading file to given path
+
+            //Save status
+            $atividade->arquivo_comprovante = $fileName;
+            $atividade->save();
+
+            // sending back with message
+            Session::flash('success', 'Upload successfully');
+            return redirect()->route('arquivos.index')->with('status', 'Arquivo carregado com sucesso!');
+        }
+        else {
+            // sending back with error message.
+            Session::flash('error', 'Uploaded file is not valid');
+            return redirect()->route('arquivos.index')->with('status', 'Erro ao carregar o arquivo.');
+        }
     }
 
     /**

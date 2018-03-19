@@ -66,6 +66,7 @@ class RegrasenviolotesController extends Controller
                         A.arquivo_entrega, 
                         C.cnpj as EmpresaCNPJ, 
                         B.cnpj as EstabelecimentoCNPJ, 
+                        A.periodo_apuracao,
                         (SELECT B.pasta_arquivos FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id where A.id = ".$value['dadosRegra']['id'].") as tributo, 
                         (SELECT B.tipo FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id where A.id = ".$value['dadosRegra']['id'].") as tipo
                         FROM
@@ -95,7 +96,7 @@ class RegrasenviolotesController extends Controller
             $dataBusca = date('d/m/Y');
             if (!empty($data_envio)) {
                 $dataBusca = $data_envio;
-            }
+            }  
 
             $query .= " AND DATE_FORMAT(A.data_entrega,'%d/%m/%Y') = '".$dataBusca."' AND D.tributo_id = (SELECT id_tributo FROM regraenviolote WHERE id = ".$value['dadosRegra']['id']."); ";
             
@@ -104,15 +105,16 @@ class RegrasenviolotesController extends Controller
 
             if (!empty($data)){
                 foreach ($data as $campo) {
+                    
                     $path_link = "http://".$_SERVER['SERVER_NAME']."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
 
                     $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
 
                     $campo['tipo'] = $this->getTipo($campo['tipo']);
-                    $ult_periodo_apuracao = $this->getLastPeriodoApuracao($value['dadosRegra']['id_empresa']);
+                    $ult_periodo_apuracao = $campo['periodo_apuracao'];
                     $path .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
                     $path_link .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
-
+                
                     if (file_exists($path)) {
                         $download_link[] = $path_link;
                     }
@@ -123,13 +125,6 @@ class RegrasenviolotesController extends Controller
                 $this->enviarEmailLote($download_link, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3'], $data_envio);
             }
         }
-    }
-
-    private function getLastPeriodoApuracao($id_empresa)
-    {
-        $periodo = DB::select("SELECT periodo_apuracao FROM crons where emp_id = ".$id_empresa." ORDER BY id DESC LIMIT 1");
-        $periodo = json_decode(json_encode($periodo),true);
-        return $periodo[0]['periodo_apuracao'];
     }
 
     public function getEstabelecimentos($id_empresa)

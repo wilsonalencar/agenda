@@ -7,8 +7,10 @@
     <div>Envio automático dos arquivos referente às obrigações fiscais em {{ $data['data'] }}.</div>
     <div>
     @foreach($data['linkDownload'] as $key => $el)
+    <?php $ultima = basename($el); ?>
+
             <form action="{{ $el }}">
-                <input type="submit" value="Download">
+                <input type="submit" value="<?php echo $ultima; ?>">
             </form><br>
     @endforeach
     </div>

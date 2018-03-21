@@ -560,8 +560,63 @@ class PagesController extends Controller
                         ->with('array', $array);
     }
 
-    public function dashboard(Request $request, $empresaID=0, $returnArray=false) {
+    public function dashboardRLT(Request $request)
+    {
+        $input = $request->all();
+        $iframe = false;
+        $layoutgraficos = '';
+        $nomeEmpresa = '';
+        $cor = '';
 
+        if ($request->has('periodo_apuracao')) {
+            $switch = Input::get('periodo_apuracao');
+        } else {
+            $switch = 1;
+        }
+
+        Carbon::setTestNow();  //reset
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+        }
+        
+            $tipo_condition = "";
+            $tipo_check = array(true,false,false,false);
+            if ($request->has('tipo_tributos')) {
+                $tipo = Input::get("tipo_tributos");
+                switch ($tipo) {
+                    case 'T':
+                        break;
+                    case 'E':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,true,false);
+                        break;
+                    case 'F':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,true,false,false);
+                        break;
+                    case 'M':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,false,true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if ($switch) {
+                $retval = DB::select('SELECT DATE_FORMAT(A.limite, "%d/%m/%Y %H:%i:%s") as limite, A.status, A.descricao, B.cnpj, C.codigo, E.nome FROM atividades A INNER JOIN estabelecimentos B ON A.estemp_id = B.id INNER JOIN municipios C ON B.cod_municipio = C.codigo INNER JOIN regras D ON A.regra_id = D.id INNER JOIN tributos E ON D.tributo_id = E.id WHERE A.periodo_apuracao = '.$input["periodo_apuracao"].' AND E.nome = "'.$input["tributoBusca"].'"');
+            } 
+
+            $retval = json_decode(json_encode($retval),true);
+            return view('pages.rlt_consulta')->withRetval($retval);
+
+    }
+
+    public function dashboard(Request $request, $empresaID=0, $returnArray=false) {
         $iframe = false;
         $layoutgraficos = '';
         $nomeEmpresa = '';
@@ -609,7 +664,7 @@ class PagesController extends Controller
         } else {
             $periodo_apuracao = $last_month->format('mY');
         }
-
+        
         // Verifica o periodo
         $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
         if ($cron==null) {
@@ -621,7 +676,7 @@ class PagesController extends Controller
         if ($user->hasRole('supervisor')  || $user->hasRole('gcliente') || $user->hasRole('gbravo') || $user->hasRole('analyst') || $user->hasRole('manager') || $user->hasRole('admin') || $user->hasRole('owner')) {
 
             $tipo_condition = "";
-            $tipo_check = array(true,false,false);
+            $tipo_check = array(true,false,false,false);
 
             if ($request->has('tipo_tributos')) {
                 $tipo = Input::get("tipo_tributos");
@@ -630,11 +685,15 @@ class PagesController extends Controller
                         break;
                     case 'E':
                         $tipo_condition = "and t.tipo = '$tipo'";
-                        $tipo_check = array(false,false,true);
+                        $tipo_check = array(false,false,true,false);
                         break;
                     case 'F':
                         $tipo_condition = "and t.tipo = '$tipo'";
-                        $tipo_check = array(false,true,false);
+                        $tipo_check = array(false,true,false,false);
+                        break;
+                    case 'M':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,false,true);
                         break;
                     default:
                         break;

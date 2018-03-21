@@ -5,6 +5,7 @@
 ?>
 <h1>Processos Administrativos - Relatório</h1>
 <p class="lead"> 
+<!-- falta voltar o filtro -->
     <a href="{{ route('consulta_procadm') }}?periodo_inicio={{$periodo_inicio}}&periodo_fim={{$periodo_fim}}">Voltar</a>  
 </p>
 <hr>

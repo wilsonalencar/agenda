@@ -35,7 +35,7 @@
             </div>
             <div class="option-all">
                 <div class="item">
-                   
+
                     {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
                     {!! Form::hidden('switch_periodo', $switch, ['class' => 'form-control']) !!}
                 </div>
@@ -50,13 +50,22 @@
                 <div class="item">
                     {!! Form::radio('tipo_tributos', 'E',$tipo[2], ['id' => 'tipo_E']) !!}
                     {{ Form::label('tipo_E', 'EST') }}
-                   
+                </div>
+                <div class="item">
+                    {!! Form::radio('tipo_tributos', 'M',$tipo[3], ['id' => 'tipo_M']) !!}
+                    {{ Form::label('tipo_M', 'MUN') }}
                 </div>
             </div>
         </div>
         {!! Form::close() !!}
     </div>
 </div>
+
+<form action="{{ route('dashboardRLT') }}" method="GET" id="relatorioConsulta">
+    <input type="hidden" name="tributoBusca" id="tributoBusca" value="">
+    <input type="hidden" name="periodo_apuracao" value="{{$periodo}}">
+</form>
+
 
 <div class="row">
     <div class="col-md-12">
@@ -206,6 +215,9 @@ $(function () {
                             var tributo = this.category;
                             $("select[name='tributo']").val(tributo);
                             $( "#dtrib_btn" ).click();
+
+                            $("#tributoBusca").val(tributo);
+                            $("#relatorioConsulta").submit();
                         }
                     }
                 }

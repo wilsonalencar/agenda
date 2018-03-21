@@ -243,6 +243,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));
     Route::post('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
     Route::get('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
+    Route::get('dashboardRLT', array('as'=>'dashboardRLT', 'uses'=>'PagesController@dashboardRLT'));
 
     Route::get('consulta_procadm', array('as'=>'consulta_procadm', 'uses'=>'ProcessosAdmsController@consulta_procadm'));
     Route::get('consulta_procadm/rpt', array('as'=>'consulta_procadm/rpt', 'uses'=>'ProcessosAdmsController@rlt_processos'));

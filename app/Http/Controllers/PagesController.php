@@ -780,18 +780,33 @@ class PagesController extends Controller
             $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
 
             $ref = $codigo;
-            if ($only_uf) {
+            if ($codigo == 0) {
                 $ref = $uf;
             }
 
+            //Query para geração do relatório
             $ativ_filtered = DB::table('atividades')
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('estabelecimentos', 'atividades.estemp_id', '=', 'estabelecimentos.id')
+                ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo');
+
+            $ativ_filtered = $ativ_filtered
                 ->select(array('status',DB::raw('COUNT(atividades.id) as count')))
-                ->where('periodo_apuracao',$periodo_apuracao)
-                ->where('ref',$ref)
-                ->where('recibo', 1)
-                ->where('regras.tributo_id',$tributo_id)
-                ->where('emp_id',$this->s_emp->id)
+                ->where('periodo_apuracao', '=' ,$periodo_apuracao);
+
+            if (!empty($ref) && $codigo == 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.uf','=',$ref);
+            }
+
+            if (!empty($ref) && $codigo > 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.codigo','=',$ref);
+            }
+
+            $ativ_filtered = $ativ_filtered
+                ->where('regras.tributo_id','=',$tributo_id)
+                ->where('emp_id','=',$this->s_emp->id)
                 ->groupBy('status')
                 ->get();
 
@@ -805,25 +820,38 @@ class PagesController extends Controller
             $only_uf = Input::get("only-uf");
             $codigo = Input::get("codigo");
 
-
             $graph['params'] = array('p_uf'=>$uf,'p_onlyuf'=>$only_uf,'p_codigo'=>$codigo,'p_tributo'=>null);
             $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
 
             $ref = $codigo;
-            if ($only_uf) {
+            if ($codigo == 0) {
                 $ref = $uf;
             }
-
+            //Query para geração do relatório
             $ativ_filtered = DB::table('atividades')
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('estabelecimentos', 'atividades.estemp_id', '=', 'estabelecimentos.id')
+                ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo');
+
+            $ativ_filtered = $ativ_filtered
                 ->select(array('status',DB::raw('COUNT(atividades.id) as count')))
-                ->where('ref',$ref)
-                ->where('periodo_apuracao',$periodo_apuracao)
-                ->where('recibo', 1)
-                ->where('emp_id',$this->s_emp->id)
+                ->where('periodo_apuracao', '=' ,$periodo_apuracao);
+
+            if (!empty($ref) && $codigo == 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.uf','=',$ref);
+            }
+
+            if (!empty($ref) && $codigo > 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.codigo','=',$ref);
+            }
+
+            $ativ_filtered = $ativ_filtered
+                ->where('emp_id','=',$this->s_emp->id)
                 ->groupBy('status')
                 ->get();
-
+                
             foreach ($ativ_filtered as $at) {
                     $graph['status_'.$at->status] = $at->count;
             }

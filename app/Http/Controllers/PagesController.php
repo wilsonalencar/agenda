@@ -355,7 +355,7 @@ class PagesController extends Controller
                 $empresasSelected = $input['multiple_select_empresas'];  
             }
 
-            //array_push($empresasSelecionadas, "img-1", "img-2");
+            array_push($empresasSelecionadas, "img-1", "img-2");
         }
        
         return view('pages.graficos')

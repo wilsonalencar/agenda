@@ -1,4 +1,6 @@
-<?php $request = $_SERVER['REQUEST_URI']; ?>
+<?php
+    $request = substr($_SERVER['REQUEST_URI'], -10);
+?>
 @extends('layouts.master')
 
 

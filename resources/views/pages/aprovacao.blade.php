@@ -1,3 +1,4 @@
+<?php $request = $_SERVER['REQUEST_URI']; ?>
 @extends('layouts.master')
 
 
@@ -43,9 +44,9 @@
 
 </div>
 
-
+@if ($request == '/aprovacao')
 <div id="caixas_container-aprovacao">
-    @if (sizeof($aprovacao)>0)
+    
     <div class="caixa-aprovacao" style="height: 80%;" id="limit_aprovacao">
             <div id="aprovacao">
                 <div class="header-box box-2">
@@ -68,6 +69,7 @@
                             </tr>
                         </thead>
                         <tbody>
+                           @if (sizeof($aprovacao)>0 ) 
                             @foreach ($aprovacao as $key => $value)
                             <?php
                                 $timestamp = strtotime($value['data_entrega']);
@@ -86,6 +88,7 @@
                                 <td><a href="{{ route('atividades.show', $value['id']) }}" style="margin-left:10px" class="btn btn-default btn-sm"><i class="fa fa-search"></i></a></td>
                             </tr> 
                             @endforeach
+                            @endif
                         </tbody>
                         <tfoot>
                             <tr>
@@ -103,7 +106,7 @@
     </div>
     @endif
 
-    @if (sizeof($urgentes)>0 && !Auth::user()->hasRole('gcliente') && !Auth::user()->hasRole('gbravo'))
+    @if (sizeof($urgentes)>0 && !Auth::user()->hasRole('gcliente') && !Auth::user()->hasRole('gbravo') && $request != '/aprovacao')
     <div class="caixa" id="limit_urgentes">
         <div style="float:right" class="btn-group">
             <button type="button" id="btn_open_urgentes" class="btn btn-danger btn-xs">Abrir</button>
@@ -142,7 +145,7 @@
     </div>
     @endif
 
-    @if (sizeof($messages)>0 && !Auth::user()->hasRole('gcliente') && !Auth::user()->hasRole('gbravo'))
+    @if (sizeof($messages)>0 && !Auth::user()->hasRole('gcliente') && !Auth::user()->hasRole('gbravo')  && $request != '/aprovacao')
     <div class="caixa" id="limit_vencimento">
             <div style="float:right" class="btn-group">
                 <button type="button" id="btn_open_vencimento" class="btn btn-info btn-xs">Abrir</button>

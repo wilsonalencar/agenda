@@ -52,6 +52,10 @@ class CargasController extends Controller
             $estabelecimentos->where('carga_msaf_entrada',1)->where('carga_msaf_saida',1);
         }
 
+        if($filter = $request->get('inativo')){
+            $estabelecimentos->where('carga_msaf_entrada',0)->where('carga_msaf_saida',0);
+        }
+
         return Datatables::of($estabelecimentos)->make(true);
     }
 

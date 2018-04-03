@@ -99,10 +99,20 @@ class MensageriaprocadmsController extends Controller
     		return;
     	}
 
-    	$subject = "BravoTaxCalendar - Processo ".$array->id." sem atualização.";
+        $var = DB::select("select B.cnpj, B.codigo, C.razao_social from processosadms A inner join estabelecimentos B on A.estabelecimento_id = B.id inner join empresas C on B.empresa_id = C.id where A.id = ".$array->id."");
+        
+        $var = json_decode(json_encode($var),true);
+        foreach ($var as $t) {
+        }
+
+        $formatedVar  = 'Empresa: '. $t['razao_social'].' - CNPJ: '. $t['cnpj'] . ' Código da área: '.$t['codigo'];
+
+        $subject = "BravoTaxCalendar - Processo ".$array->id." sem atualização.";
     	$data['nro_processo'] = $array->id;
     	$data['dias'] 	      = $array->dias_diferenca;		
     	$data['subject']      = $subject;
+        $data['dadosEmp']     = $formatedVar;
+
     	foreach($emails as $user)
     	{
     		$this->eService->sendMail($user, $data, 'emails.notificacao-processos');

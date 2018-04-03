@@ -37,7 +37,7 @@ class CargasController extends Controller
         if ($request->has('switch_val')) {
             $switch = Input::get('switch_val');
         } else {
-            $switch = 0;
+            $switch = 2;
         }
         //var_dump($request);
         return view('cargas.msaf-load')->withSwitch($switch);
@@ -47,13 +47,10 @@ class CargasController extends Controller
     {
         $seid = $this->s_emp->id;
         $estabelecimentos = Estabelecimento::select('*')->where('empresa_id', $seid)->with('municipio');
-
-        if($filter = $request->get('ativo')){
-            $estabelecimentos->where('carga_msaf_entrada',1)->where('carga_msaf_saida',1);
-        }
-
-        if($filter = $request->get('inativo')){
-            $estabelecimentos->where('carga_msaf_entrada',0)->where('carga_msaf_saida',0);
+        $filter = $request->get('ativo');
+        
+        if ($filter != 2) {
+            $estabelecimentos->where('carga_msaf_entrada',$filter)->where('carga_msaf_saida',$filter);
         }
 
         return Datatables::of($estabelecimentos)->make(true);

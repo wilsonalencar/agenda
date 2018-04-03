@@ -8,7 +8,11 @@
         <p class="lead">Status de carga para todos os estabelecimentos ativos.</p>
     </div>
     <div title="" class="col-lg-3">
-        <input type="checkbox" name="switch-checkbox" <?= $switch==1?'checked':'' ?> >
+        <select name="slt_cargas" id="slt_cargas">
+            <option value="2" <?php if($switch == 2) echo "selected"; ?>>Todos</option>
+            <option value="1" <?php if($switch == 1) echo "selected"; ?>>Carregados</option>
+            <option value="0" <?php if($switch == 0) echo "selected"; ?>>Não Carregados</option>
+        </select>
     </div>
     <div class="col-md-1">
         {!! Form::open([
@@ -57,6 +61,12 @@ $(function() {
       $( "#atualiza_btn" ).click();
     });
 
+    $( "#slt_cargas" ).change(function() {
+      $('input[name="switch_val"]').val($(this).val());
+      $( "#atualiza_btn" ).click();
+    });    
+    
+
     // Select the submit buttons of forms with data-confirm attribute
     var reset_button =$( '#reset_btn' );
 
@@ -86,7 +96,7 @@ $(function() {
         ajax: {
                 url: "{!! route('cargas.data') !!}",
                 data: function (d) {
-                    d.ativo = $("[name='switch-checkbox']").is( ":checked" )?1:0;
+                    d.ativo = $("[name='switch_val']").val();
                 }
             },
         columnDefs: [{ "width": "80px", "targets": 3 },{ "width": "80px", "targets": 4 }],

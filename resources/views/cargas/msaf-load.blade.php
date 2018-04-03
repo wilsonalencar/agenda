@@ -8,7 +8,7 @@
         <p class="lead">Status de carga para todos os estabelecimentos ativos.</p>
     </div>
     <div title="" class="col-lg-3">
-        <select name="slt_cargas" id="slt_cargas">
+        <select name="slt_cargas" id="slt_cargas" class="form-control">
             <option value="2" <?php if($switch == 2) echo "selected"; ?>>Todos</option>
             <option value="1" <?php if($switch == 1) echo "selected"; ?>>Carregados</option>
             <option value="0" <?php if($switch == 0) echo "selected"; ?>>Não Carregados</option>

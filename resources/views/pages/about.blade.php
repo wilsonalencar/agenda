@@ -105,4 +105,12 @@ jQuery(document).ready(function($){
      });
 });
 </script>
+<script type="text/javascript">
+
+function atualizar() {
+  location.reload(true)
+}
+window.setInterval("atualizar()",60000);
+</script>
+
 @stop

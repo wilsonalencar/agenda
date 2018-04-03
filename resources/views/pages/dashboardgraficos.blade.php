@@ -18,7 +18,7 @@
                 <div class="header-grafh darkcyan">
                     Status geral das entregas mensais
                 </div>
-                <div id="container" style="height:815px">Dashboard</div>
+                <div id="container" style="height:70%">Dashboard</div>
             </div>
         </div>
         <div class="col-md-4">
@@ -26,14 +26,14 @@
                 <div class="header-grafh yellow">
                     Entregômetro
                 </div>
-                <div id="container_gauge" style="height:367px">Gauge</div>
+                <div id="container_gauge" style="height:30%">Gauge</div>
             </div>
 
             <div class="card mgT30">
                 <div class="header-grafh blue">
                     Percentual de entregas
                 </div>
-                <div id="graph_container" style="height:367px">Dashboard</div>
+                <div id="graph_container" style="height:32%">Dashboard</div>
             </div>
 
         </div>

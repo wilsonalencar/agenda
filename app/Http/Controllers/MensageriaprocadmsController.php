@@ -82,7 +82,7 @@ class MensageriaprocadmsController extends Controller
 
     public function findProcessosMensageria($role_id, $dias)
     {
-    	$processos = DB::select("select * FROM processosadms a inner join observacaoprocadms b ON b.id = (select id FROM observacaoprocadms where processoadm_id = a.id AND datediff(DATE_FORMAT(NOW(), '%Y/%m/%d'), DATE_FORMAT(b.created_at, '%Y/%m/%d')) = ".$dias." ORDER BY created_at DESC LIMIT 1)");
+    	$processos = DB::select("select a.* FROM processosadms a inner join observacaoprocadms b ON b.id = (select id FROM observacaoprocadms where processoadm_id = a.id AND datediff(DATE_FORMAT(NOW(), '%Y/%m/%d'), DATE_FORMAT(b.created_at, '%Y/%m/%d')) = ".$dias." ORDER BY created_at DESC LIMIT 1)");
     	
     	foreach($processos as $processo)
     	{

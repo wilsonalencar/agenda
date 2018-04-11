@@ -104,23 +104,35 @@ class RegrasenviolotesController extends Controller
             $data = json_decode(json_encode($data),true);
 
             if (!empty($data)){
+                
+                $download_link  = array();
+                $server_name    = $_SERVER['SERVER_NAME'];
+                $document_root  = $_SERVER['DOCUMENT_ROOT'];
+                    
+                $termo = 'agenda';
+                $pattern = '/' . $termo . '/';
+                
+                if (!preg_match($pattern, $_SERVER['SERVER_NAME'])) {
+                  $server_name    = $_SERVER['SERVER_NAME'].'/agenda/public';
+                  $document_root  = $_SERVER['DOCUMENT_ROOT'].'/agenda/public';
+                }   
+                
                 foreach ($data as $campo) {
                     
-                    $path_link = "http://".$_SERVER['SERVER_NAME']."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
-
-                    $path = "".$_SERVER['DOCUMENT_ROOT']."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
-
+                    $path_link = "http://".$server_name."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
+                    $path = "".$document_root."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
+                    
                     $campo['tipo'] = $this->getTipo($campo['tipo']);
                     $ult_periodo_apuracao = $campo['periodo_apuracao'];
                     $path .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
                     $path_link .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
-                
+                    
                     if (file_exists($path)) {
                         $download_link[] = $path_link;
                     }
                 }
             }   
-
+    
             if (!empty($download_link)) {
                 $this->enviarEmailLote($download_link, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3'], $data_envio);
             }

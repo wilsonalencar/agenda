@@ -581,7 +581,7 @@ class PagesController extends Controller
         $graph3 = $retval3;
         //Fim Gráfico 3
 
-        return view('processosadms.consulta')->with('graph1',$graph1)->with('graph2',$graph2)->with('graph3',$graph3)->with('dataExibe', $dataExibe);
+        return view('processosadms.consulta_conta_corrente')->with('graph1',$graph1)->with('graph2',$graph2)->with('graph3',$graph3)->with('dataExibe', $dataExibe);
     }
 
     public function status_empresas(Request $request) {

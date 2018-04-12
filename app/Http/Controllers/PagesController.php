@@ -30,6 +30,91 @@ class PagesController extends Controller
             $this->s_emp = Empresa::findOrFail(session('seid'));
     }
 
+    public function aprovacao (Request $request = null)
+    {
+        
+        Carbon::setTestNow();  //reset
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+
+        } else {
+            $periodo_apuracao = $last_month->format('mY');
+        }
+
+        // Verifica que o periodo exista
+        $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
+        if ($cron==null) {
+            $info_periodo = substr($periodo_apuracao,0,2).'/'.substr($periodo_apuracao,-4,4);
+            Session::flash('alert-warning', "O periodo $info_periodo não tem atividades cadastradas. Foi carregado o periodo padrão.");
+            $periodo_apuracao = $last_month->format('mY');
+        }
+   
+        
+        $tributos = Tributo::selectRaw("nome")->whereNotIn('id',[12,13,14,15])->lists('nome','nome');
+
+        $retval = $this->_loadNotifications(); //var_dump($retval);
+        $graph = array();
+        
+        $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+        $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+        $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+
+        $graphUF = DB::select('SELECT 
+                                C.UF,
+                                SUM(if(Status = 1, 1, 0)) as Status1,
+                                SUM(if(Status = 2, 1, 0)) as Status2,
+                                SUM(if(Status = 3, 1, 0)) as Status3
+                            FROM
+                                agenda.atividades A
+                                    INNER JOIN
+                                estabelecimentos B ON A.estemp_id = B.id
+                                    INNER JOIN
+                                municipios C ON B.cod_municipio = C.codigo
+                                where A.recibo = 1 AND periodo_apuracao = "'.$periodo_apuracao.'" AND A.emp_id = "'.$this->s_emp->id.'"
+                            GROUP BY (C.UF)');
+
+        $retval['em_aprovacao'] = DB::select('SELECT 
+                                    A.id,
+                                    C.UF,
+                                    A.descricao,
+                                    A.data_entrega,
+                                    B.codigo as area,
+                                    B.cnpj,
+                                    A.periodo_apuracao
+                                FROM
+                                    atividades A
+                                        INNER JOIN
+                                    regras R ON R.id = A.regra_id
+                                        INNER JOIN 
+                                    tributos T ON T.id = R.tributo_id
+                                        INNER JOIN 
+                                    estabelecimentos B ON A.estemp_id = B.id
+                                        INNER JOIN
+                                    municipios C ON B.cod_municipio = C.codigo
+                                        INNER JOIN 
+                                    empresas D ON B.empresa_id = D.id
+                                    WHERE  
+                                        A.status = 2 AND
+                                        A.emp_id = "'.$this->s_emp->id.'" ORDER BY A.limite');
+
+        if (!empty($retval['em_aprovacao'])) {
+            $retval['em_aprovacao'] = json_decode(json_encode($retval['em_aprovacao']), true);
+        }
+        
+        return view('pages.aprovacao')->withMessages($retval['ordinarias'])
+            ->withVencidas($retval['vencidas'])
+            ->withUrgentes($retval['urgentes'])
+            ->withAprovacao($retval['em_aprovacao'])
+            ->withGraph($graph)
+            ->withPeriodo($periodo_apuracao)
+            ->withCron($cron)
+            ->with('graph_uf', $graphUF);
+
+    }
+
     public function home (Request $request = null, $empresaID=false)
     {
         $iframe = false;
@@ -270,7 +355,7 @@ class PagesController extends Controller
                 $empresasSelected = $input['multiple_select_empresas'];  
             }
 
-            //array_push($empresasSelecionadas, "img-1", "img-2");
+            array_push($empresasSelecionadas, "img-1", "img-2");
         }
        
         return view('pages.graficos')
@@ -668,8 +753,63 @@ class PagesController extends Controller
                         ->with('array', $array);
     }
 
-    public function dashboard(Request $request, $empresaID=0, $returnArray=false) {
+    public function dashboardRLT(Request $request)
+    {
+        $input = $request->all();
+        $iframe = false;
+        $layoutgraficos = '';
+        $nomeEmpresa = '';
+        $cor = '';
 
+        if ($request->has('periodo_apuracao')) {
+            $switch = Input::get('periodo_apuracao');
+        } else {
+            $switch = 1;
+        }
+
+        Carbon::setTestNow();  //reset
+        $today = Carbon::today()->toDateString();
+        $last_month = new Carbon('last month');
+
+
+        if ($request->has('periodo_apuracao')) {
+            $periodo_apuracao = Input::get("periodo_apuracao");
+        }
+        
+            $tipo_condition = "";
+            $tipo_check = array(true,false,false,false);
+            if ($request->has('tipo_tributos')) {
+                $tipo = Input::get("tipo_tributos");
+                switch ($tipo) {
+                    case 'T':
+                        break;
+                    case 'E':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,true,false);
+                        break;
+                    case 'F':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,true,false,false);
+                        break;
+                    case 'M':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,false,true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if ($switch) {
+                $retval = DB::select('SELECT DATE_FORMAT(A.limite, "%d/%m/%Y %H:%i:%s") as limite, A.status, A.descricao, B.cnpj, C.codigo, E.nome FROM atividades A INNER JOIN estabelecimentos B ON A.estemp_id = B.id INNER JOIN municipios C ON B.cod_municipio = C.codigo INNER JOIN regras D ON A.regra_id = D.id INNER JOIN tributos E ON D.tributo_id = E.id WHERE A.periodo_apuracao = '.$input["periodo_apuracao"].' AND E.nome = "'.$input["tributoBusca"].'"');
+            } 
+
+            $retval = json_decode(json_encode($retval),true);
+            return view('pages.rlt_consulta')->withRetval($retval);
+
+    }
+
+    public function dashboard(Request $request, $empresaID=0, $returnArray=false) {
         $iframe = false;
         $layoutgraficos = '';
         $nomeEmpresa = '';
@@ -717,7 +857,7 @@ class PagesController extends Controller
         } else {
             $periodo_apuracao = $last_month->format('mY');
         }
-
+        
         // Verifica o periodo
         $cron = Cron::where('periodo_apuracao',$periodo_apuracao)->first();
         if ($cron==null) {
@@ -729,7 +869,7 @@ class PagesController extends Controller
         if ($user->hasRole('supervisor')  || $user->hasRole('gcliente') || $user->hasRole('gbravo') || $user->hasRole('analyst') || $user->hasRole('manager') || $user->hasRole('admin') || $user->hasRole('owner')) {
 
             $tipo_condition = "";
-            $tipo_check = array(true,false,false);
+            $tipo_check = array(true,false,false,false);
 
             if ($request->has('tipo_tributos')) {
                 $tipo = Input::get("tipo_tributos");
@@ -738,11 +878,15 @@ class PagesController extends Controller
                         break;
                     case 'E':
                         $tipo_condition = "and t.tipo = '$tipo'";
-                        $tipo_check = array(false,false,true);
+                        $tipo_check = array(false,false,true,false);
                         break;
                     case 'F':
                         $tipo_condition = "and t.tipo = '$tipo'";
-                        $tipo_check = array(false,true,false);
+                        $tipo_check = array(false,true,false,false);
+                        break;
+                    case 'M':
+                        $tipo_condition = "and t.tipo = '$tipo'";
+                        $tipo_check = array(false,false,false,true);
                         break;
                     default:
                         break;
@@ -880,18 +1024,41 @@ class PagesController extends Controller
 
         if ($request->has('tributo')) {
             $tributo_id = Input::get("tributo");
+            $uf = Input::get("uf");
+            $only_uf = Input::get("only-uf");
+            $codigo = Input::get("codigo");
 
-            $graph['params'] = array('p_uf'=>null,'p_onlyuf'=>null,'p_codigo'=>null,'p_tributo'=>$tributo_id);
+            $graph['params'] = array('p_uf'=>$uf,'p_onlyuf'=>$only_uf,'p_codigo'=>$codigo,'p_tributo'=>$tributo_id);
             $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
 
+            $ref = $codigo;
+            if ($codigo == 0) {
+                $ref = $uf;
+            }
 
+            //Query para geração do relatório
             $ativ_filtered = DB::table('atividades')
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('estabelecimentos', 'atividades.estemp_id', '=', 'estabelecimentos.id')
+                ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo');
+
+            $ativ_filtered = $ativ_filtered
                 ->select(array('status',DB::raw('COUNT(atividades.id) as count')))
-                ->where('periodo_apuracao',$periodo_apuracao)
-                ->where('recibo', 1)
-                ->where('regras.tributo_id',$tributo_id)
-                ->where('emp_id',$this->s_emp->id)
+                ->where('periodo_apuracao', '=' ,$periodo_apuracao);
+
+            if (!empty($ref) && $codigo == 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.uf','=',$ref);
+            }
+
+            if (!empty($ref) && $codigo > 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.codigo','=',$ref);
+            }
+
+            $ativ_filtered = $ativ_filtered
+                ->where('regras.tributo_id','=',$tributo_id)
+                ->where('emp_id','=',$this->s_emp->id)
                 ->groupBy('status')
                 ->get();
 
@@ -905,25 +1072,38 @@ class PagesController extends Controller
             $only_uf = Input::get("only-uf");
             $codigo = Input::get("codigo");
 
-
             $graph['params'] = array('p_uf'=>$uf,'p_onlyuf'=>$only_uf,'p_codigo'=>$codigo,'p_tributo'=>null);
             $graph['status_1'] = 0; $graph['status_2'] = 0; $graph['status_3'] = 0;
 
             $ref = $codigo;
-            if ($only_uf) {
+            if ($codigo == 0) {
                 $ref = $uf;
             }
-
+            //Query para geração do relatório
             $ativ_filtered = DB::table('atividades')
                 ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                ->join('estabelecimentos', 'atividades.estemp_id', '=', 'estabelecimentos.id')
+                ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo');
+
+            $ativ_filtered = $ativ_filtered
                 ->select(array('status',DB::raw('COUNT(atividades.id) as count')))
-                ->where('ref',$ref)
-                ->where('periodo_apuracao',$periodo_apuracao)
-                ->where('recibo', 1)
-                ->where('emp_id',$this->s_emp->id)
+                ->where('periodo_apuracao', '=' ,$periodo_apuracao);
+
+            if (!empty($ref) && $codigo == 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.uf','=',$ref);
+            }
+
+            if (!empty($ref) && $codigo > 0) {
+                $ativ_filtered = $ativ_filtered
+                ->where('municipios.codigo','=',$ref);
+            }
+
+            $ativ_filtered = $ativ_filtered
+                ->where('emp_id','=',$this->s_emp->id)
                 ->groupBy('status')
                 ->get();
-
+                
             foreach ($ativ_filtered as $at) {
                     $graph['status_'.$at->status] = $at->count;
             }

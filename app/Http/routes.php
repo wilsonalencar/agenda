@@ -41,6 +41,12 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@home'
     ]);
 
+    Route::get('/aprovacao', [
+        'as' => 'aprovacao',
+        'uses' => 'PagesController@aprovacao'
+    ]);
+
+
     Route::get('/graficos', [
         'as' => 'graficos',
         'uses' => 'PagesController@graficos'
@@ -68,10 +74,12 @@ Route::group(['middleware' => ['web']], function () {
 Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente']], function () {
 
     Route::post('home', array('as'=>'home', 'uses'=>'PagesController@home'));
+    Route::post('aprovacao', array('as'=>'aprovacao', 'uses'=>'PagesController@aprovacao'));
     Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
     Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
 
     Route::get('/download/{file}', 'DownloadsController@download');
+    Route::get('/download_comprovante/{file}', 'DownloadsController@download_comprovante');
 
     Route::resource('entregas', 'EntregasController');
     Route::get('entrega/data', array('as'=>'entregas.data', 'uses'=>'EntregasController@anyData'));
@@ -90,7 +98,13 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
         'uses' => 'PagesController@about'
     ]);
 
+    Route::get('/dropdown-municipios', function(Request $request){
 
+        $input = $request->input('option');
+        $municipios = Municipio::where('uf',$input);
+
+        return Response::make($municipios->get(['codigo','nome']));
+    });
 });
 
 //Everyone registered
@@ -153,14 +167,6 @@ Route::group(['middleware' => ['web','auth','role:user|analyst|supervisor|manage
         return Response::make($regras->get(['id','nome_especifico','ref','regra_entrega']));
     });
 
-    Route::get('/dropdown-municipios', function(Request $request){
-
-        $input = $request->input('option');
-        $municipios = Municipio::where('uf',$input);
-
-        return Response::make($municipios->get(['codigo','nome']));
-    });
-
     Route::get('/calendar', [
         'as' => 'calendar',
         'uses' => 'PagesController@calendar'
@@ -194,6 +200,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
     Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));
 
     Route::post('atividade/storeComentario', array('as'=>'atividades.storeComentario', 'uses'=>'AtividadesController@storeComentario'));
+    Route::post('arquivos/upload', 'ArquivosController@upload');
 
     Route::get('upload/{user}/entrega', array('as'=>'upload.entrega', 'uses'=>'UploadsController@entrega'));
     Route::post('upload/sendUpload', 'UploadsController@upload');
@@ -202,6 +209,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
 
 Route::group(['middleware' => ['web']], function () {
     Route::get('mensageriaprocadms/jobprocadms', array('as'=>'mensageriaprocadms.Job', 'uses'=>'MensageriaprocadmsController@Job'));
+    Route::get('regra/job_envio_email', array('as'=>'regraslotes.Job', 'uses'=>'RegrasenviolotesController@Job'));
 });
 
 // Just the Owner, Admin, Manager, MSAF, Supervisor and the Analyst
@@ -240,6 +248,22 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));
     Route::post('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
     Route::get('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
+    Route::get('dashboardRLT', array('as'=>'dashboardRLT', 'uses'=>'PagesController@dashboardRLT'));
+
+    Route::get('consulta_procadm', array('as'=>'consulta_procadm', 'uses'=>'ProcessosAdmsController@consulta_procadm'));
+    Route::get('consulta_procadm/rpt', array('as'=>'consulta_procadm/rpt', 'uses'=>'ProcessosAdmsController@rlt_processos'));
+    Route::get('rlt_detalhado', array('as'=>'rlt_detalhado', 'uses'=>'ProcessosAdmsController@rlt_detalhado'));
+    Route::get('processosadms/dataRLT', array('as'=>'processosadms.dataRLT', 'uses'=>'ProcessosAdmsController@anyDataRLT'));
+    Route::get('processosadms/search_observacao', array('as'=>'processosadms.searchObservacao', 'uses'=>'ProcessosAdmsController@searchObservacao'));
+
+    Route::post('processosadms/action_valid_import', array('as'=>'processosadms.action_valid_import', 'uses'=>'ProcessosAdmsController@action_valid_import'));
+    Route::post('processosadms/action_import', array('as'=>'processosadms.action_import', 'uses'=>'ProcessosAdmsController@action_import'));
+    Route::get('processosadms/delete/{processosadms}', array('as'=>'processosadms.delete', 'uses'=>'ProcessosAdmsController@delete'));
+    Route::get('estabelecimento/search_area', array('as'=>'estabelecimentos.searchArea', 'uses'=>'EstabelecimentosController@searchArea'));
+    Route::get('processosadms/data', array('as'=>'processosadms.data', 'uses'=>'ProcessosAdmsController@anyData'));
+    Route::get('processosadms/import', array('as'=>'processosadms.import', 'uses'=>'ProcessosAdmsController@import'));
+    Route::get('processosadms/search', array('as'=>'processosadms.search', 'uses'=>'ProcessosAdmsController@search'));
+    Route::resource('processosadms', 'ProcessosAdmsController');
 
     Route::post('status_empresas', array('as'=>'status_empresas', 'uses'=>'PagesController@status_empresas'));
     Route::get('status_empresas', array('as'=>'status_empresas', 'uses'=>'PagesController@status_empresas'));
@@ -252,7 +276,6 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
 // Just Admin, Owner, Supervisor
 Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|owner']], function () {
     
-    Route::get('estabelecimento/search_area', array('as'=>'estabelecimentos.searchArea', 'uses'=>'EstabelecimentosController@searchArea'));
     Route::get('movtocontacorrentes/search', array('as'=>'movtocontacorrentes.search', 'uses'=>'MovtocontacorrentesController@search'));
     Route::get('movtocontacorrentes/confirm/{movtocontacorrente}', array('as'=>'movtocontacorrentes.confirm', 'uses'=>'MovtocontacorrentesController@confirm'));
     Route::get('movtocontacorrentes/import', array('as'=>'movtocontacorrentes.import', 'uses'=>'MovtocontacorrentesController@import'));
@@ -276,14 +299,6 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::get('movtocontacorrente', array('as'=>'movtocontacorrente', 'uses'=>'MovtocontacorrentesController@index'));
     */
 
-    Route::post('processosadms/action_valid_import', array('as'=>'processosadms.action_valid_import', 'uses'=>'ProcessosAdmsController@action_valid_import'));
-    Route::post('processosadms/action_import', array('as'=>'processosadms.action_import', 'uses'=>'ProcessosAdmsController@action_import'));
-    Route::get('processosadms/search_observacao', array('as'=>'processosadms.searchObservacao', 'uses'=>'ProcessosAdmsController@searchObservacao'));
-    Route::get('processosadms/delete/{processosadms}', array('as'=>'processosadms.delete', 'uses'=>'ProcessosAdmsController@delete'));
-    Route::get('processosadms/data', array('as'=>'processosadms.data', 'uses'=>'ProcessosAdmsController@anyData'));
-    Route::get('processosadms/import', array('as'=>'processosadms.import', 'uses'=>'ProcessosAdmsController@import'));
-    Route::get('processosadms/search', array('as'=>'processosadms.search', 'uses'=>'ProcessosAdmsController@search'));
-    Route::resource('processosadms', 'ProcessosAdmsController');
 
 });
 
@@ -316,6 +331,13 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
     Route::resource('regras', 'RegrasController');
     Route::get('regra/data', array('as'=>'regras.data', 'uses'=>'RegrasController@anyData'));
     Route::get('regra/{regra}/{estabelecimento}/{enable}/setBlacklist', array('as'=>'regras.setBlacklist', 'uses'=>'RegrasController@setBlacklist'));
+
+    Route::resource('regraslotes', 'RegrasenviolotesController');
+    Route::get('regra/envio_lote', array('as'=>'regraslotes.envio_lote', 'uses'=>'RegrasenviolotesController@envio_lote'));
+    Route::get('regra/edit_lote', array('as'=>'regraslotes.edit_lote', 'uses'=>'RegrasenviolotesController@edit_lote'));
+    Route::get('regra/lote_consulta', array('as'=>'regraslotes.lote_consulta', 'uses'=>'RegrasenviolotesController@lote_consulta'));
+    Route::get('regra/excluir', array('as'=>'regraslotes.excluir', 'uses'=>'RegrasenviolotesController@excluir'));
+    Route::get('regra/excluirFilial', array('as'=>'regraslotes.excluirFilial', 'uses'=>'RegrasenviolotesController@excluirFilial'));
 
     Route::resource('usuarios', 'UsuariosController');
     Route::get('usuario/data', array('as'=>'usuarios.data', 'uses'=>'UsuariosController@anyData'));

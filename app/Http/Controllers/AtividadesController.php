@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 use Yajra\Datatables\Datatables;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests;
 
 
@@ -135,7 +136,14 @@ class AtividadesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
+    {   
+        $aprovacao = false;
+        $aprovacao_referer = $_SERVER['HTTP_REFERER'];
+        $pos = strpos( $aprovacao_referer, 'aprovacao' );
+        if ($pos) {
+            $aprovacao = true;
+        }
+        
         $atividade = Atividade::findOrFail($id);
         $destinationPath = '#';
 
@@ -156,7 +164,7 @@ class AtividadesController extends Controller
             }
             $destinationPath = url('uploads') .'/'. substr($atividade->estemp->cnpj, 0, 8) . '/' . $atividade->estemp->cnpj . '/' . $tipo_label . '/' . $atividade->regra->tributo->nome . '/' . $atividade->periodo_apuracao . '/' . $atividade->arquivo_entrega; // upload path
         }
-        return view('atividades.show')->withAtividade($atividade)->withDownload($destinationPath);
+        return view('atividades.show')->withAtividade($atividade)->withDownload($destinationPath)->with('aprovacao', $aprovacao);
 
     }
 
@@ -272,7 +280,14 @@ class AtividadesController extends Controller
         $data = array('subject'=>$subject,'messageLines'=>array());
         $data['messageLines'][] = ' Foi efetuado um pedido de retificação para a "'.$atividade->descricao.' - COD.'.$atividade->estemp->codigo.'".';
         $data['messageLines'][] = 'Coordenador: '.$user->name;
-
+        
+        $var = DB::select("select B.razao_social, C.cnpj, C.codigo from atividades A inner join empresas B on A.emp_id = B.id inner join estabelecimentos C on A.estemp_id = C.id where A.id = ".$id."");
+        
+        $var = json_decode(json_encode($var),true);
+        foreach ($var as $t) {
+        }
+        
+        $data['messageLines'][] = 'Empresa: '. $t['razao_social'].' - CNPJ: '. $t['cnpj'] . ' Código da área: '.$t['codigo'];
         $this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
 
         return redirect()->route('entregas.index')->with('status', 'Atividade ('.$lastInsertedId.') de retificação gerada com sucesso.');
@@ -312,6 +327,13 @@ class AtividadesController extends Controller
         $data = array('subject'=>$subject,'messageLines'=>array());
         $data['messageLines'][] = $atividade->descricao.' - COD.'.$atividade->estemp->codigo.' - Reprovada pelo coordenador ('.$user->name.'), efetuar uma nova entrega.';
 
+        $var = DB::select("select B.razao_social, C.cnpj, C.codigo from atividades A inner join empresas B on A.emp_id = B.id inner join estabelecimentos C on A.estemp_id = C.id where A.id = ".$id."");
+        
+        $var = json_decode(json_encode($var),true);
+        foreach ($var as $t) {
+        }
+        $data['messageLines'][] = 'Empresa: '. $t['razao_social'].' - CNPJ: '. $t['cnpj'] . ' Código da área: '.$t['codigo'];
+
         $this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
 
         // Delete the file
@@ -350,6 +372,13 @@ class AtividadesController extends Controller
         $subject = "BravoTaxCalendar - Entrega atividade --CANCELADA--";
         $data = array('subject'=>$subject,'messageLines'=>array());
         $data['messageLines'][] = $atividade->descricao.' - COD.'.$atividade->estemp->codigo.' - Cancelada pelo coordenador ('.$user->name.'), efetuar uma nova entrega.';
+
+        $var = DB::select("select B.razao_social, C.cnpj, C.codigo from atividades A inner join empresas B on A.emp_id = B.id inner join estabelecimentos C on A.estemp_id = C.id where A.id = ".$id."");
+        
+        $var = json_decode(json_encode($var),true);
+        foreach ($var as $t) {
+        }
+        $data['messageLines'][] = 'Empresa: '. $t['razao_social'].' - CNPJ: '. $t['cnpj'] . ' Código da área: '.$t['codigo'];
 
         $this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
 

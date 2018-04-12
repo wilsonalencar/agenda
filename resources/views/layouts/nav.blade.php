@@ -56,6 +56,7 @@
                                                     <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
                                                     <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
                                                     <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
+                                                    <li><a href="{{ route('consulta_procadm') }}">Consulta Processos Administrativos</a></li>
 
                                                     <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
 
@@ -142,6 +143,7 @@
                                 <div id="workflow-manager" class="panel-collapse collapse">
                                     <div class="panel-body">
                                         <ul class="nav navbar-nav">
+                                            <li><a href="{{ route('aprovacao') }}"><i class="fa fa-btn fa-upload"></i>Aprovação</a></li>
                                             <li><a href="{{ route('entregas.index') }}"><i class="fa fa-btn fa-upload"></i>Entregas</a></li>
                                         </ul>
                                     </div>
@@ -172,6 +174,18 @@
                                             <li><a href="{{ route('categorias.index') }}">Categorias Fiscais</a></li>
                                             <li><a href="{{ route('tributos.index') }}">Tributos</a></li>
                                             <li><a href="{{ route('regras.index') }}">Regras</a></li>
+
+                                            <li class="panel panel-default" id="dropdown">
+                                                <a data-toggle="collapse" href="#regrasLote">Regras Envio por Lote</a>
+                                                <div id="regrasLote" class="panel-collapse collapse">
+                                                    <div class="panel-body">
+                                                        <ul class="nav navbar-nav">
+                                                            <li><a href="{{ route('regraslotes.envio_lote') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                                            <li><a href="{{ route('regraslotes.lote_consulta') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
                                             
                                             <li class="panel panel-default" id="dropdown">
                                                 <a data-toggle="collapse" href="#usuarios">Usuários</a>

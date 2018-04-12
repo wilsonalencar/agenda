@@ -10,13 +10,13 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row" style="margin-top: -10px;">
     <div class="col-md-6">
         <div class="card">
             <div class="header-grafh blue">
                 Status Cargas (Entrada)
             </div>
-            <div id="graph_container_1" style="height: 300px">Entrada</div>
+            <div id="graph_container_1" style="height: 235px">Entrada</div>
         </div>
     </div>
     <div class="col-md-6">
@@ -24,18 +24,18 @@
             <div class="header-grafh red">
                 Status Cargas (Saída)
             </div>
-            <div id="graph_container_2" style="height: 300px">Saida</div>
+            <div id="graph_container_2" style="height: 235px">Saida</div>
         </div>
     </div>
 </div>
 
-<div class="row mgT30">
+<div class="row" style="margin-top: 10px;">
     <div class="col-md-12">
         <div class="card">
             <div class="header-grafh">
                 Status Cargas (Consolidado)
             </div>
-            <div id="graph_container_3" style="height: 350px">Consolidado</div>
+            <div id="graph_container_3" style="height: 235px">Consolidado</div>
         </div>
     </div>
 </div>

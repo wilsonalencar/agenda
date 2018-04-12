@@ -16,7 +16,9 @@ use Yajra\Datatables\Datatables;
 
 class RegrasController extends Controller
 {
-    protected $eService;
+    protected $eService;   
+    public $msg;
+    public $estabelecimento_id;
 
     function __construct(EntregaService $service)
     {
@@ -47,6 +49,7 @@ class RegrasController extends Controller
         return Datatables::of($regras)->make(true);
     }
 
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -64,7 +67,7 @@ class RegrasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {   
         //
     }
 
@@ -78,7 +81,6 @@ class RegrasController extends Controller
     {
         $regra = Regra::with('estabelecimentos')->findOrFail($id);
         $tributo = Tributo::findOrFail($regra->tributo_id);
-
 
         //Verifica data proxima entrega/as
         $datas_entrega = array();

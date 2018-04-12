@@ -14,8 +14,6 @@
         <div class="col-md-8">
             <div class="refresh-option">
                 {!! Form::hidden('periodo_apuracao', $periodo, ['class' => 'form-control']) !!}
-                {!! Form::button('<i class="fa fa-refresh"></i>', array('id' => 'atualiza_btn', 'class'=>'refresh-icon', 'type'=>'submit')) !!}
-                {!! Form::close() !!}
             </div>
             <div class="period">
                 
@@ -34,18 +32,22 @@
 
 <div class="select-options">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             {!! Form::label('uf', 'UF:', ['class' => 'control-label']) !!}
             {!! Form::select('uf', $ufs, $graph['params']['p_uf'], ['class' => 'form-control','placeholder' => 'Selecionar UF']) !!}
-            {!! Form::checkbox('only-uf',1,$graph['params']['p_onlyuf'], ['class' => 'checkbox-left']) !!}{!! Form::label('only-uf', 'Somente por UF?', ['class' => 'label-checkox']) !!}
         </div>
         <div id="codigo_input" class="col-md-4">
             {!! Form::label('codigo', 'Municipio:', ['class' => 'control-label']) !!}
-            {!! Form::select('codigo', $municipios, null, ['class' => 'form-control']) !!}
+            {!! Form::select('codigo', $municipios, NULL, ['class' => 'form-control']) !!}
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             {!! Form::label('tributo', 'Tributo:', ['class' => 'control-label']) !!}
             {!! Form::select('tributo', $tributos, $graph['params']['p_tributo'], ['class' => 'form-control','placeholder' => 'Todos']) !!}
+        </div>
+        <div class="col-md-2">
+            {!! Form::label('&nbsp;', '&nbsp;', ['class' => 'control-label']) !!}
+
+            {!! Form::button('Pesquisar', array('id' => 'atualiza_btn', 'class'=>'btn btn-default form-control', 'type'=>'submit')) !!}
         </div>
     </div>
 </div>
@@ -62,7 +64,7 @@
 </div>
 
 
-
+{!! Form::close() !!}
 
 
 <script>
@@ -132,7 +134,7 @@ function retriveMunicipios(uf,cod) {
                    function(data) {
                        var model = $('#codigo');
                        model.empty();
-
+                       model.append("<option value='0'>Todos</option>");
                        $.each(data, function(index, element) {
                            model.append("<option value='"+ element.codigo +"'>" + element.nome + "</option>");
                        });
@@ -164,13 +166,12 @@ jQuery(document).ready(function($){
 	$('#uf').change(function(){
 
         $.get("{{ url('/dropdown-municipios')}}",
-
             { option: $(this).val() },
 
             function(data) {
                 var model = $('#codigo');
                 model.empty();
-
+                model.append("<option value='0'>Todos</option>");
                 $.each(data, function(index, element) {
                     model.append("<option value='"+ element.codigo +"'>" + element.nome + "</option>");
              });
@@ -214,10 +215,6 @@ jQuery(document).ready(function($){
             $('.spinner input').val(mes+'/'+year);
 
             $('input[name="periodo_apuracao"]').val(mes+year);
-            $( "#atualiza_btn" ).click();
-     });
-
-     $('#tributo').change(function(){
             $( "#atualiza_btn" ).click();
      });
 });

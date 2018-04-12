@@ -2,6 +2,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agenda Fiscal</title>
+
+
 <!-- BOOTSTRAP CSS -->
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
@@ -45,8 +47,29 @@
 <!-- select2 JS-->
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.min.js"></script>
 <!-- Highcharts-->
+
+<?php 
+	
+	if ($_SERVER['REQUEST_URI'] == '/aprovacao') {
+
+?>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-3d.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<?php 
+	} else {
+
+?>
+
 <script src="//cdnjs.cloudflare.com/ajax/libs/highcharts/4.2.7/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-3d.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highcharts/4.2.7/modules/exporting.js"></script>
+
+<?php } ?> 
+
+
 <script src="//cdnjs.cloudflare.com/ajax/libs/highcharts/4.2.7/highcharts-more.js"></script>
 <!-- Masked Input JS -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.min.js"></script>

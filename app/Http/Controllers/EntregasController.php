@@ -51,10 +51,11 @@ class EntregasController extends Controller
 
         if ($user->hasRole('owner') || $user->hasRole('admin') )
         {
-            $atividades = $atividades->where('status', 2)->whereHas('entregador.roles', function ($query) {
-                $query->where('name', 'supervisor');
-            });
-
+            $atividades = $atividades->whereIn('status', [1, 2]);
+            // ->whereHas('entregador.roles', function ($query) {
+            //     $query->where('name', 'supervisor');
+            // })
+            
         } else if ($user->hasRole('supervisor')) {
 
             $with_user = function ($query) {

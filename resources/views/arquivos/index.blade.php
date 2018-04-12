@@ -14,14 +14,45 @@
     </div>
 </div>
 
+<div class="modal fade" id="myModalUpload" style="width: 100%;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Upload de Comprovante</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="observacaoHTML" style="width: 100%; height: 100%;">
+        {!! Form::open(array('url'=>'arquivos/upload','method'=>'POST', 'files'=>true)) !!}
+         <div class="control-group">
+          <div class="controls">
+                {!! Form::hidden('atividade_id', '', ['class' => 'form-control', 'id'=>'atividade_id']) !!}
+                {!! Form::file('image', array('class'=>'btn btn-default ')) !!}
+          </div>
+        </div>
+        <div id="success"> </div>
+        <br/>
+        
+      </div>
+      <div class="modal-footer">
+        {!! Form::submit('Salvar', array('class'=>'btn btn-default ')) !!}
+        {!! Form::close() !!}
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
         <!--span>Prezado usuário, selecione a atividade a qual se refere a entrega:</span><br/><br/-->
-        <div class="table-default">
+        <div class="table-default table-responsive">
             <table class="table display" id="entregas-table">
                 <thead>
                     <tr class="search-table">
-                        <td colspan="10">
+                        <td colspan="12">
                             <input placeholder="Código" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
                             <input placeholder="CNPJ" type="text" id="src_cnpj" name="src_cnpj" value="<?= $filter_cnpj ?>">
+                            <input placeholder="Tributo" type="text" id="src_tributo" name="src_tributo" value="<?= $filter_tributo ?>">
                             <button id="adv_search">Buscar</button>
                         </td>
                     </tr>
@@ -38,6 +69,8 @@
                         <th>COD</th>
                         <th>DET.</th>
                         <th>Arquivo</th>
+                        <th>Upload C.P</th>
+                        <th>C.Pagto</th>
                     </tr>
                 </thead>
             </table>
@@ -49,11 +82,13 @@ $(function() {
         processing: true,
         serverSide: true,
         stateSave: true,
+        responsive: true,
         ajax: {
                     url: "{!! route('arquivos.data') !!}",
                     data: function (d) {
                         d.codigo = $('#src_codigo').val();
                         d.cnpj = $('#src_cnpj').val();
+                        d.tributo = $('#src_tributo').val();
                     }
                 },
         columnDefs: [{ "width": "22%", "targets": 1 },{ "width": "120px", "targets": 2 },{ "width": "200px", "targets": 6 }],
@@ -94,7 +129,19 @@ $(function() {
                                                     url = '<a href="{{ url('download/') }}/'+data+'" style="margin-left:10px" class="btn btn-success btn-default btn-sm"><i class="fa fa-btn fa-cloud-download"></i></a>';
                                                     return url;
 
-            }}
+            }},
+
+            {data: 'id', name:'id', searchable: false, orderable: false, render: function (data, type, row) {
+                var url = '<a href="javascript:void(0);" onclick="fileUpload('+data+')" class="btn btn-default btn-sm">Upload</a>';
+                return url;
+            }},
+            {data: 'id', name:'detalhe', searchable: false, orderable: false, render: function (data, type, row) {
+
+                var url = '';
+                url = '<a href="{{ url('download_comprovante/') }}/'+data+'" style="margin-left:10px" class="btn btn-success btn-default btn-sm"><i class="fa fa-btn fa-cloud-download"></i></a>';
+                return url;
+
+            }},
 
         ],
         order: [[ 4, "asc" ]],
@@ -119,8 +166,9 @@ $(function() {
     $('#adv_search').on('click', function(e) {
                 var val_cnpj = $('#src_cnpj').val();
                 var val_codigo = $('#src_codigo').val();
-                if (val_cnpj || val_codigo) {
-                    var url = "{{ route('arquivos.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo.replace(/[^0-9]/g,'');
+                var val_tributo = $('#src_tributo').val();
+                if (val_cnpj || val_codigo || val_tributo) {
+                    var url = "{{ route('arquivos.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo+"&vct="+val_tributo;
                 } else {
                     var url = "{{ route('arquivos.index') }}";
                 }
@@ -131,8 +179,15 @@ $(function() {
 });
 jQuery(function($){
     $('input[name="src_cnpj"]').mask("99.999.999/9999-99");
-    $('input[name="src_codigo"]').mask("9999");
 });
+
+
+function fileUpload(id)
+{   
+    $("#atividade_id").val(id);
+    $("#myModalUpload").modal(); 
+}
+
 </script>
 
 @stop

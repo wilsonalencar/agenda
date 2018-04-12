@@ -121,10 +121,15 @@
 
 {!! Form::hidden('estabelecimento_id', null, ['class' => 'form-control', 'id'=> 'estabelecimento_id']) !!}
 
-
+<?php 
+    if (!@$_GET['view']) {
+?>        
 {!! Form::submit('Update Conta Corrente', ['class' => 'btn btn-default']) !!}
 <a href="{{ route('movtocontacorrentes.delete', $movtocontacorrentes->id) }}" class="btn btn-default" onclick="return confirm('Tem certeza que deseja excluir o registro?')">Excluir</a>
 <a href="{{ route('movtocontacorrentes.search') }}" class="btn btn-default">Voltar</a>
+<?php } else { ?>
+<a href="{{ route('consulta_conta_corrente') }}" class="btn btn-default">Voltar</a>
+<?php    } ?>
 
 {!! Form::close() !!}
 <hr/>

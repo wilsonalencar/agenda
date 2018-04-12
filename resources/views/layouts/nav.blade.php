@@ -57,6 +57,8 @@
                                                     <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
                                                     <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
 
+                                                    <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
+
                                                     @if ( Auth::user()->hasRole('gbravo'))
                                                         <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
                                                     @endif

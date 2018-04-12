@@ -46,11 +46,6 @@ Route::group(['middleware' => ['web']], function () {
         'uses' => 'PagesController@graficos'
     ]);
 
-    Route::get('/consulta_conta_corrente', [
-        'as' => 'consulta_conta_corrente',
-        'uses' => 'PagesController@consulta_conta_corrente'
-    ]);
-
     Route::get('/desempenho_entregas', [
         'as' => 'desempenho_entregas',
         'uses' => 'PagesController@desempenho_entregas'
@@ -186,6 +181,10 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
     Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
     Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
 
+    Route::get('consulta_conta_corrente', array('as' => 'consulta_conta_corrente', 'uses' => 'PagesController@consulta_conta_corrente'));
+
+    Route::get('consulta_conta_corrente_rlt_1', array('as' => 'consulta_conta_corrente_rlt_1', 'uses' => 'PagesController@relatorio_1'));
+    
     Route::get('/download/{file}', 'DownloadsController@download');
 
     Route::resource('entregas', 'EntregasController');

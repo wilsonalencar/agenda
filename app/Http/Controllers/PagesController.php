@@ -306,9 +306,92 @@ class PagesController extends Controller
         ->with('empresas_selecionadas', $empresasArray);
     }
 
+
+    public function relatorio_1(Request $request)
+    {
+        $dataBusca = array();
+        $input = $request->all();
+
+        if (!empty($input['dataExibe'])) {
+            $dataBusca = $input['dataExibe'];
+            $dataExibe = array("periodo_inicio"=>$dataBusca['periodo_inicio'], "periodo_fim"=>$dataBusca['periodo_fim']);   
+            
+            $dataBusca['periodo_inicio'] = str_replace('/', '-', '01/'.$dataBusca['periodo_inicio']);
+            $dataBusca['periodo_fim'] = str_replace('/', '-', '01/'.$dataBusca['periodo_fim']);
+            list($dia, $mes, $ano) = explode( "-",$dataBusca['periodo_inicio']);
+            $dataBusca['periodo_inicio'] = getdate(strtotime($dataBusca['periodo_inicio']));
+            $dataBusca['periodo_fim'] = getdate(strtotime($dataBusca['periodo_fim']));
+            $dif = ( ($dataBusca['periodo_fim'][0] - $dataBusca['periodo_inicio'][0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+    
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+            $dataBusca = substr($dataBusca,0,-1);
+        }
+
+        $retval = db::select("SELECT 
+                           A.id,
+                           A.periodo_apuracao,
+                           A.vlr_guia,
+                           A.vlr_gia,
+                           A.vlr_sped,
+                           A.vlr_dipam,
+                           A.status_id,
+                           B.cnpj,
+                           B.codigo,
+                           C.uf
+                    FROM 
+                        movtocontacorrentes A
+                    INNER JOIN 
+                        estabelecimentos B on A.estabelecimento_id = B.id
+                    INNER JOIN 
+                        municipios C on B.cod_municipio = C.codigo
+                    WHERE 
+                        B.empresa_id = ".$this->s_emp->id."
+                    AND 
+                        A.status_id IS NOT NULL
+                    AND 
+                        A.periodo_apuracao
+                    IN
+                        (".$dataBusca.")");
+    
+        $relatorio = json_encode($retval);  
+        return view('processosadms.relatorio_1')->with('relatorio',$relatorio)->with('dataExibe', $dataExibe);
+    }
+
     public function consulta_conta_corrente(Request $request)
     {
         $dataBusca = array();
+        $input = $request->all();
+
+        if (!empty($input['dataExibe'])) {
+            $dataBusca = $input['dataExibe'];
+            $dataExibe = array("periodo_inicio"=>$dataBusca['periodo_inicio'], "periodo_fim"=>$dataBusca['periodo_fim']);   
+            
+            $dataBusca['periodo_inicio'] = str_replace('/', '-', '01/'.$dataBusca['periodo_inicio']);
+            $dataBusca['periodo_fim'] = str_replace('/', '-', '01/'.$dataBusca['periodo_fim']);
+            list($dia, $mes, $ano) = explode( "-",$dataBusca['periodo_inicio']);
+            $dataBusca['periodo_inicio'] = getdate(strtotime($dataBusca['periodo_inicio']));
+            $dataBusca['periodo_fim'] = getdate(strtotime($dataBusca['periodo_fim']));
+            $dif = ( ($dataBusca['periodo_fim'][0] - $dataBusca['periodo_inicio'][0]) / 86400 );
+            $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+    
+            for($x = 0; $x < $meses; $x++){
+                $datas[] =  date("m/Y",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+            }
+
+            $dataBusca = '';
+            foreach ($datas as $key => $value) {
+                $dataBusca .= "'".$value."',";
+            }
+            $dataBusca = substr($dataBusca,0,-1);
+        }
 
         if (empty($dataBusca)) {
             $timestamp = strtotime("-12 months");
@@ -316,7 +399,6 @@ class PagesController extends Controller
             $datAtual = date('d-m-Y');
 
             list($dia, $mes, $ano) = explode( "-",$datInicial);
-
             $datInicial = getdate(strtotime($datInicial));
             $datAtual = getdate(strtotime($datAtual));
             $dif = ( ($datAtual[0] - $datInicial[0]) / 86400 );
@@ -330,25 +412,53 @@ class PagesController extends Controller
             foreach ($datas as $key => $value) {
                 $dataBusca .= "'".$value."',";
             }
-            $dataBusca = substr($dataBusca,0,-1);   
+            $dataBusca = substr($dataBusca,0,-1);
+            $b = date('m/Y');
+            $a = date('m/Y', $timestamp);
+            $dataExibe = array("periodo_inicio"=>$a, "periodo_fim"=>$b);   
         }
-        
 
         //Grafico 1
-        $retval = DB::select("SELECT 
-                                    A.id,
-                                    A.periodo_apuracao, 
-                                    A.estabelecimento_id,
-                                    (A.vlr_guia * A.vlr_sped)  as GUIASPED, 
-                                    (A.vlr_gia * A.vlr_sped)   as GIASPED, 
-                                    (A.vlr_guia * A.vlr_gia)   as GUIAGIA, 
-                                    (A.vlr_guia * A.dipam)     as GUIADIPAM, 
-                                    (A.vlr_gia * A.dipam)      as GIADIPAM, 
-                                    (A.vlr_sped * A.dipam)     as SPEDDIPAM 
+
+        // SUM(if(vlr_guia = vlr_gia AND vlr_sped = vlr_gia AND (dipam = "N" OR (vlr_dipam = vlr_guia AND vlr_gia = vlr_dipam AND vlr_sped = vlr_dipam)), 1, 0)) as s_diferenca,
+        //                             SUM(if(vlr_guia <> vlr_gia OR vlr_sped <> vlr_gia OR (dipam = "S" AND (vlr_dipam <> vlr_guia OR vlr_dipam <> vlr_sped OR vlr_dipam <> vlr_gia)), 1, 0)) as diferenca,
+        $retval = db::select("SELECT 
+                                A.periodo_apuracao,
+                                SUM(if(A.vlr_guia <> A.vlr_gia, 1, 0)) as GUIASPED,
+                                SUM(if(A.vlr_gia <> A.vlr_sped, 1, 0)) as GIASPED,
+                                SUM(if(A.vlr_guia <> A.vlr_gia, 1, 0)) as GUIAGIA,
+                                SUM(if(A.dipam = 'S' AND (A.vlr_guia <> A.vlr_dipam), 1, 0)) as GUIADIPAM,
+                                SUM(if(A.dipam = 'S' AND (A.vlr_gia <> A.vlr_dipam), 1, 0)) as GIADIPAM,
+                                SUM(if(A.dipam = 'S' AND (A.vlr_sped <> A.vlr_dipam), 1, 0)) as SPEDDIPAM
+                            FROM 
+                                movtocontacorrentes A
+                            INNER JOIN 
+                                estabelecimentos B on A.estabelecimento_id = B.id
+                            WHERE 
+                                B.empresa_id = ".$this->s_emp->id."
+                            AND 
+                                A.periodo_apuracao 
+                            IN
+                                (".$dataBusca.") 
+                            AND 
+                                A.status_id = 2
+                            GROUP BY 
+                                A.periodo_apuracao");
+
+        $graph1 = json_encode($retval);
+        //Fim Gráfico 1
+
+        //Grafico 2
+        $retval2 = db::select("SELECT 
+                                    C.uf,
+                                        sum(case when A.status_id = 2 then 1 else 0 end) as NaoBaixado,
+                                        sum(case when A.status_id = 1 then 1 else 0 end) as Baixado
                                 FROM 
                                     movtocontacorrentes A
                                 INNER JOIN 
                                     estabelecimentos B on A.estabelecimento_id = B.id
+                                INNER JOIN 
+                                    municipios C on B.cod_municipio = C.codigo
                                 WHERE 
                                     B.empresa_id = ".$this->s_emp->id."
                                 AND
@@ -357,29 +467,36 @@ class PagesController extends Controller
                                     A.periodo_apuracao 
                                 IN
                                     (".$dataBusca.") 
-                                ORDER BY 
-                                    A.periodo_apuracao desc");
-        $array = json_decode( json_encode($retval), true);
-        $graph1 = json_encode($retval);
+                                group by C.uf;");
 
-        //Fim Gráfico 1
-
-        //Grafico 2
-
-
-        $graph2 = '';
+        $graph2 = json_encode($retval2);
         //Fim Gráfico 2
 
-
-
         //Grafico 3
+        $retval3 = db::select("SELECT 
+                                    A.periodo_apuracao,
+                                        sum(case when A.status_id = 2 then 1 else 0 end) as NaoBaixado,
+                                        sum(case when A.status_id = 1 then 1 else 0 end) as Baixado
+                                FROM 
+                                    movtocontacorrentes A
+                                INNER JOIN 
+                                    estabelecimentos B on A.estabelecimento_id = B.id
+                                INNER JOIN 
+                                    municipios C on B.cod_municipio = C.codigo
+                                WHERE 
+                                    B.empresa_id = ".$this->s_emp->id."
+                                AND
+                                    1 = 1
+                                AND 
+                                    A.periodo_apuracao 
+                                IN
+                                    (".$dataBusca.") 
+                                group by A.periodo_apuracao;");
 
-
-        $graph2 = '';
+        $graph3 = $retval3;
         //Fim Gráfico 3
 
-
-        return view('processosadms.consulta')->with('graph1',$graph1)->with('graph2',$graph2);
+        return view('processosadms.consulta')->with('graph1',$graph1)->with('graph2',$graph2)->with('graph3',$graph3)->with('dataExibe', $dataExibe);
     }
 
     public function status_empresas(Request $request) {

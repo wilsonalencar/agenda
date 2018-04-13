@@ -127,8 +127,11 @@
 {!! Form::submit('Update Conta Corrente', ['class' => 'btn btn-default']) !!}
 <a href="{{ route('movtocontacorrentes.delete', $movtocontacorrentes->id) }}" class="btn btn-default" onclick="return confirm('Tem certeza que deseja excluir o registro?')">Excluir</a>
 <a href="{{ route('movtocontacorrentes.search') }}" class="btn btn-default">Voltar</a>
-<?php } else { ?>
-<a href="{{ route('consulta_conta_corrente') }}" class="btn btn-default">Voltar</a>
+<?php } else { 
+$data1 = $_GET['periodo_inicio'];
+$data2 = $_GET['periodo_fim'];
+?>
+<a href="{{ route('consulta_conta_corrente_rlt_1') }}?dataExibe[periodo_fim]=<?php echo $data2; ?>&dataExibe[periodo_inicio]=<?php echo $data1; ?>" class="btn btn-default">Voltar</a>
 <?php    } ?>
 
 {!! Form::close() !!}

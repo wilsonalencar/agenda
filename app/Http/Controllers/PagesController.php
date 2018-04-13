@@ -509,7 +509,7 @@ class PagesController extends Controller
         //                             SUM(if(vlr_guia <> vlr_gia OR vlr_sped <> vlr_gia OR (dipam = "S" AND (vlr_dipam <> vlr_guia OR vlr_dipam <> vlr_sped OR vlr_dipam <> vlr_gia)), 1, 0)) as diferenca,
         $retval = db::select("SELECT 
                                 A.periodo_apuracao,
-                                SUM(if(A.vlr_guia <> A.vlr_gia, 1, 0)) as GUIASPED,
+                                SUM(if(A.vlr_guia <> A.vlr_sped, 1, 0)) as GUIASPED,
                                 SUM(if(A.vlr_gia <> A.vlr_sped, 1, 0)) as GIASPED,
                                 SUM(if(A.vlr_guia <> A.vlr_gia, 1, 0)) as GUIAGIA,
                                 SUM(if(A.dipam = 'S' AND (A.vlr_guia <> A.vlr_dipam), 1, 0)) as GUIADIPAM,

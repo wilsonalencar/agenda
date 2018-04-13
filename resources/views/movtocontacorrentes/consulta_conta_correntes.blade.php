@@ -43,7 +43,7 @@
             <div class="header-grafh blue">
                 Conta Corrente Por Divergência em Andamento
             </div>
-            <div id="graph_container_1" style="height: 300px" onclick="hrefCont1()">Entrada</div>
+            <div id="graph_container_1" style="height: 250px" onclick="hrefCont1()">Entrada</div>
         </div>
     </div>
     <div class="col-md-6">
@@ -51,7 +51,7 @@
             <div class="header-grafh red">
                 Conta Corrente Por UF
             </div>
-            <div id="graph_container_2" style="height: 300px" onclick="hrefCont1()">Saida</div>
+            <div id="graph_container_2" style="height: 250px" onclick="hrefCont1()">Saida</div>
         </div>
     </div>
 </div>
@@ -62,7 +62,7 @@
             <div class="header-grafh">
                 Conta Corrente Por Período
             </div>
-            <div id="graph_container_3" style="height: 350px" onclick="hrefCont1()">Consolidado</div>
+            <div id="graph_container_3" style="height: 240px" onclick="hrefCont1()">Consolidado</div>
         </div>
     </div>
 </div>

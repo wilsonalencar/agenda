@@ -62,7 +62,7 @@
 	} else {
 
 ?>
-
+<script src="https://code.highcharts.com/highcharts.js"></script> <!-- Lucas adicionou -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/highcharts/4.2.7/highcharts.js"></script>
 <script src="https://code.highcharts.com/highcharts-3d.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highcharts/4.2.7/modules/exporting.js"></script>

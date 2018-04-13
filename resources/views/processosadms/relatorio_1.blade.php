@@ -52,7 +52,7 @@
                         <td><?php echo $value['vlr_sped']; ?></td>
                         <td><?php echo $value['vlr_dipam']; ?></td>
                         <td><?php echo $value['status_id'] == 1 ? "Baixado" : "Andamento"  ?></td>
-                        <td><a href="{{ route('movtocontacorrentes.edit', $value['id']) }}?view=true"><span class="glyphicon glyphicon-search"></span></a></td>
+                        <td><a href="{{ route('movtocontacorrentes.edit', $value['id']) }}?view=true&periodo_inicio={{$dataExibe['periodo_inicio']}}&periodo_fim={{$dataExibe['periodo_fim']}}"><span class="glyphicon glyphicon-search"></span></a></td>
                     </tr>    
                 <?php    } } } ?>
                 </tbody>

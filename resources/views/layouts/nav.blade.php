@@ -30,7 +30,9 @@
                     <a class="" href="#">
                         <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
                         <span>Tax Calendar</span><p>
-                        <div class="navbar-brand"></div><br><br><Br>
+                        @if (session('seid') && !Auth::guest())
+                        <div><img src="{{ URL::to('/') }}/assets/logo/Logo-{{ session('seid') }}.png" style="position: absolute; width: 33%; margin-left: 30%; margin-top: -5px; height: 10%;"><br><br><br></div>
+                        @endif
                     </a>
                 </div>
         </div>

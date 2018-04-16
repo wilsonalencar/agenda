@@ -309,6 +309,10 @@ $('#up1').on('click', function() { //UP
                 mes = '0'+mes;
             }
             year = ''+year;
+            if (year.length == 2) {
+            year = '20'+year;
+            }
+            
             $('#periodo_fim').val(mes+'/'+year);
       });
 
@@ -325,6 +329,10 @@ $('#up1').on('click', function() { //UP
             mes = '0'+mes;
         }
         year = ''+year;
+        if (year.length == 2) {
+            year = '20'+year;
+        }
+
         $('#periodo_fim').val(mes+'/'+year);
  });
 
@@ -342,6 +350,10 @@ $('#up1').on('click', function() { //UP
             mes = '0'+mes;
         }
         year = ''+year;
+        if (year.length == 2) {
+            year = '20'+year;
+        }
+
         $('#periodo_inicio').val(mes+'/'+year);
   });
 
@@ -358,6 +370,10 @@ $('#up1').on('click', function() { //UP
             mes = '0'+mes;
         }
         year = ''+year;
+        if (year.length == 2) {
+            year = '20'+year;
+        }
+
         $('#periodo_inicio').val(mes+'/'+year);
  });
 

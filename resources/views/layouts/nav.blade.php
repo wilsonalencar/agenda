@@ -31,7 +31,7 @@
                         <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
                         <span>Tax Calendar</span><p>
                         @if (session('seid') && !Auth::guest())
-                        <div><img src="{{ URL::to('/') }}/assets/logo/Logo-{{ session('seid') }}.png" style="position: absolute; width: 33%; margin-left: 30%; margin-top: -5px; height: 10%;"><br><br><br></div>
+                        <div><img src="{{ URL::to('/') }}/assets/logo/Logo-{{ session('seid') }}.png" style="position: absolute; width: 30%; margin-left: 33%; margin-top: 5px; height: 8%;"><br><br><br></div>
                         @endif
                     </a>
                 </div>

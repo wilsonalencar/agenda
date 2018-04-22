@@ -67,6 +67,8 @@ class Googl extends Model
 		curl_setopt($this->ch, CURLOPT_POST, count($data));
 		curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data_string);
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER, Array('Content-Type: application/json'));
+		curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, 0);
 
 		if ( $extended || $this->extended) {
 			return json_decode(curl_exec($this->ch));

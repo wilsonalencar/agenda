@@ -9,6 +9,7 @@ use App\Models\Estabelecimento;
 use App\Models\Regraenviolotefilial;
 use App\Models\Empresa;
 use App\Models\Tributo;
+use App\Models\googl;
 use App\Models\Municipio;
 use App\Http\Requests;
 use App\Services\EntregaService;
@@ -66,6 +67,7 @@ class RegrasenviolotesController extends Controller
                         A.arquivo_entrega, 
                         C.cnpj as EmpresaCNPJ, 
                         B.cnpj as EstabelecimentoCNPJ, 
+                        B.razao_social as EstabelecimentoNome,
                         A.periodo_apuracao,
                         (SELECT B.pasta_arquivos FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id where A.id = ".$value['dadosRegra']['id'].") as tributo, 
                         (SELECT B.tipo FROM regraenviolote A INNER JOIN tributos B on A.id_tributo = B.id where A.id = ".$value['dadosRegra']['id'].") as tipo
@@ -118,7 +120,6 @@ class RegrasenviolotesController extends Controller
                 }   
                 
                 foreach ($data as $campo) {
-                    
                     $path_link = "http://".$server_name."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
                     $path = "".$document_root."/uploads/".substr($campo['EmpresaCNPJ'], 0, 8)."/".$campo['EstabelecimentoCNPJ']."";
                     
@@ -128,12 +129,12 @@ class RegrasenviolotesController extends Controller
                     $path_link .= '/'.$campo['tipo'].'/'.$campo['tributo'].'/'.$ult_periodo_apuracao.'/'.$campo['arquivo_entrega'];
                     
                     if (file_exists($path)) {
-                        $download_link[] = $path_link;
+                        $download_link[$campo['EstabelecimentoCNPJ']]['texto'] = $campo['EstabelecimentoNome'].' - '. $campo['tributo'];
+                        $download_link[$campo['EstabelecimentoCNPJ']]['link'] = $path_link;
                     }
                 }
             }   
-    
-            if (!empty($download_link)) {
+            if (!empty($download_link)) {    
                 $this->enviarEmailLote($download_link, $value['dadosRegra']['email_1'], $value['dadosRegra']['email_2'], $value['dadosRegra']['email_3'], $data_envio);
             }
         }
@@ -148,7 +149,14 @@ class RegrasenviolotesController extends Controller
 
     public function enviarEmailLote($array, $email_1, $email_2, $email_3, $data_envio = '')
     {   
-        $dados = array('dados' => $array, 'emails' => array($email_1, $email_2, $email_3));
+        $key = 'AIzaSyBI3NnOJV5Zt-hNnUL4BUCaWIgGugDuTC8';
+        $Googl = new Googl($key);
+        foreach ($array as $L => $F) {
+            $arr[$L]['texto'] = $F['texto'];
+            $arr[$L]['link'] = $Googl->shorten($F['link']);
+        }
+
+        $dados = array('dados' => $arr, 'emails' => array($email_1, $email_2, $email_3));
         $data['linkDownload'] = $dados['dados'];
 
         $dataExibe = date('d/m/Y');
@@ -158,7 +166,7 @@ class RegrasenviolotesController extends Controller
         $subject = "TAX CALENDAR - Entrega das obrigações em ".$dataExibe.".";
         $data['subject']      = $subject;
         $data['data']         = $dataExibe;
-
+        
         foreach($dados['emails'] as $user)
         {   
             if (!empty($user)) {

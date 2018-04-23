@@ -107,6 +107,11 @@ jQuery(document).ready(function($){
 </script>
 <script type="text/javascript">
 
+
+     $('#sidebar').toggleClass('active');
+     $('#sidebarCollapse').toggleClass('auto-left');
+     $('#content').toggleClass('auto-left');
+
 function atualizar() {
   location.reload(true)
 }

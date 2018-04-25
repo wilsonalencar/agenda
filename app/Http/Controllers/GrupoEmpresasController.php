@@ -175,7 +175,7 @@ class GrupoEmpresasController extends Controller
 
         if ($success != 'error') {
             $create = GrupoEmpresa::create($input);
-            $status = 'Grupo criado com sucesso';
+            $status = 'Empresa inserida no grupo com sucesso!';
             $success = 'status';
         } 
         
@@ -232,6 +232,32 @@ class GrupoEmpresasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
+    {
+        $grupoEmpresa = GrupoEmpresa::findOrFail($id);
+
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $Nome_grupo = $grupoEmpresa->Nome_grupo;
+        $grupoEmpresa->delete();
+
+        $dadosEmpresa = DB::table('grupoempresas')
+                ->join('empresas', 'empresas.id', '=', 'grupoempresas.id_empresa')
+                ->select('grupoempresas.id', 'empresas.cnpj', 'empresas.razao_social', 'grupoempresas.Logo_grupo')
+                ->where('grupoempresas.Nome_grupo',''.$Nome_grupo.'')
+                ->get();
+
+        $dadosEmpresa = json_decode(json_encode($dadosEmpresa),true);        
+        $status = 'Empresa removida com sucesso do grupo!';
+      
+        return view('grupoempresas.adicionar')->with('status', $status)->with('dadosEmpresa', $dadosEmpresa)->with('Nome_grupo', $Nome_grupo)->with('empresas', $empresas);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroyRLT($id)
     {
         $grupoEmpresa = GrupoEmpresa::findOrFail($id);
 

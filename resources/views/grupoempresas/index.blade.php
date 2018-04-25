@@ -42,7 +42,7 @@
                             <a href="{{ route('grupoempresas.anyData', $value['Nome_grupo']) }}" class="btn btn-default btn-sm">
                                 <i class="fa fa-edit"></i>
                             </a>
-                            <a href="{{ route('grupoempresas.destroy', $value['id']) }}" style="margin-left: 10px" class="btn btn-default btn-sm">
+                            <a href="{{ route('grupoempresas.destroyRLT', $value['id']) }}" style="margin-left: 10px" class="btn btn-default btn-sm">
                                 <i class="fa fa-trash"></i>
                             </a>
                            </td>

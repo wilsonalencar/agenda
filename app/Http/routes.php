@@ -337,6 +337,7 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
     Route::get('grupoempresas/create', array('as'=>'grupoempresas.create', 'uses'=>'GrupoEmpresasController@adicionar'));
     Route::post('grupoempresas/store', array('as'=>'grupoempresas.store', 'uses'=>'GrupoEmpresasController@store'));
     Route::get('grupoempresas/destroy/{id}', array('as'=>'grupoempresas.destroy', 'uses'=>'GrupoEmpresasController@destroy'));
+    Route::get('grupoempresas/destroyRLT/{id}', array('as'=>'grupoempresas.destroyRLT', 'uses'=>'GrupoEmpresasController@destroyRLT'));
     Route::get('grupoempresas/edit/{nomeGrupo}', array('as'=>'grupoempresas.anyData', 'uses'=>'GrupoEmpresasController@anyData'));
 
     Route::resource('regraslotes', 'RegrasenviolotesController');

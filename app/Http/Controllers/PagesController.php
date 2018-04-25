@@ -120,6 +120,8 @@ class PagesController extends Controller
         $iframe = false;
         $layoutgraficos = '';
         $nomeEmpresa = '';
+
+
         if (!empty($_GET['layout'])) {
 
             $iframe = true;
@@ -131,6 +133,11 @@ class PagesController extends Controller
 
         if ($empresaID > 0 ) {
             $this->s_emp->id = $empresaID;
+        }
+        if (!empty($this->s_emp->id)) {
+            $Grupo_Empresa = new GrupoEmpresasController;
+            $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+            $empsArray = explode(',', $emps);
         }
 
         Carbon::setTestNow();  //reset
@@ -169,8 +176,13 @@ class PagesController extends Controller
                     echo "Você não tem acesso a empresa informada.<br/><br/><a href='home'>VOLTAR</a>";
                     exit;
                 }
-
                 $request->session()->put('seid', $key);
+                
+                $Grupo_Empresa = new GrupoEmpresasController;
+                $emp = $Grupo_Empresa->getEmpresas($key, true);
+                
+                $request->session()->put('seidLogo', $emp);
+                
                 return view('pages.home_ini');
             }
             
@@ -208,9 +220,9 @@ class PagesController extends Controller
             }
             //ADMIN / OWNER
             else if ($user->hasRole('admin') || $user->hasRole('owner') || $user->hasRole('gbravo') || $user->hasRole('gcliente')) {
-                $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
-                $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
-                $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+                $graph['status_1'] = Atividade::whereIn('emp_id', $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+                $graph['status_2'] = Atividade::whereIn('emp_id', $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+                $graph['status_3'] = Atividade::whereIn('emp_id', $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
 
                 if ($empresaID > 0) {
 
@@ -237,9 +249,9 @@ class PagesController extends Controller
                 //$with_user = function ($query) {
                 //    $query->where('user_id', Auth::user()->id);
                 //};
-                $graph['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
-                $graph['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
-                $graph['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+                $graph['status_1'] = Atividade::whereIn('emp_id',  $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+                $graph['status_2'] = Atividade::whereIn('emp_id',  $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+                $graph['status_3'] = Atividade::whereIn('emp_id',  $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
                 //whereHas('users', $with_user)
 
                 if ($empresaID > 0) {
@@ -419,6 +431,8 @@ class PagesController extends Controller
             }
             $dataBusca = substr($dataBusca,0,-1);
         }
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
 
         $retval = db::select("SELECT 
                            A.id,
@@ -438,7 +452,7 @@ class PagesController extends Controller
                     INNER JOIN 
                         municipios C on B.cod_municipio = C.codigo
                     WHERE 
-                        B.empresa_id = ".$this->s_emp->id."
+                        B.empresa_id IN (".$emps.")
                     AND 
                         A.status_id IS NOT NULL
                     AND 
@@ -502,6 +516,8 @@ class PagesController extends Controller
             $a = date('m/Y', $timestamp);
             $dataExibe = array("periodo_inicio"=>$a, "periodo_fim"=>$b);   
         }
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
 
         //Grafico 1
 
@@ -520,7 +536,7 @@ class PagesController extends Controller
                             INNER JOIN 
                                 estabelecimentos B on A.estabelecimento_id = B.id
                             WHERE 
-                                B.empresa_id = ".$this->s_emp->id."
+                                B.empresa_id IN (".$emps.")
                             AND 
                                 A.periodo_apuracao 
                             IN
@@ -545,7 +561,7 @@ class PagesController extends Controller
                                 INNER JOIN 
                                     municipios C on B.cod_municipio = C.codigo
                                 WHERE 
-                                    B.empresa_id = ".$this->s_emp->id."
+                                    B.empresa_id IN (".$emps.") 
                                 AND
                                     1 = 1
                                 AND 
@@ -569,7 +585,7 @@ class PagesController extends Controller
                                 INNER JOIN 
                                     municipios C on B.cod_municipio = C.codigo
                                 WHERE 
-                                    B.empresa_id = ".$this->s_emp->id."
+                                    B.empresa_id IN (".$emps.") 
                                 AND
                                     1 = 1
                                 AND 
@@ -838,6 +854,10 @@ class PagesController extends Controller
             $nomeEmpresa = $empresa->razao_social;
         }
 
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        $empsArray = explode(',', $emps);
+
         if ($request->has('switch_periodo')) {
             $switch = Input::get('switch_periodo');
         } else {
@@ -892,15 +912,13 @@ class PagesController extends Controller
                         break;
                 }
             }
-            
-            if ($switch) {
+            if ($switch) { 
                 $retval = DB::select( DB::raw("
                                     select t.nome,substr(limite,1,10) as lim,substr(data_aprovacao,1,10) as dt_aprovacao,limite,count(*),a.status
                                     from atividades a, regras r, tributos t
-                                    where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id=:empid and a.periodo_apuracao=:periodo_apuracao $tipo_condition
+                                    where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id in(".$emps.") and a.periodo_apuracao=:periodo_apuracao $tipo_condition
                                     group by t.nome,lim,dt_aprovacao,a.status
                                     order by t.nome,lim"), array(
-                    'empid' => $this->s_emp->id,
                     'periodo_apuracao' => $periodo_apuracao
                 ));
             } else {
@@ -918,11 +936,10 @@ class PagesController extends Controller
                 $retval = DB::select( DB::raw("
                                     select t.nome,substr(limite,1,10) as lim,substr(data_aprovacao,1,10) as dt_aprovacao,limite,count(*),a.status
                                     from atividades a, regras r, tributos t
-                                    where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id=:empid $tipo_condition
+                                    where a.regra_id=r.id and r.tributo_id=t.id and a.emp_id in(".$emps.") $tipo_condition
                                     group by t.nome,lim,dt_aprovacao,a.status
                                     having lim >= :data_limite_inf and lim <= :data_limite_sup
                                     order by t.nome,lim"), array(
-                    'empid' => $this->s_emp->id,
                     'data_limite_inf' => $limits['start'],
                     'data_limite_sup' => $limits['end'],
                 ));
@@ -972,9 +989,9 @@ class PagesController extends Controller
             $retvalDash = $this->_loadNotifications(); //var_dump($retval);
 
             $graphDash = array();
-            $graphDash['status_1'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
-            $graphDash['status_2'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
-            $graphDash['status_3'] = Atividade::where('emp_id', $this->s_emp->id)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
+            $graphDash['status_1'] = Atividade::whereIn('emp_id', $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 1)->count();
+            $graphDash['status_2'] = Atividade::whereIn('emp_id', $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 2)->count();
+            $graphDash['status_3'] = Atividade::whereIn('emp_id', $empsArray)->where('recibo', 1)->where('periodo_apuracao', $periodo_apuracao)->where('status', 3)->count();
             
             if ($returnArray) {
                 $array['graph'] = $array;
@@ -1014,6 +1031,9 @@ class PagesController extends Controller
         $ufs = Municipio::selectRaw("uf, uf")->orderby('uf','asc')->lists('uf','uf');
         $municipios = [''=>''];
 
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        
         $periodo_apuracao = $last_month->format('mY');
 
         if ($request->has('periodo_apuracao')) {
@@ -1058,7 +1078,7 @@ class PagesController extends Controller
 
             $ativ_filtered = $ativ_filtered
                 ->where('regras.tributo_id','=',$tributo_id)
-                ->where('emp_id','=',$this->s_emp->id)
+                ->where('emp_id','in',$emps)
                 ->groupBy('status')
                 ->get();
 
@@ -1100,7 +1120,7 @@ class PagesController extends Controller
             }
 
             $ativ_filtered = $ativ_filtered
-                ->where('emp_id','=',$this->s_emp->id)
+                ->where('emp_id','in',$emps)
                 ->groupBy('status')
                 ->get();
                 

@@ -59,18 +59,21 @@ class CargasController extends Controller
     public function grafico()
     {
         $seid = $this->s_emp->id;
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($seid);
+        $emps = explode(',', $emps);
 
         $first = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "E" as TIPO'))
-            ->where('empresa_id', $seid)
+            ->whereIn('empresa_id', $emps)
             ->where('carga_msaf_entrada',1);
         $second = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "S" as TIPO'))
-            ->where('empresa_id', $seid)
+            ->whereIn('empresa_id', $emps)
             ->where('carga_msaf_saida',1);
         $third = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "C" as TIPO'))
-            ->where('empresa_id', $seid)
+            ->whereIn('empresa_id', $emps)
             ->where('carga_msaf_entrada',1)
             ->where('carga_msaf_saida',1);
 

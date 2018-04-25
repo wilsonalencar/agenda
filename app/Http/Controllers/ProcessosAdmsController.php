@@ -162,11 +162,15 @@ class ProcessosadmsController extends Controller
         $datas = substr($datas ,0,-1);
         $datas = substr($datas,1);
         $datas = explode("','",$datas);
+
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        $empsArray = explode(',', $emps);
         
         foreach ($datas as $key => $final) {
-            $standing[$final] = DB::select(" SELECT ( select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and B.empresa_id = ".$this->s_emp->id.") as total ,
-           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 1 and B.empresa_id = ".$this->s_emp->id.") as baixados,
-           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 2 and B.empresa_id = ".$this->s_emp->id.") as em_andamento;");
+            $standing[$final] = DB::select(" SELECT ( select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and B.empresa_id in (".$emps.")) as total ,
+           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 1 and B.empresa_id in (".$emps.")) as baixados,
+           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 2 and B.empresa_id in (".$emps.")) as em_andamento;");
         }
 
     return view('processosadms.consulta')->with('standing',$standing)->with('datas', $datas)->with('dataBusca', $dataBusca);
@@ -304,6 +308,9 @@ class ProcessosadmsController extends Controller
             $dataBusca = substr($dataBusca,0,-1);   
         }
 
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+
         $rpt = DB::Select("SELECT 
                             A.id,
                             A.periodo_apuracao,
@@ -326,7 +333,7 @@ class ProcessosadmsController extends Controller
                         WHERE 
                             A.periodo_apuracao in (".$dataBusca.") 
                         AND 
-                            B.empresa_id = ".$this->s_emp->id."");
+                            B.empresa_id in (".$emps.")");
         
         return Datatables::of($rpt)->make(true);
     }

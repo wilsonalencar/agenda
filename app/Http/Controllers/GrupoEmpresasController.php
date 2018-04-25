@@ -37,34 +37,41 @@ class GrupoEmpresasController extends Controller
                 ->get();
 
         $var = json_decode(json_encode($Rer),true);
+
         if ($logo) {
-            $Rer = DB::table('grupoempresas')
-                ->select('grupoempresas.id_empresa')
-                ->where('grupoempresas.Nome_grupo', ''.$var[0]['Nome_grupo'].'')
-                ->where('grupoempresas.Logo_grupo', 'S')
-                ->get();
+            if (array_key_exists(0, $var)) {
+                $Rer = DB::table('grupoempresas')
+                    ->select('grupoempresas.id_empresa')
+                    ->where('grupoempresas.Nome_grupo', ''.$var[0]['Nome_grupo'].'')
+                    ->where('grupoempresas.Logo_grupo', 'S')
+                    ->get();
 
-            if (!empty($Rer)) {
-                $Var = json_decode(json_encode($Rer),true);
-                return $Var[0]['id_empresa'];
-            } else {
-                return $empresa_id;
+                if (!empty($Rer)) {
+                    $Var = json_decode(json_encode($Rer),true);    
+                    if (is_array($Var)) {
+                        return $Var[0]['id_empresa'];
+                    }            
+                } else {
+                    return $empresa_id;
+                }
             }
         }
 
-        if (!empty($var)) {
-            $emps = '';
-            $Rer = DB::table('grupoempresas')
-                ->select('grupoempresas.id_empresa')
-                ->where('grupoempresas.Nome_grupo', ''.$var[0]['Nome_grupo'].'')
-                ->get();
-        
-        $Rer = json_decode(json_encode($Rer),true);
-            foreach ($Rer as $key => $V) {
-                $emps .= $V['id_empresa'].',';
+        if (array_key_exists(0, $var)) {
+            if (!empty($var)) {
+                $emps = '';
+                $Rer = DB::table('grupoempresas')
+                    ->select('grupoempresas.id_empresa')
+                    ->where('grupoempresas.Nome_grupo', ''.$var[0]['Nome_grupo'].'')
+                    ->get();
+            $Rer = json_decode(json_encode($Rer),true);
+                foreach ($Rer as $key => $V) {
+                    $emps .= $V['id_empresa'].',';
+                }
+                $emps = substr_replace($emps, '', -1);
             }
-            $emps = substr_replace($emps, '', -1);
         }
+
         return $emps;
     }
 

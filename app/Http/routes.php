@@ -334,7 +334,7 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
 
     Route::resource('grupoempresas', 'GrupoEmpresasController');
     Route::post('grupoempresas/', array('as'=>'grupoempresas', 'uses'=>'GrupoEmpresasController@index'));
-    Route::post('grupoempresas/create', array('as'=>'grupoempresas.create', 'uses'=>'GrupoEmpresasController@adicionar'));
+    Route::get('grupoempresas/create', array('as'=>'grupoempresas.create', 'uses'=>'GrupoEmpresasController@adicionar'));
     Route::post('grupoempresas/store', array('as'=>'grupoempresas.store', 'uses'=>'GrupoEmpresasController@store'));
     Route::get('grupoempresas/destroy/{id}', array('as'=>'grupoempresas.destroy', 'uses'=>'GrupoEmpresasController@destroy'));
     Route::get('grupoempresas/edit/{nomeGrupo}', array('as'=>'grupoempresas.anyData', 'uses'=>'GrupoEmpresasController@anyData'));

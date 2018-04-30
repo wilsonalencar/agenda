@@ -819,7 +819,7 @@ class PagesController extends Controller
             $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
     
             if ($switch) {
-                $retval = DB::select('SELECT DATE_FORMAT(A.limite, "%d/%m/%Y %H:%i:%s") as limite, A.status, A.descricao, B.cnpj, C.codigo, E.nome FROM atividades A INNER JOIN estabelecimentos B ON A.estemp_id = B.id INNER JOIN municipios C ON B.cod_municipio = C.codigo INNER JOIN regras D ON A.regra_id = D.id INNER JOIN tributos E ON D.tributo_id = E.id WHERE A.periodo_apuracao = '.$input["periodo_apuracao"].' AND E.nome = "'.$input["tributoBusca"].'" AND B.empresa_id in ('.$emps.')');
+                $retval = DB::select('SELECT DATE_FORMAT(A.limite, "%d/%m/%Y %H:%i:%s") as limite, A.status, A.descricao, B.cnpj, C.codigo, E.nome FROM atividades A INNER JOIN estabelecimentos B ON A.estemp_id = B.id INNER JOIN municipios C ON B.cod_municipio = C.codigo INNER JOIN regras D ON A.regra_id = D.id INNER JOIN tributos E ON D.tributo_id = E.id WHERE A.periodo_apuracao = '.$input["periodo_apuracao"].' AND E.nome = "'.$input["tributoBusca"].'" AND A.emp_id in ('.$emps.')');
             } 
 
             $retval = json_decode(json_encode($retval),true);

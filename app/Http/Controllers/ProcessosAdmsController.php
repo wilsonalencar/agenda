@@ -599,7 +599,12 @@ class ProcessosadmsController extends Controller
 
         $processosadms = $processosadms->whereIn('periodo_apuracao', $datas);
         $array = array();
-        $estabelecimentos = Estabelecimento::select('id')->where('empresa_id', $this->s_emp->id)->get();
+        
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        $empsArray = explode(',', $emps);
+
+        $estabelecimentos = Estabelecimento::select('id')->whereIn('empresa_id', $empsArray)->get();
         foreach($estabelecimentos as $row) {
             $array[] = $row->id;
         }

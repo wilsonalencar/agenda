@@ -32,13 +32,19 @@ class GrupoEmpresasController extends Controller
      */
     public function index()
     {   
-        $emps = $this->getEmpresas($this->s_emp->id);
-        $emps = explode(',', $emps);
+        if (!empty($this->s_emp)) {
+            $emps = $this->getEmpresas($this->s_emp->id);
+            $emps = explode(',', $emps);            
+        }
 
         $Rer = DB::table('grupoempresas')
-                ->select('grupoempresas.id', 'grupoempresas.Nome_grupo')
-                ->whereIn('grupoempresas.id_empresa', $emps)
-                ->get();   
+                ->select('grupoempresas.Nome_grupo');
+        
+        if (!empty($emps)) {
+            $Rer = $Rer->whereIn('grupoempresas.id_empresa', $emps);
+        }
+                
+        $Rer = $Rer->groupBy('Nome_grupo')->get();   
 
         $Relatorio = json_decode(json_encode($Rer),true);
         return view('grupoempresas.index')->with('Relatorio', $Relatorio);
@@ -275,21 +281,21 @@ class GrupoEmpresasController extends Controller
      */
     public function destroyRLT($id)
     {
-        $grupoEmpresa = GrupoEmpresa::findOrFail($id);
-
-        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
-        $Nome_grupo = $grupoEmpresa->Nome_grupo;
-        $grupoEmpresa->delete();
-
-        $dadosEmpresa = DB::table('grupoempresas')
-                ->join('empresas', 'empresas.id', '=', 'grupoempresas.id_empresa')
-                ->select('grupoempresas.id', 'empresas.cnpj', 'empresas.razao_social', 'grupoempresas.Logo_grupo')
-                ->where('grupoempresas.Nome_grupo',''.$Nome_grupo.'')
+        $grupoEmpresa = DB::table('grupoempresas')
+                ->select('grupoempresas.*')
+                ->where('grupoempresas.Nome_grupo',''.$id.'')
                 ->get();
 
-        $dadosEmpresa = json_decode(json_encode($dadosEmpresa),true);        
-        $status = 'Empresa removida com sucesso do grupo!';
-      
-        return back()->with('status', $status)->with('dadosEmpresa', $dadosEmpresa)->with('Nome_grupo', $Nome_grupo)->with('empresas', $empresas);
+        $grupoEmpresa = json_decode(json_encode($grupoEmpresa),true);
+        
+        if (!empty($grupoEmpresa)) {
+            foreach ($grupoEmpresa as $key => $finalID) {
+                $grupoEmpresa = GrupoEmpresa::findOrFail($finalID['id']);
+                $grupoEmpresa->delete();
+            }
+        }
+
+        $status = 'Grupo apagado com sucesso!';
+        return back()->with('status', $status);
     }
 }

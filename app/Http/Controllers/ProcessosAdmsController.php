@@ -158,9 +158,22 @@ class ProcessosadmsController extends Controller
         }
 
         $dataBusca = substr($dataBusca,0,-1);   
-        $dataBuscaArr = explode(',', $dataBusca);
-        $dataBuscaArr = array_unique($dataBuscaArr, SORT_STRING);
-        $dataBusca = implode(',', $dataBuscaArr);
+        $dataBusca = explode(',', $dataBusca);
+        
+        $i = 0;
+        $keyQ = 0;
+        $datePP = "'".date('03/Y')."'";
+        foreach ($dataBusca as $key => $value) {
+            if ($value == $datePP) {
+                $i++;
+                $keyQ = $key;
+            }
+        }
+        if ($keyQ != 0) {
+            $keyQ = $keyQ-1;
+        }
+        $dataBusca[$keyQ] = "'".substr_replace($datas[$keyQ], '02', 0,2)."'";
+        $dataBusca = implode(',', $dataBusca); 
 
         $datas = $dataBusca;
         $datas = substr($datas ,0,-1);
@@ -170,9 +183,9 @@ class ProcessosadmsController extends Controller
         $Grupo_Empresa = new GrupoEmpresasController;
         $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
         $empsArray = explode(',', $emps);
-        $datasArr = array_unique($datas, SORT_STRING);
-
-        foreach ($datasArr as $key => $final) {
+        
+        
+        foreach ($datas as $key => $final) {
             $standing[$final] = DB::select(" SELECT ( select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and B.empresa_id in (".$emps.")) as total ,
            (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 1 and B.empresa_id in (".$emps.")) as baixados,
            (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 2 and B.empresa_id in (".$emps.")) as em_andamento;");
@@ -581,11 +594,28 @@ class ProcessosadmsController extends Controller
         }
 
         $dataBusca = substr($dataBusca,0,-1);   
+        $dataBusca = explode(',', $dataBusca);
+        
+        $i = 0;
+        $keyQ = 0;
+        $datePP = "'".date('03/Y')."'";
+        foreach ($dataBusca as $key => $value) {
+            if ($value == $datePP) {
+                $i++;
+                $keyQ = $key;
+            }
+        }
+        if ($keyQ != 0) {
+            $keyQ = $keyQ-1;
+        }
+        $dataBusca[$keyQ] = "'".substr_replace($datas[$keyQ], '02', 0,2)."'";
+        $dataBusca = implode(',', $dataBusca); 
+
         $datas = $dataBusca;
         $datas = substr($datas ,0,-1);
         $datas = substr($datas,1);
         $datas = explode("','",$datas);
-
+        
         $processosadms = Processosadm::join('estabelecimentos', 'processosadms.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->select(
                 'processosadms.*',
                 'processosadms.id as IdProcessosAdms',

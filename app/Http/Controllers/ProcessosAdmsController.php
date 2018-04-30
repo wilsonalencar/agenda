@@ -166,6 +166,7 @@ class ProcessosadmsController extends Controller
         $Grupo_Empresa = new GrupoEmpresasController;
         $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
         $empsArray = explode(',', $emps);
+        $datas = array_unique($datas, SORT_STRING);
         
         foreach ($datas as $key => $final) {
             $standing[$final] = DB::select(" SELECT ( select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and B.empresa_id in (".$emps.")) as total ,

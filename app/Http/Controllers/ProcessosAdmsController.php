@@ -232,8 +232,6 @@ class ProcessosadmsController extends Controller
         $datas = explode("','",$datas);
 
         $graphs = array();
-        
-        $where = ' 1 = 1 ';
 
         //$request->session()->put('filter_cnpj', $input['periodo_apuracao']);
         if (!empty(Input::get("vcn")) || !empty(Input::get("vco")) || !empty(Input::get("vcp"))) {
@@ -260,9 +258,9 @@ class ProcessosadmsController extends Controller
             } 
         }
 
-        
-
-        $where .= ' AND b.empresa_id = '.$this->s_emp->id.' AND a.periodo_apuracao in ('.$dataBusca.')';
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        $where = 'b.empresa_id in ('.$emps.') AND a.periodo_apuracao in ('.$dataBusca.')';
 
         $graphs = DB::select('select c.uf,
                                       SUM(if(status_id = 1, 1, 0)) as Baixada,

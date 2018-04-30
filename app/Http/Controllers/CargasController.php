@@ -62,7 +62,6 @@ class CargasController extends Controller
         $Grupo_Empresa = new GrupoEmpresasController;
         $emps = $Grupo_Empresa->getEmpresas($seid);
         $emps = explode(',', $emps);
-
         $first = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "E" as TIPO'))
             ->whereIn('empresa_id', $emps)
@@ -79,6 +78,7 @@ class CargasController extends Controller
 
         $grafico = DB::table('estabelecimentos')
             ->select(DB::raw('count(*) as TOT,  "T" as TIPO'))
+            ->whereIn('estabelecimentos.empresa_id', $emps)
             ->union($first)->union($second)->union($third)
             ->get();
 

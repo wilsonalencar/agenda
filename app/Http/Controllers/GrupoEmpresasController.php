@@ -3,16 +3,28 @@
 namespace App\Http\Controllers;
 
 use DB;
+use App\Models\Atividade;
+use App\Models\User;
 use App\Models\GrupoEmpresa;
 use App\Models\Empresa;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Yajra\Datatables\Datatables;
 
 class GrupoEmpresasController extends Controller
 {
+
+    protected $s_emp = null;
+
+    public function __construct(Request $request = null)
+    { 
+        if (!Auth::guest() && !empty(session()->get('seid')))
+            $this->s_emp = Empresa::findOrFail(session('seid'));
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,8 +32,12 @@ class GrupoEmpresasController extends Controller
      */
     public function index()
     {   
+        $emps = $this->getEmpresas($this->s_emp->id);
+        $emps = explode(',', $emps);
+
         $Rer = DB::table('grupoempresas')
                 ->select('grupoempresas.id', 'grupoempresas.Nome_grupo')
+                ->whereIn('grupoempresas.id_empresa', $emps)
                 ->get();   
 
         $Relatorio = json_decode(json_encode($Rer),true);

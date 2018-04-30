@@ -158,6 +158,10 @@ class ProcessosadmsController extends Controller
         }
 
         $dataBusca = substr($dataBusca,0,-1);   
+        $dataBuscaArr = explode(',', $dataBusca);
+        $dataBuscaArr = array_unique($dataBuscaArr, SORT_STRING);
+        $dataBusca = implode(',', $dataBuscaArr);
+
         $datas = $dataBusca;
         $datas = substr($datas ,0,-1);
         $datas = substr($datas,1);

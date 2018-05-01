@@ -215,6 +215,32 @@
                             </a>
                         </li>
                     @endif
+                    <li class="panel panel-default" id="dropdown">
+                    <a data-toggle="collapse" href="#cronograma"><i class="fa fa-clock-o"></i>Cronograma</a>
+                        <div id="cronograma" class="panel-collapse collapse">
+                            <div class="panel-body">
+                            <ul class="nav navbar-nav">
+                                <li class="panel panel-default" id="dropdown">
+                                 <li class="panel panel-default" id="dropdown">
+                                    <a data-toggle="collapse" href="#analistas">Cronograma</a>
+                                    <div id="analistas" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul class="nav navbar-nav">
+                                                <li><a href="{{ route('atividadesanalista.adicionar') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                                <li><a href="{{ route('atividadesanalista.index') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </li>
+                                    <!-- <li><a href="{{ route('home') }}">Gerar</a></li>
+                                    <li><a href="{{ route('home') }}">Manipular</a></li>
+                                    <li><a href="{{ route('home') }}">Mensal</a></li>
+                                    <li><a href="{{ route('home') }}">Semanal</a></li> -->
+                                </li>
+                            </ul>
+                            </div>
+                        </div>
+                    </li>
                 @endif 
             </ul>
         </div><!-- /.navbar-collapse -->

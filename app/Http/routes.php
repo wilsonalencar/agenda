@@ -232,6 +232,16 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::get('integracao/data', array('as'=>'cargas.data', 'uses'=>'CargasController@anyData'));
     Route::get('integracao/{state}/{estab}/changeStateEntrada', array('as'=>'cargas.changeStateEntrada', 'uses'=>'CargasController@changeStateEntrada'));
     Route::get('carga/{state}/{estab}/changeStateSaida', array('as'=>'cargas.changeStateSaida', 'uses'=>'CargasController@changeStateSaida'));
+
+    Route::get('Atividade_Analista/adicionar', array('as'=>'atividadesanalista.adicionar', 'uses'=>'AtividadeanalistaController@create'));
+    Route::post('Atividade_Analista/store', array('as'=>'atividadesanalista.store', 'uses'=>'AtividadeanalistaController@store'));
+    Route::get('Atividade_Analista/store', array('as'=>'atividadesanalista.store', 'uses'=>'AtividadeanalistaController@store'));
+    Route::post('Atividade_Analista/edit', array('as'=>'atividadesanalista.edit', 'uses'=>'AtividadeanalistaController@edit'));
+    Route::get('Atividade_Analista/', array('as'=>'atividadesanalista.index', 'uses'=>'AtividadeanalistaController@index'));
+    Route::get('Atividade_Analista/editRLT', array('as'=>'atividadesanalista.editRLT', 'uses'=>'AtividadeanalistaController@editRLT'));
+    Route::post('Atividade_Analista/filial', array('as'=>'atividadesanalistafilial.store', 'uses'=>'AtividadeanalistafilialController@store'));
+    Route::get('Atividade_Analista/excluirFilial', array('as'=>'atividadesanalistafilial.excluirFilial', 'uses'=>'AtividadeanalistafilialController@excluirFilial'));
+
 });
 
 // Just the Owner, Admin, Manager and the Supervisor

@@ -20,16 +20,17 @@ class Cronogramaatividades extends Migration
             $table->integer('regra_id')->unsigned();
             $table->integer('estemp_id')->unsigned();
             $table->string('estemp_type');
+            $table->integer('emp_id')->unsigned()->nullable();
             $table->string('periodo_apuracao');
             $table->dateTime('inicio_aviso');
             $table->dateTime('limite');
-            $table->char('tipo_geracao',1)->default('A'); //Manual|Automatica
+            $table->char('tipo_geracao')->length(1)->default('A'); //Manual|Automatica
             $table->string('arquivo_entrega')->default('-');
             $table->integer('usuario_entregador')->unsigned();
             $table->dateTime('data_entrega');
             $table->integer('usuario_aprovador')->unsigned();
             $table->dateTime('data_aprovacao');
-            $table->integer('retificacao_id', 11);
+            $table->integer('retificacao_id')->length(11);
             $table->timestamps();
             $table->foreign('regra_id')->references('id')->on('regras')->onDelete('cascade');
         });

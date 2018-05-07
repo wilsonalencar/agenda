@@ -12,11 +12,6 @@ class AlterTableAtividadecronograma extends Migration
      */
     public function up()
     {
-       if (! Schema::hasColumn('cronogramaatividades', 'emp_id')) {
-            Schema::table('cronogramaatividades', function (Blueprint $table) {
-                $table->integer('emp_id')->after('estemp_type')->unsigned()->nullable();
-            });
-        }
     }
 
     /**
@@ -26,10 +21,5 @@ class AlterTableAtividadecronograma extends Migration
      */
     public function down()
     {
-        if (Schema::hasColumn('cronogramaatividades', 'emp_id')) {
-            Schema::table('cronogramaatividades', function (Blueprint $table) {
-                $table->dropColumn('emp_id');
-            });
-        }
     }
 }

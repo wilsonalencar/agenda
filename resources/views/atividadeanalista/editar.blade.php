@@ -23,7 +23,7 @@
     </div>
 <?php } ?>
 
-<h1>Regras de envio por lote</h1>
+<h1>Atividade do analista</h1>
 <hr>
 {!! Form::open([
     'route' => 'atividadesanalista.edit'
@@ -63,7 +63,7 @@
 
 {!! Form::hidden('id', $dados['id'], ['class' => 'form-control']) !!}
 {!! Form::submit('Salvar', ['class' => 'btn btn-default']) !!}
-    <a href="{{route('atividadesanalista.index')}}" class="btn btn-default">Consulta</a>
+    <a href="{{route('atividadesanalista.index')}}" class="btn btn-default">Voltar</a>
 {!! Form::close() !!}
 <hr/>
 

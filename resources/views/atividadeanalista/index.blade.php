@@ -10,7 +10,7 @@
     </div>   
 @endif
 
-<h1>Cronograma</h1>
+<h1>Atividade do Analista</h1>
 <p class="lead">Segue a lista de todas as atividades cadastradas.</p>
 <hr>
    <table class="table table-bordered display" id="myTableAprovacao">   

@@ -23,7 +23,7 @@
     </div>
 <?php } ?>
 
-<h1>Cadastro de responsabilidades</h1>
+<h1>Atividade do analista</h1>
 <hr>
 {!! Form::open([
     'route' => 'atividadesanalista.store'

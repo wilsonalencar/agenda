@@ -34,7 +34,9 @@ class AtividadeanalistaController extends Controller
      */
     public function index()
     {
-    	$table =  db::Select('SELECT 
+        $user = User::findOrFail(Auth::user()->id);
+
+    	$query = 'SELECT 
                         A.id,
                         C.name,
                         B.razao_social,
@@ -55,10 +57,16 @@ class AtividadeanalistaController extends Controller
                             LEFT JOIN
                         atividadeanalistafilial D ON (D.Id_atividadeanalista = A.id)
                             INNER JOIN 
-                        tributos G ON A.Tributo_id = G.id
-                    WHERE
-                        B.id = '.$this->s_emp->id.'    
-                    GROUP BY C.name , B.razao_social , A.id, G.nome');
+                        tributos G ON A.Tributo_id = G.id';
+
+        if (@$this->s_emp->id && !$user->hasRole('admin')) {
+            $query .= ' WHERE
+                        B.id = '.$this->s_emp->id.'';
+        }
+
+        $query .= ' GROUP BY C.name , B.razao_social , A.id, G.nome';
+
+        $table = DB::select($query);
 
         $table = json_decode(json_encode($table),true);
         return view('atividadeanalista.index')->with('table', $table);

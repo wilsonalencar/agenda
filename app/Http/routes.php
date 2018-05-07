@@ -254,6 +254,15 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('atividade/{atividade}/retificar', array('as'=>'atividades.retificar', 'uses'=>'AtividadesController@retificar'));
     Route::get('atividade/{atividade}/cancelar', array('as'=>'atividades.cancelar', 'uses'=>'AtividadesController@cancelar'));
 
+    Route::resource('cronogramaatividades', 'CronogramaatividadesController');
+    Route::get('cronogramaatividades/data', array('as'=>'cronogramaatividades.data', 'uses'=>'CronogramaatividadesController@anyData'));
+    Route::post('cronogramaatividades/storeEstab', array('as'=>'cronogramaatividades.storeEstabelecimento', 'uses'=>'CronogramaatividadesController@storeEstabelecimento'));
+    Route::post('cronogramaatividades/storeEmp', array('as'=>'cronogramaatividades.storeEmpresa', 'uses'=>'CronogramaatividadesController@storeEmpresa'));
+    Route::get('cronogramaatividades/{atividade}/aprovar', array('as'=>'cronogramaatividades.aprovar', 'uses'=>'CronogramaatividadesController@aprovar'));
+    Route::get('cronogramaatividades/{atividade}/reprovar', array('as'=>'cronogramaatividades.reprovar', 'uses'=>'CronogramaatividadesController@reprovar'));
+    Route::get('cronogramaatividades/{atividade}/retificar', array('as'=>'cronogramaatividades.retificar', 'uses'=>'CronogramaatividadesController@retificar'));
+    Route::get('cronogramaatividades/{atividade}/cancelar', array('as'=>'cronogramaatividades.cancelar', 'uses'=>'CronogramaatividadesController@cancelar'));
+
     Route::post('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));
     Route::get('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));
     Route::post('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
@@ -355,6 +364,9 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
 
     Route::get('empresa/{periodo}/{empresa}/geracao', array('as'=>'empresas.geracao', 'uses'=>'EmpresasController@geracao'));
     Route::get('estabelecimento/{tributo}/{estabelecimento}/{periodo_ini}/{periodo_fin}/geracao', array('as'=>'estabelecimentos.geracao', 'uses'=>'EstabelecimentosController@geracao'));
+
+    Route::get('cronogramaatividades/empresa/{periodo}/{empresa}', array('as'=>'empresas.cronogramageracao', 'uses'=>'EmpresasController@cronogramageracao'));
+    Route::get('cronogramaatividades/estabelecimento/{tributo}/{estabelecimento}/{periodo_ini}/{periodo_fin}', array('as'=>'estabelecimentos.cronogramageracao', 'uses'=>'EstabelecimentosController@cronogramageracao'));
 
 });
 

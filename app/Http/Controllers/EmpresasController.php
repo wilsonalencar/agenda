@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Atividade;
 use App\Models\Cron;
+use App\Models\CronogramaStatus;
 use App\Models\Empresa;
 use App\Models\User;
 use App\Models\Tributo;
@@ -226,6 +227,30 @@ class EmpresasController extends Controller
         return redirect()->back()->with('status', $exitCode);
 
     }
+
+    public function cronogramageracao($periodo,$id_emp) {
+
+        $empresa = Empresa::findOrFail($id_emp);
+        
+        $warning = false; // WARNING para periodo anterior não gerado
+        if (strlen($periodo) == 4) {
+            $knownDate = Carbon::create($periodo,1,1,0,0);
+        } else {
+            $knownDate = Carbon::create((int)substr($periodo,-4,4),(int)substr($periodo,0,2),1,0,0);
+        }
+
+        if (!$warning){
+            Artisan::call('generatecronograma:all', [
+                'periodo' => $periodo, 'empresa' => $empresa->cnpj
+            ]);
+
+            $exitCode = Artisan::output();
+        }
+
+        return redirect()->back()->with('status', $exitCode);
+
+    }
+
 
     private function _getFeriadosNacionais()
     {

@@ -18,6 +18,8 @@ class Kernel extends ConsoleKernel
 
         Commands\Generate_Activities::class,
         Commands\Generate_Activities_Single::class,
+        Commands\Generate_Cronograma_Activities_Single::class,
+        Commands\Generate_Cronograma_Activities::class,
         Commands\Generate_Warnings::class
     ];
 

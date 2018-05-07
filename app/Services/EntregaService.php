@@ -9,7 +9,9 @@
 namespace App\Services;
 
 use App\Models\Atividade;
+use App\Models\CronogramaAtividade;
 use App\Models\Cron;
+use App\Models\CronogramaStatus;
 use App\Models\Municipio;
 use App\Models\Regra;
 use App\Models\Tributo;
@@ -20,8 +22,10 @@ use App\Models\Empresa;
 use App\Models\Estabelecimento;
 use App\Models\FeriadoEstadual;
 use Carbon\Carbon;
+use App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 //use Illuminate\Mail\Mailer;
 //use Swift_Mailer;
 
@@ -379,6 +383,166 @@ class EntregaService {
         $log->type = $type;
         $log->save();
     }
+
+
+    public function generateSingleCnpjCronActivities($periodo_apuracao,$cnpj,$codigo,$tributo_id) {
+        // Single 'estabelecimento' generation for newly registered
+        $generate = true;
+        //
+        $estab = Estabelecimento::where('cnpj',$cnpj)->where('codigo',$codigo)->firstOrFail();
+        $empresa = Empresa::where('id',$estab->empresa_id)->firstOrFail();
+
+        //Verifica existencia atividades
+        if ($tributo_id==0) {
+            $exists = CronogramaAtividade::where('periodo_apuracao', $periodo_apuracao)->where('estemp_type','estab')->where('estemp_id',$estab->id)->count();
+        } else {
+            $exists = CronogramaAtividade::where('periodo_apuracao', $periodo_apuracao)->where('estemp_type','estab')->where('estemp_id',$estab->id)->whereHas('regra.tributo', function ($query) use ($tributo_id) {
+                $query->where('id', $tributo_id);
+            })->count();
+        }
+
+        if ($exists >0 || $estab->ativo == 0) {
+            $generate = false;
+        }
+
+        if ($generate) {
+            //TODAS AS REGRAS ATIVAS
+            $matchThese = ['freq_entrega'=>'M','ativo' => 1, 'ref'=>$estab->municipio->uf];
+            $orThose = ['freq_entrega'=>'M','ativo' => 1, 'ref'=>$estab->municipio->codigo];
+            //FILTRO TRIBUTO
+            if ($tributo_id>0) {
+                $matchThese['tributo_id']= $tributo_id;
+                $orThose   ['tributo_id']= $tributo_id;
+            }
+            //FILTRO BLOQUEIO DE REGRA
+            $blacklist = array();  //Lista dos estab (id) que não estão ativos para esta regra
+            foreach($estab->regras as $el) {
+                $blacklist[] = $el->id;
+            }
+
+            if (sizeof($blacklist)>0) {
+                $regras = Regra::whereNotIn('id',$blacklist)->where($matchThese)->orWhere($orThose)->get();
+            } else {
+                $regras = Regra::where($matchThese)->orWhere($orThose)->get();
+            }
+
+            //GERAÇÂO
+            $count = 0;
+            foreach ($regras as $regra) {
+
+                $trib = DB::table('tributos')
+                    ->join('empresa_tributo', 'tributos.id', '=', 'empresa_tributo.tributo_id')
+                    ->join('empresas', 'empresas.id', '=', 'empresa_tributo.empresa_id')
+                    ->select('empresa_tributo.adiantamento_entrega')
+                    ->where('tributos.id',$regra->tributo->id)
+                    ->where('empresas.cnpj',$empresa->cnpj)
+                    ->get();
+
+                //VERIFICA ADIANTAMENTO DE ENTREGA
+                $offset = null;
+                if (!empty($trib[0]->adiantamento_entrega)) {
+                    $offset = $trib[0]->adiantamento_entrega;
+                }
+                
+                //VERIFICA REGRA PARA GESTAO DAS ATIVIDADES QUE CAEM NO FIM DA SEMANA
+                $adiant_fds = $regra->afds;
+
+                $val = array();
+                // Regras Especiais
+                if (substr($regra->regra_entrega, 0, strlen('RE')) === 'RE') {
+
+                    $session = Session::all();
+                    $ult = array_pop( $session );
+                    $id_user = array_pop( $session );
+                    if (!is_numeric($id_user)) {
+                        $id_user = $ult;
+                    }
+
+                    $param = array('cnpj'=>$estab->cnpj,'IE'=>$estab->insc_estadual);
+                    $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega,$param,$periodo_apuracao,$offset,$adiant_fds);
+
+                    foreach ($retval_array as $el) {
+                        $data_limite = $el['data']->toDateTimeString();
+                        $alerta = intval($regra->tributo->alerta);
+                        $inicio_aviso = $el['data']->subDays($alerta)->toDateTimeString();
+                        $desc_prefix = $regra->tributo->recibo == 1 ? 'Entrega ' : '';
+                        $val = array(
+                            'descricao' => $desc_prefix . $el['desc'],
+                            'recibo' => $regra->tributo->recibo,
+                            'status' => 1,
+                            'periodo_apuracao' => $periodo_apuracao,
+                            'inicio_aviso' => $inicio_aviso,
+                            'limite' => $data_limite,
+                            'tipo_geracao' => 'A',
+                            'regra_id' => $regra->id,
+                            'Data_cronograma' => date('d-m-Y'),
+                            'Resp_cronograma' => $id_user
+                        );
+                    }
+
+                } else {  // Regra standard
+
+                    $ref = $regra->ref;
+                    if ($municipio = Municipio::find($regra->ref)) {
+                        $ref = $municipio->nome . ' (' . $municipio->uf . ')';
+                    }
+                    $nome_especifico = $regra->nome_especifico;
+                    if (!$nome_especifico) {
+                        $nome_especifico = $regra->tributo->nome;
+                    }
+                    $desc = $nome_especifico . ' ' . $ref;
+                    $desc_prefix = $regra->tributo->recibo == 1 ? 'Entrega ' : '';
+
+                    $session = Session::all();
+                    $ult = array_pop( $session );
+                    $id_user = array_pop( $session );
+                    if (!is_numeric($id_user)) {
+                        $id_user = $ult;
+                    }
+
+                    $data = $this->calculaProximaData($regra->regra_entrega,$periodo_apuracao,$offset,$adiant_fds);
+                    $data_limite = $data->toDateTimeString();
+                    $alerta = intval($regra->tributo->alerta);
+                    $inicio_aviso = $data->subDays($alerta)->toDateTimeString();
+
+                    $val = array(
+                        'descricao' => $desc_prefix . $desc,
+                        'recibo' => $regra->tributo->recibo,
+                        'status' => 1,
+                        'periodo_apuracao' => $periodo_apuracao,
+                        'inicio_aviso' => $inicio_aviso,
+                        'limite' => $data_limite,
+                        'tipo_geracao' => 'A',
+                        'regra_id' => $regra->id
+                    );
+
+                }
+
+                //CRIA ATIVIDADE
+                $val['estemp_type'] = 'estab';
+                $val['estemp_id'] = $estab->id;
+                $val['emp_id'] = $estab->empresa_id;
+
+                $anali = DB::select('SELECT a.* from atividadeanalista a left join regras b on a.Tributo_id = b.tributo_id where b.id = '.$val['regra_id'].' and a.Emp_id ='.$val['emp_id']);
+
+                if (!empty($anali)) {
+                    $anali = json_decode(json_encode($anali),true);
+                    $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                } 
+
+                $val['Resp_cronograma'] =$id_user;
+                $val['Data_cronograma'] = date('d-m-Y');
+                
+                $nova_atividade = CronogramaAtividade::create($val);
+                $count++;
+
+            }
+
+        }
+        return $generate;
+
+    }
+
 
     public function generateSingleCnpjActivities($periodo_apuracao,$cnpj,$codigo,$tributo_id) {
         // Single 'estabelecimento' generation for newly registered
@@ -878,6 +1042,261 @@ class EntregaService {
             );
         }
 
+        return $generate;
+    }
+
+    public function generateMonthlyCronActivities($periodo_apuracao,$cnpj_empresa) {
+        // Activate auto activity generation
+        $generate = true;
+        //
+        $empresa = Empresa::where('cnpj',$cnpj_empresa)->firstOrFail();
+        if (CronogramaStatus::where('periodo_apuracao', $periodo_apuracao)->where('emp_id', $empresa->id)->count() >0) {
+            $generate = false;
+        }
+        //TODAS AS REGRAS ATIVAS PARA A EMPRESA SOLICITADA
+        $empresa_tributos = $empresa->tributos()->get();
+        $array_tributos_ativos = array();
+        foreach($empresa_tributos as $at) {
+            $array_tributos_ativos[] = $at->id;
+        }
+        //
+        $regras = Regra::where('freq_entrega','M')->where('ativo',1)->whereIN('tributo_id',$array_tributos_ativos)->get();
+
+        if ($generate) {
+            $count = 0;
+            foreach ($regras as $regra) {
+
+                //VERIFICA CNPJ QUE FORAM BANIDOS PARA ESTA REGRA
+                $blacklist = array();
+                foreach($regra->estabelecimentos as $el) {
+                    $blacklist[] = $el->id;
+                }
+
+                //VERIFICA CNPJ QUE UTILIZAM A REGRA
+                $ativ_estemps = array();
+                if ($regra->tributo->tipo == 'F') { //Federal
+                    $empresas = DB::table('empresas')
+                        ->select('id', 'cnpj')
+                        ->where('cnpj',$empresa->cnpj)
+                        ->get();
+
+                    $ativ_estemps = $empresas;
+
+                } else if ($regra->tributo->tipo == 'E') { //Estadual
+
+                    $ref = $regra->ref;
+
+                    $empresas = DB::table('empresas')
+                        ->select('empresas.cnpj', 'empresas.id', 'empresas.id', 'municipios.uf', 'municipios.nome', 'empresas.insc_estadual')
+                        ->join('municipios', 'municipios.codigo', '=', 'empresas.cod_municipio')
+                        ->where('municipios.uf', $ref)
+                        ->where('cnpj',$empresa->cnpj)
+                        ->get();
+
+                    $estabs = DB::table('estabelecimentos')
+                        ->select('estabelecimentos.cnpj', 'estabelecimentos.id', 'estabelecimentos.empresa_id', 'municipios.uf', 'municipios.nome','estabelecimentos.insc_estadual')
+                        ->join('municipios', 'municipios.codigo', '=', 'estabelecimentos.cod_municipio')
+                        ->where('municipios.uf', $ref)
+                        ->where('estabelecimentos.ativo', 1)
+                        ->where('empresa_id',$empresa->id)
+                        ->get();
+
+                    $ativ_estemps = array_merge($empresas, $estabs);
+
+                } else { //Municipal
+                    $ref = $regra->ref;
+                    if (strlen($ref)==2) {  // O tributo é municipal, porem a regra é estadual
+
+                        $empresas = DB::table('empresas')
+                            ->select('empresas.cnpj', 'empresas.id', 'empresas.id')
+                            ->join('municipios', 'municipios.codigo', '=', 'empresas.cod_municipio')
+                            ->where('municipios.uf', $ref)
+                            ->where('cnpj',$empresa->cnpj)
+                            ->get();
+
+                        $estabs = DB::table('estabelecimentos AS est')
+                            ->select('est.cnpj', 'est.id', 'est.empresa_id')
+                            ->join('municipios AS mun', 'mun.codigo', '=', 'est.cod_municipio')
+                            ->where('mun.uf', $ref)
+                            ->where('est.ativo', 1)
+                            ->where('empresa_id',$empresa->id)
+                            ->get();
+
+                    } else {    // O tributo é municipal, e a regra é municipal
+
+                        $empresas = DB::table('empresas')
+                            ->select('empresas.cnpj', 'empresas.id', 'empresas.id')
+                            ->join('municipios', 'municipios.codigo', '=', 'empresas.cod_municipio')
+                            ->where('municipios.codigo', $ref)
+                            ->where('cnpj',$empresa->cnpj)
+                            ->get();
+
+                        $estabs = DB::table('estabelecimentos AS est')
+                            ->select('est.cnpj', 'est.id', 'est.empresa_id')
+                            ->join('municipios AS mun', 'mun.codigo', '=', 'est.cod_municipio')
+                            ->where('mun.codigo', $ref)
+                            ->where('est.ativo', 1)
+                            ->where('empresa_id',$empresa->id)
+                            ->get();
+                    }
+                    $ativ_estemps = array_merge($empresas, $estabs);
+                }
+
+                $trib = DB::table('tributos')
+                    ->join('empresa_tributo', 'tributos.id', '=', 'empresa_tributo.tributo_id')
+                    ->join('empresas', 'empresas.id', '=', 'empresa_tributo.empresa_id')
+                    ->select('empresa_tributo.adiantamento_entrega')
+                    ->where('tributos.id',$regra->tributo->id)
+                    ->where('empresas.cnpj',$empresa->cnpj)
+                    ->get();
+
+                //VERIFICA ADIANTAMENTO DE ENTREGA
+                $offset = $trib[0]->adiantamento_entrega;
+
+                //VERIFICA REGRA PARA GESTAO DAS ATIVIDADES QUE CAEM NO FIM DA SEMANA
+                $adiant_fds = $regra->afds;
+
+                $val = array();
+
+                // REGRAS ESPECIAIS: RE01,RE02,RE03...
+                if (substr($regra->regra_entrega, 0, strlen('RE')) === 'RE') {
+                    foreach($ativ_estemps as $ae) {
+                        $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
+                        $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
+
+                        $data_limite = $retval_array[0]['data']->toDateTimeString();
+                        $alerta = intval($regra->tributo->alerta);
+                        $inicio_aviso = $retval_array[0]['data']->subDays($alerta)->toDateTimeString();
+                        $desc_prefix = $regra->tributo->recibo == 1 ? 'Entrega ' : '';
+                        $session = Session::all();
+                        $ult = array_pop( $session );
+                        $id_user = array_pop( $session );
+                        if (!is_numeric($id_user)) {
+                            $id_user = $ult;
+                        }
+
+                        $val = array(
+                            'descricao' => $desc_prefix . $retval_array[0]['desc'],
+                            'recibo' => $regra->tributo->recibo,
+                            'status' => 1,
+                            'periodo_apuracao' => $periodo_apuracao,
+                            'inicio_aviso' => $inicio_aviso,
+                            'limite' => $data_limite,
+                            'tipo_geracao' => 'A',
+                            'regra_id' => $regra->id,
+                            'Data_cronograma' => date('d-m-Y'),
+                            'Resp_cronograma' => $id_user
+                        );
+
+                        //FILTRO TRIBUTOS SUSPENSOS (ex. DIPAM)
+
+                        $val['estemp_type'] = substr($ae->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
+                        $val['estemp_id'] = $ae->id;
+                        if ($val['estemp_type'] == 'estab') {
+                            $val['emp_id'] = $ae->empresa_id;
+                        } else {
+                            $val['emp_id'] = $ae->id;
+                        }
+
+                        $anali = DB::table('atividadeanalista')
+                            ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
+                            ->select('atividadeanalista.Id_usuario_analista')
+                            ->where('regras.id',$val['regra_id'])
+                            ->where('atividadeanalista.Emp_id', $val['emp_id'])
+                            ->get();
+
+                        if (!empty($anali)) {
+                            $anali = json_decode(json_encode($anali),true);
+                            $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                        } 
+                        //Verifica blacklist dos estabelecimentos para esta regra
+                        if (!in_array($ae->id,$blacklist)) {
+                            CronogramaAtividade::create($val);
+                            $count++;
+                        }
+
+                    }
+
+                }
+                // REGRAS PADRÃO
+                else {
+                    $ref = $regra->ref;
+                    if ($municipio = Municipio::find($regra->ref)) {
+                        $ref = $municipio->nome . ' (' . $municipio->uf . ')';
+                    }
+                    $nome_especifico = $regra->nome_especifico;
+                    if (!$nome_especifico) {
+                        $nome_especifico = $regra->tributo->nome;
+                    }
+                    $desc = $nome_especifico . ' ' . $ref;
+                    $desc_prefix = $regra->tributo->recibo == 1 ? 'Entrega ' : '';
+
+                    $data = $this->calculaProximaData($regra->regra_entrega,$periodo_apuracao,$offset,$adiant_fds);
+                    $data_limite = $data->toDateTimeString();
+                    $alerta = intval($regra->tributo->alerta);
+                    $inicio_aviso = $data->subDays($alerta)->toDateTimeString();
+                    
+                    $session = Session::all();
+                    $ult = array_pop( $session );
+                    $id_user = array_pop( $session );
+                    if (!is_numeric($id_user)) {
+                        $id_user = $ult;
+                    }
+                    
+                    $val = array(
+                        'descricao' => $desc_prefix . $desc,
+                        'recibo' => $regra->tributo->recibo,
+                        'status' => 1,
+                        'periodo_apuracao' => $periodo_apuracao,
+                        'inicio_aviso' => $inicio_aviso,
+                        'limite' => $data_limite,
+                        'tipo_geracao' => 'A',
+                        'regra_id' => $regra->id
+                    );
+
+                    //FILTRO TRIBUTOS SUSPENSOS (ex. DIPAM)
+                    if (sizeof($ativ_estemps) > 0) {
+                        foreach ($ativ_estemps as $el) {
+                            if (@!$el->empresa_id) {
+                                $empresa_id = $el->id;
+                            } else {
+                                $empresa_id = $el->empresa_id;
+                            }
+                            $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
+                            $val['estemp_id'] = $el->id;
+                            if ($val['estemp_type'] == 'estab') {
+                                $val['emp_id'] = $el->empresa_id;
+                            } else {
+                                $val['emp_id'] = $el->id;
+                            }
+                            $anali = DB::table('atividadeanalista')
+                            ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
+                            ->select('atividadeanalista.Id_usuario_analista')
+                            ->where('regras.id',$val['regra_id'])
+                            ->where('atividadeanalista.Emp_id', $empresa_id)
+                            ->get();
+                            if (!empty($anali)) {
+                                $anali = json_decode(json_encode($anali),true);
+                                $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                            }
+
+                            $val['Resp_cronograma'] = $id_user;
+                            $val['Data_cronograma'] = date('d-m-Y');
+
+                            //Verifica blacklist dos estabelecimentos para esta regra
+                            if (!in_array($el->id,$blacklist)) {
+                                CronogramaAtividade::create($val);
+                                $count++;
+                            }
+                        DB::table('cronogramastatus')->insert(
+                            ['periodo_apuracao' => $periodo_apuracao,'qtd'=>$count,'tipo_periodo'=>'M','emp_id'=>$empresa->id]
+                        );
+                        return $generate;
+                        }
+                    }
+                }
+            }
+        }
         return $generate;
     }
 

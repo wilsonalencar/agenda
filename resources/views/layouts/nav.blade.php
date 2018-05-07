@@ -222,7 +222,7 @@
                             <ul class="nav navbar-nav">
                                 <li class="panel panel-default" id="dropdown">
                                  <li class="panel panel-default" id="dropdown">
-                                    <a data-toggle="collapse" href="#analistas">Cronograma</a>
+                                    <a data-toggle="collapse" href="#analistas">Analistas</a>
                                     <div id="analistas" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <ul class="nav navbar-nav">
@@ -232,6 +232,9 @@
                                         </div>
                                     </div>
                                 </li>
+                                <li><a href="{{ route('cronogramaatividades.create') }}">Gerar</a></li>
+                                <li><a href="{{ route('cronogramaatividades.index') }}">Manipular</a></li>
+                
                                     <!-- <li><a href="{{ route('home') }}">Gerar</a></li>
                                     <li><a href="{{ route('home') }}">Manipular</a></li>
                                     <li><a href="{{ route('home') }}">Mensal</a></li>

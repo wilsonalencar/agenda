@@ -239,5 +239,17 @@ class EstabelecimentosController extends Controller
 
     }
 
+    public function cronogramageracao($id_tributo,$id_estab,$periodo_ini,$periodo_fin) {
+        $estabelecimento = Estabelecimento::findOrFail($id_estab);
+        if ($periodo_ini==$periodo_fin) {
+            Artisan::call('generatecronograma:single', [
+                'cnpj' => $estabelecimento->cnpj, 'codigo' => $estabelecimento->codigo, 'tributo_id' => $id_tributo, 'periodo_ini' => $periodo_ini
+            ]);
+        } 
+        $exitCode = Artisan::output();
+        return redirect()->back()->with('status', $exitCode);
+
+    }
+
 
 }

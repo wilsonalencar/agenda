@@ -3,114 +3,233 @@
 @section('content')
 
 <h1>Cronograma de Atividades</h1>
-<p class="lead">Segue a lista de todas as atividades em aberto. <a href="#"></a></p>
+<p class="lead">Segue a lista de todas as atividades em aberto. </p>
+<p class="lead"><button href="#" id="excl_per" class="btn btn-default" data-toggle="modal" data-target="#myModal">Excluir por período/Empresa</button>  <button href="#" id="excl_per" class="btn btn-default" data-toggle="modal" data-target="#myModalAlt" onclick="mymodalAlt(0)">Alterar por Período/Empresa</button> </p>
 <hr>
-<table class="table table-bordered display" id="atividades-table">
+<div class="table-default table-responsive">
+<table class="table display" id="atividades-table">
     <thead>
     <tr>
-        <td colspan="10">
-            <input style="width: 145px; position:relative; left:10px; " placeholder="codigo" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
-            <input style="width: 145px; position:relative; left:10px; " placeholder="cnpj" type="text" id="src_cnpj" name="src_cnpj" value="<?= $filter_cnpj ?>">
-            <button id="adv_search" style="position:relative; left:10px;">BUSCAR</button>
-        </td>
-    </tr>
-    <tr>
-        <th>ID</th>
-        <th>DESCRIÇÃO</th>
-        <th>TRIBUTO</th>
-        <th>APURAÇÃO</th>
-        <th>LIMITE</th>
+        <th>Início</th>
+        <th>Término</th>
+        <th>Filial</th>
+        <th>Atividade</th>
+        <th>UF</th>
+        <th>Tipo</th>
+        <th>Analista</th>
+        <th>Município</th>
         <th>CNPJ</th>
-        <th>CODIGO</th>
-        <th>STATUS</th>
+        <th>IE</th>
         <th></th>
 
     </tr>
     </thead>
+    <tbody>
+        <?php if (!empty($tabela)) { 
+            foreach ($tabela as $chave => $value) {
+        ?>  
+        <tr>
+            <td><?php echo $value['inicio_aviso']; ?></td>
+            <td><?php echo $value['limite']; ?></td>
+            <td><?php echo $value['codigo']; ?></td>
+            <td><?php echo $value['descricao']; ?></td>
+            <td><?php echo $value['uf']; ?></td>
+            <td><?php echo tipo($value['Tipo']); ?></td>
+            <td><?php echo $value['name']; ?></td>
+            <td><?php echo $value['nome']; ?></td>
+            <td><?php echo mask($value['cnpj'], "##.###.###/####-##"); ?></td>
+            <td><?php echo $value['insc_estadual']; ?></td>
+            <td><a class="btn btn-default btn-sm" onclick="mymodalAlt(<?php echo $value['id']; ?>)" data-toggle="modal" data-target="#myModalAlt"><i class="fa fa-edit"></i></a><a class="btn btn-default btn-sm" onclick="confirmaDelete(<?php echo $value['id']; ?>)"><i class="fa fa-trash"></i></a></td>
+        </tr>
+        <?php } }  ?>
+    </tbody>
 </table>
+</div>
+
+
+{!! Form::open([
+    'route' => 'cronogramaatividades.excluir',
+    'name' => 'formUnic'
+]) !!}
+{!!  Form::hidden('idAtividade', NULL , NULL, ['class' => 'form-control s2']) !!} 
+{!! Form::close() !!}
+
 <script>
-$(function() {
+    function confirmaDelete(id)
+    {
+        if (confirm('Você tem certeza que quer deletar esse registro?') == true) {
+            $('input[name=idAtividade]').val(id);
+            $('form[name=formUnic]').submit();
+        }
+    }
 
-    $('#atividades-table').DataTable({
-        processing: true,
-        serverSide: true,
-        stateSave: true,
-        ajax: {
-                url: "{!! route('cronogramaatividades.data') !!}",
-                data: function (d) {
-                    d.codigo = $('#src_codigo').val();
-                    d.cnpj = $('#src_cnpj').val();
-                }
-        },
-        columnDefs: [{ "width": "22%", "targets": 1 },{ "width": "120px", "targets": 2 },{ "width": "150px", "targets": 5 }],
-        columns: [
-            {data: 'id',name:'id'},
-            {data: 'descricao', name: 'descricao'},
-            {data: 'regra.tributo.nome', name: 'regra.tributo.nome',searchable: false, orderable: false},
-            {data: 'periodo_apuracao', name: 'periodo_apuracao'},
-            {data: 'limite', name: 'limite', render: function ( data ) { return data.substring(8,10)+'-'+data.substring(5,7)+'-'+data.substring(0,4); } },
-            {data: 'estemp.cnpj', name: 'estemp.cnpj',searchable: false, orderable: false, render: function (data) {return data.substring(0,2)+'.'+data.substring(2,5)+'.'+data.substring(5,8)+'/'+data.substring(8,12)+'-'+data.substring(12,14)} },
-            {data: 'estemp.codigo', name: 'estemp.codigo',searchable: false, orderable: false },
-            {data: 'status', name: 'status', render: function (data) {
-                                                                           var retval= '';
-                                                                           switch(data) {
-                                                                               case 1:
-                                                                                   retval = 'Pendente';
-                                                                                   break;
-                                                                               case 2:
-                                                                                   retval = 'Em aprovação';
-                                                                                   break;
-                                                                               case 3:
-                                                                                   retval = 'Concluida';
-                                                                                   break;
-                                                                               default:
-                                                                                   retval = '-';
-                                                                                   break;
-                                                                           }
-                                                                           return retval;
-                                                                       }
-            },
-            {data: 'id', name:'edit', searchable: false, orderable: false, render: function (data) {
-
-                        //var url = '<a href="{{ route('atividades.edit', ':id_edit') }}" class="btn btn-default btn-sm">Alterar</a>';
-                        var url = '<a href="{{ route('atividades.show', ':id_show') }}" style="margin-left:10px" class="btn btn-default btn-sm">Mostrar</a>';
-                        url = url.replace(':id_edit', data);
-                        url = url.replace(':id_show', data);
-                        return url;
-            }}
-        ],
+    $(document).ready(function (){
+    $('#atividades-table').dataTable({
         language: {
-            "searchPlaceholder": "ID, P.A. ou descrição"
-         },
-         dom: 'l<"centerBtn"B>frtip',
-         buttons: [
-             'copyHtml5',
-             'excelHtml5',
-             'csvHtml5',
-             'pdfHtml5'
-         ],
-         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
-
-    });
-
-    $('#adv_search').on('click', function(e) {
-                    var val_cnpj = $('#src_cnpj').val();
-                    var val_codigo = $('#src_codigo').val();
-                    if (val_cnpj || val_codigo) {
-                        var url = "{{ route('cronogramaatividades.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo.replace(/[^0-9]/g,'');
-                    } else {
-                        var url = "{{ route('cronogramaatividades.index') }}";
-                    }
-                    $("body").css("cursor", "progress");
-                    location.replace(url);
-        });
-
+        //"searchPlaceholder": "ID, P.A. ou descrição",
+        "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
+        },
+        dom: '<"centerBtn">frtip'
+    });    
+        
 });
 
 jQuery(function($){
-    $('input[name="src_cnpj"]').mask("99.999.999/9999-99");
-    $('input[name="src_codigo"]').mask("9999");
+    $('input[name="periodo_apuracao"]').mask("99/9999");
 });
 
+function mymodalAlt(id){
+    if (id > 0) {
+        document.getElementById('periodo_alt').style.display = "none";
+        document.getElementById('empresa_alt').style.display = "none";
+        $('input[name=id_atividade]').val(id);    
+    } else {
+        document.getElementById('periodo_alt').style.display = "block";
+        document.getElementById('empresa_alt').style.display = "block";
+        $('input[name=id_atividade]').val(0);
+    }
+}
+
 </script>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Exclusão por Período/Empresa</h4>
+      </div>
+      <div class="modal-body">
+        {!! Form::open([
+            'route' => 'cronogramaatividades.excluir'
+        ]) !!}
+        <div class="form-group">
+            <div style="width:50%">
+                {!! Form::label('Período', 'Período apuração', ['class' => 'control-label'] )  !!}
+                {!!  Form::text('periodo_apuracao', NULL , NULL, ['class' => 'form-control s2']) !!}            
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <div style="width:90%">
+        {!! Form::label('Emp_id', 'Empresa', ['class' => 'control-label'] )  !!}
+        {!!  Form::select('Emp_id', $empresas, array(), ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        {!! Form::submit('Remover', ['class' => 'btn btn-danger']) !!}
+        {!! Form::close() !!}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Voltar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- Modal -->
+<div id="myModalAlt" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Alteração por Período/Empresa</h4>
+      </div>
+      <div class="modal-body">
+        {!! Form::open([
+            'route' => 'cronogramaatividades.alterar'
+        ]) !!}
+        <div class="form-group" id="periodo_alt" style="display:none;">
+            <div style="width:50%">
+                {!! Form::label('Período', 'Período apuração', ['class' => 'control-label'] )  !!}
+                {!!  Form::text('periodo_apuracao', NULL , NULL, ['class' => 'form-control s2']) !!}            
+            </div>
+        </div>
+        <div class="form-group" id="empresa_alt" style="display:none;"> 
+            <div style="width:90%">
+        {!! Form::label('Emp_id', 'Empresa', ['class' => 'control-label'] )  !!}
+        {!!  Form::select('Emp_id', $empresas, array(), ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div style="width:50%">
+        {!! Form::label('inicio_aviso', 'Inicio Aviso', ['class' => 'control-label'] )  !!}<br>
+        {!!  Form::date('inicio_aviso', NULL ,NULL, ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div style="width:50%">
+        {!! Form::label('limite', 'Término Aviso', ['class' => 'control-label'] )  !!}<br>
+        {!!  Form::date('limite', NULL, NULL, ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div style="width:50%">
+        {!! Form::label('Id_usuario_analista', 'Analista', ['class' => 'control-label'] )  !!}
+        {!!  Form::select('Id_usuario_analista', $analistas, array(), ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        {!!  Form::hidden('id_atividade', NULL, NULL, ['class' => 'form-control s2']) !!}
+        {!! Form::submit('Alterar', ['class' => 'btn btn-success']) !!}
+        {!! Form::close() !!}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Voltar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<?php
+function mask($val, $mask)
+    {
+         $maskared = '';
+         $k = 0;
+         for($i = 0; $i<=strlen($mask)-1; $i++)
+         {
+         if($mask[$i] == '#')
+         {
+         if(isset($val[$k]))
+         $maskared .= $val[$k++];
+         }
+         else
+         {
+         if(isset($mask[$i]))
+         $maskared .= $mask[$i];
+         }
+         }
+         return $maskared;
+    }
+function tipo($tipo)
+    {
+        switch ($tipo) {
+            case 'E':
+                return 'Estadual';
+                break;
+            
+            case 'F':
+                return 'Federal';
+                break;
+
+            case 'M';
+                return 'Municipal';
+                break;
+        }
+    }
+?>
 @stop

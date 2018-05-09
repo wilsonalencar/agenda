@@ -233,7 +233,7 @@
                                     </div>
                                 </li>
                                 <li><a href="{{ route('cronogramaatividades.create') }}">Gerar</a></li>
-                                <!-- <li><a href="{{ route('cronogramaatividades.index') }}">Manipular</a></li> -->
+                                <li><a href="{{ route('cronogramaatividades.index') }}">Manipular</a></li>
                 
                                     <!-- <li><a href="{{ route('home') }}">Gerar</a></li>
                                     <li><a href="{{ route('home') }}">Manipular</a></li>

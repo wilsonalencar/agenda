@@ -47,51 +47,101 @@ class CronogramaatividadesController extends Controller
 
     public function anyData(Request $request)
     {
-        $atividades = Atividade::select('*')
-                        ->with('regra')->with('regra.tributo')->with('estemp')
-                        ->orderBy('status','asc')->orderBy('limite','asc');
+        $atividades = DB::select('select A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.limite, "%d/%m/%Y") as limite, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual from cronogramaatividades A left join estabelecimentos B on A.estemp_id = B.id left join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id');
+        $atividades = json_decode(json_encode($atividades),true);
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $ids = '4,6';
+        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
+        $user_ids = json_decode(json_encode($user_ids),true);
+        $analistas = User::selectRaw("name, id")->whereIN("id", $user_ids)->lists('name','id');
 
-        if($filter_cnpj = $request->get('cnpj')){
+        return view('cronogramaatividades.index')->with('tabela', $atividades)->with('empresas', $empresas)->with('analistas', $analistas);
+    }
+    
+    public function alterar(Request $request)
+    {
+        $input = $request->all();
+        if (array_key_exists('inicio_aviso', $input) || array_key_exists('limite', $input)) {
+            if (strtotime($input['inicio_aviso']) > strtotime($input['limite'])) {
+                return redirect()->back()->with('status', 'Favor informar as datas corretamente');
+            }
+        }
 
-            if (substr($filter_cnpj, -6, 4) == '0001') {
-                $estemp = Empresa::select('id')->where('cnpj', $filter_cnpj)->get();
-                $type = 'emp';
-            } else {
-                $estemp = Estabelecimento::select('id')->where('cnpj', $filter_cnpj)->get();
-                $type = 'estab';
+        if ($input['id_atividade'] != 0) {
+            $obj = CronogramaAtividade::findOrFail($input['id_atividade']);
+            if (array_key_exists('inicio_aviso', $input) && !empty($input['inicio_aviso'])) {
+                $obj->inicio_aviso = $input['inicio_aviso'];
             }
 
-            if (sizeof($estemp) > 0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type', $type);
-            } else {
-                $atividades = new Collection();
+            if (array_key_exists('limite', $input) && !empty($input['limite'])) {
+                $obj->limite = $input['limite'];
             }
+
+            if (array_key_exists('Id_usuario_analista', $input) && !empty($input['Id_usuario_analista'])) {
+                $obj->Id_usuario_analista = $input['Id_usuario_analista'];
+            }
+
+        $obj->save();
 
         }
 
-        if($filter_codigo = $request->get('codigo')){
-
-            if ($filter_codigo == '1001') {
-                $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
-                $type = 'emp';
-            } else {
-                $estemp = Estabelecimento::select('id')->where('codigo','like','%'.$filter_codigo)->get();
-                $type = 'estab';
+        if ($input['id_atividade'] == 0) {
+            if (empty($input['periodo_apuracao']) || empty($input['Emp_id'])) {
+                return redirect()->back()->with('status', 'É necessário informar a empresa e o período para busca dos registros a serem atualizados.');
             }
+            $input['periodo_apuracao'] = str_replace('/', '', $input['periodo_apuracao']);
 
-            if (sizeof($estemp)>0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type',$type);
-            } else {
-                $atividades = new Collection();
+            $current = DB::Select('select id from cronogramaatividades where periodo_apuracao = '.$input['periodo_apuracao'].' and emp_id = '.$input['Emp_id'].'');
+            
+            foreach ($current as $key => $val) {
+                $obj = CronogramaAtividade::findOrFail($val->id);
+
+                if (array_key_exists('inicio_aviso', $input) && !empty($input['inicio_aviso'])) {
+                    $obj->inicio_aviso = $input['inicio_aviso'];
+                }
+
+                if (array_key_exists('limite', $input) && !empty($input['limite'])) {
+                    $obj->limite = $input['limite'];
+                }
+
+                if (array_key_exists('Id_usuario_analista', $input) && !empty($input['Id_usuario_analista'])) {
+                    $obj->Id_usuario_analista = $input['Id_usuario_analista'];
+                }
+
+            $obj->save();
             }
-
         }
 
-        if ( isset($request['search']) && $request['search']['value'] != '' ) {
-            $str_filter = $request['search']['value'];
+        return redirect()->back()->with('status', 'Registro Atualizado com sucesso');
+    }
+    public function excluir(Request $request)
+    {
+        $input = $request->all();
+
+        if (array_key_exists('periodo_apuracao', $input)) {
+
+            if (empty($input['periodo_apuracao'])) {
+                return redirect()->back()->with('status', 'Favor informar o período desejado para exclusão');
+            }
+
+            $input['periodo_apuracao'] = str_replace('/', '', $input['periodo_apuracao']);
+            
+            $current = DB::Select('select id from cronogramaatividades where periodo_apuracao = '.$input['periodo_apuracao'].' and emp_id = '.$input['Emp_id'].'');
+            
+            if (!empty($current)) {
+                foreach ($current as $strls => $vlr) {
+                    $obj = CronogramaAtividade::findOrFail($vlr->id);
+                    $obj->delete();
+                }
+            }
+        }
+        if (array_key_exists('idAtividade', $input)) {
+            $id = $input['idAtividade'];
+            $obj = CronogramaAtividade::findOrFail($id);
+            $obj->delete();
         }
 
-        return Datatables::of($atividades)->make(true);
+    return redirect()->back()->with('status', 'Registros excluídos com sucesso');
     }
 
     /**

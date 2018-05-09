@@ -255,13 +255,11 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('atividade/{atividade}/cancelar', array('as'=>'atividades.cancelar', 'uses'=>'AtividadesController@cancelar'));
 
     Route::resource('cronogramaatividades', 'CronogramaatividadesController');
-    Route::get('cronogramaatividades/data', array('as'=>'cronogramaatividades.data', 'uses'=>'CronogramaatividadesController@anyData'));
+    Route::get('cronogramaatividades', array('as'=>'cronogramaatividades.index', 'uses'=>'CronogramaatividadesController@anyData'));
+    Route::post('cronogramaatividades/excluir', array('as'=>'cronogramaatividades.excluir', 'uses'=>'CronogramaatividadesController@excluir'));
+    Route::post('cronogramaatividades/alterar', array('as'=>'cronogramaatividades.alterar', 'uses'=>'CronogramaatividadesController@alterar'));
     Route::post('cronogramaatividades/storeEstab', array('as'=>'cronogramaatividades.storeEstabelecimento', 'uses'=>'CronogramaatividadesController@storeEstabelecimento'));
     Route::post('cronogramaatividades/storeEmp', array('as'=>'cronogramaatividades.storeEmpresa', 'uses'=>'CronogramaatividadesController@storeEmpresa'));
-    Route::get('cronogramaatividades/{atividade}/aprovar', array('as'=>'cronogramaatividades.aprovar', 'uses'=>'CronogramaatividadesController@aprovar'));
-    Route::get('cronogramaatividades/{atividade}/reprovar', array('as'=>'cronogramaatividades.reprovar', 'uses'=>'CronogramaatividadesController@reprovar'));
-    Route::get('cronogramaatividades/{atividade}/retificar', array('as'=>'cronogramaatividades.retificar', 'uses'=>'CronogramaatividadesController@retificar'));
-    Route::get('cronogramaatividades/{atividade}/cancelar', array('as'=>'cronogramaatividades.cancelar', 'uses'=>'CronogramaatividadesController@cancelar'));
 
     Route::post('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));
     Route::get('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));

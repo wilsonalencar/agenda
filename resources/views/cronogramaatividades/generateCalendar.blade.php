@@ -28,7 +28,7 @@
             </div>
             <div class="col-md-6"></div>
             <div class="col-md-2">
-                {!! Form::submit('Calendário', ['class' => 'btn btn-success-block']) !!}
+                {!! Form::submit('Cronograma', ['class' => 'btn btn-success-block']) !!}
                 {!! Form::close() !!}
             </div>
         </div>

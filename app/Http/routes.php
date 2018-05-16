@@ -92,6 +92,9 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('upload/{user}/entrega', array('as'=>'upload.entrega', 'uses'=>'UploadsController@entrega'));
     Route::post('upload/sendUpload', 'UploadsController@upload');
 
+    Route::get('uploadCron/{user}/entrega', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronograma'));
+    Route::post('upload/sendUploadCron', 'UploadsController@uploadCron');
+
     Route::post('about', array('as'=>'about', 'uses'=>'PagesController@about'));
     Route::get('/about', [
         'as' => 'about',
@@ -204,6 +207,9 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
 
     Route::get('upload/{user}/entrega', array('as'=>'upload.entrega', 'uses'=>'UploadsController@entrega'));
     Route::post('upload/sendUpload', 'UploadsController@upload');
+    
+    Route::get('uploadCron/{user}/entrega', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronograma'));
+    Route::post('upload/sendUploadCron', 'UploadsController@uploadCron');
 
 });
 

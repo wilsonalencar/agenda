@@ -277,6 +277,176 @@ class CronogramaatividadesController extends Controller
         //
     }
 
+
+    public function Gerarsemanal()
+    {
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+
+        return view('cronogramaatividades.generateCalendarSemanal')->with('empresas',$empresas);
+    }
+
+    public function semanal(Request $request)
+    {
+        $input = $request->all();
+
+        if (!isset($input['empresas_selected']) || empty($input['empresas_selected'])) {
+            return redirect()->back()->with('status', 'Favor informar a(s) empresa(s)');
+        }
+
+        if (!isset($input['data_inicio']) || empty($input['data_inicio'])) {
+            return redirect()->back()->with('status', 'Favor informar ambas as datas');
+        }
+
+        if (!isset($input['data_fim']) || empty($input['data_fim'])) {
+            return redirect()->back()->with('status', 'Favor informar ambas as datas');
+        }
+
+        if (strtotime($input['data_inicio']) > strtotime($input['data_fim'])) {
+            return redirect()->back()->with('status', 'A data de Início não pode ser Maior que a data Final');   
+        }
+
+        $day1 =substr($input['data_fim'], -2);
+        $day2 = substr($input['data_inicio'], -2); 
+        $diff = $day1 - $day2;
+        if ( $diff > 7) {
+            return redirect()->back()->with('status', 'Desculpe essa função não permite a busca de mais de uma semana');
+        }
+        $input['data_inicio'] = implode("/", array_reverse(explode("-", $input['data_inicio']))); 
+        $input['data_fim'] = implode("/", array_reverse(explode("-", $input['data_fim']))); 
+
+        $dateStart      = $input['data_inicio'];
+        $dateStart      = implode('-', array_reverse(explode('/', substr($dateStart, 0, 10)))).substr($dateStart, 10);
+        $dateStart      = new \DateTime($dateStart);
+
+        $dateEnd        = $input['data_fim'];
+        $dateEnd        = implode('-', array_reverse(explode('/', substr($dateEnd, 0, 10)))).substr($dateEnd, 10);
+        $dateEnd        = new \DateTime($dateEnd);
+     
+        $dateRange = array();
+        while($dateStart <= $dateEnd){
+            $dateRange[] = $dateStart->format('Y-m-d');
+            $dateStart = $dateStart->modify('+1day');
+        }
+     
+        $datas = $dateRange;
+
+        $user_id = Auth::user()->id;
+        $events = [];
+        $empresas = array();
+
+        foreach ($input['empresas_selected'] as $key => $value) {
+            $empresas[] = $value;
+        }
+        
+        $vall = count($datas);
+
+        foreach ($datas as $key => $dataSing) {
+            $datas[$key] = $dataSing.' 00:00:00';
+            $datas[$vall] = $dataSing.' 23:59:59';
+            $vall += 1;
+        }
+    
+        $feriados = $this->eService->getFeriadosNacionais();
+        $feriados_estaduais = $this->eService->getFeriadosEstaduais();
+        
+        $user = User::findOrFail(Auth::user()->id);
+            $atividades_estab = DB::table('cronogramaatividades')
+                ->join('estabelecimentos', 'estabelecimentos.id', '=', 'cronogramaatividades.estemp_id')
+                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite')
+                ->whereIN('cronogramaatividades.emp_id', $empresas)
+                ->whereIN('cronogramaatividades.limite', $datas)
+                ->where('cronogramaatividades.status','<', 3)
+                ->where('cronogramaatividades.estemp_type','estab')
+                ->get();
+
+        foreach($atividades_estab as $atividade) {
+
+            $events[] = \Calendar::event(
+                str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')', 
+                true, 
+                $atividade->limite, 
+                $atividade->limite, 
+                $atividade->id, 
+                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
+            );
+        }
+        //MATRIZ
+        $atividades_emp = DB::table('cronogramaatividades')
+            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
+            ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite')
+            ->whereIN('cronogramaatividades.emp_id', $empresas)
+            ->whereIN('cronogramaatividades.limite', $datas)
+            ->where('cronogramaatividades.status','<', 3)
+            ->where('cronogramaatividades.estemp_type','emp')
+            ->get();
+
+        foreach($atividades_emp as $atividade) {
+            $events[] = \Calendar::event(
+                str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')',
+                true, 
+                $atividade->limite,
+                $atividade->limite,
+                $atividade->id,
+                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
+            );
+        }
+
+        foreach ($feriados_estaduais as $val) {
+
+            $feriados_estaduais_uf = explode(';', $val->datas);
+
+            foreach ($feriados_estaduais_uf as $el) {
+                $key = $val->uf;
+                $fer_exploded = explode('-',$el);
+                $day = $fer_exploded[0];
+                $month = $fer_exploded[1];
+
+                $events[] = \Calendar::event(
+                    "FERIADO ESTAD. em $key",
+                    true,
+                    date('Y')."-{$month}-{$day}T0800",
+                    date('Y')."-{$month}-{$day}T0800",
+                    null,
+                    ['url' => url('/feriados'),'textColor'=>'white']
+                );
+            }
+
+        }
+
+        //Carregando os feriados nacionais
+
+        foreach ($feriados as $key=>$feriado) {
+            //Add feriado to events
+            $fer_exploded = explode('-',$feriado);
+            $day = $fer_exploded[0];
+            $month = $fer_exploded[1];
+
+            $events[] = \Calendar::event(
+                "FERIADO - $key", //event title
+                true, //full day event?
+                date('Y')."-{$month}-{$day}T0800", //start time (you can also use Carbon instead of DateTime)
+                date('Y')."-{$month}-{$day}T0800", //end time (you can also use Carbon instead of DateTime)
+                null,
+                ['url' => url('/feriados'),'textColor'=>'white']
+            );
+        }
+
+        //Geração do calendario
+
+        $calendar = \Calendar::addEvents($events) //add an array with addEvents
+        ->setOptions([ //set fullcalendar options
+                'lang' => 'pt',
+                'firstDay' => 1,
+                'aspectRatio' => 2.3,
+                'header' => [ 'left' => 'prev,next', 'center'=>'title'] //, 'right' => 'month,agendaWeek'
+            ])
+        ->setCallbacks([ //set fullcalendar callback options (will not be JSON encoded)
+            'viewRender' => 'function() { }'
+        ]);
+
+        return view('cronogramaatividades.calendar', compact('calendar'));
+    }
+
     public function Gerarmensal()
     {
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');

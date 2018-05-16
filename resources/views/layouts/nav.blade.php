@@ -226,7 +226,7 @@
                                     <div id="analistas" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <ul class="nav navbar-nav">
-                                                <li><a href="{{ route('atividadesanalista.adicionar') }}"><i class="fa fa-btn fa-file-text-o"></i>Atividade do analista</a></li>
+                                                <li><a href="{{ route('atividadesanalista.adicionar') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
                                                 <li><a href="{{ route('atividadesanalista.index') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
                                             </ul>
                                         </div>

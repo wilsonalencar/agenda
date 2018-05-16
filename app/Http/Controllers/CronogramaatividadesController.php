@@ -15,9 +15,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Models\CronogramaAtividade;
 use App\Models\Atividade;
+use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 use Yajra\Datatables\Datatables;
@@ -47,13 +49,34 @@ class CronogramaatividadesController extends Controller
 
     public function anyData(Request $request)
     {
-        $atividades = DB::select('select A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.limite, "%d/%m/%Y") as limite, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual from cronogramaatividades A left join estabelecimentos B on A.estemp_id = B.id left join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id');
+        $input = $request->all();
+        $periodo_busca = '';
+        $empresa_busca = '';
+
+        if (isset($input['periodo_apuracao']) && !empty($input['periodo_apuracao'])) {
+            $periodo_busca = str_replace('/', '', $input['periodo_apuracao']);
+        }
+
+        if (isset($input['Emp_id']) && !empty($input['Emp_id'])) {
+            $empresa_busca = $input['Emp_id'];
+        }
+        $query = 'SELECT A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.limite, "%d/%m/%Y") as limite, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual, A.Id_usuario_analista from cronogramaatividades A left join estabelecimentos B on A.estemp_id = B.id left join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id where 1 ';
+        
+        if (!empty($empresa_busca)) {
+            $query .= 'AND A.emp_id = '.$empresa_busca.'';
+        }
+
+        if (!empty($periodo_busca)) {
+            $query .= ' AND A.periodo_apuracao = '.$periodo_busca.'';
+        }
+
+        $atividades = DB::select($query);
         $atividades = json_decode(json_encode($atividades),true);
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $ids = '4,6';
         $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
         $user_ids = json_decode(json_encode($user_ids),true);
-        $analistas = User::selectRaw("name, id")->whereIN("id", $user_ids)->lists('name','id');
+        $analistas = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
 
         return view('cronogramaatividades.index')->with('tabela', $atividades)->with('empresas', $empresas)->with('analistas', $analistas);
     }
@@ -154,7 +177,8 @@ class CronogramaatividadesController extends Controller
         $usuarios = User::selectRaw("concat(name, ' - ( ', email, ' )') as nome_e_mail, id")->lists('nome_e_mail', 'id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $regras = [''=>''];
-        $estabelecimentos = Estabelecimento::selectRaw("razao_social, id")->lists('razao_social','id'); //Unidades Federais
+        $estabelecimentos = Estabelecimento::selectRaw("concat(razao_social, ' - ', codigo, ' - ', cnpj) as razao_social, id")->lists('razao_social','id'); //Unidades Federais
+
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id'); //Unidades Federais
         $municipios = [''=>''];
 
@@ -186,8 +210,19 @@ class CronogramaatividadesController extends Controller
 
         $var = explode(',', $value);
         foreach ($var as $chave => $id) {
-            return redirect()->route('estabelecimentos.cronogramageracao', [$tributo, $id, $periodo_ini, $periodo_fim] );
+            $this->cronogramageracaoEstab($tributo, $id, $periodo_ini, $periodo_fim);
         }
+    return redirect()->back()->with('status', 'Atividades geradas com sucesso');
+    }
+
+    public function cronogramageracaoEstab($id_tributo,$id_estab,$periodo_ini,$periodo_fin) {
+        $estabelecimento = Estabelecimento::findOrFail($id_estab);
+        if ($periodo_ini==$periodo_fin) {
+            Artisan::call('generatecronograma:single', [
+                'cnpj' => $estabelecimento->cnpj, 'codigo' => $estabelecimento->codigo, 'tributo_id' => $id_tributo, 'periodo_ini' => $periodo_ini
+            ]);
+        } 
+        $exitCode = Artisan::output();
     }
 
     public function storeEmpresa(Request $request)
@@ -203,13 +238,33 @@ class CronogramaatividadesController extends Controller
         $var = explode(',', $value);
         foreach ($var as $chave => $id) {
             $periodo = $input['periodo_apuracao_emps'];
-            return redirect()->route('empresas.cronogramageracao', [$periodo, $id] );
+            $this->cronogramageracaoEmps($periodo, $id);
+        }
+        return redirect()->back()->with('status', 'Atividade gerada com sucesso');
+    }
+
+    public function cronogramageracaoEmps($periodo,$id_emp) {
+        $empresa = Empresa::findOrFail($id_emp);
+        
+        $warning = false; // WARNING para periodo anterior não gerado
+        if (strlen($periodo) == 4) {
+            $knownDate = Carbon::create($periodo,1,1,0,0);
+        } else {
+            $knownDate = Carbon::create((int)substr($periodo,-4,4),(int)substr($periodo,0,2),1,0,0);
+        }
+
+        if (!$warning){
+            Artisan::call('generatecronograma:all', [
+                'periodo' => $periodo, 'empresa' => $empresa->cnpj
+            ]);
+
+            $exitCode = Artisan::output();
         }
     }
 
+
     public function store(Request $request)
     {
-
         $input = $request->all();
 
         CronogramaAtividade::create($input);

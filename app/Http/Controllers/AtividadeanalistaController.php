@@ -42,7 +42,7 @@ class AtividadeanalistaController extends Controller
                         B.razao_social,
                         G.nome,
                         GROUP_CONCAT((SELECT 
-                                    E.razao_social
+                                    E.codigo
                                 FROM
                                     estabelecimentos E
                                 WHERE
@@ -87,7 +87,7 @@ class AtividadeanalistaController extends Controller
         $ids = '4,6';
         $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
         $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->lists('name','id');
+        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
 
@@ -108,7 +108,7 @@ class AtividadeanalistaController extends Controller
         $ids = '4,6';
         $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
         $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->lists('name','id');
+        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
 
@@ -183,7 +183,7 @@ class AtividadeanalistaController extends Controller
         $ids = '4,6';
         $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
         $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->lists('name','id');
+        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $input = $request->all();
@@ -202,7 +202,6 @@ class AtividadeanalistaController extends Controller
             $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($input['id'])),true);
             return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);
         }
-
         $Atividade = AtividadeAnalista::findOrFail($input['id']);
         $Atividade->fill($input)->save();
         $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($input['id'])),true);
@@ -227,7 +226,7 @@ class AtividadeanalistaController extends Controller
         $ids = '4,6';
         $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
         $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->lists('name','id');
+        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $cnpjs = DB::table('atividadeanalistafilial')

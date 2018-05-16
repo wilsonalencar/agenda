@@ -228,30 +228,6 @@ class EmpresasController extends Controller
 
     }
 
-    public function cronogramageracao($periodo,$id_emp) {
-
-        $empresa = Empresa::findOrFail($id_emp);
-        
-        $warning = false; // WARNING para periodo anterior não gerado
-        if (strlen($periodo) == 4) {
-            $knownDate = Carbon::create($periodo,1,1,0,0);
-        } else {
-            $knownDate = Carbon::create((int)substr($periodo,-4,4),(int)substr($periodo,0,2),1,0,0);
-        }
-
-        if (!$warning){
-            Artisan::call('generatecronograma:all', [
-                'periodo' => $periodo, 'empresa' => $empresa->cnpj
-            ]);
-
-            $exitCode = Artisan::output();
-        }
-
-        return redirect()->back()->with('status', $exitCode);
-
-    }
-
-
     private function _getFeriadosNacionais()
     {
         $formatoDataDeComparacao    =  "d-m"; // Dia / Mês

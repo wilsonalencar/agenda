@@ -55,9 +55,9 @@
     <div style="width:30%">
         Regra geral:
         {{ Form::label('Sim', 'SIM') }}
-        {!! Form::radio('label_regra', 'S', ( $dados['Regra_geral'] == "S" ? true : false ), ['id' => 'regra_geral_SIM', 'onClick' => 'hideDiv()']) !!}
+        {!! Form::radio('Regra_geral', 'S', ( $dados['Regra_geral'] == "S" ? true : false ), ['id' => 'regra_geral_SIM', 'onClick' => 'hideDiv()']) !!}
         {{ Form::label('Nao', 'NAO') }}
-        {!! Form::radio('label_regra', 'N', ( $dados['Regra_geral'] == "N" ? true : false ), ['id' => 'regra_geral_NAO', 'onClick' => 'showDiv()']) !!}
+        {!! Form::radio('Regra_geral', 'N', ( $dados['Regra_geral'] == "N" ? true : false ), ['id' => 'regra_geral_NAO', 'onClick' => 'showDiv()']) !!}
     </div>
 </div>
 
@@ -74,11 +74,12 @@
     <div class="form-group">
         <div style="width:50%">
         {!! Form::label('cnpj', 'CNPJ:', ['class' => 'control-label']) !!}
-        {!! Form::text('cnpj', '', ['class' => 'form-control']) !!}
+        {!! Form::text('cnpj_exibe', NULL, ['class' => 'form-control']) !!}
+        {!! Form::hidden('cnpj', NULL, ['class' => 'form-control']) !!}
         {!! Form::hidden('Id_atividadeanalista', $dados['id'], ['class' => 'form-control']) !!}
             <div class="pull-right">
             <br>
-                {!! Form::submit('Adicionar', ['class' => 'btn btn-default']) !!}
+                {!! Form::submit('Adicionar', ['class' => 'btn btn-default', 'onclick' => 'myfunction()']) !!}
             </div>
         </div>
         
@@ -116,6 +117,11 @@
     if (document.getElementById('regra_geral_NAO').checked) {
        document.getElementById('hidden_div').style.display = "block";
     }
+function myfunction() {
+    cnpj = $('input[name="cnpj_exibe"]').val();    
+    $('input[name="cnpj"]').val(cnpj);
+    $('input[name="cnpj_exibe"]').val('');
+}
 
 function confirma() {
     if (confirm("Você tem certeza que quer deletar o registro?") == true) {
@@ -126,7 +132,7 @@ function confirma() {
 }
 
 jQuery(function($){
-    $('input[name="cnpj"]').mask("99.999.999/9999-99");
+    $('input[name="cnpj_exibe"]').mask("99.999.999/9999-99");
 });
 
 function showDiv(){

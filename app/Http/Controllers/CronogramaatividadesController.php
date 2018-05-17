@@ -452,6 +452,7 @@ class CronogramaatividadesController extends Controller
                 'firstDay' => $dayofweek,
                 'aspectRatio' => 30,
                 'allDayText' => 'Atividades',
+                'eventLimit' => 300,
                 'defaultDate' => $dataSelected, 
                 'header' => [ 'left' => '', 'center'=>'title', 'right' => ''] , 
                 'defaultView' => 'agendaWeek'

@@ -399,6 +399,49 @@ class CronogramaatividadesController extends Controller
                 ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
             );
         }
+        $feriados = $this->eService->getFeriadosNacionais();
+        $feriados_estaduais = $this->eService->getFeriadosEstaduais();
+
+        foreach ($feriados_estaduais as $val) {
+
+            $feriados_estaduais_uf = explode(';', $val->datas);
+
+            foreach ($feriados_estaduais_uf as $el) {
+                $key = $val->uf;
+                $fer_exploded = explode('-',$el);
+                $day = $fer_exploded[0];
+                $month = $fer_exploded[1];
+
+                $events[] = \Calendar::event(
+                    "FERIADO ESTAD. em $key",
+                    true,
+                    date('Y')."-{$month}-{$day}T0800",
+                    date('Y')."-{$month}-{$day}T0800",
+                    null,
+                    ['url' => url('/feriados'),'textColor'=>'white']
+                );
+            }
+
+        }
+
+        //Carregando os feriados nacionais
+
+        foreach ($feriados as $key=>$feriado) {
+            //Add feriado to events
+            $fer_exploded = explode('-',$feriado);
+            $day = $fer_exploded[0];
+            $month = $fer_exploded[1];
+
+            $events[] = \Calendar::event(
+                "FERIADO - $key", //event title
+                true, //full day event?
+                date('Y')."-{$month}-{$day}T0800", //start time (you can also use Carbon instead of DateTime)
+                date('Y')."-{$month}-{$day}T0800", //end time (you can also use Carbon instead of DateTime)
+                null,
+                ['url' => url('/feriados'),'textColor'=>'white']
+            );
+        }
+
         $day = 0;
         $dayofweek = date('w', strtotime($dataSelected));
 
@@ -407,7 +450,8 @@ class CronogramaatividadesController extends Controller
         ->setOptions([ //set fullcalendar options
                 'lang' => 'pt',
                 'firstDay' => $dayofweek,
-                'aspectRatio' => 30.0,
+                'aspectRatio' => 30,
+                'allDayText' => 'Atividades',
                 'defaultDate' => $dataSelected, 
                 'header' => [ 'left' => '', 'center'=>'title', 'right' => ''] , 
                 'defaultView' => 'agendaWeek'

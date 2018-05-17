@@ -311,6 +311,8 @@ class CronogramaatividadesController extends Controller
         if ( $diff > 7) {
             return redirect()->back()->with('status', 'Desculpe essa função não permite a busca de mais de uma semana');
         }
+        
+        $dataSelected   = $input['data_inicio'];
         $input['data_inicio'] = implode("/", array_reverse(explode("-", $input['data_inicio']))); 
         $input['data_fim'] = implode("/", array_reverse(explode("-", $input['data_fim']))); 
 
@@ -345,10 +347,7 @@ class CronogramaatividadesController extends Controller
             $datas[$vall] = $dataSing.' 23:59:59';
             $vall += 1;
         }
-    
-        $feriados = $this->eService->getFeriadosNacionais();
-        $feriados_estaduais = $this->eService->getFeriadosEstaduais();
-        
+            
         $user = User::findOrFail(Auth::user()->id);
             $atividades_estab = DB::table('cronogramaatividades')
                 ->join('estabelecimentos', 'estabelecimentos.id', '=', 'cronogramaatividades.estemp_id')
@@ -356,8 +355,13 @@ class CronogramaatividadesController extends Controller
                 ->whereIN('cronogramaatividades.emp_id', $empresas)
                 ->whereIN('cronogramaatividades.limite', $datas)
                 ->where('cronogramaatividades.status','<', 3)
-                ->where('cronogramaatividades.estemp_type','estab')
-                ->get();
+                ->where('cronogramaatividades.estemp_type','estab');
+            
+            if ($user->hasRole('analyst')){
+                $atividades_estab = $atividades_estab->where('cronogramaatividades.Id_usuario_analista', $user->id);
+            }
+
+            $atividades_estab = $atividades_estab->get();
 
         foreach($atividades_estab as $atividade) {
 
@@ -377,8 +381,13 @@ class CronogramaatividadesController extends Controller
             ->whereIN('cronogramaatividades.emp_id', $empresas)
             ->whereIN('cronogramaatividades.limite', $datas)
             ->where('cronogramaatividades.status','<', 3)
-            ->where('cronogramaatividades.estemp_type','emp')
-            ->get();
+            ->where('cronogramaatividades.estemp_type','emp');
+     
+            if ($user->hasRole('analyst')){
+                $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);
+            }
+     
+            $atividades_emp = $atividades_emp->get();
 
         foreach($atividades_emp as $atividade) {
             $events[] = \Calendar::event(
@@ -390,55 +399,18 @@ class CronogramaatividadesController extends Controller
                 ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
             );
         }
-
-        foreach ($feriados_estaduais as $val) {
-
-            $feriados_estaduais_uf = explode(';', $val->datas);
-
-            foreach ($feriados_estaduais_uf as $el) {
-                $key = $val->uf;
-                $fer_exploded = explode('-',$el);
-                $day = $fer_exploded[0];
-                $month = $fer_exploded[1];
-
-                $events[] = \Calendar::event(
-                    "FERIADO ESTAD. em $key",
-                    true,
-                    date('Y')."-{$month}-{$day}T0800",
-                    date('Y')."-{$month}-{$day}T0800",
-                    null,
-                    ['url' => url('/feriados'),'textColor'=>'white']
-                );
-            }
-
-        }
-
-        //Carregando os feriados nacionais
-
-        foreach ($feriados as $key=>$feriado) {
-            //Add feriado to events
-            $fer_exploded = explode('-',$feriado);
-            $day = $fer_exploded[0];
-            $month = $fer_exploded[1];
-
-            $events[] = \Calendar::event(
-                "FERIADO - $key", //event title
-                true, //full day event?
-                date('Y')."-{$month}-{$day}T0800", //start time (you can also use Carbon instead of DateTime)
-                date('Y')."-{$month}-{$day}T0800", //end time (you can also use Carbon instead of DateTime)
-                null,
-                ['url' => url('/feriados'),'textColor'=>'white']
-            );
-        }
+        $day = 0;
+        $dayofweek = date('w', strtotime($dataSelected));
 
         //Geração do calendario
-
         $calendar = \Calendar::addEvents($events) //add an array with addEvents
         ->setOptions([ //set fullcalendar options
                 'lang' => 'pt',
-                'firstDay' => 1,
-                'aspectRatio' => 2.3,
-                'header' => [ 'left' => 'prev,next', 'center'=>'title'] //, 'right' => 'month,agendaWeek'
+                'firstDay' => $dayofweek,
+                'aspectRatio' => 30.0,
+                'defaultDate' => $dataSelected, 
+                'header' => [ 'left' => '', 'center'=>'title', 'right' => ''] , 
+                'defaultView' => 'agendaWeek'
             ])
         ->setCallbacks([ //set fullcalendar callback options (will not be JSON encoded)
             'viewRender' => 'function() { }'
@@ -482,8 +454,13 @@ class CronogramaatividadesController extends Controller
                 ->whereIN('cronogramaatividades.emp_id', $empresas)
                 ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
                 ->where('cronogramaatividades.status','<', 3)
-                ->where('cronogramaatividades.estemp_type','estab')
-                ->get();
+                ->where('cronogramaatividades.estemp_type','estab');
+                
+                if ($user->hasRole('analyst')){
+                   $atividades_estab = $atividades_estab->where('cronogramaatividades.Id_usuario_analista', $user->id);
+                }
+
+                $atividades_estab = $atividades_estab->get();
 
         foreach($atividades_estab as $atividade) {
 
@@ -503,8 +480,13 @@ class CronogramaatividadesController extends Controller
             ->whereIN('cronogramaatividades.emp_id', $empresas)
             ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
             ->where('cronogramaatividades.status','<', 3)
-            ->where('cronogramaatividades.estemp_type','emp')
-            ->get();
+            ->where('cronogramaatividades.estemp_type','emp');
+
+            if ($user->hasRole('analyst')){
+                $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);
+            }
+
+            $atividades_emp = $atividades_emp->get();
 
         foreach($atividades_emp as $atividade) {
             $events[] = \Calendar::event(

@@ -1065,12 +1065,11 @@ class EntregaService {
         if ($generate) {
             $count = 0;
             foreach ($regras as $regra) {
-
                 //VERIFICA CNPJ QUE FORAM BANIDOS PARA ESTA REGRA
                 $blacklist = array();
                 foreach($regra->estabelecimentos as $el) {
                     $blacklist[] = $el->id;
-                }
+                }   
 
                 //VERIFICA CNPJ QUE UTILIZAM A REGRA
                 $ativ_estemps = array();
@@ -1220,6 +1219,7 @@ class EntregaService {
                 }
                 // REGRAS PADRÃO
                 else {
+
                     $ref = $regra->ref;
                     if ($municipio = Municipio::find($regra->ref)) {
                         $ref = $municipio->nome . ' (' . $municipio->uf . ')';
@@ -1253,7 +1253,6 @@ class EntregaService {
                         'tipo_geracao' => 'A',
                         'regra_id' => $regra->id
                     );
-
                     //FILTRO TRIBUTOS SUSPENSOS (ex. DIPAM)
                     if (sizeof($ativ_estemps) > 0) {
                         foreach ($ativ_estemps as $el) {
@@ -1288,16 +1287,18 @@ class EntregaService {
                                 CronogramaAtividade::create($val);
                                 $count++;
                             }
-                        DB::table('cronogramastatus')->insert(
-                            ['periodo_apuracao' => $periodo_apuracao,'qtd'=>$count,'tipo_periodo'=>'M','emp_id'=>$empresa->id]
-                        );
-                        return $generate;
                         }
                     }
                 }
             }
+        
+            DB::table('cronogramastatus')->insert(
+                ['periodo_apuracao' => $periodo_apuracao,'qtd'=>$count,'tipo_periodo'=>'M','emp_id'=>$empresa->id]
+            );
+            
         }
-        return $generate;
+        
+    return $generate;
     }
 
     public function generateNotifications($user) {

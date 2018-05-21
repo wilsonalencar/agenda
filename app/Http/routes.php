@@ -269,6 +269,9 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('Gerarsemanal', array('as'=>'cronogramaatividades.Gerarsemanal', 'uses'=>'CronogramaatividadesController@Gerarsemanal'));
     Route::post('semanal', array('as'=>'semanal', 'uses'=>'CronogramaatividadesController@semanal'));
 
+    Route::get('GerarchecklistCron', array('as'=>'cronogramaatividades.GerarchecklistCron', 'uses'=>'CronogramaatividadesController@GerarchecklistCron'));
+    Route::post('ChecklistCron', array('as'=>'ChecklistCron', 'uses'=>'CronogramaatividadesController@ChecklistCron'));
+
     Route::post('cronogramaatividades/excluir', array('as'=>'cronogramaatividades.excluir', 'uses'=>'CronogramaatividadesController@excluir'));
     Route::post('cronogramaatividades/alterar', array('as'=>'cronogramaatividades.alterar', 'uses'=>'CronogramaatividadesController@alterar'));
     Route::post('cronogramaatividades/storeEstab', array('as'=>'cronogramaatividades.storeEstabelecimento', 'uses'=>'CronogramaatividadesController@storeEstabelecimento'));

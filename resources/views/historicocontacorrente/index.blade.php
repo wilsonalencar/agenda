@@ -4,7 +4,7 @@
 <?php 
     $data = date('d/m/Y H:i:s');
 ?>
-<h1>Histórico movimentações</h1>
+<h1>Histórico das movimentações</h1>
 <p class="lead"><a href="{{ route('movtocontacorrentes.search') }}">Voltar</a></p>
 <hr>
 
@@ -41,7 +41,6 @@
 </table>
 
 <script>
-
 $(document).ready(function () {
     $('#dataTables-example').dataTable({
         language: {                        
@@ -50,6 +49,5 @@ $(document).ready(function () {
         dom: '<B>frtip'
     });     
 });
-
 </script>
 @stop

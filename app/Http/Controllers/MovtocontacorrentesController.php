@@ -423,31 +423,31 @@ class MovtocontacorrentesController extends Controller
         $diff = array_diff($new, $atual);
         $txtDiff = '';
         if (array_key_exists('periodo_apuracao', $diff)) {
-            $txtDiff .= 'Período : '. $atual['periodo_apuracao'].' => '.$new['periodo_apuracao'].'<br />';
+            $txtDiff .= '<b>Período</b> : '. $atual['periodo_apuracao'].' => '.$new['periodo_apuracao'].'<br />';
         }
         if (array_key_exists('estabelecimento_id', $diff)) {
-            $txtDiff .= 'Estabelecimento : '. $atual['estabelecimento_id'].' => '.$new['estabelecimento_id'].'<br />';
+            $txtDiff .= '<b>Estabelecimento</b> : '. $atual['estabelecimento_id'].' => '.$new['estabelecimento_id'].'<br />';
         }
         if (array_key_exists('vlr_guia', $diff)) {
-            $txtDiff .= 'Vlr Guia : '. $atual['vlr_guia'].' => '.$new['vlr_guia'].'<br />';
+            $txtDiff .= '<b>Vlr Guia</b> : '. $atual['vlr_guia'].' => '.$new['vlr_guia'].'<br />';
         }
         if (array_key_exists('vlr_gia', $diff)) {
-            $txtDiff .= 'Vlr Gia : '. $atual['vlr_gia'].' => '.$new['vlr_gia'].'<br />';
+            $txtDiff .= '<b>Vlr Gia</b> : '. $atual['vlr_gia'].' => '.$new['vlr_gia'].'<br />';
         }
         if (array_key_exists('vlr_sped', $diff)) {
-            $txtDiff .= 'Vlr Sped : '. $atual['vlr_sped'].' => '.$new['vlr_sped'].'<br />';
+            $txtDiff .= '<b>Vlr Sped</b> : '. $atual['vlr_sped'].' => '.$new['vlr_sped'].'<br />';
         }
         if (array_key_exists('dipam', $diff)) {
-            $txtDiff .= 'Dipam : '. $atual['dipam'].' => '.$new['dipam'].'<br />';
+            $txtDiff .= '<b>Dipam</b> : '. $atual['dipam'].' => '.$new['dipam'].'<br />';
         }
         if (array_key_exists('vlr_dipam', $diff)) {
-            $txtDiff .= 'Vlr Dipam : '. $atual['vlr_dipam'].' => '.$new['vlr_dipam'].'<br />';
+            $txtDiff .= '<b>Vlr Dipam</b> : '. $atual['vlr_dipam'].' => '.$new['vlr_dipam'].'<br />';
         }
         if (array_key_exists('status_id', $diff)) {
-            $txtDiff .= 'Status : '. $atual['status_id'].' => '.$new['status_id'].'<br />';
+            $txtDiff .= '<b>Status</b> : '. $atual['status_id'].' => '.$new['status_id'].'<br />';
         }
         if (array_key_exists('observacao', $diff)) {
-            $txtDiff .= 'OBS : '. $atual['observacao'].' => '.$new['observacao'].'<br />';
+            $txtDiff .= '<b>OBS</b> : '. $atual['observacao'].' => '.$new['observacao'].'<br />';
         }
 
     $historico = new HistoricoContaCorrenteController();

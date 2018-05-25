@@ -284,8 +284,8 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::post('movtocontacorrentes/action_import', array('as'=>'movtocontacorrentes.action_import', 'uses'=>'MovtocontacorrentesController@action_import'));
     Route::post('movtocontacorrentes/action_valid_import', array('as'=>'movtocontacorrentes.action_valid_import', 'uses'=>'MovtocontacorrentesController@action_valid_import'));
     Route::get('movtocontacorrente', array('as'=>'movtocontacorrente', 'uses'=>'MovtocontacorrentesController@index'));
+    Route::get('movtocontacorrente/historico/{id}', array('as'=>'movtocontacorrentes.historic', 'uses'=>'HistoricoContaCorrenteController@index'));
     Route::resource('movtocontacorrentes', 'MovtocontacorrentesController');
-
 });
 
 // Just Admin, Owner, Supervisor

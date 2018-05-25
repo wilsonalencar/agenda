@@ -41,6 +41,8 @@
         <th>UF</th>
         <th>CARGA ENTRADA</th>
         <th>CARGA SAÍDA</th>
+        <th>ATUALIZAÇÃO ENTRADA</th>
+        <th>ATUALIZAÇÃO SAÍDA</th>
     </tr>
     </thead>
 </table>
@@ -99,7 +101,7 @@ $(function() {
                     d.ativo = $("[name='switch_val']").val();
                 }
             },
-        columnDefs: [{ "width": "80px", "targets": 3 },{ "width": "80px", "targets": 4 }],
+        columnDefs: [{ "width": "80px", "targets": 3 },{ "width": "80px", "targets": 4 },{ "width": "180px", "targets": 5 },{ "width": "180px", "targets": 6 }],
         columns: [
             {data: 'codigo', name: 'codigo'},
             {data: 'cnpj', name: 'cnpj',render: function ( data ) {
@@ -143,10 +145,32 @@ $(function() {
                                                                       }
                                                                     @endif
                                                                   return url;
-            }}
+            }},
+            {data: 'id' , searchable: false, orderable: false, name: 'alteracao_entrada',  render: function (data, type, row) {
+
+                                                                  var url = '';
+
+                                                                  if(row['Id_usuario_entrada'] != 0) {
+                                                                        url += getUser(row['Id_usuario_entrada']) + '<br>' + mascararDate(row['Dt_alteracao_entrada']);
+                                                                  } else {
+                                                                        url += 'Inexistente' + '<br>' + mascararDate(row['Dt_alteracao_entrada']);
+                                                                  }
+                                                                  return url; 
+                                                                }},
+            {data: 'Dt_alteracao_saida', searchable: false, orderable: false, name: 'alteracao_saida',render: function (data, type, row) {
+
+                                                                  var url = '';
+
+                                                                  if(row['Id_usuario_saida'] != 0) {
+                                                                        url += getUser(row['Id_usuario_saida']) + '<br>' + mascararDate(row['Dt_alteracao_saida']);
+                                                                  } else {
+                                                                        url += 'Inexistente' + '<br>' + mascararDate(row['Dt_alteracao_saida']);
+                                                                  }
+                                                                  return url; 
+                                                                }},
         ],
          language: {
-                                    //"searchPlaceholder": "ID, P.A. ou descrição",
+                                    // "searchPlaceholder": "ID, P.A. ou descrição",
                                     "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
          },
          lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -160,6 +184,28 @@ $(function() {
 
 });
 
+function getUser(userID)
+{
+    return $.ajax(
+    {
+        type: "GET",
+        url: '{{ url('cargas') }}/getUser',
+        cache: false,
+        async: false,
+        dataType: "json",
+        data:
+        {
+            'userID':userID
+        },
+        success: function(d)
+        {
+            if (!d.success) {
+                return 'Não existe';
+            }       
+           return d.data.user[0].email;
+        }
+    }).responseJSON.data.user[0].email;
+}
 </script>
 
 @stop

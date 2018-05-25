@@ -26,7 +26,11 @@ class Estabelecimento extends Model
         'empresa_id',
         'ativo',
         'carga_msaf_entrada',
-        'carga_msaf_saida'
+        'carga_msaf_saida',
+        'Id_usuario_entrada',
+        'Dt_alteracao_entrada',
+        'Id_usuario_saida',
+        'Dt_alteracao_saida'
     ];
 
     /**

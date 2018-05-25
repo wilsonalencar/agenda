@@ -215,6 +215,7 @@ Route::group(['middleware' => ['web']], function () {
 // Just the Owner, Admin, Manager, MSAF, Supervisor and the Analyst
 Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|owner']], function () {
     Route::get('cargas', array('as'=>'cargas', 'uses'=>'CargasController@index'));
+    Route::get('cargas/getUser', array('as'=>'cargas.getUser', 'uses'=>'CargasController@getUser'));
     Route::get('cargas_grafico', array('as'=>'cargas_grafico', 'uses'=>'CargasController@grafico'));
     Route::post('cargas', array('as'=>'cargas', 'uses'=>'CargasController@index'));
     Route::post('cargas/reset', array('as'=>'cargas.reset', 'uses'=>'CargasController@resetData'));

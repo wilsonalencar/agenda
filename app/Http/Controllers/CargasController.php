@@ -6,6 +6,7 @@ use App\Models\Estabelecimento;
 use Auth;
 use DB;
 use App\Models\Empresa;
+use App\Models\User;
 use App\Services\EntregaService;
 use App\Http\Requests;
 use Illuminate\Support\Facades\Input;
@@ -42,11 +43,30 @@ class CargasController extends Controller
         //var_dump($request);
         return view('cargas.msaf-load')->withSwitch($switch);
     }
+    public function getUser()
+    {
+        if (empty($_GET['userID'])) {
+            $userID = 0;
+        } else {
+            $userID = $_GET['userID'];
+        }
+        
+        $user = User::select('email')->where('id', $userID)->get();
+
+        if (!$user) {
+            echo json_encode(array('success'=>false, 'data'=>array('user'=>$user)));
+            exit;
+        }
+
+        echo json_encode(array('success'=>true, 'data'=>array('user'=>$user)));
+        exit;
+    }
 
     public function anyData(Request $request)
     {
         $seid = $this->s_emp->id;
         $estabelecimentos = Estabelecimento::select('*')->where('empresa_id', $seid)->with('municipio');
+
         $filter = $request->get('ativo');
         
         if ($filter != 2) {
@@ -96,6 +116,10 @@ class CargasController extends Controller
         foreach ($estabelecimentos as $el) {
             $el->carga_msaf_entrada = 0;
             $el->carga_msaf_saida = 0;
+            $el->Id_usuario_saida = 0;
+            $el->Id_usuario_entrada = 0;
+            $el->Dt_alteracao_entrada = '0000-00-00 00:00:00';
+            $el->Dt_alteracao_saida = '0000-00-00 00:00:00';
             $el->save();
         };
 
@@ -114,6 +138,13 @@ class CargasController extends Controller
             $estabelecimento->carga_msaf_entrada = 0;
 
         }
+
+        $hoje = date('Y-m-d H:i:s');
+        $user_id = Auth::user()->id;
+        $estabelecimento->Dt_alteracao_entrada = $hoje;
+        $estabelecimento->Dt_alteracao_saida = $estabelecimento->Dt_alteracao_saida;
+        $estabelecimento->Id_usuario_entrada = $user_id;
+        $estabelecimento->Id_usuario_saida = $estabelecimento->Id_usuario_saida;
         $estabelecimento->save();
 
         return redirect()->back()->with('status', 'O status de carga foi alterado para o estabelecimento '.$estabelecimento->codigo.'!');
@@ -131,6 +162,13 @@ class CargasController extends Controller
             $estabelecimento->carga_msaf_saida = 0;
 
         }
+
+        $hoje = date('Y-m-d H:i:s');
+        $user_id = Auth::user()->id;
+        $estabelecimento->Dt_alteracao_entrada = $estabelecimento->Dt_alteracao_entrada;
+        $estabelecimento->Dt_alteracao_saida = $hoje;
+        $estabelecimento->Id_usuario_entrada = $estabelecimento->Id_usuario_entrada;
+        $estabelecimento->Id_usuario_saida = $user_id;
         $estabelecimento->save();
 
         return redirect()->back()->with('status', 'O status de carga foi alterado para o estabelecimento '.$estabelecimento->codigo.'!');

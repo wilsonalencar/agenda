@@ -9,7 +9,10 @@
         </div>
     </div>
 </div>
-
+<?php
+$periodo = '';
+$data = date('d/m/Y H:i:s');
+?>
 <div class="table-default table-responsive">
     <table class="table display" id="dataTables-example">
         <thead>
@@ -26,7 +29,8 @@
         <?php
         if (!empty($checklist)) {
             foreach ($checklist as $key => $value) {
-                foreach ($value as $val => $dados) {                           
+                foreach ($value as $val => $dados) {  
+                $periodo = $dados['periodo_apuracao'];                        
         ?>          
         <tr>
             <td><?php echo $dados['razao_social']; ?></td>
@@ -82,22 +86,33 @@ $('#dataTables-example').dataTable({
                       return {
                         columns: [
                           {
-                            alignment: 'right',
+                            alignment: 'left',
                             image: logo,
                             width: 60
                           },
                           {
-                            alignment: 'center',
-                            text: 'Checklist',
-                            fontSize: 15,
-                            margin: [10,0]  
+                            alignment: 'right',
+                            text: '<?php echo $data; ?>',
+                            fontSize: 10
                           }
                         ],
                         margin: 20  
                       }
                     });
+                    doc['footer']=(function(currentPage, pageCount) {
+                      return {
+                        columns: [
+                          {
+                            alignment: 'right',
+                            text:'Página : ' + currentPage.toString() + ' de ' + pageCount,
+                            fontSize: 10
+                          }
+                        ]
+                      }
+                    });
                 },
-                title:'',
+
+                title:'Checklist - <?php echo $periodo; ?>',
                 orientation: 'landscape',
                 pageSize: 'A4'
              },

@@ -340,11 +340,21 @@ class CronogramaatividadesController extends Controller
     //Empresas adicionadas
     $queryCron .= " AND A.emp_id in (".$empresas.")";
 
+    //ordenação
+    $queryCron .= " order by A.limite, A.emp_id, C.codigo";
+
     $array = DB::Select($queryCron);
     $array = json_decode(json_encode($array),true);
     $checklist = array();
+    
     foreach ($array as $chave => $value) {
         $checklist[$value['razao_social']][] = $value;
+    }
+    foreach ($checklist as $key => $value) {
+        foreach ($value as $chave => $dados) {
+            $dados['periodo_apuracao'] = $input['periodo_apuracao'];
+        }
+    $checklist[$key][$chave] = $dados;
     }
 
     return view('cronogramaatividades.checklist')->with('checklist',$checklist);

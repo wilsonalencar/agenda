@@ -47,7 +47,7 @@
         //"searchPlaceholder": "ID, P.A. ou descrição",
         "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
-        dom: 'l<"centerBtn"B>frtip',
+        dom: 'f',
         processing: true,
         stateSave: true,
         order: [[ 0, 'asc' ], [ 1, 'asc' ]],

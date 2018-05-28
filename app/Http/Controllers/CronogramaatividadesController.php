@@ -177,7 +177,7 @@ class CronogramaatividadesController extends Controller
         $usuarios = User::selectRaw("concat(name, ' - ( ', email, ' )') as nome_e_mail, id")->lists('nome_e_mail', 'id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $regras = [''=>''];
-        $estabelecimentos = Estabelecimento::selectRaw("concat(razao_social, ' - ', codigo, ' - ', cnpj) as razao_social, id")->lists('razao_social','id'); //Unidades Federais
+        $estabelecimentos = Estabelecimento::selectRaw("concat(razao_social, ' - ', codigo, ' - ', cnpj) as razao_social, id")->orderby('codigo')->lists('razao_social','id'); //Unidades Federais
 
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id'); //Unidades Federais
         $municipios = [''=>''];

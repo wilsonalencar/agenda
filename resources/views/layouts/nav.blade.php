@@ -240,6 +240,7 @@
                                 <li><a href="{{ route('cronogramaatividades.Gerarmensal') }}">Mensal</a></li>
                                 <li><a href="{{ route('cronogramaatividades.Gerarsemanal') }}">Semanal</a></li>
                                 <li><a href="{{ route('cronogramaatividades.GerarchecklistCron') }}">Checklist</a></li>
+                                <li><a href="{{ route('cronogramaatividades.GerarConsulta') }}">Consulta</a></li>
                                 </li>
                             </ul>
                             </div>

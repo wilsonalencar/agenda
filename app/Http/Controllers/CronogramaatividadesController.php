@@ -305,6 +305,146 @@ class CronogramaatividadesController extends Controller
         return view('cronogramaatividades.generateChecklist')->with('empresas',$empresas);
     }
 
+    public function GerarConsulta()
+    {
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        
+        $estabelecimentos = Estabelecimento::selectRaw("concat(razao_social, ' - ', codigo, ' - ', cnpj) as razao_social, id")->orderby('codigo')->lists('razao_social','id');
+        
+        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
+        $status = array('1' => 'Não efetuada', '2' => 'Em aprovação', '3' => 'Entregue');
+        $ids = '4,6';
+        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
+        $user_ids = json_decode(json_encode($user_ids),true);
+        $analistas = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
+
+        return view('cronogramaatividades.generateConsulta')->with('empresas',$empresas)->with('estabelecimentos',$estabelecimentos)->with('analistas',$analistas)->with('tributos',$tributos)->with('status', $status);
+    }
+
+    public function ConsultaCronograma(Request $request)
+    {
+        $input = $request->all();
+
+        if (!isset($input['data_inicio']) || empty($input['data_inicio'])) {
+            return redirect()->back()->with('status', 'Favor informar ambas as datas');
+        }
+
+        if (!isset($input['data_fim']) || empty($input['data_fim'])) {
+            return redirect()->back()->with('status', 'Favor informar ambas as datas');
+        }
+
+        if (!isset($input['empresas_selected']) || empty($input['empresas_selected'])) {
+            return redirect()->back()->with('status', 'Favor informar a(s) empresa(s)');
+        }
+
+        $input['data_inicio'] = implode("/", array_reverse(explode("-", $input['data_inicio']))); 
+        $input['data_fim'] = implode("/", array_reverse(explode("-", $input['data_fim']))); 
+
+        $dateStart      = $input['data_inicio'];
+        $dateStart      = implode('-', array_reverse(explode('/', substr($dateStart, 0, 10)))).substr($dateStart, 10);
+        $dateStart      = new \DateTime($dateStart);
+
+        $dateEnd        = $input['data_fim'];
+        $dateEnd        = implode('-', array_reverse(explode('/', substr($dateEnd, 0, 10)))).substr($dateEnd, 10);
+        $dateEnd        = new \DateTime($dateEnd);
+        $dateRange = array();
+        while($dateStart <= $dateEnd){
+            $dateRange[] = $dateStart->format('Y-m-d');
+            $dateStart = $dateStart->modify('+1day');
+        }
+
+        $datas = $dateRange;
+
+        //datas
+        $string['Datas'] = '';
+        foreach ($datas as $k => $v) {
+            $string['Datas'] .= "'".$v."',";
+        }
+        $string['Datas'] = substr($string['Datas'], 0, -1);
+
+        //empresas
+        $string['emps'] = '';
+        foreach ($input['empresas_selected'] as $k => $v) {
+            $string['emps'] .= $v.",";
+        }
+        $string['emps'] = substr($string['emps'], 0, -1);
+        
+        //analistas
+        $string['analista_selected'] = '';
+        if (!empty($input['analista_selected'])) {
+            foreach ($input['analista_selected'] as $k => $v) {
+                $string['analista_selected'] .= $v.",";
+            }
+            $string['analista_selected'] = substr($string['analista_selected'], 0, -1);
+        }
+
+        $string['estabelecimentos'] = '';
+        if (!empty($input['estabelecimento_selected'])) {
+            foreach ($input['estabelecimento_selected'] as $k => $v) {
+                $string['estabelecimentos'] .= $v.",";
+            }
+        $string['estabelecimentos'] = substr($string['estabelecimentos'], 0, -1);
+        }
+
+        $string['tributos'] = '';
+        if (!empty($input['tributos_selected'])) {
+            foreach ($input['tributos_selected'] as $k => $v) {
+                $string['tributos'] .= $v.",";
+            }
+        $string['tributos'] = substr($string['tributos'], 0, -1);
+        }
+        
+        $string['status'] = '';
+        if (!empty($input['status_selected'])) {
+            foreach ($input['status_selected'] as $k => $v) {
+                $string['status'] .= $v.",";
+            }
+        $string['status'] = substr($string['status'], 0, -1);
+        }
+
+        $query = "SELECT 
+                    DATE_FORMAT(A.limite, '%d/%m/%Y %H:%i:%s') as limite,
+                    B.codigo as codigo,
+                    B.cnpj as CNPJ,
+                    D.nome as Tributo,
+                    A.descricao as Atividade,
+                    E.name as UsuarioAnalista,
+                    A.status
+                FROM 
+                    cronogramaatividades A 
+                INNER JOIN 
+                    estabelecimentos B on A.estemp_id = B.id
+                INNER JOIN 
+                    regras C on A.regra_id = C.id
+                INNER JOIN 
+                    tributos D on C.tributo_id = D.id
+                LEFT JOIN 
+                    users E on A.Id_usuario_analista = E.id ";
+        
+        $query .= " WHERE DATE_FORMAT(A.limite, '%Y-%m-%d') in (".$string['Datas'].") ";
+        $query .= " AND A.emp_id in (".$string['emps'].") ";
+
+        if (!empty($string['analista_selected'])) {
+            $query .= " AND A.Id_usuario_analista in (".$string['analista_selected'].") ";
+        }
+
+        if (!empty($string['estabelecimentos'])) {
+            $query .= " AND A.estemp_id in (".$string['estabelecimentos'].") ";
+        }
+
+        if (!empty($string['tributos'])) {
+            $query .= " AND D.id in (".$string['tributos'].") ";
+        }
+
+        if (!empty($string['status'])) {
+            $query .= " AND A.status in (".$string['status'].") ";
+        }
+
+        $dados = DB::select($query);
+
+    return view('cronogramaatividades.ConsultaCronograma')->with('dados',$dados);
+    }
+
     public function ChecklistCron(Request $request)
     {
         $input = $request->all();

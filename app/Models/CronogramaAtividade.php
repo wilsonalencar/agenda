@@ -72,21 +72,5 @@ class CronogramaAtividade extends Model
         return $this->belongsToMany('App\Models\User');
     }
 
-    /**
-     * Get the retificacoes for the atividade.
-     */
-    public function retificacoes()
-    {
-        return $this->hasMany('App\Models\CronogramaAtividade','retificacao_id');
-    }
-
-    /**
-     * Get the main atividade that owns the retificacao.
-     */
-    public function primat()
-    {
-        return $this->belongsTo('App\Models\CronogramaAtividade','retificacao_id');
-    }
-
 
 }

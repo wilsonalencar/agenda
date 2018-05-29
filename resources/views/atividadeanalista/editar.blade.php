@@ -39,7 +39,7 @@
 <div class="form-group">
     <div style="width:50%">
     {!! Form::label('Tributo_id', 'Responsabilidade Tributos', ['class' => 'control-label'] )  !!}
-    {!! Form::select('Tributo_id', $tributos, $dados['Tributo_id'], ['class' => 'form-control s2']) !!}
+    {!! Form::select('Tributo_id[]', $tributos, $dados['Tributo_id'], ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
 
     </div>
 </div>

@@ -201,16 +201,29 @@ class CronogramaatividadesController extends Controller
         if (empty($input['periodo_apuracao_estab']) || empty($input['multiple_select_estabelecimentos_frm'])) {
             return redirect()->back()->with('status', 'Favor informar quais estabelecimentos e qual o período');
         }
-        foreach ($input['multiple_select_estabelecimentos_frm'] as $x => $value) {
+        
+        foreach ($input['select_tributo_estab'] as $key => $trib) {
+            $tributo = explode(',', $trib);
         }
-        $tributo = $input['select_tributo_estab'];
+
+        foreach ($tributo as $key => $idTrib) {
+            foreach ($input['multiple_select_estabelecimentos_frm'] as $x => $value) {
+                $var[$key]['tributo'] = $idTrib; 
+                $var[$key]['estabelecimento'] = $value; 
+            }
+        }
+
         $input['periodo_apuracao_estab'] = str_replace('/', '', $input['periodo_apuracao_estab']);
         $periodo_fim = $input['periodo_apuracao_estab'];
         $periodo_ini = $input['periodo_apuracao_estab'];
 
-        $var = explode(',', $value);
-        foreach ($var as $chave => $id) {
-            $this->cronogramageracaoEstab($tributo, $id, $periodo_ini, $periodo_fim);
+        foreach ($var as $k => $x) {
+            $arr = explode(',', $x['estabelecimento']);
+
+            foreach ($arr as $chave => $id) {
+                $this->cronogramageracaoEstab($x['tributo'], $id, $periodo_ini, $periodo_fim);
+            }
+            
         }
     return redirect()->back()->with('status', 'Atividades geradas com sucesso');
     }

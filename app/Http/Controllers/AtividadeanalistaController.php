@@ -111,15 +111,27 @@ class AtividadeanalistaController extends Controller
         $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
-
+        $var = array();
         $input = $request->all();
-
-        if (!$this->validation($input)) {
-            return redirect()->back()->with('alert', 'Já existe esta atividade para este analista.');
+        if (!empty($input['Tributo_id'])) {
+            foreach ($input['Tributo_id'] as $key => $value) {
+                $var[$key]['Emp_id'] = $input['Emp_id'];
+                $var[$key]['Tributo_id'] = $value;
+                $var[$key]['Id_usuario_analista']= $input['Id_usuario_analista'];
+                $var[$key]['Regra_geral'] = $input['Regra_geral'];
+            }
         }
 
-        $create = AtividadeAnalista::create($input);
-        $dados = AtividadeAnalista::findOrFail($create->id);
+        if (is_array($var)) {
+            foreach ($var as $k => $v) {
+                if (!$this->validation($v)) {
+                    return redirect()->back()->with('alert', 'Já existe esta atividade para este analista.');
+                }
+                $create = AtividadeAnalista::create($v);
+                $dados = AtividadeAnalista::findOrFail($create->id);
+            }
+        }
+
         $cnpjs = DB::table('atividadeanalistafilial')
                 ->join('estabelecimentos', 'atividadeanalistafilial.Id_estabelecimento', '=', 'estabelecimentos.id')
                 ->select('atividadeanalistafilial.id', 'atividadeanalistafilial.Id_estabelecimento', 'estabelecimentos.cnpj', 'estabelecimentos.codigo')
@@ -186,8 +198,7 @@ class AtividadeanalistaController extends Controller
         $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
-        $input = $request->all();
-
+        $input = $request->all();        
         $cnpjs = DB::table('atividadeanalistafilial')
                 ->join('estabelecimentos', 'atividadeanalistafilial.Id_estabelecimento', '=', 'estabelecimentos.id')
                 ->select('atividadeanalistafilial.Id_estabelecimento','atividadeanalistafilial.id' ,'estabelecimentos.cnpj', 'estabelecimentos.codigo')
@@ -196,14 +207,28 @@ class AtividadeanalistaController extends Controller
         
         $cnpjs = json_decode(json_encode($cnpjs),true);
 
-        if (!$this->validationEdit($input)) {
-            $situation = 'error';
-            $message = 'Já existe atividade para o analista selecionado';
-            $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($input['id'])),true);
-            return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);
+        $var = array();
+        if (!empty($input['Tributo_id'])) {
+            foreach ($input['Tributo_id'] as $x => $v) {
+                $var[$x]['Emp_id'] = $input['Emp_id'];
+                $var[$x]['Tributo_id'] = $v;
+                $var[$x]['Id_usuario_analista'] = $input['Id_usuario_analista'];
+                $var[$x]['Regra_geral'] = $input['Regra_geral'];
+                $var[$x]['id'] = $input['id'];
+            }
         }
-        $Atividade = AtividadeAnalista::findOrFail($input['id']);
-        $Atividade->fill($input)->save();
+        if (is_array($var) && !empty($var)) {
+            foreach ($var as $key => $value) {
+                if (!$this->validationEdit($value)) {
+                    $situation = 'error';
+                    $message = 'Já existe atividade para o analista selecionado';
+                    $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($value['id'])),true);
+                    return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);
+                }
+                $Atividade = AtividadeAnalista::findOrFail($value['id']);
+                $Atividade->fill($value)->save();
+            }
+        }
         $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($input['id'])),true);
     
         return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);

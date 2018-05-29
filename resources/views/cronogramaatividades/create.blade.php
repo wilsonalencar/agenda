@@ -20,8 +20,8 @@
 </div>
 
 <div class="form-group">
-    {!! Form::label('select_tributos', 'Tributo (estabelecimento)', ['class' => 'control-label'] )  !!}
-    {!!  Form::select('select_tributos', $tributos, array(), ['class' => 'form-control s2_multi', 'id' => 'select_tributo']) !!}
+    {!! Form::label('select_tributos', 'Tributo (estabelecimentos)', ['class' => 'control-label'] )  !!}
+    {!!  Form::select('select_tributos[]', $tributos, array(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple', 'id' => 'select_tributo']) !!}
 </div>
 
 <div class="form-group">
@@ -44,7 +44,7 @@
     {!!  Form::hidden('multiple_select_estabelecimentos_frm[]', '', array(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
 
     {!! Form::hidden('periodo_apuracao_estab',null, ['class' => 'form-control','style' => 'width:80px']) !!}
-    {!! Form::hidden('select_tributo_estab',null, ['class' => 'form-control','style' => 'width:80px']) !!}
+    {!! Form::hidden('select_tributo_estab[]',null, ['class' => 'form-control','style' => 'width:80px']) !!}
 
 {!! Form::close() !!}
 
@@ -72,8 +72,9 @@ jQuery(function($){
 function Estabelecimentos(){
     var periodo = $('input[name="periodo_apuracao"]').val();
     var opcoes = [];
+    var opcoesTrib = [];
     var estabelecimentos = $('#multiple_estab :selected');  
-    var tributo = $('#select_tributo :selected').val();  
+    var tributo = $('#select_tributo :selected');  
     
     estabelecimentos.each(function(i, selecionado){
       if($.inArray(selecionado,opcoes) == -1){
@@ -82,9 +83,18 @@ function Estabelecimentos(){
         opcoes.splice(i,1);
       }
     });
+
+    tributo.each(function(i, selecionado){
+      if($.inArray(selecionado,opcoesTrib) == -1){
+        opcoesTrib.push(selecionado.value);
+      }else{
+        opcoesTrib.splice(i,1);
+      }
+    });
+    
     $('input[name="multiple_select_estabelecimentos_frm[]"]').val(opcoes);
     $('input[name="periodo_apuracao_estab"]').val(periodo);
-    $('input[name="select_tributo_estab"]').val(tributo);
+    $('input[name="select_tributo_estab[]"]').val(opcoesTrib);
     if ($('input[name="multiple_select_estabelecimentos_frm[]"]').val() != '') {
         $('#storeEstabelecimento').submit();
     }

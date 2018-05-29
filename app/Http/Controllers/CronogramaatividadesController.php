@@ -579,10 +579,9 @@ class CronogramaatividadesController extends Controller
         $user = User::findOrFail(Auth::user()->id);
             $atividades_estab = DB::table('cronogramaatividades')
                 ->join('estabelecimentos', 'estabelecimentos.id', '=', 'cronogramaatividades.estemp_id')
-                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite')
+                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
                 ->whereIN('cronogramaatividades.emp_id', $empresas)
                 ->whereIN('cronogramaatividades.limite', $datas)
-                ->where('cronogramaatividades.status','<', 3)
                 ->where('cronogramaatividades.estemp_type','estab');
             
             if ($user->hasRole('analyst')){
@@ -592,23 +591,24 @@ class CronogramaatividadesController extends Controller
             $atividades_estab = $atividades_estab->get();
 
         foreach($atividades_estab as $atividade) {
-
+            $cor[1] = 'red';
+            $cor[2] = 'yellow';
+            $cor[3] = 'green';
             $events[] = \Calendar::event(
                 str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')', 
                 true, 
                 $atividade->limite, 
                 $atividade->limite, 
                 $atividade->id, 
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
             );
         }
         //MATRIZ
         $atividades_emp = DB::table('cronogramaatividades')
             ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
-            ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite')
+            ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
             ->whereIN('cronogramaatividades.emp_id', $empresas)
             ->whereIN('cronogramaatividades.limite', $datas)
-            ->where('cronogramaatividades.status','<', 3)
             ->where('cronogramaatividades.estemp_type','emp');
      
             if ($user->hasRole('analyst')){
@@ -618,13 +618,16 @@ class CronogramaatividadesController extends Controller
             $atividades_emp = $atividades_emp->get();
 
         foreach($atividades_emp as $atividade) {
+            $cor[1] = 'red';
+            $cor[2] = 'yellow';
+            $cor[3] = 'green';
             $events[] = \Calendar::event(
                 str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')',
                 true, 
                 $atividade->limite,
                 $atividade->limite,
                 $atividade->id,
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
             );
         }
         $feriados = $this->eService->getFeriadosNacionais();
@@ -723,10 +726,9 @@ class CronogramaatividadesController extends Controller
         $user = User::findOrFail(Auth::user()->id);
             $atividades_estab = DB::table('cronogramaatividades')
                 ->join('estabelecimentos', 'estabelecimentos.id', '=', 'cronogramaatividades.estemp_id')
-                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite')
+                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
                 ->whereIN('cronogramaatividades.emp_id', $empresas)
                 ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
-                ->where('cronogramaatividades.status','<', 3)
                 ->where('cronogramaatividades.estemp_type','estab');
                 
                 if ($user->hasRole('analyst')){
@@ -736,23 +738,24 @@ class CronogramaatividadesController extends Controller
                 $atividades_estab = $atividades_estab->get();
 
         foreach($atividades_estab as $atividade) {
-
+            $cor[1] = 'red';
+            $cor[2] = 'yellow';
+            $cor[3] = 'green';
             $events[] = \Calendar::event(
                 str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')', 
                 true, 
                 $atividade->limite, 
                 $atividade->limite, 
                 $atividade->id, 
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
             );
         }
         //MATRIZ
         $atividades_emp = DB::table('cronogramaatividades')
             ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
-            ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite')
+            ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
             ->whereIN('cronogramaatividades.emp_id', $empresas)
             ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
-            ->where('cronogramaatividades.status','<', 3)
             ->where('cronogramaatividades.estemp_type','emp');
 
             if ($user->hasRole('analyst')){
@@ -762,13 +765,16 @@ class CronogramaatividadesController extends Controller
             $atividades_emp = $atividades_emp->get();
 
         foreach($atividades_emp as $atividade) {
+            $cor[1] = 'red';
+            $cor[2] = 'yellow';
+            $cor[3] = 'green';
             $events[] = \Calendar::event(
                 str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')',
                 true, 
                 $atividade->limite,
                 $atividade->limite,
                 $atividade->id,
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> 'red', 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
             );
         }
 
@@ -813,11 +819,14 @@ class CronogramaatividadesController extends Controller
         }
 
         //Geração do calendario
-
+        $mes = substr($periodo_apuracao, 0, -4)+1;
+        $ano = substr($periodo_apuracao, 2);
+        $dataAcima = $ano.'-'.$mes.'-01';
         $calendar = \Calendar::addEvents($events) //add an array with addEvents
         ->setOptions([ //set fullcalendar options
                 'lang' => 'pt',
                 'firstDay' => 1,
+                'defaultDate' => $dataAcima,
                 'aspectRatio' => 2.3,
                 'header' => [ 'left' => 'prev,next', 'center'=>'title'] //, 'right' => 'month,agendaWeek'
             ])

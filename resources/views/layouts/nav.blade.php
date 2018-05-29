@@ -222,6 +222,7 @@
                             <div class="panel-body">
                             <ul class="nav navbar-nav">
                                 <li class="panel panel-default" id="dropdown">
+                                 @if (Auth::user()->hasRole('admin'))
                                  <li class="panel panel-default" id="dropdown">
                                     <a data-toggle="collapse" href="#analistas">Analistas</a>
                                     <div id="analistas" class="panel-collapse collapse">
@@ -233,14 +234,13 @@
                                         </div>
                                     </div>
                                 </li>
-                                 @if (Auth::user()->hasRole('admin'))
                                 <li><a href="{{ route('cronogramaatividades.create') }}">Gerar</a></li>
                                 <li><a href="{{ route('cronogramaatividades.index') }}">Manipular</a></li>
+                                <li><a href="{{ route('cronogramaatividades.GerarConsulta') }}">Consulta</a></li>
                                  @endif
                                 <li><a href="{{ route('cronogramaatividades.Gerarmensal') }}">Mensal</a></li>
                                 <li><a href="{{ route('cronogramaatividades.Gerarsemanal') }}">Semanal</a></li>
                                 <li><a href="{{ route('cronogramaatividades.GerarchecklistCron') }}">Checklist</a></li>
-                                <li><a href="{{ route('cronogramaatividades.GerarConsulta') }}">Consulta</a></li>
                                 </li>
                             </ul>
                             </div>

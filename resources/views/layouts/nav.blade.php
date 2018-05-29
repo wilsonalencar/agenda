@@ -215,6 +215,7 @@
                             </a>
                         </li>
                     @endif
+                    <?php if (!empty(session()->get('seid'))){ ?>
                     <li class="panel panel-default" id="dropdown">
                     <a data-toggle="collapse" href="#cronograma"><i class="fa fa-clock-o"></i>Cronograma</a>
                         <div id="cronograma" class="panel-collapse collapse">
@@ -238,11 +239,13 @@
                                  @endif
                                 <li><a href="{{ route('cronogramaatividades.Gerarmensal') }}">Mensal</a></li>
                                 <li><a href="{{ route('cronogramaatividades.Gerarsemanal') }}">Semanal</a></li>
+                                <li><a href="{{ route('cronogramaatividades.GerarchecklistCron') }}">Checklist</a></li>
                                 </li>
                             </ul>
                             </div>
                         </div>
                     </li>
+                    <?php } ?>
                 @endif 
             </ul>
         </div><!-- /.navbar-collapse -->

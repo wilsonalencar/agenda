@@ -285,6 +285,81 @@ class CronogramaatividadesController extends Controller
         return view('cronogramaatividades.generateCalendarSemanal')->with('empresas',$empresas);
     }
 
+    public function GerarchecklistCron()
+    {
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+
+        return view('cronogramaatividades.generateChecklist')->with('empresas',$empresas);
+    }
+
+    public function ChecklistCron(Request $request)
+    {
+        $input = $request->all();
+        
+        if (empty($input['empresas_selected'])) {
+            return redirect()->back()->with('status', 'Favor informar ao menos uma empresa');
+        }
+        
+        if (empty($input['periodo_apuracao'])) {
+            return redirect()->back()->with('status', 'Informar o período desejado para busca');
+        }
+
+    $empresas = '';
+
+    $periodo_busca = str_replace("/", "", $input['periodo_apuracao']);
+    foreach($input['empresas_selected'] as $key => $id) {
+        $empresas .= $id.',';
+    }
+    
+    $empresas = substr($empresas,0,-1);
+    
+    $queryCron = "SELECT 
+                    A.descricao,
+                    DATE_FORMAT(A.limite, '%d/%m/%Y') AS limite,
+                    B.razao_social,
+                    C.codigo,
+                    C.cnpj,
+                    D.status
+                FROM
+                    cronogramaatividades A
+                        INNER JOIN
+                    empresas B ON A.emp_id = B.id
+                        INNER JOIN
+                    estabelecimentos C ON A.estemp_id = C.id
+                        INNER JOIN
+                    atividades D ON A.emp_id = D.emp_id
+                        AND A.estemp_id = D.estemp_id
+                        AND A.periodo_apuracao = D.periodo_apuracao
+                        AND A.regra_id = D.regra_id
+                WHERE
+                    D.status in (1,2)";
+
+    //Período adicionado
+    $queryCron .= " AND A.periodo_apuracao = ".$periodo_busca."";
+    
+    //Empresas adicionadas
+    $queryCron .= " AND A.emp_id in (".$empresas.")";
+
+    //ordenação
+    $queryCron .= " order by A.limite, A.emp_id, C.codigo";
+
+    $array = DB::Select($queryCron);
+    $array = json_decode(json_encode($array),true);
+    $checklist = array();
+    
+    foreach ($array as $chave => $value) {
+        $checklist[$value['razao_social']][] = $value;
+    }
+    foreach ($checklist as $key => $value) {
+        foreach ($value as $chave => $dados) {
+            $dados['periodo_apuracao'] = $input['periodo_apuracao'];
+        }
+    $checklist[$key][$chave] = $dados;
+    }
+
+    return view('cronogramaatividades.checklist')->with('checklist',$checklist);
+    }
+
     public function semanal(Request $request)
     {
         $input = $request->all();

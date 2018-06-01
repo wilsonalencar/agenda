@@ -126,6 +126,27 @@
             </div>
              @endif
         </div>
+        @if ($dadosOriginais)
+        <div class="col-md-5">
+            <div class="detailBox">
+                <div class="titleBox">
+                  <label class="lead-bold">Dados Entrega Original</label>
+                </div>
+                <div class="actionBox">
+                    <ul class="commentList">                        
+                        <li>
+                            <div>
+                              <p class="lead"><b>Descrição: </b>{{ $dadosOriginais[0]['descricao'] }}</p>
+                              <p class="lead"><b>Status: </b>{{ status_label($dadosOriginais[0]['status']) }}</p>
+                              <p class="lead"><b>Usuário entregador:  </b>{{ $dadosOriginais[0]['entregador']}} | <b>Data entrega: </b>{{ date("d/m/Y", strtotime($dadosOriginais[0]['data_entrega'])) }}</p>
+                              <p class="lead"><b>Usuário aprovador: </b>{{ $dadosOriginais[0]['aprovador'] }} | <b>Data aprovação: </b>{{ date("d/m/Y", strtotime($dadosOriginais[0]['data_aprovacao'])) }}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        @endif
     </div> 
     <div class="col-md-5">
             <div class="detailBox">

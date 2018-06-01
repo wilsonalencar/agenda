@@ -209,7 +209,7 @@ class ArquivosController extends Controller
 
         $dadosOriginais = false;
         if ($atividade->tipo_geracao == 'R') {
-            $dadosOriginais = json_decode(json_encode(DB::select('Select A.*, B.name as entregador, C.name as aprovador from atividades A left join users B on A.usuario_entregador = B.id left join users C on A.usuario_aprovador = C.id where A.id = '.$atividade->retificacao_id.';')),true);
+            $dadosOriginais = json_decode(json_encode(DB::select('Select A.*, B.name as entregador, C.name as aprovador from atividades A left join users B on A.usuario_entregador = B.id left join users C on A.usuario_aprovador = C.id where A.retificacao_id = '.$atividade->id.';')),true);
         }
         return view('arquivos.show')->withAtividade($atividade)->withDownload($destinationPath)->with('dadosOriginais', $dadosOriginais);
     }

@@ -130,7 +130,7 @@
         <div class="col-md-5">
             <div class="detailBox">
                 <div class="titleBox">
-                  <label class="lead-bold">Dados Entrega Original</label>
+                  <label class="lead-bold">Dados Retificação</label>
                 </div>
                 <div class="actionBox">
                     <ul class="commentList">                        

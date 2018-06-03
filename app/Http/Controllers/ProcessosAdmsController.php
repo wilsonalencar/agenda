@@ -158,15 +158,37 @@ class ProcessosadmsController extends Controller
         }
 
         $dataBusca = substr($dataBusca,0,-1);   
+        $dataBusca = explode(',', $dataBusca);
+        
+        $i = 0;
+        $keyQ = 0;
+        $datePP = "'".date('03/Y')."'";
+        foreach ($dataBusca as $key => $value) {
+            if ($value == $datePP) {
+                $i++;
+                $keyQ = $key;
+            }
+        }
+        if ($keyQ != 0) {
+            $keyQ = $keyQ-1;
+        }
+        $dataBusca[$keyQ] = "'".substr_replace($datas[$keyQ], '02', 0,2)."'";
+        $dataBusca = implode(',', $dataBusca); 
+
         $datas = $dataBusca;
         $datas = substr($datas ,0,-1);
         $datas = substr($datas,1);
         $datas = explode("','",$datas);
+
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        $empsArray = explode(',', $emps);
+        
         
         foreach ($datas as $key => $final) {
-            $standing[$final] = DB::select(" SELECT ( select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and B.empresa_id = ".$this->s_emp->id.") as total ,
-           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 1 and B.empresa_id = ".$this->s_emp->id.") as baixados,
-           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 2 and B.empresa_id = ".$this->s_emp->id.") as em_andamento;");
+            $standing[$final] = DB::select(" SELECT ( select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and B.empresa_id in (".$emps.")) as total ,
+           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 1 and B.empresa_id in (".$emps.")) as baixados,
+           (select count(*)from processosadms A INNER JOIN estabelecimentos B ON A.estabelecimento_id = B.id where A.periodo_apuracao in ('".$final."') and A.status_id = 2 and B.empresa_id in (".$emps.")) as em_andamento;");
         }
 
     return view('processosadms.consulta')->with('standing',$standing)->with('datas', $datas)->with('dataBusca', $dataBusca);
@@ -228,8 +250,6 @@ class ProcessosadmsController extends Controller
         $datas = explode("','",$datas);
 
         $graphs = array();
-        
-        $where = ' 1 = 1 ';
 
         //$request->session()->put('filter_cnpj', $input['periodo_apuracao']);
         if (!empty(Input::get("vcn")) || !empty(Input::get("vco")) || !empty(Input::get("vcp"))) {
@@ -256,9 +276,9 @@ class ProcessosadmsController extends Controller
             } 
         }
 
-        
-
-        $where .= ' AND b.empresa_id = '.$this->s_emp->id.' AND a.periodo_apuracao in ('.$dataBusca.')';
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        $where = 'b.empresa_id in ('.$emps.') AND a.periodo_apuracao in ('.$dataBusca.')';
 
         $graphs = DB::select('select c.uf,
                                       SUM(if(status_id = 1, 1, 0)) as Baixada,
@@ -304,6 +324,9 @@ class ProcessosadmsController extends Controller
             $dataBusca = substr($dataBusca,0,-1);   
         }
 
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+
         $rpt = DB::Select("SELECT 
                             A.id,
                             A.periodo_apuracao,
@@ -326,7 +349,7 @@ class ProcessosadmsController extends Controller
                         WHERE 
                             A.periodo_apuracao in (".$dataBusca.") 
                         AND 
-                            B.empresa_id = ".$this->s_emp->id."");
+                            B.empresa_id in (".$emps.")");
         
         return Datatables::of($rpt)->make(true);
     }
@@ -571,11 +594,28 @@ class ProcessosadmsController extends Controller
         }
 
         $dataBusca = substr($dataBusca,0,-1);   
+        $dataBusca = explode(',', $dataBusca);
+        
+        $i = 0;
+        $keyQ = 0;
+        $datePP = "'".date('03/Y')."'";
+        foreach ($dataBusca as $key => $value) {
+            if ($value == $datePP) {
+                $i++;
+                $keyQ = $key;
+            }
+        }
+        if ($keyQ != 0) {
+            $keyQ = $keyQ-1;
+        }
+        $dataBusca[$keyQ] = "'".substr_replace($datas[$keyQ], '02', 0,2)."'";
+        $dataBusca = implode(',', $dataBusca); 
+
         $datas = $dataBusca;
         $datas = substr($datas ,0,-1);
         $datas = substr($datas,1);
         $datas = explode("','",$datas);
-
+        
         $processosadms = Processosadm::join('estabelecimentos', 'processosadms.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->select(
                 'processosadms.*',
                 'processosadms.id as IdProcessosAdms',
@@ -594,7 +634,12 @@ class ProcessosadmsController extends Controller
 
         $processosadms = $processosadms->whereIn('periodo_apuracao', $datas);
         $array = array();
-        $estabelecimentos = Estabelecimento::select('id')->where('empresa_id', $this->s_emp->id)->get();
+        
+        $Grupo_Empresa = new GrupoEmpresasController;
+        $emps = $Grupo_Empresa->getEmpresas($this->s_emp->id);
+        $empsArray = explode(',', $emps);
+
+        $estabelecimentos = Estabelecimento::select('id')->whereIn('empresa_id', $empsArray)->get();
         foreach($estabelecimentos as $row) {
             $array[] = $row->id;
         }

@@ -14,7 +14,6 @@
     </style>
     
 @endif
-
 <div class="side-menu" id="sidebar">
     <nav class="navbar navbar-default" role="navigation">
         <div class="navbar-header">
@@ -30,8 +29,8 @@
                     <a class="" href="#">
                         <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
                         <span>Tax Calendar</span><p>
-                        @if (session('seid') && !Auth::guest())
-                        <div><img src="{{ URL::to('/') }}/assets/logo/Logo-{{ session('seid') }}.png" style="position: absolute; width: 30%; margin-left: 33%; margin-top: 5px; height: 8%;"><br><br><br></div>
+                        @if (session('seidLogo') && !Auth::guest())
+                        <div><img src="{{ URL::to('/') }}/assets/logo/Logo-{{ session('seidLogo') }}.png" style="position: absolute; width: 30%; margin-left: 33%; margin-top: 5px; height: 8%;"><br><br><br></div>
                         @endif
                     </a>
                 </div>
@@ -200,6 +199,19 @@
                                                     </div>
                                                 </div>
                                             </li>
+
+                                            <li class="panel panel-default" id="dropdown">
+                                                <a data-toggle="collapse" href="#grupoEmpresas">Grupo de Empresas</a>
+                                                <div id="grupoEmpresas" class="panel-collapse collapse">
+                                                    <div class="panel-body">
+                                                        <ul class="nav navbar-nav">
+                                                            <li><a href="{{ route('grupoempresas.create') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                                            <li><a href="{{ route('grupoempresas') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+
                                             <li><a href="{{ route('atividades.index') }}">Atividades</a></li>
                                             @endif
                                             <li><a href="{{ route('empresas.index') }}">Empresas</a></li>

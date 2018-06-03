@@ -7,6 +7,7 @@ use App\Models\Cron;
 use App\Models\Empresa;
 use App\Models\Estabelecimento;
 use App\Models\Municipio;
+use App\Models\HistoricoContaCorrente;
 use App\Models\FeriadoEstadual;
 use App\Models\FeriadoMunicipal;
 use App\Models\Movtocontacorrente;
@@ -408,9 +409,49 @@ class MovtocontacorrentesController extends Controller
             $input['dipam'] = 'N';
         }
         
+        $arrayMovto = json_decode(json_encode($movtocontacorrentes),true);
+        $Historico = $this->historic($arrayMovto, $input);
 
         $movtocontacorrentes->fill($input)->save();
         return redirect()->back()->with('status', 'Conta Corrente atualizada com sucesso!');
+    }
+    public function historic($atual, $new)
+    {
+        $idMovto = $atual['id'];
+        $idUser  = Auth::user()->id;
+
+        $diff = array_diff($new, $atual);
+        $txtDiff = '';
+        if (array_key_exists('periodo_apuracao', $diff)) {
+            $txtDiff .= '<b>Período</b> : '. $atual['periodo_apuracao'].' => '.$new['periodo_apuracao'].'<br />';
+        }
+        if (array_key_exists('estabelecimento_id', $diff)) {
+            $txtDiff .= '<b>Estabelecimento</b> : '. $atual['estabelecimento_id'].' => '.$new['estabelecimento_id'].'<br />';
+        }
+        if (array_key_exists('vlr_guia', $diff)) {
+            $txtDiff .= '<b>Vlr Guia</b> : '. $atual['vlr_guia'].' => '.$new['vlr_guia'].'<br />';
+        }
+        if (array_key_exists('vlr_gia', $diff)) {
+            $txtDiff .= '<b>Vlr Gia</b> : '. $atual['vlr_gia'].' => '.$new['vlr_gia'].'<br />';
+        }
+        if (array_key_exists('vlr_sped', $diff)) {
+            $txtDiff .= '<b>Vlr Sped</b> : '. $atual['vlr_sped'].' => '.$new['vlr_sped'].'<br />';
+        }
+        if (array_key_exists('dipam', $diff)) {
+            $txtDiff .= '<b>Dipam</b> : '. $atual['dipam'].' => '.$new['dipam'].'<br />';
+        }
+        if (array_key_exists('vlr_dipam', $diff)) {
+            $txtDiff .= '<b>Vlr Dipam</b> : '. $atual['vlr_dipam'].' => '.$new['vlr_dipam'].'<br />';
+        }
+        if (array_key_exists('status_id', $diff)) {
+            $txtDiff .= '<b>Status</b> : '. $atual['status_id'].' => '.$new['status_id'].'<br />';
+        }
+        if (array_key_exists('observacao', $diff)) {
+            $txtDiff .= '<b>OBS</b> : '. $atual['observacao'].' => '.$new['observacao'].'<br />';
+        }
+
+    $historico = new HistoricoContaCorrenteController();
+    $historico->store($txtDiff, $idMovto, $idUser);
     }
 
     /**

@@ -320,8 +320,8 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::post('movtocontacorrentes/action_import', array('as'=>'movtocontacorrentes.action_import', 'uses'=>'MovtocontacorrentesController@action_import'));
     Route::post('movtocontacorrentes/action_valid_import', array('as'=>'movtocontacorrentes.action_valid_import', 'uses'=>'MovtocontacorrentesController@action_valid_import'));
     Route::get('movtocontacorrente', array('as'=>'movtocontacorrente', 'uses'=>'MovtocontacorrentesController@index'));
+    Route::get('movtocontacorrente/historico/{id}', array('as'=>'movtocontacorrentes.historic', 'uses'=>'HistoricoContaCorrenteController@index'));
     Route::resource('movtocontacorrentes', 'MovtocontacorrentesController');
-
 });
 
 // Just Admin, Owner, Supervisor
@@ -367,6 +367,14 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
     Route::resource('regras', 'RegrasController');
     Route::get('regra/data', array('as'=>'regras.data', 'uses'=>'RegrasController@anyData'));
     Route::get('regra/{regra}/{estabelecimento}/{enable}/setBlacklist', array('as'=>'regras.setBlacklist', 'uses'=>'RegrasController@setBlacklist'));
+
+    Route::resource('grupoempresas', 'GrupoEmpresasController');
+    Route::post('grupoempresas/', array('as'=>'grupoempresas', 'uses'=>'GrupoEmpresasController@index'));
+    Route::get('grupoempresas/create', array('as'=>'grupoempresas.create', 'uses'=>'GrupoEmpresasController@adicionar'));
+    Route::post('grupoempresas/store', array('as'=>'grupoempresas.store', 'uses'=>'GrupoEmpresasController@store'));
+    Route::get('grupoempresas/destroy/{id}', array('as'=>'grupoempresas.destroy', 'uses'=>'GrupoEmpresasController@destroy'));
+    Route::get('grupoempresas/destroyRLT/{id}', array('as'=>'grupoempresas.destroyRLT', 'uses'=>'GrupoEmpresasController@destroyRLT'));
+    Route::get('grupoempresas/edit/{nomeGrupo}', array('as'=>'grupoempresas.anyData', 'uses'=>'GrupoEmpresasController@anyData'));
 
     Route::resource('regraslotes', 'RegrasenviolotesController');
     Route::get('regra/envio_lote', array('as'=>'regraslotes.envio_lote', 'uses'=>'RegrasenviolotesController@envio_lote'));

@@ -55,6 +55,7 @@
         <th>STATUS</th>
         <th>OBS</th>
         <th></th>
+        <th></th>
     </tr>
     </thead>
 </table>
@@ -228,6 +229,13 @@ $(function() {
                 url = url.replace(':id_edit', data);
                 return url;
             }},
+
+            {data: 'IdMovtoContaCorrente', name:'edit', searchable: false, orderable: false, render: function (data) {
+
+                var url = '<a href="{{ route('movtocontacorrentes.historic', ':id_edit') }}" class="btn btn-default btn-sm">Histórico</a>';
+                url = url.replace(':id_edit', data);
+                return url;
+            }},
             {data: 'observacao', name: 'observacao'},
         ],
         "columnDefs": [
@@ -245,7 +253,8 @@ $(function() {
             { "width": "5%", "targets": 11, className: "dt-right"},
             { "width": "1%", "targets": 12 },
             { "width": "12%", "targets": 13 },
-            { "width": "12%", "targets": 14, "visible":false, "title": "Observação"},
+            { "width": "12%", "targets": 14 },
+            { "width": "12%", "targets": 15, "visible":false, "title": "Observação"},
         ],
         language: {
             //"searchPlaceholder": "ID, P.A. ou descrição",
@@ -257,27 +266,27 @@ $(function() {
              {
                 extend: 'excelHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14  ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15  ]
                 }
              },
             
              {
                 extend: 'csvHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14 ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15 ]
                 }
              },
 
              {
                 extend: 'copyHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14 ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15]
                 }
              },
              {
                 extend: 'pdfHtml5',
                 exportOptions: {
-                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14]
+                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15]
                 },
                 customize: function(doc) {
                   //pageMargins [left, top, right, bottom] 

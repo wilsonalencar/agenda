@@ -150,7 +150,7 @@ $(function() {
 
                                                                   var url = '';
 
-                                                                  if(row['Id_usuario_entrada'] != 0) {
+                                                                  if(row['Id_usuario_entrada'] > 0) {
                                                                         url += getUser(row['Id_usuario_entrada']) + '<br>' + mascararDate(row['Dt_alteracao_entrada']);
                                                                   } else {
                                                                         url += 'Inexistente' + '<br>' + mascararDate(row['Dt_alteracao_entrada']);
@@ -161,7 +161,7 @@ $(function() {
 
                                                                   var url = '';
 
-                                                                  if(row['Id_usuario_saida'] != 0) {
+                                                                  if(row['Id_usuario_saida'] > 0) {
                                                                         url += getUser(row['Id_usuario_saida']) + '<br>' + mascararDate(row['Dt_alteracao_saida']);
                                                                   } else {
                                                                         url += 'Inexistente' + '<br>' + mascararDate(row['Dt_alteracao_saida']);

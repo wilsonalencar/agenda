@@ -116,8 +116,8 @@ class CargasController extends Controller
         foreach ($estabelecimentos as $el) {
             $el->carga_msaf_entrada = 0;
             $el->carga_msaf_saida = 0;
-            $el->Id_usuario_saida = 0;
-            $el->Id_usuario_entrada = 0;
+            $el->Id_usuario_saida = NULL;
+            $el->Id_usuario_entrada = NULL;
             $el->Dt_alteracao_entrada = '0000-00-00 00:00:00';
             $el->Dt_alteracao_saida = '0000-00-00 00:00:00';
             $el->save();

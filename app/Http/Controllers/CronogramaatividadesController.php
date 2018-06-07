@@ -52,33 +52,94 @@ class CronogramaatividadesController extends Controller
         $input = $request->all();
         $periodo_busca = '';
         $empresa_busca = '';
+        $ie_busca = '';
+        $municipio_cod = '';
+        $analista_busca = '';
+        $estabelecimento_busca = '';
+        $data_inicio = '';
+        $data_termino = '';
+        
+        $permite_empresa = false;
+        $permite_analista = false;
+        $permite_municipio = false;
+        $permite_filial = false;
+
 
         if (isset($input['periodo_apuracao']) && !empty($input['periodo_apuracao'])) {
             $periodo_busca = str_replace('/', '', $input['periodo_apuracao']);
         }
-
         if (isset($input['Emp_id']) && !empty($input['Emp_id'])) {
             $empresa_busca = $input['Emp_id'];
         }
-        $query = 'SELECT A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.limite, "%d/%m/%Y") as limite, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual, A.Id_usuario_analista from cronogramaatividades A left join estabelecimentos B on A.estemp_id = B.id left join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id where 1 ';
-        
-        if (!empty($empresa_busca)) {
-            $query .= 'AND A.emp_id = '.$empresa_busca.'';
+        if (!empty($input['municipio_cod'])) {
+            $municipio_cod = $input['municipio_cod'];
+        }
+        if (!empty($input['ie_busca'])) {
+            $ie_busca = $input['ie_busca'];
+        }
+        if (!empty($input['Analista_id'])) {
+            $analista_busca = $input['Analista_id'];
+        }
+        if (!empty($input['Estabelecimento_id'])) {
+            $estabelecimento_busca = $input['Estabelecimento_id'];
+        }
+        if (!empty($input['permite_empresa'])) {
+            $permite_empresa = $input['permite_empresa'];
+        }
+        if (!empty($input['permite_analista'])) {
+            $permite_analista = $input['permite_analista'];
+        }
+        if (!empty($input['permite_municipio'])) {
+            $permite_municipio = $input['permite_municipio'];
+        }
+        if (!empty($input['permite_filial'])) {
+            $permite_filial = $input['permite_filial'];
+        }
+        if (!empty($input['data_inicio'])) {
+            $data_inicio = $input['data_inicio'];
+        }
+        if (!empty($input['data_termino'])) {
+            $data_termino = $input['data_termino'];
         }
 
+        $query = 'SELECT A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.limite, "%d/%m/%Y") as limite, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual, A.Id_usuario_analista from cronogramaatividades A inner join estabelecimentos B on A.estemp_id = B.id inner join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id where 1 ';
+        
+        if (!empty($empresa_busca) && $permite_empresa) {
+            $query .= 'AND A.emp_id = '.$empresa_busca.'';
+        }
         if (!empty($periodo_busca)) {
             $query .= ' AND A.periodo_apuracao = '.$periodo_busca.'';
+        }
+        if (!empty($ie_busca)) {
+            $query .= ' AND B.insc_estadual = '.$ie_busca.'';
+        }
+        if (!empty($estabelecimento_busca) && $permite_filial) {
+            $query .= ' AND A.estemp_id = '.$estabelecimento_busca.'';
+        }
+        if (!empty($municipio_cod) && $permite_municipio) {
+            $query .= ' AND C.codigo = '.$municipio_cod.'';
+        }
+        if (!empty($analista_busca) && $permite_analista) {
+            $query .= ' AND A.Id_usuario_analista = '.$analista_busca.'';
+        }
+        if (!empty($data_inicio)) {
+            $query .= ' AND DATE_FORMAT(A.inicio_aviso, "%Y-%m-%d") = "'.$data_inicio.'"';
+        }
+        if (!empty($data_termino)) {
+            $query .= ' AND DATE_FORMAT(A.limite, "%Y-%m-%d") = "'.$data_termino.'"';
         }
 
         $atividades = DB::select($query);
         $atividades = json_decode(json_encode($atividades),true);
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $municipios = Municipio::selectRaw("nome, codigo")->lists('nome','codigo');
+        $estabelecimentos = Estabelecimento::selectRaw("concat(razao_social, ' - ', codigo, ' - ', cnpj) as razao_social, id")->orderby('codigo')->lists('razao_social','id');
         $ids = '4,6';
         $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
         $user_ids = json_decode(json_encode($user_ids),true);
         $analistas = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
 
-        return view('cronogramaatividades.index')->with('tabela', $atividades)->with('empresas', $empresas)->with('analistas', $analistas);
+        return view('cronogramaatividades.index')->with('tabela', $atividades)->with('empresas', $empresas)->with('analistas', $analistas)->with('estabelecimentos', $estabelecimentos)->with('municipios', $municipios);
     }
     
     public function alterar(Request $request)

@@ -218,8 +218,51 @@ function mymodalAlt(id, id_analista){
         </div>
         <div class="form-group" id="empresa_alt"> 
             <div style="width:90%">
+                <input type="checkbox" name="permite_empresa" value="true">            
         {!! Form::label('Emp_id', 'Empresa', ['class' => 'control-label'] )  !!}
         {!!  Form::select('Emp_id', $empresas, array(), ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+        <div class="form-group" id="empresa_alt"> 
+            <div style="width:90%">
+                <input type="checkbox" name="permite_filial" value="true">
+        {!! Form::label('Estabelecimento_id', 'Filial', ['class' => 'control-label'] )  !!}
+        {!!  Form::select('Estabelecimento_id', $estabelecimentos, array(), ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div style="width:90%">
+                <input type="checkbox" name="permite_analista" value="true">
+                {!! Form::label('Analista_id', 'Analista', ['class' => 'control-label'] )  !!}
+                {!!  Form::select('Analista_id', $analistas, array(), ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div style="width:90%">
+                <input type="checkbox" name="permite_municipio" value="true">
+                {!! Form::label('municipio_cod', 'Municipio', ['class' => 'control-label'] )  !!}
+                {!!  Form::select('municipio_cod', $municipios, array(), ['class' => 'form-control s2']) !!}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div style="width:50%">
+                {!! Form::label('ie_busca', 'Inscrição Estadual', ['class' => 'control-label'] )  !!}
+                {!!  Form::text('ie_busca', NULL , NULL, ['class' => 'form-control s2']) !!}            
+            </div>
+        </div>
+        <div class="form-group">
+            <div style="width:50%">
+                {!! Form::label('data_inicio', 'Data de busca (Coluna Início)', ['class' => 'control-label'] )  !!}
+                {!!  Form::date('data_inicio', NULL , NULL, ['class' => 'form-control s2']) !!}            
+            </div>
+        </div>
+        <div class="form-group">
+            <div style="width:50%">
+                {!! Form::label('data_termino', 'Data de Busca (Coluna Término)', ['class' => 'control-label'] )  !!}
+                {!!  Form::date('data_termino', NULL , NULL, ['class' => 'form-control s2']) !!}            
             </div>
         </div>
 

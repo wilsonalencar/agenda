@@ -46,7 +46,14 @@ class GuiaicmsController extends Controller
     {
         $emp = explode(' ', $this->s_emp->razao_social);
         $emp_cnpj = substr($this->s_emp->cnpj, 0,8);
-        $path = '/doc_apuracao/'.$emp[0].'_'.$emp_cnpj.'/';
+        $a = explode('/', $_SERVER['SCRIPT_FILENAME']);
+        $path = '';
+        if ($a[0] == 'C:' || $a[0] == 'F:') {
+            $path = $a[0];
+        }
+        $path .= '/doc_apuracao/'.$emp[0].'_'.$emp_cnpj.'/';
+        echo "<pre>";
+        print_r($path);exit;
         $arquivos = scandir($path);
         foreach ($arquivos as $X => $FILENAME) {
             if (substr($FILENAME, -3) == 'pdf') {

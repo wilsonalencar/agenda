@@ -48,8 +48,10 @@ class GuiaicmsController extends Controller
         $emp_cnpj = substr($this->s_emp->cnpj, 0,8);
         $a = explode('/', $_SERVER['SCRIPT_FILENAME']);
         $path = '';
+        $funcao = '';
         if ($a[0] == 'C:' || $a[0] == 'F:') {
             $path = $a[0];
+            $funcao = $a[0];
         }
         $path .= '/doc_apuracao/'.$emp[0].'_'.$emp_cnpj.'/';
         $arquivos = scandir($path);
@@ -58,11 +60,12 @@ class GuiaicmsController extends Controller
                 $files[] = $FILENAME;
             }
         }
+        $funcao .= '/usr/bin/pdftotext ';
 
         if (!empty($files)) {
             foreach ($files as $K => $file) {
                 $filetxt = str_replace('pdf', 'txt', $file);
-                $pdftext = shell_exec('/usr/bin/pdftotext '.$path.$file.' '.$path.'results/'.$filetxt);
+                $pdftext = shell_exec($funcao.$path.$file.' '.$path.'results/'.$filetxt);
                 $origem = $path.$file;
                 $destino = $path.'imported/'.$file;
                 $pathdestinotxt = $path.'results/'.$filetxt;

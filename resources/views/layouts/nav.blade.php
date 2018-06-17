@@ -136,6 +136,20 @@
                             </li>
                     @endif
 
+                    <li class="panel panel-default" id="dropdown">
+                            <a data-toggle="collapse" href="#pagamentos"><i class="fa fa-money" aria-hidden="true"></i>Pagamentos</a>
+                                <div id="pagamentos" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <ul class="nav navbar-nav">
+                                            <li class="panel panel-default" id="dropdown">
+                                                <li><a href="{{ route('guiaicms.icms') }}">ICMS</a></li>
+                                            </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </li>
+
 
                         @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
                             <li class="panel panel-default" id="dropdown">

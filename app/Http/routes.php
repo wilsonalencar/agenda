@@ -270,6 +270,9 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::post('cronogramaatividades/storeEstab', array('as'=>'cronogramaatividades.storeEstabelecimento', 'uses'=>'CronogramaatividadesController@storeEstabelecimento'));
     Route::post('cronogramaatividades/storeEmp', array('as'=>'cronogramaatividades.storeEmpresa', 'uses'=>'CronogramaatividadesController@storeEmpresa'));
 
+    Route::get('guiaicms', array('as'=>'guiaicms.icms', 'uses'=>'GuiaicmsController@icms'));
+    Route::post('guiaicms/planilha', array('as'=>'guiaicms.planilha', 'uses'=>'GuiaicmsController@planilha'));
+
 });
 
 // Just the Owner, Admin, Manager and the Supervisor

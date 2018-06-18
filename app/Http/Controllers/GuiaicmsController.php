@@ -478,7 +478,7 @@ juros de mora
         if (!empty($match)) {
             $string = explode('
 ',trim($match[1]));
-            $icms['INSCRICAO_ESTADUAL'] = trim(str_replace('.', '', $string[0]));
+            $icms['IE'] = trim(str_replace('.', '', $string[0]));
         }
         
         //cidade e endereço e data vencimento

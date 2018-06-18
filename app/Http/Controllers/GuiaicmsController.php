@@ -523,6 +523,17 @@ juros de mora
             }
         }
 
+        $sql_semcod = "SELECT A.*, B.empresa_id, B.codigo, C.uf, D.centrocusto, C.codigo_sap FROM guiaicms A LEFT JOIN estabelecimentos B on A.CNPJ = B.cnpj left join municipios C on B.cod_municipio = C.codigo left join centrocustospagto D on B.id = D.estemp_id WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.CODBARRAS IS NULL"; 
+        
+        $dados_semcod = json_decode(json_encode(DB::Select($sql_semcod)),true);
+
+        $planilha_semcod = array();
+        foreach ($dados_semcod as $key => $dado) {
+            if ($dado['empresa_id'] == $this->s_emp->id) {
+                $planilha_semcod[] = $dado;
+            }
+        }
+
         $valorData = $data_fim;
         $data_vencimento_2 = str_replace('-', '/', $valorData);
         $data_fim = date('dmY', strtotime($data_vencimento_2));
@@ -531,7 +542,7 @@ juros de mora
         $data_vencimento = str_replace('-', '/', $valorData2);
         $data_inicio = date('dmY', strtotime($data_vencimento));   
 
-        return view('guiaicms.icms')->with('planilha', $planilha)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim);
+        return view('guiaicms.icms')->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim);
     }
 
     /**

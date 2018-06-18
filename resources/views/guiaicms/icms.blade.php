@@ -65,9 +65,11 @@
                 </tr>
                 </thead>
                     <tbody>
-                    Com Código de barras
                     <?php
                         if (!empty($planilha)) {
+                    ?>
+                        Com Código de barras
+                    <?php
                           foreach ($planilha as $key => $value) {  
                     ?>
                         <tr style="display: none">
@@ -165,9 +167,10 @@
                 </tr>
                 </thead>
                     <tbody>
-                Sem Código de barras
                     <?php
-                        if (!empty($planilha_semcod)) {
+                        if (!empty($planilha_semcod)) { ?>
+                    Sem Código de barras
+                    <?php
                           foreach ($planilha_semcod as $key => $value) {  
                     ?>
                         <tr style="display: none">

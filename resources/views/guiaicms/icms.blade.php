@@ -65,11 +65,11 @@
                 </tr>
                 </thead>
                     <tbody>
+                    Com Código de barras
                     <?php
                         if (!empty($planilha)) {
                           foreach ($planilha as $key => $value) {  
                     ?>
-                    Com Código de barras
                         <tr style="display: none">
                             <td><?php echo $value['uf'];?></td>
                             <td>SEFAZ</td>
@@ -165,11 +165,11 @@
                 </tr>
                 </thead>
                     <tbody>
+                Sem Código de barras
                     <?php
                         if (!empty($planilha_semcod)) {
                           foreach ($planilha_semcod as $key => $value) {  
                     ?>
-                Sem Código de barras
                         <tr style="display: none">
                             <td>046-2</td>
                             <td>GAREI</td>

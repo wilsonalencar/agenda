@@ -552,9 +552,9 @@ juros de mora
         $data_vencimento = str_replace('-', '/', $valorData2);
         $data_inicio = date('dmY', strtotime($data_vencimento));   
 
-        $mensagem = 'Dados Carregados com sucesso';
+        $mensagem = 'Período carregado com sucesso';
         if (empty($dados) && empty($dados_semcod)) {
-            $mensagem = 'Não existem dados a serem carregados';
+            $mensagem = 'Não há dados nesse período';
         }
 
         return view('guiaicms.icms')->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem);

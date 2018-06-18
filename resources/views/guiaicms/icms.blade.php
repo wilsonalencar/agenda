@@ -4,6 +4,11 @@
 {!! Form::open([
     'route' => 'guiaicms.planilha'
 ]) !!}
+<?php if (@!empty($mensagem)) { ?>
+    <div class="alert alert-success">
+        <?php echo $mensagem; ?>
+    </div>
+<?php } ?>
 <div class="main" id="empresaMultipleSelectSelecionar" style="display:block;">
         <div class="row">
             <div class="col-md-12">
@@ -75,7 +80,7 @@
                             <?php
                             $valorData = $value['DATA_VENCTO'];
                             $data_vencimento = str_replace('-', '/', $valorData);
-                            $value['DATA_VENCTO'] = date('d/m/Y H:i:s', strtotime($data_vencimento));
+                            $value['DATA_VENCTO'] = date('d/m/Y', strtotime($data_vencimento));
                             ?>
                             <td><?php echo $value['DATA_VENCTO'];?></td>
                             <td><?php echo $value['codigo'];?></td>
@@ -171,7 +176,7 @@
                             <?php
                             $valorData = $value['DATA_VENCTO'];
                             $data_vencimento = str_replace('-', '/', $valorData);
-                            $value['DATA_VENCTO'] = date('d/m/Y H:i:s', strtotime($data_vencimento));
+                            $value['DATA_VENCTO'] = date('d/m/Y', strtotime($data_vencimento));
                             ?>
                             <td><?php if (substr($value['CNPJ'], 0,8) == 13574594) {
                                 echo "1000";

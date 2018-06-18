@@ -44,19 +44,29 @@ class GuiaicmsController extends Controller
 
     public function Job()
     {
-        $emp = explode(' ', $this->s_emp->razao_social);
-        $emp_cnpj = substr($this->s_emp->cnpj, 0,8);
         $a = explode('/', $_SERVER['SCRIPT_FILENAME']);
         $path = '';
+
         $funcao = '';
         if ($a[0] == 'C:' || $a[0] == 'F:') {
             $path = $a[0];
         }
-        $path .= '/doc_apuracao/'.$emp[0].'_'.$emp_cnpj.'/';
+        $path .= '/doc_apuracao/';
+
         $arquivos = scandir($path);
-        foreach ($arquivos as $X => $FILENAME) {
-            if (substr($FILENAME, -3) == 'pdf') {
-                $files[] = $FILENAME;
+        
+        $data = array();
+        foreach ($arquivos as $k => $v) {
+            if (strpbrk($v, '0123456789１２３４５６７８９０')) {
+                $path_name = $path.$v;
+                $data[] = scandir($path_name);   
+            }
+        }
+        foreach ($data as $X => $FILENAME) {
+            foreach ($FILENAME as $L => $arquivo) {
+                if (substr($arquivo, -3) == 'pdf') {
+                    $files[] = $arquivo;
+                }
             }
         }
         $funcao = 'pdftotext.exe ';
@@ -542,7 +552,12 @@ juros de mora
         $data_vencimento = str_replace('-', '/', $valorData2);
         $data_inicio = date('dmY', strtotime($data_vencimento));   
 
-        return view('guiaicms.icms')->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim);
+        $mensagem = 'Dados Carregados com sucesso';
+        if (empty($dados) && empty($dados_semcod)) {
+            $mensagem = 'Não existem dados a serem carregados';
+        }
+
+        return view('guiaicms.icms')->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem);
     }
 
     /**

@@ -58,40 +58,55 @@ class GuiaicmsController extends Controller
         $data = array();
         foreach ($arquivos as $k => $v) {
             if (strpbrk($v, '0123456789１２３４５６７８９０')) {
-                $path_name = $path.$v;
-                $data[] = scandir($path_name);   
+                $path_name = $path.$v.'/';
+                $data[$k]['arquivos'] = scandir($path_name);   
+                $data[$k]['path'] = $path_name;   
             }
         }
         foreach ($data as $X => $FILENAME) {
-            foreach ($FILENAME as $L => $arquivo) {
-                if (substr($arquivo, -3) == 'pdf') {
-                    $files[] = $arquivo;
+            foreach ($FILENAME as $L => $arquivos) {
+                if (is_array($arquivos)) {
+                    foreach ($arquivos as $A => $arquivo) {
+                        if (substr($arquivo, -3) == 'pdf') {
+                            $files[] = $FILENAME['path'].$arquivo;
+                        }
+                    }
                 }
             }
         }
         $funcao = 'pdftotext.exe ';
-        
+
         if (!empty($files)) {
             foreach ($files as $K => $file) {
                 $filetxt = str_replace('pdf', 'txt', $file);
-                shell_exec($funcao.$path.$file.' '.$path.'results/'.$filetxt);
-                
-                $origem = $path.$file;
-                $destino = $path.'imported/'.$file;
-                $pathdestinotxt = $path.'results/'.$filetxt;
+                $caminho1 = explode('/', $filetxt);
+                $caminho1_result = '';
+                foreach ($caminho1 as $key => $value) {
+                    $arquivonome = $value;
+                    $caminho1_result .= $value.'/';
+                    if (strpbrk($value, '0123456789１２３４５６７８９０')) {
+                        $caminho1_result .= 'results/';
+                    }
+                }
 
-                $arr[$file]['arquivo'] = $file; 
-                $arr[$file]['path'] = $destino; 
-                $arr[$file]['arquivotxt'] = $filetxt; 
-                $arr[$file]['pathtxt'] = $pathdestinotxt; 
+                $caminho1_result = substr($caminho1_result, 0, -1);
                 
-                copy($origem, $destino);
-                unlink($origem);
+                // shell_exec($funcao.$file.' '.$caminho1_result);
+                $destino = str_replace('results', 'imported', str_replace('txt', 'pdf', $caminho1_result));
+
+                $arr[$file]['arquivo'] = str_replace('txt', 'pdf', $arquivonome); 
+                $arr[$file]['path'] = $destino; 
+                $arr[$file]['arquivotxt'] = $arquivonome; 
+                $arr[$file]['pathtxt'] = $caminho1_result;
+                echo "<prE>";
+                print_r($arr);exit;
+                copy($file, $destino);
+                //unlink($file);
             }
         }
-        if (!empty($files)) {
-            $this->saveICMS($arr);
-        }
+        // if (!empty($files)) {
+            // $this->saveICMS($arr);
+        // }
 
     echo "Nenhum arquivo foi encontrado disponível para salvar";
     }
@@ -541,6 +556,50 @@ juros de mora
         foreach ($dados_semcod as $key => $dado) {
             if ($dado['empresa_id'] == $this->s_emp->id) {
                 $planilha_semcod[] = $dado;
+            }
+        }
+
+        foreach ($planilha as $chave => $valorl) {
+            if ($valorl['MULTA_MORA_INFRA'] == 0) {
+                $planilha[$chave]['MULTA_MORA_INFRA'] = '';
+            }
+
+            if ($valorl['HONORARIOS_ADV'] == 0) {
+                $planilha[$chave]['HONORARIOS_ADV'] = '';
+            }
+
+            if ($valorl['ACRESC_FINANC'] == 0) {
+                $planilha[$chave]['ACRESC_FINANC'] = '';
+            }
+
+            if ($valorl['JUROS_MORA'] == 0) {
+                $planilha[$chave]['JUROS_MORA'] = '';
+            }
+
+            if ($valorl['MULTA_PENAL_FORMAL'] == 0) {
+                $planilha[$chave]['MULTA_PENAL_FORMAL'] = '';
+            }
+        }
+
+        foreach ($planilha_semcod as $chave2 => $valorl2) {
+            if ($valorl2['MULTA_MORA_INFRA'] == 0) {
+                $planilha_semcod[$chave2]['MULTA_MORA_INFRA'] = '';
+            }
+
+            if ($valorl2['HONORARIOS_ADV'] == 0) {
+                $planilha_semcod[$chave2]['HONORARIOS_ADV'] = '';
+            }
+
+            if ($valorl2['ACRESC_FINANC'] == 0) {
+                $planilha_semcod[$chave2]['ACRESC_FINANC'] = '';
+            }
+
+            if ($valorl2['JUROS_MORA'] == 0) {
+                $planilha_semcod[$chave2]['JUROS_MORA'] = '';
+            }
+
+            if ($valorl2['MULTA_PENAL_FORMAL'] == 0) {
+                $planilha_semcod[$chave2]['MULTA_PENAL_FORMAL'] = '';
             }
         }
 

@@ -187,19 +187,19 @@
                             <td><?php echo $value['DATA_VENCTO'];?></td>
                             <td>1</td>
                             <td><?php echo $value['CNPJ'];?></td>
-                            <td><?php echo $value['REFERENCIA'];?></td>
+                            <td><?php echo str_replace('/', '', $value['REFERENCIA']);?></td>
                             <td></td>
                             <td></td>
                             <td><?php echo $value['codigo'];?></td>
                             <td><?php echo $value['CNPJ'];?></td>
                             <td></td>
                             <td>ICMS SP</td>
-                            <td><?php echo $value['REFERENCIA'];?></td>
+                            <td><?php echo str_replace('/', '', $value['REFERENCIA']);?></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td><?php echo $value['REFERENCIA'];?></td>
+                            <td><?php echo str_replace('/', '', $value['REFERENCIA']);?></td>
                             <td></td>
                             <td></td>
                             <td></td>

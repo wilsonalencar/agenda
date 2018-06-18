@@ -91,7 +91,7 @@ class GuiaicmsController extends Controller
 
                 $caminho1_result = substr($caminho1_result, 0, -1);
                 
-                // shell_exec($funcao.$file.' '.$caminho1_result);
+                shell_exec($funcao.$file.' '.$caminho1_result);
                 $destino = str_replace('results', 'imported', str_replace('txt', 'pdf', $caminho1_result));
 
                 $arr[$file]['arquivo'] = str_replace('txt', 'pdf', $arquivonome); 
@@ -102,9 +102,9 @@ class GuiaicmsController extends Controller
                 // unlink($file);
             }
         }
-        // if (!empty($files)) {
-            // $this->saveICMS($arr);
-        // }
+        if (!empty($files)) {
+            $this->saveICMS($arr);
+        }
 
     echo "Nenhum arquivo foi encontrado disponível para salvar";
     }
@@ -127,9 +127,9 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsRS($value);
             }   
 
-            if ($this->validateEx($icms)) {
-                Guiaicms::create($icms);
-            } 
+            // if ($this->validateEx($icms)) {
+                // Guiaicms::create($icms);
+            // } 
         }
     echo "Dados Gravados com sucesso";exit;
     }

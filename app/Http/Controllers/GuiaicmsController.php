@@ -99,7 +99,7 @@ class GuiaicmsController extends Controller
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
                 copy($file, substr($destino, 0,-9));
-                // unlink($file);
+                unlink($file);
             }
         }
         if (!empty($files)) {

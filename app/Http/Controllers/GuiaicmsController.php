@@ -94,11 +94,11 @@ class GuiaicmsController extends Controller
                 // shell_exec($funcao.$file.' '.$caminho1_result);
                 $destino = str_replace('results', 'imported', str_replace('txt', 'pdf', $caminho1_result));
 
-                $arr[$file]['arquivo'] = str_replace('txt', 'pdf', $arquivonome); 
+                $arr[$file]['arquivo'] = str_replace('txt', 'pdf', substr($arquivonome, 0, -9)); 
                 $arr[$file]['path'] = $destino; 
                 $arr[$file]['arquivotxt'] = $arquivonome; 
-                $arr[$file]['pathtxt'] = $caminho1_result;
-                echo "<prE>";
+                $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
+                echo "<Pre>";
                 print_r($arr);exit;
                 copy($file, $destino);
                 //unlink($file);

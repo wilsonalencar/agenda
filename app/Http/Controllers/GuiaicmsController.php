@@ -142,6 +142,10 @@ class GuiaicmsController extends Controller
 
     public function validateEx($icms)
     {
+        if (empty($icms)) {
+            return false;
+        }
+        
         if (empty($icms['CNPJ'])) {
             $icms['CNPJ'] = 0;
         }

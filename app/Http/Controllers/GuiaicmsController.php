@@ -98,8 +98,8 @@ class GuiaicmsController extends Controller
                 $arr[$file]['path'] = substr($destino, 0, -9); 
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
-                // copy($file, substr($destino, 0,-9));
-                // unlink($file);
+                copy($file, substr($destino, 0,-9));
+                unlink($file);
             }
         }
         if (!empty($files)) {
@@ -131,7 +131,6 @@ class GuiaicmsController extends Controller
                 copy($value['path'], str_replace('/imported', '', $value['path']));
                 unlink($value['path']);
             }
-            echo "oi";exit;
             //if ($this->validateEx($icms)) {
             //    Guiaicms::create($icms);
             //} 

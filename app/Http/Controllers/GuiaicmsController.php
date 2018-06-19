@@ -127,7 +127,7 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsRS($value);
             }   
 
-            if (empty($icms) || count($icms) < 6) {
+            if ((empty($icms) || count($icms) < 6) && !$this->validateEx($icms)) {
                 $icms = array();
                 copy($value['path'], str_replace('/imported', '', $value['path']));
                 unlink($value['path']);

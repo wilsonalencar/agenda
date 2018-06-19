@@ -128,10 +128,10 @@ class GuiaicmsController extends Controller
             }   
 
             if (empty($icms)) {
-                echo "<pre>";
-                print_r($icms);exit;
+                copy($value['path'], str_replace('/imported', '', $value['path']));
+                unlink($value['path']);
             }
-            
+            echo "oi";exit;
             //if ($this->validateEx($icms)) {
             //    Guiaicms::create($icms);
             //} 

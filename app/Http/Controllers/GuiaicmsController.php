@@ -91,15 +91,17 @@ class GuiaicmsController extends Controller
 
                 $caminho1_result = substr($caminho1_result, 0, -1);
                 
-                shell_exec($funcao.$file.' '.substr($caminho1_result, 0, -8));
+                //shell_exec($funcao.$file.' '.substr($caminho1_result, 0, -8));
                 $destino = str_replace('results', 'imported', str_replace('txt', 'pdf', $caminho1_result));
 
                 $arr[$file]['arquivo'] = str_replace('txt', 'pdf', $arquivonome); 
                 $arr[$file]['path'] = substr($destino, 0, -9); 
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
-                copy($file, substr($destino, 0,-9));
-                unlink($file);
+                echo "<PrE>";
+                print_r($arr);exit;
+                //copy($file, substr($destino, 0,-9));
+                //unlink($file);
             }
         }
         if (!empty($files)) {
@@ -127,9 +129,9 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsRS($value);
             }   
 
-            if ($this->validateEx($icms)) {
-                Guiaicms::create($icms);
-            } 
+            //if ($this->validateEx($icms)) {
+            //    Guiaicms::create($icms);
+            //} 
         }
     echo "Dados Gravados com sucesso";exit;
     }

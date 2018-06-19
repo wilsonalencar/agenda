@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class SapMunicipios extends Migration
+class AlterMunicipios2 extends Migration
 {
     /**
      * Run the migrations.
@@ -12,11 +12,9 @@ class SapMunicipios extends Migration
      */
     public function up()
     {
-        if (! Schema::hasColumn('municipios', 'codigo_sap')) {
-            Schema::table('municipios', function (Blueprint $table) {
-                $table->integer('codigo_sap')->nullable()->default(null)->after('uf');
-            });
-        }
+        Schema::table('municipios', function (Blueprint $table) {
+            $table->string('codigo_sap',10)->nullable()->default(null)->after('uf');
+        });
     }
 
     /**

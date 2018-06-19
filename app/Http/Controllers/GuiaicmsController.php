@@ -49,10 +49,10 @@ class GuiaicmsController extends Controller
 
         $funcao = '';
         if ($a[0] == 'C:' || $a[0] == 'F:') {
-            $path = $a[0];
+            $path = 'W:';
         }
-        $path .= '/doc_apuracao/';
-
+		$path .= '/';
+		
         $arquivos = scandir($path);
         
         $data = array();
@@ -63,7 +63,8 @@ class GuiaicmsController extends Controller
                 $data[$k]['path'] = $path_name;   
             }
         }
-        foreach ($data as $X => $FILENAME) {
+		
+		foreach ($data as $X => $FILENAME) {
             foreach ($FILENAME as $L => $arquivos) {
                 if (is_array($arquivos)) {
                     foreach ($arquivos as $A => $arquivo) {
@@ -74,7 +75,7 @@ class GuiaicmsController extends Controller
                 }
             }
         }
-        $funcao = 'pdftotext.exe ';
+		$funcao = 'pdftotext.exe ';
 
         if (!empty($files)) {
             foreach ($files as $K => $file) {
@@ -88,9 +89,7 @@ class GuiaicmsController extends Controller
                         $caminho1_result .= 'results/';
                     }
                 }
-
-                $caminho1_result = substr($caminho1_result, 0, -1);
-                
+                $caminho1_result = substr($caminho1_result, 0, -1);   
                 shell_exec($funcao.$file.' '.substr($caminho1_result, 0, -8));
                 $destino = str_replace('results', 'imported', str_replace('txt', 'pdf', $caminho1_result));
 
@@ -98,7 +97,7 @@ class GuiaicmsController extends Controller
                 $arr[$file]['path'] = substr($destino, 0, -9); 
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
-                copy($file, substr($destino, 0,-9));
+				copy($file, substr($destino, 0,-9));
                 unlink($file);
             }
         }

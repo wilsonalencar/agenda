@@ -51,7 +51,7 @@ class GuiaicmsController extends Controller
         if ($a[0] == 'C:' || $a[0] == 'F:') {
             $path = 'W:';
         }
-		$path .= '/';
+		$path .= '/storagebravobpo/';
 		
         $arquivos = scandir($path);
         

@@ -132,9 +132,6 @@ class GuiaicmsController extends Controller
                 unlink($value['path']);
             }
             
-            echo "<Pre>";
-            print_r($icms);exit;
-            
             if ($this->validateEx($icms) && !empty($icms)) {
                Guiaicms::create($icms);
             } 
@@ -151,7 +148,7 @@ class GuiaicmsController extends Controller
             $icms['REFERENCIA'] = 0;
         }
         $query = 'SELECT * FROM guiaicms WHERE CNPJ = "'.$icms['CNPJ'].'" AND REFERENCIA = "'.$icms['REFERENCIA'].'" AND TRIBUTO_ID = '.$icms['TRIBUTO_ID'].'';
-
+        echo $query;exit;
         $validate = DB::select($query);
         if (!empty($validate)) {
             return false;

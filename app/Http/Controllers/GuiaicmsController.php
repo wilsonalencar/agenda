@@ -127,6 +127,11 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsRS($value);
             }   
 
+            if (empty($icms)) {
+                echo "<pre>";
+                print_r($icms);exit;
+            }
+            
             //if ($this->validateEx($icms)) {
             //    Guiaicms::create($icms);
             //} 
@@ -153,6 +158,10 @@ class GuiaicmsController extends Controller
 
     public function icmsRS($value)
     {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -265,6 +274,10 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
     public function icmsRJ($value)
     {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -364,14 +377,16 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
     public function icmsSP($value)
     {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
-        echo "<Pre>";
-        print_r($str);exit;
         $icms['TRIBUTO_ID'] = 8;
         
         //razão social

@@ -99,7 +99,7 @@ class GuiaicmsController extends Controller
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
                 copy($file, substr($destino, 0,-9));
-                //unlink($file);
+                unlink($file);
             }
         }
         if (!empty($files)) {
@@ -127,7 +127,8 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsRS($value);
             }   
 
-            if (empty($icms)) {
+            if (empty($icms) || count($icms) < 6) {
+                $icms = array();
                 copy($value['path'], str_replace('/imported', '', $value['path']));
                 unlink($value['path']);
             }
@@ -148,7 +149,7 @@ class GuiaicmsController extends Controller
             $icms['REFERENCIA'] = 0;
         }
         $query = 'SELECT * FROM guiaicms WHERE CNPJ = "'.$icms['CNPJ'].'" AND REFERENCIA = "'.$icms['REFERENCIA'].'" AND TRIBUTO_ID = '.$icms['TRIBUTO_ID'].'';
-        echo $query;exit;
+
         $validate = DB::select($query);
         if (!empty($validate)) {
             return false;

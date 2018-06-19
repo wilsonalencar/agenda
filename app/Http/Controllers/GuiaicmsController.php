@@ -91,17 +91,15 @@ class GuiaicmsController extends Controller
 
                 $caminho1_result = substr($caminho1_result, 0, -1);
                 
-                //shell_exec($funcao.$file.' '.substr($caminho1_result, 0, -8));
+                shell_exec($funcao.$file.' '.substr($caminho1_result, 0, -8));
                 $destino = str_replace('results', 'imported', str_replace('txt', 'pdf', $caminho1_result));
 
                 $arr[$file]['arquivo'] = str_replace('txt', 'pdf', $arquivonome); 
                 $arr[$file]['path'] = substr($destino, 0, -9); 
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
-                echo "<PrE>";
-                print_r($arr);exit;
-                //copy($file, substr($destino, 0,-9));
-                //unlink($file);
+                // copy($file, substr($destino, 0,-9));
+                // unlink($file);
             }
         }
         if (!empty($files)) {
@@ -372,6 +370,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
+        echo "<Pre>";
+        print_r($str);exit;
         $icms['TRIBUTO_ID'] = 8;
         
         //razão social

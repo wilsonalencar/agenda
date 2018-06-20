@@ -78,7 +78,7 @@
                             <td><?php if (substr($value['CNPJ'], 0,8) == 13574594) {
                                 echo "1000";
                             } ?></td>
-						  <td><?php echo 'CODIGO'.$value['CODBARRAS'];?></td>
+						  <td><?php echo $value['CODBARRAS'];?></td>
                             <?php
                             $valorData = $value['DATA_VENCTO'];
                             $data_vencimento = str_replace('-', '/', $valorData);

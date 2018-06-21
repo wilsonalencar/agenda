@@ -126,6 +126,18 @@ class CargasController extends Controller
         return redirect()->back()->with('status', 'Todos os status de carga foram alterados!');
     }
 
+    public function atualizarEntrada()
+    {
+        $hoje = date('Y-m-d H:i:s');
+        $user_id = Auth::user()->id;
+
+        DB::table('estabelecimentos')
+            ->where('empresa_id', $this->s_emp->id)
+            ->update(['carga_msaf_entrada' => 1, 'Dt_alteracao_entrada' => $hoje, 'Id_usuario_entrada' => $user_id]);
+
+        return redirect()->back()->with('status', 'O status de carga foi alterado para todos os estabelecimentos da empresa ');
+    }
+
     public function changeStateEntrada($status,$id) {
 
         $estabelecimento = Estabelecimento::findOrFail($id);

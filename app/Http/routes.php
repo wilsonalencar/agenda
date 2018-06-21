@@ -225,6 +225,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::get('cargas_grafico', array('as'=>'cargas_grafico', 'uses'=>'CargasController@grafico'));
     Route::post('cargas', array('as'=>'cargas', 'uses'=>'CargasController@index'));
     Route::post('cargas/reset', array('as'=>'cargas.reset', 'uses'=>'CargasController@resetData'));
+    Route::post('cargas/atualizar_entrada', array('as'=>'cargas.atualizar_entrada', 'uses'=>'CargasController@atualizarEntrada'));
     Route::get('cargas/data', array('as'=>'cargas.data', 'uses'=>'CargasController@anyData'));
     Route::get('carga/{state}/{estab}/changeStateEntrada', array('as'=>'cargas.changeStateEntrada', 'uses'=>'CargasController@changeStateEntrada'));
     Route::get('carga/{state}/{estab}/changeStateSaida', array('as'=>'cargas.changeStateSaida', 'uses'=>'CargasController@changeStateSaida'));

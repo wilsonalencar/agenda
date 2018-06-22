@@ -4,10 +4,10 @@
 
 <h1>Cargas</h1>
 <div class="row">
-    <div class="col-md-7">
+    <div class="col-md-6">
         <p class="lead">Status de carga para todos os estabelecimentos ativos.</p>
     </div>
-    <div title="" class="col-lg-3">
+    <div title="" class="col-lg-2">
         <select name="slt_cargas" id="slt_cargas" class="form-control">
             <option value="2" <?php if($switch == 2) echo "selected"; ?>>Todos</option>
             <option value="1" <?php if($switch == 1) echo "selected"; ?>>Carregados</option>
@@ -20,6 +20,13 @@
         ]) !!}
         {!! Form::hidden('switch_val', $switch, ['class' => 'form-control']) !!}
         {!! Form::button('<i class="fa fa-refresh"></i> Atualizar', array('id' => 'atualiza_btn', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
+        {!! Form::close() !!}
+    </div>
+    <div class="col-md-2">
+        {!! Form::open([
+            'route' => 'cargas.atualizar_entrada'
+        ]) !!}
+        {!! Form::button('<i class="fa fa-repeat"></i> Atualizar Todas Entradas', array('id' => 'atualizar_entrada_btn', 'class'=>'btn btn-default', 'type'=>'submit')) !!}
         {!! Form::close() !!}
     </div>
     @if ( Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
@@ -43,6 +50,8 @@
         <th>CARGA SAÍDA</th>
         <th>ATUALIZAÇÃO ENTRADA</th>
         <th>ATUALIZAÇÃO SAÍDA</th>
+        <th></th>
+        <th></th>
     </tr>
     </thead>
 </table>
@@ -87,6 +96,24 @@ $(function() {
 
     });
 
+    // Select the submit buttons of forms with data-confirm attribute
+    var reset_button =$( '#atualizar_entrada_btn' );
+
+    // On click of one of these submit buttons
+    reset_button.on('click', function (e) {
+
+        // Prevent the form to be submitted
+        e.preventDefault();
+
+        var button = $(this); // Get the button
+        var form = button.closest('form'); // Get the related form
+        var msg = 'Quer realmente atualizar as entradas de carga?'; // Get the confirm message
+
+        if(confirm(msg)) form.submit(); // If the user confirm, submit the form
+        $("body").css("cursor", "progress");
+
+    });
+
     $( "#atualiza_btn" ).click(function() {
         $("body").css("cursor", "progress");
     });
@@ -101,7 +128,14 @@ $(function() {
                     d.ativo = $("[name='switch_val']").val();
                 }
             },
-        columnDefs: [{ "width": "80px", "targets": 3 },{ "width": "80px", "targets": 4 },{ "width": "180px", "targets": 5 },{ "width": "180px", "targets": 6 }],
+        columnDefs: [
+          { "width": "80px", "targets": 3 },
+          { "width": "80px", "targets": 4 },
+          { "width": "180px", "targets": 5 },
+          { "width": "180px", "targets": 6 },
+          { "width": "12%", "targets": 7, "visible":false, "title": "Carga Entrada"},
+          { "width": "12%", "targets": 8, "visible":false, "title": "Carga Saída"}
+          ],
         columns: [
             {data: 'codigo', name: 'codigo'},
             {data: 'cnpj', name: 'cnpj',render: function ( data ) {
@@ -168,6 +202,44 @@ $(function() {
                                                                   }
                                                                   return url; 
                                                                 }},
+            {data: 'id', name:'carga_entrada', searchable: false, orderable: false, render: function (data, type, row) {
+
+                                                                  var url = '';
+                                                                  @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
+                                                                  if(row['carga_msaf_entrada']==1) {
+                                                                      url += 'OK';
+                                                                  } else {
+                                                                      url += 'PENDENTE';
+                                                                  }
+                                                                  url = url.replace(':id_estab', data);
+                                                                  @else
+                                                                  if(row['carga_msaf_entrada']==1) {
+                                                                        url += 'OK';
+                                                                    } else {
+                                                                        url += 'PENDENTE';
+                                                                    }
+                                                                  @endif
+                                                                  return url;
+            }},
+            {data: 'id', name:'carga_saida', searchable: false, orderable: false, render: function (data, type, row) {
+
+                                                                  var url = '';
+                                                                  @if ( Auth::user()->hasRole('msaf') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
+                                                                  if(row['carga_msaf_saida']==1) {
+                                                                        url += 'OK';
+                                                                  } else {
+                                                                        url += 'PENDENTE';
+                                                                  }
+                                                                  url = url.replace(':id_estab', data);
+                                                                  @else
+                                                                    if(row['carga_msaf_saida']==1) {
+                                                                          url += 'OK';
+                                                                      } else {
+                                                                          url += 'PENDENTE';
+                                                                      }
+                                                                    @endif
+                                                                  return url;
+            }},
         ],
          language: {
                                     // "searchPlaceholder": "ID, P.A. ou descrição",
@@ -176,8 +248,18 @@ $(function() {
          lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
          dom: 'l<"centerBtn"B>frtip',
          buttons: [
-              'copyHtml5',
-              'excelHtml5'
+              {
+                extend: 'copyHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2, 7, 8, 5, 6]
+                }
+              },
+              {
+                extend: 'excelHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2, 7, 8, 5, 6]
+                }
+             },
          ]
 
     });

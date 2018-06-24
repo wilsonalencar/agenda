@@ -542,12 +542,15 @@ juros de mora
      * @return \Illuminate\Http\Response
      */
     public function icms()
-    {   
-        return view('guiaicms.icms');
+    {  
+        $estabelecimentos = Estabelecimento::where('empresa_id', $this->s_emp->id)->selectRaw("codigo, id")->lists('codigo','id');
+        $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+
+        return view('guiaicms.icms')->withEstabelecimentos($estabelecimentos)->withUf($uf);
     }
 
     public function planilha(Request $request)
-    {   
+    {  
         $input = $request->all();
         if (empty($input['inicio']) || empty($input['fim'])) {
             return redirect()->back()->with('status', 'É necessário informar as duas datas.');
@@ -556,6 +559,17 @@ juros de mora
         $data_fim = $input['fim'].' 23:59:59';
         
         $sql = "SELECT A.*, B.empresa_id, B.codigo, C.uf, D.centrocusto FROM guiaicms A LEFT JOIN estabelecimentos B on A.CNPJ = B.cnpj inner join municipios C on B.cod_municipio = C.codigo left join centrocustospagto D on B.id = D.estemp_id WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.CODBARRAS <> ''"; 
+
+
+        if (!empty($input['multiple_select_estabelecimentos'])) {
+            $sql .= " AND A.CNPJ IN (Select cnpj FROM estabelecimentos where id IN (".implode(',', $input['multiple_select_estabelecimentos'])."))";
+        }
+
+        if (!empty($input['multiple_select_uf'])) {
+            $sql .= " AND A.UF IN (".implode(',', array_map(function($value){
+                return "'$value'";
+            }, $input['multiple_select_uf'])).")";
+        }
 
         $dados = json_decode(json_encode(DB::Select($sql)),true);
 

@@ -16,6 +16,16 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-md-2">
+                {!! Form::label('multiple_select_tributos[]', 'Estabelecimentos', ['class' => 'control-label'] )  !!}
+                {!!  Form::select('multiple_select_estabelecimentos[]', $estabelecimentos, array(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
+            </div>
+            <div class="col-md-2">
+                {!! Form::label('multiple_select_tributos[]', 'UF', ['class' => 'control-label'] )  !!}
+                {!!  Form::select('multiple_select_uf[]', $uf, array(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-2">     
                 {!! Form::label('inicio', 'Data Inicial', ['class' => 'control-label']) !!}    
                 {!! Form::date('inicio', '', ['class' => 'form-control']) !!}
@@ -244,6 +254,8 @@
 
 <script type="text/javascript">
     
+$('select').select2();
+
 jQuery(function($){
     $('input[name="periodo_apuracao"]').mask("99/9999");
 });
@@ -259,10 +271,6 @@ $(document).ready(function () {
         if (!empty($planilha)) {
         ?>
         buttons: [
-            {
-                extend: 'excelHtml5',
-                title: 'ZFIC_COMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>'
-            },
             {
                 extend: 'csvHtml5',
                 title: 'ZFIC_COMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>'
@@ -282,10 +290,6 @@ $(document).ready(function () {
         if (!empty($planilha_semcod)) {
         ?>
         buttons: [
-            {
-                extend: 'excelHtml5',
-                title: 'ZFIC_SEMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>'
-            },
             {
                 extend: 'csvHtml5',
                 title: 'ZFIC_SEMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>'

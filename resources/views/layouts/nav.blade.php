@@ -227,7 +227,7 @@
                                             </li>
 
                                             <li><a href="{{ route('atividades.index') }}">Atividades</a></li>
-                                            <li><a href="{{ route('guiaicms.Job') }}">Ler PDF</a></li>
+                                            <li><a href="{{ route('guiaicms.Job', 'getType=1') }}">Ler PDF</a></li>
                                             @endif
                                             <li><a href="{{ route('empresas.index') }}">Empresas</a></li>
                                             <?php if (!empty(session()->get('seid'))){ ?> 

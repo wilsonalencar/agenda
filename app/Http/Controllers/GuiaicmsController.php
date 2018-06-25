@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 
 
+
 class GuiaicmsController extends Controller
 {
     protected $eService;   
@@ -105,7 +106,12 @@ class GuiaicmsController extends Controller
             $this->saveICMS($arr);
         }
 
-    echo "Nenhum arquivo foi encontrado disponível para salvar";
+        if (empty($_GET['getType'])) {  
+            echo "Nenhum arquivo foi encontrado disponível para salvar";exit;
+        }
+
+        $mensagem = 'Nenhum arquivo foi encontrado disponível para salvar';
+        return view('guiaicms.job_return')->withMensagem($mensagem);
     }
 
     public function saveICMS($array)
@@ -136,7 +142,14 @@ class GuiaicmsController extends Controller
                Guiaicms::create($icms);
             } 
         }
-    echo "Dados Gravados com sucesso";exit;
+
+        if (empty($_GET['getType'])) {  
+            echo "Dados gravados com sucesso";exit;
+        }
+
+        $mensagem = 'Dados gravados com sucesso';
+        return view('guiaicms.job_return')->withMensagem($mensagem);
+        
     }
 
     public function validateEx($icms)
@@ -599,11 +612,11 @@ juros de mora
         $sql_semcod = "SELECT A.*, B.empresa_id, B.codigo, C.uf, D.centrocusto, C.codigo_sap FROM guiaicms A LEFT JOIN estabelecimentos B on A.CNPJ = B.cnpj left join municipios C on B.cod_municipio = C.codigo left join centrocustospagto D on B.id = D.estemp_id WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.CODBARRAS = ''"; 
 
         if (!empty($input['multiple_select_estabelecimentos'])) {
-            $sql .= " AND A.CNPJ IN (Select cnpj FROM estabelecimentos where id IN (".implode(',', $input['multiple_select_estabelecimentos'])."))";
+            $sql_semcod .= " AND A.CNPJ IN (Select cnpj FROM estabelecimentos where id IN (".implode(',', $input['multiple_select_estabelecimentos'])."))";
         }
 
         if (!empty($input['multiple_select_uf'])) {
-            $sql .= " AND A.UF IN (".implode(',', array_map(function($value){
+            $sql_semcod .= " AND A.UF IN (".implode(',', array_map(function($value){
                 return "'$value'";
             }, $input['multiple_select_uf'])).")";
         }

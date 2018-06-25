@@ -51,8 +51,8 @@ class GuiaicmsController extends Controller
         if ($a[0] == 'C:' || $a[0] == 'F:') {
             $path = 'W:';
         }
-		$path .= '/storagebravobpo/';
-		
+        $path .= '/storagebravobpo/';
+        
         $arquivos = scandir($path);
         
         $data = array();
@@ -63,8 +63,8 @@ class GuiaicmsController extends Controller
                 $data[$k]['path'] = $path_name;   
             }
         }
-		
-		foreach ($data as $X => $FILENAME) {
+        
+        foreach ($data as $X => $FILENAME) {
             foreach ($FILENAME as $L => $arquivos) {
                 if (is_array($arquivos)) {
                     foreach ($arquivos as $A => $arquivo) {
@@ -75,7 +75,7 @@ class GuiaicmsController extends Controller
                 }
             }
         }
-		$funcao = 'pdftotext.exe ';
+        $funcao = 'pdftotext.exe ';
 
         if (!empty($files)) {
             foreach ($files as $K => $file) {
@@ -97,7 +97,7 @@ class GuiaicmsController extends Controller
                 $arr[$file]['path'] = substr($destino, 0, -9); 
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
-				copy($file, substr($destino, 0,-9));
+                copy($file, substr($destino, 0,-9));
                 unlink($file);
             }
         }
@@ -545,13 +545,29 @@ juros de mora
     {  
         $estabelecimentos = Estabelecimento::where('empresa_id', $this->s_emp->id)->selectRaw("codigo, id")->lists('codigo','id');
         $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+        $estabelecimentosselected = array();
+        $ufselected = array();
 
-        return view('guiaicms.icms')->withEstabelecimentos($estabelecimentos)->withUf($uf);
+        return view('guiaicms.icms')->withEstabelecimentos($estabelecimentos)->withUf($uf)->withestabelecimentosselected($estabelecimentosselected)->withufselected($estabelecimentosselected);
     }
 
     public function planilha(Request $request)
     {  
         $input = $request->all();
+        $estabelecimentosselected = array();
+        if (!empty($input['multiple_select_estabelecimentos'])) {
+            $estabelecimentosselected = $input['multiple_select_estabelecimentos'];
+        }
+
+        $ufselected = array();
+        if (!empty($input['multiple_select_uf'])) {
+            $ufselected = $input['multiple_select_uf'];
+        }
+        
+
+        $estabelecimentos = Estabelecimento::where('empresa_id', $this->s_emp->id)->selectRaw("codigo, id")->lists('codigo','id');
+        $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+
         if (empty($input['inicio']) || empty($input['fim'])) {
             return redirect()->back()->with('status', 'É necessário informar as duas datas.');
         }
@@ -581,6 +597,16 @@ juros de mora
         }
 
         $sql_semcod = "SELECT A.*, B.empresa_id, B.codigo, C.uf, D.centrocusto, C.codigo_sap FROM guiaicms A LEFT JOIN estabelecimentos B on A.CNPJ = B.cnpj left join municipios C on B.cod_municipio = C.codigo left join centrocustospagto D on B.id = D.estemp_id WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.CODBARRAS = ''"; 
+
+        if (!empty($input['multiple_select_estabelecimentos'])) {
+            $sql .= " AND A.CNPJ IN (Select cnpj FROM estabelecimentos where id IN (".implode(',', $input['multiple_select_estabelecimentos'])."))";
+        }
+
+        if (!empty($input['multiple_select_uf'])) {
+            $sql .= " AND A.UF IN (".implode(',', array_map(function($value){
+                return "'$value'";
+            }, $input['multiple_select_uf'])).")";
+        }
         
         $dados_semcod = json_decode(json_encode(DB::Select($sql_semcod)),true);
 
@@ -647,8 +673,8 @@ juros de mora
         if (empty($dados) && empty($dados_semcod)) {
             $mensagem = 'Não há dados nesse período';
         }
-
-        return view('guiaicms.icms')->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem);
+                    
+        return view('guiaicms.icms')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
     }
 
     /**

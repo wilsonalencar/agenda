@@ -18,11 +18,22 @@
         <div class="row">
             <div class="col-md-2">
                 {!! Form::label('multiple_select_tributos[]', 'Estabelecimentos', ['class' => 'control-label'] )  !!}
-                {!!  Form::select('multiple_select_estabelecimentos[]', $estabelecimentos, array(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
+                <select multiple="multiple" name="multiple_select_estabelecimentos[]" id="estabelecimentos" class="form-control s2_multi">
+                <?php foreach($estabelecimentos as $aKey => $value) { 
+                    $selected = false;
+                    foreach($estabelecimentosselected as $key) {
+                        if($aKey == $key) {
+                            $selected = true;
+                        }
+                    }
+                ?>
+                    <option value="{{$aKey}}" @if($selected)selected="selected"@endif>{{$value}}</option>
+                <?php } ?>
+                </select>
             </div>
             <div class="col-md-2">
                 {!! Form::label('multiple_select_tributos[]', 'UF', ['class' => 'control-label'] )  !!}
-                {!!  Form::select('multiple_select_uf[]', $uf, array(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
+                {!!  Form::select('multiple_select_uf[]', $uf, $ufselected, ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
             </div>
         </div>
         <div class="row">
@@ -88,7 +99,7 @@
                             <td><?php if (substr($value['CNPJ'], 0,8) == 13574594) {
                                 echo "1000";
                             } ?></td>
-						  <td><?php echo $value['CODBARRAS'];?></td>
+                          <td><?php echo $value['CODBARRAS'];?></td>
                             <?php
                             $valorData = $value['DATA_VENCTO'];
                             $data_vencimento = str_replace('-', '/', $valorData);

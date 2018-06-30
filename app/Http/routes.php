@@ -273,6 +273,8 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
 
     Route::get('guiaicms', array('as'=>'guiaicms.icms', 'uses'=>'GuiaicmsController@icms'));
     Route::post('guiaicms/planilha', array('as'=>'guiaicms.planilha', 'uses'=>'GuiaicmsController@planilha'));
+    Route::post('guiaicms/criticas', array('as'=>'guiaicms.criticas', 'uses'=>'GuiaicmsController@criticas'));
+    Route::get('guiaicms/search_criticas', array('as'=>'guiaicms.search_criticas', 'uses'=>'GuiaicmsController@search_criticas'));
 
 });
 

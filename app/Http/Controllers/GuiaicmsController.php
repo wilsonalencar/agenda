@@ -10,7 +10,9 @@ use App\Models\Estabelecimento;
 use App\Models\Tributo;
 use App\Models\Municipio;
 use App\Models\Guiaicms;
+use App\Models\CriticasLeitor;
 use App\Models\Atividade;
+use App\Models\User;
 use App\Http\Requests;
 use App\Services\EntregaService;
 use Illuminate\Support\Facades\Input;
@@ -53,9 +55,8 @@ class GuiaicmsController extends Controller
             $path = 'W:';
         }
         $path .= '/storagebravobpo/';
-        
         $arquivos = scandir($path);
-        
+
         $data = array();
         foreach ($arquivos as $k => $v) {
             if (strpbrk($v, '0123456789１２３４５６７８９０')) {
@@ -64,20 +65,31 @@ class GuiaicmsController extends Controller
                 $data[$k]['path'] = $path_name;   
             }
         }
-        
+
         foreach ($data as $X => $FILENAME) {
             foreach ($FILENAME as $L => $arquivos) {
                 if (is_array($arquivos)) {
                     foreach ($arquivos as $A => $arquivo) {
                         if (substr($arquivo, -3) == 'pdf') {
+
+                            $arrayNameFile = explode("_", $arquivo);
+                            if (empty($arrayNameFile[2])) {
+                                continue;
+                            }
+
+                            if ($arrayNameFile[2] != 'ICMS') {
+                                continue;
+                            }
+
                             $files[] = $FILENAME['path'].$arquivo;
                         }
                     }
                 }
             }
         }
-        $funcao = 'pdftotext.exe ';
 
+        $funcao = 'pdftotext.exe ';
+        
         if (!empty($files)) {
             foreach ($files as $K => $file) {
                 $filetxt = str_replace('pdf', 'txt', $file);
@@ -90,18 +102,18 @@ class GuiaicmsController extends Controller
                         $caminho1_result .= 'results/';
                     }
                 }
+
                 $caminho1_result = substr($caminho1_result, 0, -1);   
                 shell_exec($funcao.$file.' '.substr($caminho1_result, 0, -8));
                 $destino = str_replace('results', 'imported', str_replace('txt', 'pdf', $caminho1_result));
-
+               
                 $arr[$file]['arquivo'] = str_replace('txt', 'pdf', $arquivonome); 
                 $arr[$file]['path'] = substr($destino, 0, -9); 
                 $arr[$file]['arquivotxt'] = $arquivonome; 
                 $arr[$file]['pathtxt'] = substr($caminho1_result, 0, -8);
-                copy($file, substr($destino, 0,-9));
-                unlink($file);
             }
         }
+
         if (!empty($files)) {
             $this->saveICMS($arr);
         }
@@ -117,7 +129,38 @@ class GuiaicmsController extends Controller
     public function saveICMS($array)
     {
         $icms = array();
+
         foreach ($array as $key => $value) {
+
+            $arrayExplode = explode("_", $value['arquivo']);
+            
+            $AtividadeID = 0;
+            if (!empty($arrayExplode[0])) 
+                $AtividadeID = $arrayExplode[0];
+
+            $CodigoEstabelecimento = 0;
+            if (!empty($arrayExplode[1])) 
+                $CodigoEstabelecimento = $arrayExplode[1];
+
+            $NomeTributo = '';
+            if (!empty($arrayExplode[2])) 
+                $NomeTributo = $arrayExplode[2];
+
+            $PeriodoApuracao = '';
+            if (!empty($arrayExplode[3])) 
+                $PeriodoApuracao = $arrayExplode[3]; 
+
+            $UF = '';
+            if (!empty($arrayExplode[4])) 
+                $UF = substr($arrayExplode[4], 0, 2); 
+
+            //buscando estemp_id
+            $estemp_id = 0;
+            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = '.$CodigoEstabelecimento.' ');
+            if (!empty($arrayEstempId[0]->id)) {
+                $estemp_id = $arrayEstempId[0]->id;
+            }
+
             $arqu = 'foo '.$value['arquivotxt'].' bar';    
             
             if (strpos($arqu, 'SP')) {
@@ -130,17 +173,62 @@ class GuiaicmsController extends Controller
 
             if (strpos($arqu, 'RS')) {
                 $icms = $this->icmsRS($value);
-            }   
+            }  
+            
+            if (empty($icms) || count($icms) < 6) {
+                $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
+                continue;
+            }
 
-            if (empty($icms) || count($icms) < 6 || !$this->validateEx($icms)) {
-                $icms = array();
-                copy($value['path'], str_replace('/imported', '', $value['path']));
-                unlink($value['path']);
+            $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID);
+            if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código de atividade não existe', 'N');
+                continue;
+            }
+
+            $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
+            if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Filial divergente com a filial da atividade', 'N');
+                continue;
+            }
+
+            $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
+            if (!$validateTributo[0]->countTributo) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O Tributo ICMS não confere com o tributo da atividade', 'N');
+                continue;
+            }
+
+            $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = '{$PeriodoApuracao}'");
+            if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Período de apuração diverente do período da atividade', 'N');
+                continue;
+            }
+
+            $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
+            if (empty($UF) || !$validateUF[0]->countUF) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'UF divergente da UF da filial da atividade', 'N');
+                continue;
+            }
+
+            $alertCentroCusto = DB::select("select count(1) countCentroCusto FROM centrocustospagto where estemp_id = ".$estemp_id." AND centrocusto <> '' AND centrocusto is not null");
+            if (!$alertCentroCusto[0]->countCentroCusto) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Centro de custo não cadastrado', 'S');
+            }
+
+            $alertCodigoSap = DB::select("select count(1) as countCodigoSap FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND codigo_sap <> '' AND codigo_sap is not null");
+            if (!$alertCodigoSap[0]->countCodigoSap) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código SAP do Municipio não cadastrado', 'S');
+            } 
+            
+            if (!$this->validateEx($icms)) {
+                continue;
             }
             
-            if ($this->validateEx($icms) && !empty($icms)) {
-               Guiaicms::create($icms);
-            } 
+            Guiaicms::create($icms);
+
+            $destino = str_replace('/imported', '', $value['path']);
+            copy($destino, $value['path']);
+            unlink($destino);
         }
 
         if (empty($_GET['getType'])) {  
@@ -150,6 +238,56 @@ class GuiaicmsController extends Controller
         $mensagem = 'Dados gravados com sucesso';
         return view('guiaicms.job_return')->withMensagem($mensagem);
         
+    }
+
+    public function createCritica($empresa_id=1, $estemp_id=0, $tributo_id=8, $arquivo, $critica, $importado)
+    {
+        $array['importado']     = $importado;
+        $array['critica']       = $critica;
+        $array['arquivo']       = $arquivo;
+        $array['Tributo_id']    = $tributo_id;
+        $array['Estemp_id']     = $estemp_id;
+        $array['Empresa_id']    = $empresa_id;
+        $array['Data_critica']  = date('Y-m-d h:i:s');
+        
+        //criando registro na tabela
+        CriticasLeitor::create($array);
+        
+        //buscar email através de empresa e tributo
+        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$tributo_id." and Emp_id = ".$empresa_id.")";
+        $emailsAnalista = DB::select($query);
+
+        $codigoEstabelecimento = '';
+        if ($estemp_id > 0) {
+            $codigoEstabelecimentoArray = DB::select('select codigo FROM estabelecimentos where id = '.$estemp_id.' LIMIT 1 ');
+            
+            if (!empty($codigoEstabelecimentoArray[0])) {
+                $codigoEstabelecimento = $codigoEstabelecimentoArray[0]->codigo;
+            }
+        }
+
+        $tributo_nome = '';
+        if ($tributo_id > 0) {
+            $nomeTributoArray = DB::select('select nome FROM tributos where id = '.$tributo_id.' LIMIT 1 ');
+            
+            if (!empty($nomeTributoArray[0])) {
+                $tributo_nome = $nomeTributoArray[0]->nome;
+            }
+        }
+        
+        //enviando email
+        $now = date('d/m/Y');
+        $subject = "Críticas e Alertas Leitor PDF em ".$now;
+        $text = 'Empresa => '.$empresa_id.' Estabelecimento.Codigo => '.$codigoEstabelecimento.' Tributo => '.$tributo_nome.' Arquivo => '.$arquivo.' Critica => '.$critica.' importado => '.$importado;
+
+        $data = array('subject'=>$subject,'messageLines'=>$text);
+        
+        if (!empty($emailsAnalista)) {
+            foreach($emailsAnalista as $row) {
+                $user = User::findOrFail($row->id);
+                $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
+            }
+        }     
     }
 
     public function validateEx($icms)
@@ -170,6 +308,7 @@ class GuiaicmsController extends Controller
         if (!empty($validate)) {
             return false;
         }
+
         return true;
     }
 
@@ -301,6 +440,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
+
         $icms['TRIBUTO_ID'] = 8;
 
 
@@ -546,6 +686,30 @@ juros de mora
         
         fclose($handle);
         return $icms;
+    }
+
+
+    public function search_criticas()
+    {
+        return view('guiaicms.search_criticas');
+    }
+
+
+    public function criticas(Request $request)
+    {
+        $input = $request->all();
+        if (empty($input['inicio']) || empty($input['fim'])) {
+            return redirect()->back()->with('status', 'É necessário informar as duas datas.');
+        }
+
+        $data_inicio = $input['inicio'].' 00:00:00';
+        $data_fim = $input['fim'].' 23:59:59';
+
+        $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasleitor A INNER JOIN estabelecimentos B ON A.Estemp_id = B.id INNER JOIN tributos C ON A.Tributo_id = C.id WHERE    A.Data_critica BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.Empresa_id = ".$this->s_emp->id." ";
+    
+        $dados = json_decode(json_encode(DB::Select($sql)),true);
+
+        return view('guiaicms.search_criticas')->withDados($dados);
     }
 
     /**

@@ -185,7 +185,7 @@ $(function() {
                                                                   var url = '';
 
                                                                   if(row['Id_usuario_entrada'] > 0) {
-                                                                        url += getUser(row['Id_usuario_entrada']) + '<br>' + mascararDate(row['Dt_alteracao_entrada']);
+                                                                        url += row['userEmailEntrada'] + '<br>' + mascararDate(row['Dt_alteracao_entrada']);
                                                                   } else {
                                                                         url += 'Inexistente' + '<br>' + mascararDate(row['Dt_alteracao_entrada']);
                                                                   }
@@ -196,7 +196,7 @@ $(function() {
                                                                   var url = '';
 
                                                                   if(row['Id_usuario_saida'] > 0) {
-                                                                        url += getUser(row['Id_usuario_saida']) + '<br>' + mascararDate(row['Dt_alteracao_saida']);
+                                                                        url += row['userEmailSaida'] + '<br>' + mascararDate(row['Dt_alteracao_saida']);
                                                                   } else {
                                                                         url += 'Inexistente' + '<br>' + mascararDate(row['Dt_alteracao_saida']);
                                                                   }
@@ -266,28 +266,6 @@ $(function() {
 
 });
 
-function getUser(userID)
-{
-    return $.ajax(
-    {
-        type: "GET",
-        url: '{{ url('cargas') }}/getUser',
-        cache: false,
-        async: false,
-        dataType: "json",
-        data:
-        {
-            'userID':userID
-        },
-        success: function(d)
-        {
-            if (!d.success) {
-                return 'Não existe';
-            }       
-           return d.data.user[0].email;
-        }
-    }).responseJSON.data.user[0].email;
-}
 </script>
 
 @stop

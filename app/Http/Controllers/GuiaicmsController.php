@@ -11,14 +11,17 @@ use App\Models\Tributo;
 use App\Models\Municipio;
 use App\Models\Guiaicms;
 use App\Models\CriticasLeitor;
+use App\Models\CriticasEntrega;
 use App\Models\Atividade;
 use App\Models\User;
 use App\Http\Requests;
 use App\Services\EntregaService;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use Carbon\Carbon;
 
 
 
@@ -278,6 +281,55 @@ class GuiaicmsController extends Controller
         //enviando email
         $now = date('d/m/Y');
         $subject = "Críticas e Alertas Leitor PDF em ".$now;
+        $text = 'Empresa => '.$empresa_id.' Estabelecimento.Codigo => '.$codigoEstabelecimento.' Tributo => '.$tributo_nome.' Arquivo => '.$arquivo.' Critica => '.$critica.' importado => '.$importado;
+
+        $data = array('subject'=>$subject,'messageLines'=>$text);
+        
+        if (!empty($emailsAnalista)) {
+            foreach($emailsAnalista as $row) {
+                $user = User::findOrFail($row->id);
+                $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
+            }
+        }     
+    }    
+
+    public function createCriticaEntrega($empresa_id=1, $estemp_id=0, $tributo_id=8, $arquivo, $critica, $importado)
+    {
+        $array['importado']     = $importado;
+        $array['critica']       = $critica;
+        $array['arquivo']       = $arquivo;
+        $array['Tributo_id']    = $tributo_id;
+        $array['Estemp_id']     = $estemp_id;
+        $array['Empresa_id']    = $empresa_id;
+        $array['Data_critica']  = date('Y-m-d h:i:s');
+        
+        //criando registro na tabela
+        CriticasEntrega::create($array);
+        //buscar email através de empresa e tributo
+        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$tributo_id." and Emp_id = ".$empresa_id.")";
+        $emailsAnalista = DB::select($query);
+
+        $codigoEstabelecimento = '';
+        if ($estemp_id > 0) {
+            $codigoEstabelecimentoArray = DB::select('select codigo FROM estabelecimentos where id = '.$estemp_id.' LIMIT 1 ');
+            
+            if (!empty($codigoEstabelecimentoArray[0])) {
+                $codigoEstabelecimento = $codigoEstabelecimentoArray[0]->codigo;
+            }
+        }
+
+        $tributo_nome = '';
+        if ($tributo_id > 0) {
+            $nomeTributoArray = DB::select('select nome FROM tributos where id = '.$tributo_id.' LIMIT 1 ');
+            
+            if (!empty($nomeTributoArray[0])) {
+                $tributo_nome = $nomeTributoArray[0]->nome;
+            }
+        }
+        
+        //enviando email
+        $now = date('d/m/Y');
+        $subject = "Críticas e Alertas Entrega de arquivos em ".$now;
         $text = 'Empresa => '.$empresa_id.' Estabelecimento.Codigo => '.$codigoEstabelecimento.' Tributo => '.$tributo_nome.' Arquivo => '.$arquivo.' Critica => '.$critica.' importado => '.$importado;
 
         $data = array('subject'=>$subject,'messageLines'=>$text);
@@ -711,6 +763,29 @@ juros de mora
 
         return view('guiaicms.search_criticas')->withDados($dados);
     }
+    
+
+    public function search_criticas_entrega()
+    {
+        return view('guiaicms.search_criticas_entrega');
+    }
+
+    public function criticas_entrega(Request $request)
+    {
+        $input = $request->all();
+        if (empty($input['inicio']) || empty($input['fim'])) {
+            return redirect()->back()->with('status', 'É necessário informar as duas datas.');
+        }
+
+        $data_inicio = $input['inicio'].' 00:00:00';
+        $data_fim = $input['fim'].' 23:59:59';
+
+        $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasentrega A INNER JOIN estabelecimentos B ON A.Estemp_id = B.id INNER JOIN tributos C ON A.Tributo_id = C.id WHERE    A.Data_critica BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.Empresa_id = ".$this->s_emp->id." ";
+    
+        $dados = json_decode(json_encode(DB::Select($sql)),true);
+
+        return view('guiaicms.search_criticas_entrega')->withDados($dados);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -854,45 +929,237 @@ juros de mora
         return view('guiaicms.icms')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    // inicio job de atividades
+    public function jobAtividades()
     {
+        $a = explode('/', $_SERVER['SCRIPT_FILENAME']);
+        $path = '';
+
+        $funcao = '';
+        if ($a[0] == 'C:' || $a[0] == 'F:') {
+            $path = 'W:';
+        }
+        $path .= '/storagebravobpo/';
+        $arquivos = scandir($path);
+
+        $data = array();
+        foreach ($arquivos as $k => $v) {
+            if (strpbrk($v, '0123456789１２３４５６７８９０')) {
+                $path_name = $path.$v.'/';
+                $data[$k]['arquivos'] = scandir($path_name);   
+                $data[$k]['path'] = $path_name;    
+            }
+        }
+        foreach ($data as $X => $FILENAME) {
+            foreach ($FILENAME as $L => $arquivos) {
+                if (is_array($arquivos)) {
+                    foreach ($arquivos as $A => $arquivo) {
+                        if (substr($arquivo, -3) == 'pdf') {
+                            $arrayNameFile = explode("_", $arquivo);
+                            if (empty($arrayNameFile[2])) {
+                                continue;
+                            }
+                            
+                            if ($this->validateTributo($arrayNameFile[2])) {
+                                continue;
+                            }
+
+                            $files[] = $FILENAME['path'].$arquivo;
+                        }
+                    }
+                }
+            }
+        }        
+        
+        if (!empty($files)) {
+            $this->savefiles($files);
+        } else {
+            echo "Não foram encontrados arquivos para realizar o processo.";exit;
+        }
+    
+        echo "Job foi rodado com sucesso.";exit;
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    private function validateTributo($tributo)
     {
+        $permission = DB::table('tributoleitorpdf')
+            ->join('tributos', 'tributoleitorpdf.Tributo_id', '=', 'tributos.id')
+            ->select('tributoleitorpdf.id')
+            ->where('tributoleitorpdf.leitorpdf', '=', 'S')
+            ->where('tributos.nome', '=', $tributo)
+            ->get();
+
+        if (empty($permission)) {
+            return true;
+        }
+    
+    return false;
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    private function savefiles($files){
+        $arr = array();
+        foreach ($files as $K => $file) {
+            $arquivo = explode('/', $file);
+            foreach ($arquivo as $k => $fileexploded) {
+            }
+
+            $arrayExplode = explode("_", $fileexploded);
+            $AtividadeID = 0;
+            if (!empty($arrayExplode[0])) 
+                $AtividadeID = $arrayExplode[0];
+
+            $CodigoEstabelecimento = 0;
+            if (!empty($arrayExplode[1])) 
+                $CodigoEstabelecimento = $arrayExplode[1];
+
+            $NomeTributo = '';
+            if (!empty($arrayExplode[2])) 
+                $NomeTributo = $arrayExplode[2];
+
+            $PeriodoApuracao = '';
+            if (!empty($arrayExplode[3])) 
+                $PeriodoApuracao = $arrayExplode[3]; 
+
+            $UF = '';
+            if (!empty($arrayExplode[4])) 
+                $UF = substr($arrayExplode[4], 0, 2); 
+
+            $estemp_id = 0;
+            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = '.$CodigoEstabelecimento.' ');
+            if (!empty($arrayEstempId[0]->id)) {
+                $estemp_id = $arrayEstempId[0]->id;
+            }
+
+            $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
+            if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código de atividade não existe', 'N');
+                continue;
+            }
+
+            $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
+            if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
+                continue;
+            }
+
+            if ($this->checkTributo($NomeTributo)) {
+                $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
+                if (!$validateTributo[0]->countTributo) {
+                    $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'O Tributo ICMS não confere com o tributo da atividade', 'N');
+                    continue;
+                }
+            }
+
+            $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = '{$PeriodoApuracao}'");
+            if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Período de apuração diverente do período da atividade', 'N');
+                continue;
+            }
+
+            $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
+            if (empty($UF) || !$validateUF[0]->countUF) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
+                continue;
+            }
+
+            $alertCentroCusto = DB::select("select count(1) countCentroCusto FROM centrocustospagto where estemp_id = ".$estemp_id." AND centrocusto <> '' AND centrocusto is not null");
+            if (!$alertCentroCusto[0]->countCentroCusto) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Centro de custo não cadastrado', 'S');
+            }
+
+            $alertCodigoSap = DB::select("select count(1) as countCodigoSap FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND codigo_sap <> '' AND codigo_sap is not null");
+            if (!$alertCodigoSap[0]->countCodigoSap) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código SAP do Municipio não cadastrado', 'S');
+            }
+            $arr[$AtividadeID][$K]['filename'] = $fileexploded;
+            $arr[$AtividadeID][$K]['path'] = $file;
+            $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;
+        }
+
+        if (!empty($arr)) {
+            foreach ($arr as $k => $singlearray) {
+                if (isset($singlearray['atividade'])) {
+                    unset($singlearray['atividade']);
+                }
+
+                $date = time();
+                $path = $date.'.zip';
+                $this->createZipFile($singlearray, $path);    
+            }
+        }
+    }   
+
+    public function checkTributo($tributo)
     {
+        $permission = DB::table('tributos')
+            ->select('tributos.id')
+            ->where('tributos.nome', '=', $tributo)
+            ->get();
+
+        if (empty($permission)) {
+            return false;
+        }
+    
+    return true;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+    public function createZipFile($f = array(),$fileName){
+        $zip = new \ZipArchive();
+        touch($fileName);
+
+        $res = $zip->open($fileName, \ZipArchive::CREATE);
+        if($res === true){
+        foreach ($f as $in => $name) {
+                $zip->addFile($name['path'] , $name['filename']);
+            }
+        }
+        $zip->close();
+
+        if (file_exists($fileName)) {
+            $data = ['image' => $fileName, 'atividade_id' => $name['atividade'], '_token' => csrf_token()];
+            $this->upload($data);
+        }
     }
+
+    public function upload($data) {
+
+        $file = array('image' => $data['image']);
+        $rules = array('image' => 'required|mimes:pdf,zip'); 
+        $validator = Validator::make($file, $rules);
+        
+        $atividade_id = $data['atividade_id'];
+        $atividade = Atividade::findOrFail($atividade_id);
+        $estemp = $atividade->estemp;
+        $regra = $atividade->regra;
+        $tipo = $regra->tributo->tipo;
+        $tipo_label = 'UNDEFINED';
+        switch($tipo) {
+            case 'F':
+                $tipo_label = 'FEDERAIS'; break;
+            case 'E':
+                $tipo_label = 'ESTADUAIS'; break;
+            case 'M':
+                $tipo_label = 'MUNICIPAIS'; break;
+        }
+        
+        $destinationPath = 'uploads/'.substr($estemp->cnpj,0,8).'/'.$estemp->cnpj.'/'.$tipo_label.'/'.$regra->tributo->nome.'/'.$atividade->periodo_apuracao;
+
+        copy($data['image'], $destinationPath);
+        unlink($data['image']);
+
+        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$regra->tributo->id." and Emp_id = ".$atividade->emp_id.") limit 1";
+        $idanalistas = DB::select($query);
+        
+        if (!empty($idanalistas)) {
+            foreach ($idanalistas as $k => $id) {
+                $atividade->Usuario_aprovador = $id;
+            }
+        }
+        $atividade->arquivo_entrega = $data['image'];
+        $atividade->usuario_entregador = Auth::user()->id;
+        $atividade->data_entrega = date("Y-m-d H:i:s");
+        $atividade->data_aprovacao = date("Y-m-d H:i:s");
+        $atividade->status = 3;
+        $atividade->save();
+    }    
 }

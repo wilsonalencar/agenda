@@ -217,6 +217,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('mensageriaprocadms/jobprocadms', array('as'=>'mensageriaprocadms.Job', 'uses'=>'MensageriaprocadmsController@Job'));
     Route::get('regra/job_envio_email', array('as'=>'regraslotes.Job', 'uses'=>'RegrasenviolotesController@Job'));
     Route::get('guiaicms/job', array('as'=>'guiaicms.Job', 'uses'=>'GuiaicmsController@Job'));
+    Route::get('atividades/job', array('as'=>'guiaicms.jobAtividades', 'uses'=>'GuiaicmsController@jobAtividades'));
 });
 
 // Just the Owner, Admin, Manager, MSAF, Supervisor and the Analyst
@@ -275,6 +276,8 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::post('guiaicms/planilha', array('as'=>'guiaicms.planilha', 'uses'=>'GuiaicmsController@planilha'));
     Route::post('guiaicms/criticas', array('as'=>'guiaicms.criticas', 'uses'=>'GuiaicmsController@criticas'));
     Route::get('guiaicms/search_criticas', array('as'=>'guiaicms.search_criticas', 'uses'=>'GuiaicmsController@search_criticas'));
+    Route::get('guiaicms/search_criticas_entrega', array('as'=>'guiaicms.search_criticas_entrega', 'uses'=>'GuiaicmsController@search_criticas_entrega'));
+    Route::post('guiaicms/criticas_entrega', array('as'=>'guiaicms.criticas_entrega', 'uses'=>'GuiaicmsController@criticas_entrega'));
 
 });
 

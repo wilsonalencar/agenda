@@ -41,7 +41,6 @@ class UploadsController extends Controller
     }
 
     public function upload() {
-
         // getting all of the post data
         $file = array('image' => Input::file('image'));
         // setting up rules

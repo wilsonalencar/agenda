@@ -144,6 +144,7 @@
                                             <li class="panel panel-default" id="dropdown">
                                                 <li><a href="{{ route('guiaicms.icms') }}">ICMS</a></li>
                                                 <li><a href="{{ route('guiaicms.search_criticas') }}">Criticas</a></li>
+                                                <li><a href="{{ route('guiaicms.search_criticas_entrega') }}">Criticas Entrega</a></li>
                                             </li>
                                     </ul>
                                 </div>

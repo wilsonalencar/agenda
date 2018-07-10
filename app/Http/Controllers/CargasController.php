@@ -65,8 +65,12 @@ class CargasController extends Controller
     public function anyData(Request $request)
     {
         $seid = $this->s_emp->id;
-        $estabelecimentos = Estabelecimento::select('*')->where('empresa_id', $seid)->with('municipio');
 
+        //$estabelecimentos = Estabelecimento::select('*')->where('empresa_id', $seid)->with('municipio');
+
+         $estabelecimentos = Estabelecimento::leftjoin('users as UserEntrada', 'estabelecimentos.Id_usuario_entrada', '=', 'UserEntrada.id')->leftjoin('users as UserSaida', 'estabelecimentos.Id_usuario_saida', '=', 'UserSaida.id')->select('estabelecimentos.*', 'UserEntrada.email as userEmailEntrada', 'UserSaida.email as userEmailSaida')->where('empresa_id', $seid)->with('municipio');
+
+        //echo '<Pre>';print_r($estabelecimentos);exit;
         $filter = $request->get('ativo');
         
         if ($filter != 2) {

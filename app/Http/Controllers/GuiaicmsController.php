@@ -58,6 +58,7 @@ class GuiaicmsController extends Controller
             $path = 'W:';
         }
         $path .= '/storagebravobpo/';
+        
         $arquivos = scandir($path);
 
         $data = array();
@@ -80,7 +81,7 @@ class GuiaicmsController extends Controller
                                 continue;
                             }
 
-                            if ($arrayNameFile[2] != 'ICMS') {
+                            if ($arrayNameFile[2] != 'ICMS' && $arrayNameFile[2] != 'DIFAL') {
                                 continue;
                             }
 
@@ -207,7 +208,8 @@ class GuiaicmsController extends Controller
                 continue;
             }
 
-            $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
+            $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = (select estemp_id FROM atividades where id = ".$AtividadeID.")) AND uf = '".$UF."'");
+
             if (empty($UF) || !$validateUF[0]->countUF) {
                 $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'UF divergente da UF da filial da atividade', 'N');
                 continue;
@@ -219,16 +221,24 @@ class GuiaicmsController extends Controller
             }
 
             $alertCodigoSap = DB::select("select count(1) as countCodigoSap FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND codigo_sap <> '' AND codigo_sap is not null");
-            if (!$alertCodigoSap[0]->countCodigoSap) {
+            if (!$alertCodigoSap[0]->countCodigoSap && $UF == 'SP') {
                 $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código SAP do Municipio não cadastrado', 'S');
             } 
             
             if (!$this->validateEx($icms)) {
                 continue;
             }
-            
-            Guiaicms::create($icms);
+             
 
+            if (!empty($icms['COD_RECEITA'])) {  
+                $icms['COD_RECEITA'] = strtolower($icms['COD_RECEITA']);
+            }
+
+            if (!empty($icms['UF'])) {  
+                $icms['UF'] = strtolower($icms['UF']);
+            }
+
+            Guiaicms::create($icms);
             $destino = str_replace('/imported', '', $value['path']);
             copy($destino, $value['path']);
             unlink($destino);
@@ -353,7 +363,7 @@ class GuiaicmsController extends Controller
         }
         if (empty($icms['REFERENCIA'])) {
             $icms['REFERENCIA'] = 0;
-        }
+        }   
         $query = 'SELECT * FROM guiaicms WHERE CNPJ = "'.$icms['CNPJ'].'" AND REFERENCIA = "'.$icms['REFERENCIA'].'" AND TRIBUTO_ID = '.$icms['TRIBUTO_ID'].'';
 
         $validate = DB::select($query);
@@ -754,11 +764,12 @@ juros de mora
             return redirect()->back()->with('status', 'É necessário informar as duas datas.');
         }
 
-        $data_inicio = $input['inicio'].' 00:00:00';
-        $data_fim = $input['fim'].' 23:59:59';
+        $data_inicio = $input['inicio'];
+        $data_fim = $input['fim'];
 
-        $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasleitor A INNER JOIN estabelecimentos B ON A.Estemp_id = B.id INNER JOIN tributos C ON A.Tributo_id = C.id WHERE    A.Data_critica BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.Empresa_id = ".$this->s_emp->id." ";
-    
+        $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasleitor A LEFT JOIN estabelecimentos B ON A.Estemp_id = B.id LEFT JOIN tributos C ON A.Tributo_id = C.id WHERE A.Data_critica BETWEEN DATE_FORMAT('".$data_inicio."', '%Y/%m/%d') AND DATE_FORMAT('".$data_fim."', '%Y/%m/%d')";
+       
+     
         $dados = json_decode(json_encode(DB::Select($sql)),true);
 
         return view('guiaicms.search_criticas')->withDados($dados);

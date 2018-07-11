@@ -1153,10 +1153,10 @@ juros de mora
         if (!empty($idanalistas)) {
             foreach ($idanalistas as $k => $id) {
                 $atividade->Usuario_aprovador = $id;
+                $atividade->usuario_entregador = $id;
             }
         }
         $atividade->arquivo_entrega = $data['image'];
-        $atividade->usuario_entregador = Auth::user()->id;
         $atividade->data_entrega = date("Y-m-d H:i:s");
         $atividade->data_aprovacao = date("Y-m-d H:i:s");
         $atividade->status = 3;

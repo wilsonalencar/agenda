@@ -89,7 +89,41 @@
                     <?php
                         if (!empty($planilha)) {
                     ?>
-                        Com Código de barras
+
+                    Com Código de barras
+                    
+                    <!-- cabeçafilho fixo? -->
+                    <tr style="display: none">
+                        <th>Codigo de Receita (Interno)</th>
+                        <th>Codigo do Tributo</th>
+                        <th>Empresa</th>
+                        <th>Codigo de Barras</th>
+                        <th>Data de vencimento</th>
+                        <th>Divisao</th>
+                        <th>CNPJ</th>
+                        <th>Comentario para Comprovante</th>
+                        <th>Comentarios</th>
+                        <th>Registro da instalacao</th>
+                        <th>Numero de documento de nove posicoes</th>
+                        <th>Series NF/NFE</th>
+                        <th>Subseries</th>
+                        <th>Chave de acesso de 44 posicoes</th>
+                        <th>Codigo de Autoriza</th>
+                        <th>BTP - Data da Nota</th>
+                        <th>Identifcacao processo FGTS</th>
+                        <th>Ordem</th>
+                        <th>Centro de custo</th>
+                        <th>Divisao</th>
+                        <th>Valor total</th>
+                        <th>Valor atualizado</th>
+                        <th>Valor multa</th>
+                        <th>Valor Juros</th>
+                        <th>Valor outros </th>
+                        <th>Valor acrescimento</th>
+                        <th>Valor desconto</th>
+                        <th>Ordem</th>
+                    </tr>
+
                     <?php
                           foreach ($planilha as $key => $value) {  
                     ?>
@@ -190,7 +224,61 @@
                     <tbody>
                     <?php
                         if (!empty($planilha_semcod)) { ?>
+                    
                     Sem Código de barras
+                    
+                    <!-- cabeçalho fixo -->
+                    <tr style="display: none">
+                        <th>Código de Receita (Interno)</th>
+                        <th>Codigo do Tributo</th>
+                        <th>Empresa</th>
+                        <th>Data de vencimento</th>
+                        <th>Tipo de identificação</th>
+                        <th>Identificação</th>
+                        <th>Data Apuração</th>
+                        <th>Numero Refencia</th>
+                        <th>Tipo DARF</th>
+                        <th>Divisão</th>
+                        <th>CNPJ</th>
+                        <th>Comentário para Comprovante</th>
+                        <th>Comentários</th>
+                        <th>Periodo de Competência/Referência/Apuração</th>
+                        <th>Informações Adicionais</th>
+                        <th>Data de Apuração</th>
+                        <th>Percentual sobre Receita Bruta</th>
+                        <th>Documento de Origem</th>
+                        <th>Referência GARE Bradesco</th>
+                        <th>Número do Parcelamento/AIIM/OEICM</th>
+                        <th>Divida ativa / Nº Etiqueta</th>
+                        <th>Ano Base</th>
+                        <th>Inscrição Estadual</th>
+                        <th>Estado (UF)</th>
+                        <th>Município</th>
+                        <th>Placa Veículo</th>
+                        <th>Opção de Pagamento</th>
+                        <th>Opção de Retirada</th>
+                        <th>Nome (GPS)</th>
+                        <th>Endereço (GPS)</th>
+                        <th>Numero do Endereço (GPS)</th>
+                        <th>Bairro (GPS)</th>
+                        <th>CEP (GPS)</th>
+                        <th>UF (GPS)</th>
+                        <th>Município (GPS)</th>
+                        <th>Telefone (GPS)</th>
+                        <th>Ordem</th>
+                        <th>Centro de custo</th>
+                        <th>Divisao</th>
+                        <th>Valor total</th>
+                        <th>Valor atualizado</th>
+                        <th>Valor multa</th>
+                        <th>Valor Juros</th>
+                        <th>Valor outros </th>
+                        <th>Valor acrescimento</th>
+                        <th>Valor desconto</th>
+                        <th>Ordem</th>
+                    </tr>
+
+
                     <?php
                           foreach ($planilha_semcod as $key => $value) {  
                     ?>
@@ -277,14 +365,15 @@ $(document).ready(function () {
             "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
         dom: '<B>rt',
-        name: 'oii',
         <?php
         if (!empty($planilha)) {
         ?>
         buttons: [
             {
                 extend: 'csvHtml5',
-                title: 'ZFIC_COMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>'
+                title: 'ZFIC_COMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>',
+                fieldSeparator: ';',
+                fieldBoundary: ''
             }
         ]
         <?php }?>
@@ -296,14 +385,15 @@ $(document).ready(function () {
             "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
         dom: '<B>rt',
-        name: 'oii',
         <?php
         if (!empty($planilha_semcod)) {
         ?>
         buttons: [
             {
                 extend: 'csvHtml5',
-                title: 'ZFIC_SEMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>'
+                title: 'ZFIC_SEMCODBARRAS_<?php echo $data_inicio; ?>_<?php echo $data_fim; ?>',
+                fieldSeparator: ';',
+                fieldBoundary:''
             }
         ]
         <?php }?>

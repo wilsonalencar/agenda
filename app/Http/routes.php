@@ -279,7 +279,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
 });
 
 // Just the Owner, Admin, Manager and the Supervisor
-Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente']], function () {
+Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente|analyst']], function () {
 
     Route::resource('atividades', 'AtividadesController');
     Route::get('atividade/data', array('as'=>'atividades.data', 'uses'=>'AtividadesController@anyData'));

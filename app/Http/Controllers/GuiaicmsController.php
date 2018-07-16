@@ -228,11 +228,11 @@ class GuiaicmsController extends Controller
              
 
             if (!empty($icms['COD_RECEITA'])) {  
-                $icms['COD_RECEITA'] = strtolower($icms['COD_RECEITA']);
+                $icms['COD_RECEITA'] = strtoupper($icms['COD_RECEITA']);
             }
 
             if (!empty($icms['UF'])) {  
-                $icms['UF'] = strtolower($icms['UF']);
+                $icms['UF'] = strtoupper($icms['UF']);
             }
 
             Guiaicms::create($icms);

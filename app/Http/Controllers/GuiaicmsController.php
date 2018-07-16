@@ -126,7 +126,7 @@ class GuiaicmsController extends Controller
             echo "Nenhum arquivo foi encontrado disponível para salvar";exit;
         }
 
-        $mensagem = 'Nenhum arquivo foi encontrado disponível para salvar';
+        $mensagem = 'Concluído com sucesso';
         return view('guiaicms.job_return')->withMensagem($mensagem);
     }
 
@@ -759,6 +759,7 @@ juros de mora
 
     public function criticas(Request $request)
     {
+        $mensagem = "Não existem críticas no período selecionado.";
         $input = $request->all();
         if (empty($input['inicio']) || empty($input['fim'])) {
             return redirect()->back()->with('status', 'É necessário informar as duas datas.');
@@ -768,11 +769,14 @@ juros de mora
         $data_fim = $input['fim'];
 
         $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasleitor A LEFT JOIN estabelecimentos B ON A.Estemp_id = B.id LEFT JOIN tributos C ON A.Tributo_id = C.id WHERE A.Data_critica BETWEEN DATE_FORMAT('".$data_inicio."', '%Y/%m/%d') AND DATE_FORMAT('".$data_fim."', '%Y/%m/%d')";
-       
      
         $dados = json_decode(json_encode(DB::Select($sql)),true);
 
-        return view('guiaicms.search_criticas')->withDados($dados);
+        if (!empty($dados)) {
+            $mensagem = '';
+        }
+
+        return view('guiaicms.search_criticas')->withDados($dados)->with('mensagem', $mensagem);
     }
     
 
@@ -937,30 +941,29 @@ juros de mora
             $mensagem = 'Não há dados nesse período';
         }
 
-        if (!empty($dados)) {
-            foreach ($dados as $key => $value) {
-                $dados[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
-                $dados[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
-                $dados[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
-                $dados[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
-                $dados[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
-                $dados[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
-                $dados[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
+        if (!empty($planilha)) {
+            foreach ($planilha as $key => $value) {
+                $planilha[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
+                $planilha[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
+                $planilha[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
+                $planilha[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
+                $planilha[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
+                $planilha[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
+                $planilha[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
             }
         }
 
-        if (!empty($dados_semcod)) {
-            foreach ($dados_semcod as $key => $value) {
-                $dados_semcod[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
-                $dados_semcod[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
-                $dados_semcod[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
-                $dados_semcod[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
-                $dados_semcod[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
-                $dados_semcod[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
-                $dados_semcod[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
+        if (!empty($planilha_semcod)) {
+            foreach ($planilha_semcod as $key => $value) {
+                $planilha_semcod[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
+                $planilha_semcod[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
+                $planilha_semcod[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
+                $planilha_semcod[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
+                $planilha_semcod[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
+                $planilha_semcod[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
+                $planilha_semcod[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
             }
         }
-
         return view('guiaicms.icms')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
     }
 
@@ -970,6 +973,7 @@ juros de mora
         if (!empty($valor)) {
             $string = number_format($valor,2,",",".");
         }
+
         return $string;
     }
 

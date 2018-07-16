@@ -86,12 +86,6 @@
                 </tr>
                 </thead>
                     <tbody>
-                    <?php
-                        if (!empty($planilha)) {
-                    ?>
-
-                    Com Código de barras
-                    
                     <!-- cabeçafilho fixo? -->
                     <tr style="display: none">
                         <th>Codigo de Receita (Interno)</th>
@@ -123,6 +117,12 @@
                         <th>Valor desconto</th>
                         <th>Ordem</th>
                     </tr>
+                    <?php
+                        if (!empty($planilha)) {
+                    ?>
+
+                    Com Código de barras
+                    
 
                     <?php
                           foreach ($planilha as $key => $value) {  
@@ -169,116 +169,114 @@
                     </tbody>
                 </table>
                 <br> 
-                <table class="table table-bordered display" id="dataTables-example_2" style="width: 100%; height: 100%; font-size: 12px; display: none;">
+                <table class="table table-bordered display" id="dataTables-example_2333" style="width: 100%; height: 100%; font-size: 12px; display: none;">
                 <thead>
-                <tr style="display: none">
-                    <th>CAB_CDRCIN</th>
-                    <th>CAB_CODTBT</th>
-                    <th>CAB_BUKRS</th>
-                    <th>CAB_DTVENC</th>
-                    <th>CAB_TPIDENT</th>
-                    <th>CAB_IDENT</th>
-                    <th>CAB_DTAPUR</th>
-                    <th>CAB_NUMREF</th>
-                    <th>CAB_TIPODARF</th>
-                    <th>CAB_GSBER</th>
-                    <th>CAB_CNPJE</th>
-                    <th>CAB_COMPCM</th>
-                    <th>CAB_COMENT</th>
-                    <th>CAB_PRDCPT</th>
-                    <th>CAB_INFADI</th>
-                    <th>CAB_DARF11</th>
-                    <th>CAB_DARJ22</th>
-                    <th>CAB_GARE13</th>
-                    <th>CAB_GARE14</th>
-                    <th>CAB_GARE15</th>
-                    <th>CAB_ANOBAS</th>
-                    <th>CAB_RENAVA</th>
-                    <th>CAB_INSEST</th>
-                    <th>CAB_ESTADO</th>
-                    <th>CAB_MUNICI</th>
-                    <th>CAB_CPLACA</th>
-                    <th>CAB_OPCPAG</th>
-                    <th>CAB_OPCRET</th>
-                    <th>CAB_NOMGPS</th>
-                    <th>CAB_ENDGPS</th>
-                    <th>CAB_NUMGPS</th>
-                    <th>CAB_BAIGPS</th>
-                    <th>CAB_CEPGPS</th>
-                    <th>CAB_ESTGPS</th>
-                    <th>CAB_MUNGPS</th>
-                    <th>CAB_TELGPS</th>
-                    <th>CAB_AUFNR</th>
-                    <th>RAT_KOSTL</th>
-                    <th>RAT_GSBER</th>
-                    <th>RAT_VALOR</th>
-                    <th>RAT_VAL_ATU</th>
-                    <th>RAT_VAL_MULTA</th>
-                    <th>RAT_VAL_JUROS</th>
-                    <th>RAT_VAL_OUTROS</th>
-                    <th>RAT_VAL_ACRES</th>
-                    <th>RAT_VAL_DESCONT</th>
-                    <th>RAT_AUFNR</th>
-                </tr>
+                    <tr style="display: none">
+                        <th>CAB_CDRCIN</th>
+                        <th>CAB_CODTBT</th>
+                        <th>CAB_BUKRS</th>
+                        <th>CAB_DTVENC</th>
+                        <th>CAB_TPIDENT</th>
+                        <th>CAB_IDENT</th>
+                        <th>CAB_DTAPUR</th>
+                        <th>CAB_NUMREF</th>
+                        <th>CAB_TIPODARF</th>
+                        <th>CAB_GSBER</th>
+                        <th>CAB_CNPJE</th>
+                        <th>CAB_COMPCM</th>
+                        <th>CAB_COMENT</th>
+                        <th>CAB_PRDCPT</th>
+                        <th>CAB_INFADI</th>
+                        <th>CAB_DARF11</th>
+                        <th>CAB_DARJ22</th>
+                        <th>CAB_GARE13</th>
+                        <th>CAB_GARE14</th>
+                        <th>CAB_GARE15</th>
+                        <th>CAB_ANOBAS</th>
+                        <th>CAB_RENAVA</th>
+                        <th>CAB_INSEST</th>
+                        <th>CAB_ESTADO</th>
+                        <th>CAB_MUNICI</th>
+                        <th>CAB_CPLACA</th>
+                        <th>CAB_OPCPAG</th>
+                        <th>CAB_OPCRET</th>
+                        <th>CAB_NOMGPS</th>
+                        <th>CAB_ENDGPS</th>
+                        <th>CAB_NUMGPS</th>
+                        <th>CAB_BAIGPS</th>
+                        <th>CAB_CEPGPS</th>
+                        <th>CAB_ESTGPS</th>
+                        <th>CAB_MUNGPS</th>
+                        <th>CAB_TELGPS</th>
+                        <th>CAB_AUFNR</th>
+                        <th>RAT_KOSTL</th>
+                        <th>RAT_GSBER</th>
+                        <th>RAT_VALOR</th>
+                        <th>RAT_VAL_ATU</th>
+                        <th>RAT_VAL_MULTA</th>
+                        <th>RAT_VAL_JUROS</th>
+                        <th>RAT_VAL_OUTROS</th>
+                        <th>RAT_VAL_ACRES</th>
+                        <th>RAT_VAL_DESCONT</th>
+                        <th>RAT_AUFNR</th>
+                    </tr>
                 </thead>
                     <tbody>
+                        <!-- cabeçafilho fixo? -->
+                        <tr style="display: none">
+                            <td>Código de Receita (Interno)</td>
+                            <td>Codigo do Tributo</td>
+                            <td>Empresa</td>
+                            <td>Data de vencimento</td>
+                            <td>Tipo de identificação</td>
+                            <td>Identificação</td>
+                            <td>Data Apuração</td>
+                            <td>Numero Refencia</td>
+                            <td>Tipo DARF</td>
+                            <td>Divisão</td>
+                            <td>CNPJ</td>
+                            <td>Comentário para Comprovante</td>
+                            <td>Comentários</td>
+                            <td>Periodo de Competência/Referência/Apuração</td>
+                            <td>Informações Adicionais</td>
+                            <td>Data de Apuração</td>
+                            <td>Percentual sobre Receita Bruta</td>
+                            <td>Documento de Origem</td>
+                            <td>Referência GARE Bradesco</td>
+                            <td>Número do Parcelamento/AIIM/OEICM</td>
+                            <td>Divida ativa / Nº Etiqueta</td>
+                            <td>Ano Base</td>
+                            <td>Inscrição Estadual</td>
+                            <td>Estado (UF)</td>
+                            <td>Município</td>
+                            <td>Placa Veículo</td>
+                            <td>Opção de Pagamento</td>
+                            <td>Opção de Retirada</td>
+                            <td>Nome (GPS)</td>
+                            <td>Endereço (GPS)</td>
+                            <td>Numero do Endereço (GPS)</td>
+                            <td>Bairro (GPS)</td>
+                            <td>CEP (GPS)</td>
+                            <td>UF (GPS)</td>
+                            <td>Município (GPS)</td>
+                            <td>Telefone (GPS)</td>
+                            <td>Ordem</td>
+                            <td>Centro de custo</td>
+                            <td>Divisao</td>
+                            <td>Valor total</td>
+                            <td>Valor atualizado</td>
+                            <td>Valor multa</td>
+                            <td>Valor Juros</td>
+                            <td>Valor outros </td>
+                            <td>Valor acrescimento</td>
+                            <td>Valor desconto</td>
+                            <td>Ordem</td>
+                        </tr>
                     <?php
                         if (!empty($planilha_semcod)) { ?>
                     
                     Sem Código de barras
                     
-                    <!-- cabeçalho fixo -->
-                    <tr style="display: none">
-                        <th>Código de Receita (Interno)</th>
-                        <th>Codigo do Tributo</th>
-                        <th>Empresa</th>
-                        <th>Data de vencimento</th>
-                        <th>Tipo de identificação</th>
-                        <th>Identificação</th>
-                        <th>Data Apuração</th>
-                        <th>Numero Refencia</th>
-                        <th>Tipo DARF</th>
-                        <th>Divisão</th>
-                        <th>CNPJ</th>
-                        <th>Comentário para Comprovante</th>
-                        <th>Comentários</th>
-                        <th>Periodo de Competência/Referência/Apuração</th>
-                        <th>Informações Adicionais</th>
-                        <th>Data de Apuração</th>
-                        <th>Percentual sobre Receita Bruta</th>
-                        <th>Documento de Origem</th>
-                        <th>Referência GARE Bradesco</th>
-                        <th>Número do Parcelamento/AIIM/OEICM</th>
-                        <th>Divida ativa / Nº Etiqueta</th>
-                        <th>Ano Base</th>
-                        <th>Inscrição Estadual</th>
-                        <th>Estado (UF)</th>
-                        <th>Município</th>
-                        <th>Placa Veículo</th>
-                        <th>Opção de Pagamento</th>
-                        <th>Opção de Retirada</th>
-                        <th>Nome (GPS)</th>
-                        <th>Endereço (GPS)</th>
-                        <th>Numero do Endereço (GPS)</th>
-                        <th>Bairro (GPS)</th>
-                        <th>CEP (GPS)</th>
-                        <th>UF (GPS)</th>
-                        <th>Município (GPS)</th>
-                        <th>Telefone (GPS)</th>
-                        <th>Ordem</th>
-                        <th>Centro de custo</th>
-                        <th>Divisao</th>
-                        <th>Valor total</th>
-                        <th>Valor atualizado</th>
-                        <th>Valor multa</th>
-                        <th>Valor Juros</th>
-                        <th>Valor outros </th>
-                        <th>Valor acrescimento</th>
-                        <th>Valor desconto</th>
-                        <th>Ordem</th>
-                    </tr>
-
-
                     <?php
                           foreach ($planilha_semcod as $key => $value) {  
                     ?>
@@ -339,10 +337,62 @@
                             <td></td>
                         </tr>
                     <?php } } ?>
-                            
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
                 </table>
-
             </div>
             <div class="col-md-2">
                 {!! Form::submit('Gerar', ['class' => 'btn btn-success-block']) !!}
@@ -380,7 +430,7 @@ $(document).ready(function () {
     });     
 
 
-    $('#dataTables-example_2').dataTable({
+    $('#dataTables-example_2333').dataTable({
         language: {                        
             "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },

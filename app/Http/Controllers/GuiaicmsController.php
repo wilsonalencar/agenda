@@ -936,8 +936,41 @@ juros de mora
         if (empty($dados) && empty($dados_semcod)) {
             $mensagem = 'Não há dados nesse período';
         }
-                    
+
+        if (!empty($dados)) {
+            foreach ($dados as $key => $value) {
+                $dados[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
+                $dados[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
+                $dados[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
+                $dados[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
+                $dados[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
+                $dados[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
+                $dados[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
+            }
+        }
+
+        if (!empty($dados_semcod)) {
+            foreach ($dados_semcod as $key => $value) {
+                $dados_semcod[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
+                $dados_semcod[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
+                $dados_semcod[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
+                $dados_semcod[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
+                $dados_semcod[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
+                $dados_semcod[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
+                $dados_semcod[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
+            }
+        }
+
         return view('guiaicms.icms')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
+    }
+
+    private function maskMoeda($valor)
+    {
+        $string = '';
+        if (!empty($valor)) {
+            $string = number_format($valor,2,",",".");
+        }
+        return $string;
     }
 
     // inicio job de atividades

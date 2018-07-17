@@ -678,6 +678,18 @@ class EntregaService {
 
     }
 
+    private function findEstabelecimentoCNPJ($cnpj)
+    {   
+        $id_estab_emp = 0;
+        $queryEstabelecimentoIDCNPJ = DB::select("Select id FROM estabelecimentos where cnpj = '".$cnpj."' ");
+        $jsonEstab = json_decode(json_encode($queryEstabelecimentoIDCNPJ),true);
+        if (!empty($jsonEstab[0])) {
+            $id_estab_emp = $jsonEstab[0]['id'];
+        }
+
+        return $id_estab_emp;
+    }
+
     public function generateMonthlyActivities($periodo_apuracao,$cnpj_empresa) {
         // Activate auto activity generation
         $generate = true;
@@ -687,6 +699,7 @@ class EntregaService {
         if (Cron::where('periodo_apuracao', $periodo_apuracao)->where('emp_id', $empresa->id)->count() >0) {
             $generate = false;
         }
+
         //TODAS AS REGRAS ATIVAS PARA A EMPRESA SOLICITADA
         $empresa_tributos = $empresa->tributos()->get();
         $array_tributos_ativos = array();
@@ -823,6 +836,7 @@ class EntregaService {
                             $val['emp_id'] = $ae->empresa_id;
                         } else {
                             $val['emp_id'] = $ae->id;
+                            $val['estemp_id'] = $this->findEstabelecimentoCNPJ($ae->cnpj);
                         }
 
                         //Verifica blacklist dos estabelecimentos para esta regra
@@ -874,6 +888,7 @@ class EntregaService {
                                 $val['emp_id'] = $el->empresa_id;
                             } else {
                                 $val['emp_id'] = $el->id;
+                                $val['estemp_id'] = $this->findEstabelecimentoCNPJ($el->cnpj);
                             }
 
                             //Verifica blacklist dos estabelecimentos para esta regra
@@ -1023,6 +1038,7 @@ class EntregaService {
                             $val['emp_id'] = $el->empresa_id;
                         } else {
                             $val['emp_id'] = $el->id;
+                            $val['estemp_id'] = $this->findEstabelecimentoCNPJ($el->cnpj);
                         }
 
                         $nova_atividade = Atividade::create($val);
@@ -1195,6 +1211,7 @@ class EntregaService {
                             $val['emp_id'] = $ae->empresa_id;
                         } else {
                             $val['emp_id'] = $ae->id;
+                            $val['estemp_id'] = $this->findEstabelecimentoCNPJ($ae->cnpj);
                         }
 
                         $anali = DB::table('atividadeanalista')
@@ -1267,6 +1284,7 @@ class EntregaService {
                                 $val['emp_id'] = $el->empresa_id;
                             } else {
                                 $val['emp_id'] = $el->id;
+                                $val['estemp_id'] = $this->findEstabelecimentoCNPJ($el->cnpj);
                             }
                             $anali = DB::table('atividadeanalista')
                             ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')

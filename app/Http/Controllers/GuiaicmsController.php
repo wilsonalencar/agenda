@@ -505,7 +505,6 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
         $icms['TRIBUTO_ID'] = 8;
 
-
         preg_match('~\(01\) nome / razao social \(estabelecimento principal\)([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
@@ -536,6 +535,12 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $valorData = trim($l[1]);
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+        }
+
+        preg_match('~apuracao \(debitos/creditos\) normal([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['IE'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
         }
 
         preg_match('~\(06\) receita([^{]*)~i', $str, $match);

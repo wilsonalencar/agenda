@@ -820,9 +820,9 @@ class EntregaService {
                         $val['estemp_type'] = substr($ae->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                         $val['estemp_id'] = $ae->id;
                         if ($val['estemp_type'] == 'estab') {
-                            $val['emp_id'] = $ae->empresa_id;
-                        } else {
                             $val['emp_id'] = $ae->id;
+                        } else {
+                            $val['emp_id'] = $ae->empresa_id;
                         }
 
                         //Verifica blacklist dos estabelecimentos para esta regra
@@ -871,9 +871,9 @@ class EntregaService {
                             $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                             $val['estemp_id'] = $el->id;
                             if ($val['estemp_type'] == 'estab') {
-                                $val['emp_id'] = $el->empresa_id;
-                            } else {
                                 $val['emp_id'] = $el->id;
+                            } else {
+                                $val['emp_id'] = $el->empresa_id;
                             }
 
                             //Verifica blacklist dos estabelecimentos para esta regra
@@ -1020,9 +1020,9 @@ class EntregaService {
                         $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                         $val['estemp_id'] = $el->id;
                         if ($val['estemp_type'] == 'estab') {
-                            $val['emp_id'] = $el->empresa_id;
-                        } else {
                             $val['emp_id'] = $el->id;
+                        } else {
+                            $val['emp_id'] = $el->empresa_id;
                         }
 
                         $nova_atividade = Atividade::create($val);
@@ -1192,9 +1192,9 @@ class EntregaService {
                         $val['estemp_type'] = substr($ae->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                         $val['estemp_id'] = $ae->id;
                         if ($val['estemp_type'] == 'estab') {
-                            $val['emp_id'] = $ae->empresa_id;
-                        } else {
                             $val['emp_id'] = $ae->id;
+                        } else {
+                            $val['emp_id'] = $ae->empresa_id;
                         }
 
                         $anali = DB::table('atividadeanalista')
@@ -1264,9 +1264,9 @@ class EntregaService {
                             $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                             $val['estemp_id'] = $el->id;
                             if ($val['estemp_type'] == 'estab') {
-                                $val['emp_id'] = $el->empresa_id;
-                            } else {
                                 $val['emp_id'] = $el->id;
+                            } else {
+                                $val['emp_id'] = $el->empresa_id;
                             }
                             $anali = DB::table('atividadeanalista')
                             ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')

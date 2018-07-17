@@ -49,19 +49,22 @@ class AtividadeanalistafilialController extends Controller
         if (count($emp) == 0) {
             return false;
         }
-
+        //Verifica se existe o cnpj
         $find = DB::table('estabelecimentos')->select('empresa_id', 'id')->where('empresa_id', $emp[0]['Emp_id'])->where('cnpj', $array['cnpj'])->get();
-
         $find = json_decode(json_encode($find),true);
         if (count($find) == 0) {
             return false;
         }
+        //fim verificação
 
-        $existencia = DB::table('atividadeanalistafilial')->select('id')->where('Id_estabelecimento', $find[0]['id'])->get();
+        //Verifica se o estabelecimento já está na Atividadeanalistafilial
+        $existencia = DB::Select('SELECT A.id FROM atividadeanalistafilial A INNER JOIN atividadeanalista B on A.Id_atividadeanalista = B.id WHERE A.Id_estabelecimento = '.$find[0]['id'].' AND B.Emp_id = '.$find[0]['empresa_id'].' AND B.Id_usuario_analista = '.$array['Id_usuario'].' AND B.Tributo_id = (SELECT D.Tributo_id FROM atividadeanalista D where D.id = '.$array['Id_atividadeanalista'].')');
         $existencia = json_decode(json_encode($existencia),true);
         if (count($existencia) > 0) {
             return false;
         }
+        //fim verificação
+
         return true;
     }
 
@@ -98,8 +101,7 @@ class AtividadeanalistafilialController extends Controller
             return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);
         }
         
-        $input['cnpj'] = preg_replace('/[^0-9]/', '', $input['cnpj']);;
-
+        $input['cnpj'] = preg_replace('/[^0-9]/', '', $input['cnpj']);
         if (!empty($input['cnpj']) && !$this->validation($input)) {
             
             $cnpjs = DB::table('atividadeanalistafilial')

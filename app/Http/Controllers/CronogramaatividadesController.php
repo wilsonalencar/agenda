@@ -462,7 +462,7 @@ class CronogramaatividadesController extends Controller
             }
         $string['status'] = substr($string['status'], 0, -1);
         }
-
+        $user = User::findOrFail(Auth::user()->id);
         $query = "SELECT 
                     DATE_FORMAT(A.limite, '%d/%m/%Y %H:%i:%s') as limite,
                     B.codigo as codigo,
@@ -485,7 +485,7 @@ class CronogramaatividadesController extends Controller
         $query .= " WHERE DATE_FORMAT(A.limite, '%Y-%m-%d') in (".$string['Datas'].") ";
         $query .= " AND A.emp_id in (".$string['emps'].") ";
 
-        if (!empty($string['analista_selected'])) {
+        if (!empty($string['analista_selected']) && !$user->hasRole('analyst')) {
             $query .= " AND A.Id_usuario_analista in (".$string['analista_selected'].") ";
         }
 
@@ -499,6 +499,10 @@ class CronogramaatividadesController extends Controller
 
         if (!empty($string['status'])) {
             $query .= " AND A.status in (".$string['status'].") ";
+        }
+
+        if ($user->hasRole('analyst')){
+            $query .= ' AND A.Id_usuario_analista = '.$user->id;
         }
 
         $dados = DB::select($query);

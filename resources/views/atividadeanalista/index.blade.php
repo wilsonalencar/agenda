@@ -41,17 +41,16 @@
     </table>                                            
 
 <script type="text/javascript">
-    $(document).ready(function (){
+$(document).ready(function (){
     $('#myTableAprovacao').dataTable({
         language: {
-        //"searchPlaceholder": "ID, P.A. ou descrição",
+        "searchPlaceholder": "Pesquisar registro específico",
         "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
-        dom: 'f',
+        dom: "lfrtip",
         processing: true,
         stateSave: true,
-        order: [[ 0, 'asc' ], [ 1, 'asc' ]],
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        lengthMenu: [[25, 50, 75, -1], [25, 50, 75, "100"]]
     });        
 });
 

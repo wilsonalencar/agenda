@@ -206,7 +206,6 @@ class AtividadeanalistaController extends Controller
                 ->get();
         
         $cnpjs = json_decode(json_encode($cnpjs),true);
-
         $var = array();
         if (!empty($input['Tributo_id'])) {
             foreach ($input['Tributo_id'] as $x => $v) {

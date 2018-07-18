@@ -618,95 +618,37 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         if (!file_exists($value['pathtxt'])) {
             return $icms;
         }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
-
         $icms['TRIBUTO_ID'] = 8;
 
-        preg_match('~\(01\) nome / razao social \(estabelecimento principal\)([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['CONTRIBUINTE'] = trim($i[0]);
-        }
-
-        preg_match('~\(10\) cnpj/cpf([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['CNPJ'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($i[0]))));
-        }
-
-        preg_match('~\(04\) uf ([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['UF'] = trim($i[0]);
-        }
-
-        preg_match('~periodo de referencia: data vencimento:([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $l = explode(' ', $i[0]);
-            $icms['REFERENCIA'] = trim($l[0]);
-            $valorData = trim($l[1]);
-            $data_vencimento = str_replace('/', '-', $valorData);
-            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-        }
-
-        preg_match('~apuracao \(debitos/creditos\) normal([^{]*)~i', $str, $match);
+        preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
+        
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['IE'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
+            $icms['COD_RECEITA'] = $this->numero($i[0]);
+            $icms['REFERENCIA'] = $this->numero($i[1]);
+            $lk = explode('
+', $i[2]);
+            $icms['IE'] = $this->numero($lk[0]);
+            $icms['DATA_VENCTO'] = $lk[1];
+
+            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[5]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[7])))));
+            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[16]))));
         }
 
-        preg_match('~\(06\) receita([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['COD_RECEITA'] = trim($i[0]);
-        }
-
-        preg_match('~\(13\) valor principal([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['VLR_RECEITA'] = str_replace(',', '.', trim(str_replace('.', '', $i[0])));
-        }
-
-        preg_match('~\(14\) juros de mora
-
-\(15\) multa de mora([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['JUROS_MORA'] = str_replace(',', '.', trim(str_replace('.', '', $i[0])));
-            $a = explode(' ', $i[2]);
-            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $a[0]));
-        }
-
-        preg_match('~\(16\) multa penal/formal([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $a = explode(' ', $i[0]);
-            $icms['MULTA_PENAL_FORMAL'] = str_replace(',', '.', trim(str_replace('.', '', $a[0])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
-        }
-        
-        preg_match('~\(08\) informacoes complementares([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['OBSERVACAO'] = trim($i[0]);
-        }
-
-        preg_match('~\(18\) autenticacao bancaria([^{]*)~i', $str, $match);
+        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
@@ -720,99 +662,61 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
     public function icmsGO($value)
     {
-        $icms = array();
+           $icms = array();
         if (!file_exists($value['pathtxt'])) {
             return $icms;
         }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['CNPJ'] = $estabelecimento->cnpj;
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
-
         $icms['TRIBUTO_ID'] = 8;
+        
+        echo "<Pre>";
+        print_r($icms);
+        echo "<hr>";
+        echo "<pre>";
+        print_r($str);exit;
 
-        preg_match('~\(01\) nome / razao social \(estabelecimento principal\)([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['CONTRIBUINTE'] = trim($i[0]);
-        }
 
-        preg_match('~\(10\) cnpj/cpf([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['CNPJ'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($i[0]))));
-        }
-
-        preg_match('~\(04\) uf ([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['UF'] = trim($i[0]);
-        }
-
-        preg_match('~periodo de referencia: data vencimento:([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $l = explode(' ', $i[0]);
-            $icms['REFERENCIA'] = trim($l[0]);
-            $valorData = trim($l[1]);
-            $data_vencimento = str_replace('/', '-', $valorData);
-            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-        }
-
-        preg_match('~apuracao \(debitos/creditos\) normal([^{]*)~i', $str, $match);
+        preg_match('~caceal([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['IE'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
+            $icms['IE'] = trim($this->numero($i[0]));
         }
 
-        preg_match('~\(06\) receita([^{]*)~i', $str, $match);
+        preg_match('~receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['COD_RECEITA'] = trim($i[0]);
+            $i = explode(' ', trim($match[1]));
+            $icms['COD_RECEITA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
         }
 
-        preg_match('~\(13\) valor principal([^{]*)~i', $str, $match);
+        preg_match('~referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['VLR_RECEITA'] = str_replace(',', '.', trim(str_replace('.', '', $i[0])));
+            $i = explode(' ', trim($match[1]));
+            $icms['REFERENCIA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
         }
 
-        preg_match('~\(14\) juros de mora
-
-\(15\) multa de mora([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['JUROS_MORA'] = str_replace(',', '.', trim(str_replace('.', '', $i[0])));
-            $a = explode(' ', $i[2]);
-            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $a[0]));
-        }
-
-        preg_match('~\(16\) multa penal/formal([^{]*)~i', $str, $match);
+        preg_match('~vencimento principal cm desconto juros multa total([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
             $a = explode(' ', $i[0]);
-            $icms['MULTA_PENAL_FORMAL'] = str_replace(',', '.', trim(str_replace('.', '', $a[0])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
-        }
-        
-        preg_match('~\(08\) informacoes complementares([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['OBSERVACAO'] = trim($i[0]);
+            $icms['DATA_VENCTO'] = trim($a[0]);
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[1])));
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',trim($a[4])));
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',trim($a[5])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[6])));
         }
 
-        preg_match('~\(18\) autenticacao bancaria([^{]*)~i', $str, $match);
+        preg_match('~via - banco([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
@@ -866,12 +770,12 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
                $icms['REFERENCIA'] = $l[0];
                $icms['DATA_VENCTO'] = $l[1];
                
-               $icms['VLR_TOTAL'] = $data[7];
+               $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$data[7]));
                $p = explode(' ', $data[6]);
-               $icms['VLR_RECEITA'] = $p[0];
-               $icms['JUROS_MORA'] = $p[1];
-               $icms['MULTA_MORA_INFRA'] = $p[2];
-               $icms['TAXA'] = $p[3];
+               $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$p[0]));
+               $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$p[1]));
+               $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$p[2]));
+               $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$p[3]));
            }   
         }
         
@@ -944,10 +848,10 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $a = explode(' ', $i[0]);
             $icms['DATA_VENCTO'] = trim($a[0]);
-            $icms['VLR_RECEITA'] = trim($a[1]);
-            $icms['JUROS_MORA'] = trim($a[4]);
-            $icms['MULTA_MORA_INFRA'] = trim($a[5]);
-            $icms['VLR_TOTAL'] = trim($a[6]);
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[1])));
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',trim($a[4])));
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',trim($a[5])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[6])));
         }
 
         preg_match('~via - banco([^{]*)~i', $str, $match);

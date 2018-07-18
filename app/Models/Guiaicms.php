@@ -37,7 +37,8 @@ class Guiaicms extends Model
         'CNAE',
         'OBSERVACAO',
         'MULTA_PENAL_FORMAL',
-        'CODBARRAS'
+        'CODBARRAS',
+        'TAXA'
     ];
 
 }

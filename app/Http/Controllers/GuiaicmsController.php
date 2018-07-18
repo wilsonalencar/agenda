@@ -678,52 +678,41 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
-        
-        echo "<Pre>";
-        print_r($icms);
-        echo "<hr>";
-        echo "<pre>";
-        print_r($str);exit;
 
-
-        preg_match('~caceal([^{]*)~i', $str, $match);
+        preg_match('~inscricao estadual:([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
             $icms['IE'] = trim($this->numero($i[0]));
         }
 
-        preg_match('~receita([^{]*)~i', $str, $match);
+        preg_match('~documento de origem referencia 300-mensal -([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
+            $icms['REFERENCIA'] = trim($this->numero($i[0]));
         }
 
-        preg_match('~referencia([^{]*)~i', $str, $match);
+        preg_match('~data de vencimento([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['REFERENCIA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
+            $icms['DATA_VENCTO'] =substr(trim($i[0]), 0,10);
         }
 
-        preg_match('~vencimento principal cm desconto juros multa total([^{]*)~i', $str, $match);
+        preg_match('~validade do calculo: total a recolher:
+([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $a = explode(' ', $i[0]);
-            $icms['DATA_VENCTO'] = trim($a[0]);
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[1])));
-            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',trim($a[4])));
-            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',trim($a[5])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[6])));
+            $i = explode(' ', trim($match[1]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[1])));          
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[1])));
         }
 
-        preg_match('~via - banco([^{]*)~i', $str, $match);
+        preg_match('~foo([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
+        
         fclose($handle);
         return $icms;
     }

@@ -834,6 +834,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['CNPJ'] = $estabelecimento->cnpj;
 
         $handle = fopen($value['pathtxt'], "r");
@@ -843,53 +844,50 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
+
+        preg_match('~15.juros - r\$ 16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $k = 0;
+            foreach ($i as $key => $value) {
+                if ($value == '15.juros - r$ 16.outros - r$ 17.valor total - r$') {
+                    $k = 1;
+                }
+                if ($k) {
+                    $data[] = $value;
+                }
+            }
+        if (!empty($data)) {
+               $a = explode(' ', $data[2]);
+               $icms['COD_RECEITA'] = $a[1];
+
+               $l = explode(' ', $data[3]);
+               $icms['REFERENCIA'] = $l[0];
+               $icms['DATA_VENCTO'] = $l[1];
+               
+               $icms['VLR_TOTAL'] = $data[7];
+               $p = explode(' ', $data[6]);
+               $icms['VLR_RECEITA'] = $p[0];
+               $icms['JUROS_MORA'] = $p[1];
+               $icms['MULTA_MORA_INFRA'] = $p[2];
+               $icms['TAXA'] = $p[3];
+           }   
+        }
         
-        echo "<pre>";
-        print_r($str);
-        echo "</pre>";
-        echo "<hr />";
-        echo "<hr />";
-        echo "<hr />";
-        echo "<PrE>";
-        print_r($icms);
-        echo "</pre>";
-        exit;
-
-        preg_match('~caceal([^{]*)~i', $str, $match);
+        $codbarras = '';
+        preg_match('~aviso aos bancos : receber ate ([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['IE'] = trim($this->numero($i[0]));
-        }
-
-        preg_match('~receita([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
-        }
-
-        preg_match('~referencia([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['REFERENCIA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
-        }
-
-        preg_match('~vencimento principal cm desconto juros multa total([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $a = explode(' ', $i[0]);
-            $icms['DATA_VENCTO'] = trim($a[0]);
-            $icms['VLR_RECEITA'] = trim($a[1]);
-            $icms['JUROS_MORA'] = trim($a[4]);
-            $icms['MULTA_MORA_INFRA'] = trim($a[5]);
-            $icms['VLR_TOTAL'] = trim($a[6]);
-        }
-
-        preg_match('~via - banco([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            foreach ($i as $key => $value) {
+                if (is_numeric($this->numero($value)) && strlen($this->numero($value)) > 8) {
+                    $codbarras .= $this->numero($value);
+                }
+                if ($key == 5) {
+                    break;
+                }
+            }
+            $codbarras = str_replace('-', '', str_replace(' ', '', substr($codbarras, 0,-2)));
             $icms['CODBARRAS'] = trim($codbarras);
         }
 

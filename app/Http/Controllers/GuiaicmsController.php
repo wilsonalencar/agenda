@@ -697,9 +697,9 @@ juros de mora
         //vlr_total
         preg_match('~valor total
 14([^{]*)~i', $str, $match);
+        if (!empty($match)) {
         $string = explode('
 ',trim($match[1]));
-        if (!empty($match)) {
             $icms['VLR_TOTAL'] = str_replace(',', '.', trim(str_replace('.', '', $string[0])));
         }
         

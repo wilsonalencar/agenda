@@ -690,6 +690,18 @@ class EntregaService {
         return $id_estab_emp;
     }
 
+    private function findEmpresaEstabelecimentoID($estabelecimentoID)
+    {   
+        $id_empresa = 0;
+        $findEmpresaEstabelecimentoID = DB::select("Select empresa_id FROM estabelecimentos where id = ".$estabelecimentoID." ");
+        $jsonEstab = json_decode(json_encode($findEmpresaEstabelecimentoID),true);
+        if (!empty($jsonEstab[0])) {
+            $id_empresa = $jsonEstab[0]['empresa_id'];
+        }
+
+        return $id_empresa;
+    }
+
     public function generateMonthlyActivities($periodo_apuracao,$cnpj_empresa) {
         // Activate auto activity generation
         $generate = true;
@@ -835,8 +847,9 @@ class EntregaService {
                         if ($val['estemp_type'] == 'estab') {
                             $val['emp_id'] = $ae->empresa_id;
                         } else {
-                            $val['emp_id'] = $ae->id;
-                            $val['estemp_id'] = $this->findEstabelecimentoCNPJ($ae->cnpj);
+                           $id_estab = $this->findEstabelecimentoCNPJ($ae->cnpj);
+                            $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
+                            $val['estemp_id'] = $id_estab;
                         }
 
                         //Verifica blacklist dos estabelecimentos para esta regra
@@ -887,8 +900,9 @@ class EntregaService {
                             if ($val['estemp_type'] == 'estab') {
                                 $val['emp_id'] = $el->empresa_id;
                             } else {
-                                $val['emp_id'] = $el->id;
-                                $val['estemp_id'] = $this->findEstabelecimentoCNPJ($el->cnpj);
+                                $id_estab = $this->findEstabelecimentoCNPJ($el->cnpj);
+                            $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
+                            $val['estemp_id'] = $id_estab;
                             }
 
                             //Verifica blacklist dos estabelecimentos para esta regra
@@ -1037,8 +1051,9 @@ class EntregaService {
                         if ($val['estemp_type'] == 'estab') {
                             $val['emp_id'] = $el->empresa_id;
                         } else {
-                            $val['emp_id'] = $el->id;
-                            $val['estemp_id'] = $this->findEstabelecimentoCNPJ($el->cnpj);
+                            $id_estab = $this->findEstabelecimentoCNPJ($el->cnpj);
+                            $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
+                            $val['estemp_id'] = $id_estab;
                         }
 
                         $nova_atividade = Atividade::create($val);
@@ -1062,6 +1077,7 @@ class EntregaService {
     }
 
     public function generateMonthlyCronActivities($periodo_apuracao,$cnpj_empresa) {
+
         // Activate auto activity generation
         $generate = true;
         //
@@ -1069,6 +1085,7 @@ class EntregaService {
         if (CronogramaStatus::where('periodo_apuracao', $periodo_apuracao)->where('emp_id', $empresa->id)->count() >0) {
             $generate = false;
         }
+        
         //TODAS AS REGRAS ATIVAS PARA A EMPRESA SOLICITADA
         $empresa_tributos = $empresa->tributos()->get();
         $array_tributos_ativos = array();
@@ -1077,9 +1094,10 @@ class EntregaService {
         }
         //
         $regras = Regra::where('freq_entrega','M')->where('ativo',1)->whereIN('tributo_id',$array_tributos_ativos)->get();
-
+        
         if ($generate) {
             $count = 0;
+
             foreach ($regras as $regra) {
                 //VERIFICA CNPJ QUE FORAM BANIDOS PARA ESTA REGRA
                 $blacklist = array();
@@ -1119,6 +1137,7 @@ class EntregaService {
                     $ativ_estemps = array_merge($empresas, $estabs);
 
                 } else { //Municipal
+
                     $ref = $regra->ref;
                     if (strlen($ref)==2) {  // O tributo é municipal, porem a regra é estadual
 
@@ -1175,7 +1194,9 @@ class EntregaService {
 
                 // REGRAS ESPECIAIS: RE01,RE02,RE03...
                 if (substr($regra->regra_entrega, 0, strlen('RE')) === 'RE') {
+                    
                     foreach($ativ_estemps as $ae) {
+                        
                         $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
                         $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
 
@@ -1210,9 +1231,12 @@ class EntregaService {
                         if ($val['estemp_type'] == 'estab') {
                             $val['emp_id'] = $ae->empresa_id;
                         } else {
-                            $val['emp_id'] = $ae->id;
-                            $val['estemp_id'] = $this->findEstabelecimentoCNPJ($ae->cnpj);
+                            $id_estab = $this->findEstabelecimentoCNPJ($ae->cnpj);
+                            $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
+                            $val['estemp_id'] = $id_estab;
                         }
+
+
 
                         $anali = DB::table('atividadeanalista')
                             ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
@@ -1270,6 +1294,7 @@ class EntregaService {
                         'tipo_geracao' => 'A',
                         'regra_id' => $regra->id
                     );
+
                     //FILTRO TRIBUTOS SUSPENSOS (ex. DIPAM)
                     if (sizeof($ativ_estemps) > 0) {
                         foreach ($ativ_estemps as $el) {
@@ -1283,8 +1308,9 @@ class EntregaService {
                             if ($val['estemp_type'] == 'estab') {
                                 $val['emp_id'] = $el->empresa_id;
                             } else {
-                                $val['emp_id'] = $el->id;
-                                $val['estemp_id'] = $this->findEstabelecimentoCNPJ($el->cnpj);
+                                $id_estab = $this->findEstabelecimentoCNPJ($el->cnpj);
+                            $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
+                            $val['estemp_id'] = $id_estab;
                             }
                             $anali = DB::table('atividadeanalista')
                             ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
@@ -1309,7 +1335,7 @@ class EntregaService {
                     }
                 }
             }
-        
+            
             DB::table('cronogramastatus')->insert(
                 ['periodo_apuracao' => $periodo_apuracao,'qtd'=>$count,'tipo_periodo'=>'M','emp_id'=>$empresa->id]
             );

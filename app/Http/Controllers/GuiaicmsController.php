@@ -186,14 +186,14 @@ class GuiaicmsController extends Controller
             if (strpos($arqu, 'DF')) {
                 $icms = $this->icmsDF($value);
             }
-
+            /*
             if (strpos($arqu, 'PA')) {
                 $icms = $this->icmsPA($value);
             }
 
             if (strpos($arqu, 'GO')) {
                 $icms = $this->icmsGO($value);
-            }  
+            } */ 
             
             if (empty($icms) || count($icms) < 6) {
                 $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');

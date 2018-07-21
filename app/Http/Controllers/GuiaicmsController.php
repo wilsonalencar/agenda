@@ -954,9 +954,9 @@ juros de mora
         //vlr_total
         preg_match('~valor total
 14([^{]*)~i', $str, $match);
+        if (!empty($match)) {
         $string = explode('
 ',trim($match[1]));
-        if (!empty($match)) {
             $icms['VLR_TOTAL'] = str_replace(',', '.', trim(str_replace('.', '', $string[0])));
         }
         
@@ -1027,11 +1027,11 @@ juros de mora
             return redirect()->back()->with('status', 'É necessário informar as duas datas.');
         }
 
-        $data_inicio = $input['inicio'];
-        $data_fim = $input['fim'];
+        $data_inicio = $input['inicio']. ' 00:00:00';
+        $data_fim = $input['fim'].' 23:59:59';
 
-        $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasleitor A LEFT JOIN estabelecimentos B ON A.Estemp_id = B.id LEFT JOIN tributos C ON A.Tributo_id = C.id WHERE A.Data_critica BETWEEN DATE_FORMAT('".$data_inicio."', '%Y/%m/%d') AND DATE_FORMAT('".$data_fim."', '%Y/%m/%d')";
-     
+        $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasleitor A LEFT JOIN estabelecimentos B ON A.Estemp_id = B.id LEFT JOIN tributos C ON A.Tributo_id = C.id WHERE A.Data_critica BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.Empresa_id = ".$this->s_emp->id." ";
+        
         $dados = json_decode(json_encode(DB::Select($sql)),true);
 
         if (!empty($dados)) {

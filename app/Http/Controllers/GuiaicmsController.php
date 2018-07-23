@@ -1333,7 +1333,6 @@ juros de mora
             $UF = '';
             if (!empty($arrayExplode[4])) 
                 $UF = substr($arrayExplode[4], 0, 2); 
-
             $estemp_id = 0;
             $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = '.$CodigoEstabelecimento.' ');
             if (!empty($arrayEstempId[0]->id)) {
@@ -1451,9 +1450,8 @@ juros de mora
             case 'M':
                 $tipo_label = 'MUNICIPAIS'; break;
         }
-        
+            
         $destinationPath = 'uploads/'.substr($estemp->cnpj,0,8).'/'.$estemp->cnpj.'/'.$tipo_label.'/'.$regra->tributo->nome.'/'.$atividade->periodo_apuracao;
-
         copy($data['image'], $destinationPath);
         unlink($data['image']);
 
@@ -1461,9 +1459,9 @@ juros de mora
         $idanalistas = DB::select($query);
         
         if (!empty($idanalistas)) {
-            foreach ($idanalistas as $k => $id) {
-                $atividade->Usuario_aprovador = $id;
-                $atividade->usuario_entregador = $id;
+            foreach ($idanalistas as $k => $analista) {
+                $atividade->Usuario_aprovador = $analista->id;
+                $atividade->usuario_entregador = $analista->id;
             }
         }
         $atividade->arquivo_entrega = $data['image'];

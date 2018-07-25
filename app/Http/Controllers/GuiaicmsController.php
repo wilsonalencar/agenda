@@ -747,6 +747,17 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+     
+        echo "<Pre>";
+        print_r($icms);
+        echo "</pre>";
+        echo "<hr />";
+        echo "<Pre>";
+        print_r($str);
+        echo "</pre>";
+        exit;
+
+
         preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
         
         if (!empty($match)) {

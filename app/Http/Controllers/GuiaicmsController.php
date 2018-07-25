@@ -1064,7 +1064,6 @@ valor total([^{]*)~i', $str, $match);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['CNPJ'] = $estabelecimento->cnpj;
-
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -1073,6 +1072,12 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+        echo "<Pre>";
+        print_r($icms);
+        echo "<hr />";
+        echo "<Pre>";
+        print_r($str);exit;
+        
         preg_match('~15.juros - r\$ 16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
@@ -1195,7 +1200,7 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-        
+
         fclose($handle);
         return $icms;
     }

@@ -195,13 +195,21 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsGO($value);
             }  
             
-            if (strpos($arqu, 'ES')) {
-                $icms = $this->icmsES($value);
-            }
+            // if (strpos($arqu, 'ES')) {
+            //     $icms = $this->icmsES($value);
+            // }
             
-            if (strpos($arqu, 'PB')) {
-                $icms = $this->icmsPB($value);
-            }
+            // if (strpos($arqu, 'PB')) {
+            //     $icms = $this->icmsPB($value);
+            // }
+
+            // if (strpos($arqu, 'SE')) {
+            //     $icms = $this->icmsSE($value);
+            // }
+            
+            // if (strpos($arqu, 'BA')) {
+            //     $icms = $this->icmsBA($value);
+            // }
 
             if (empty($icms) || count($icms) < 6) {
                 $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
@@ -738,6 +746,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['IE'] = $estabelecimento->insc_estadual;
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -747,38 +756,51 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
-     
-        echo "<Pre>";
-        print_r($icms);
-        echo "</pre>";
-        echo "<hr />";
-        echo "<Pre>";
-        print_r($str);
-        echo "</pre>";
-        exit;
-
-
-        preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
-        
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] = $this->numero($i[0]);
-            $icms['REFERENCIA'] = $this->numero($i[1]);
-            $lk = explode('
-', $i[2]);
-            $icms['IE'] = $this->numero($lk[0]);
-            $icms['DATA_VENCTO'] = $lk[1];
-
-            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[5]));
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[7])))));
-            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[16]))));
-        }
-
-        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        preg_match('~servico icms - comercio([^{]*)~i', $str, $match);        
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            $a = explode(' ', $i[4]);
+            $icms['COD_RECEITA'] = $this->numero($a[1]);
+        }
+
+        preg_match('~data de referencia([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['REFERENCIA'] = $a[0];
+        }
+
+        preg_match('~vencimento([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['DATA_VENCTO'] = $a[0];
+        }
+
+        preg_match('~valor da receita([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[1]);
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+
+        preg_match('~credito total([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
+        }
+
+        preg_match('~documento unico de arrecadacao versao internet([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[2]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
 
@@ -788,7 +810,121 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
     public function icmsGO($value)
     {
-           $icms = array();
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+
+        preg_match('~inscricao estadual:([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['IE'] = trim($this->numero($i[0]));
+        }
+
+        preg_match('~documento de origem referencia 300-mensal -([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['REFERENCIA'] = trim($this->numero($i[0]));
+        }
+
+        preg_match('~data de vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['DATA_VENCTO'] =substr(trim($i[0]), 0,10);
+        }
+
+        preg_match('~validade do calculo: total a recolher:
+([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[1])));          
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[1])));
+        }
+
+        preg_match('~foo([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+        
+        fclose($handle);
+        return $icms;
+    }
+
+    public function icmsSE($value)
+    {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+
+        preg_match('~inscricao estadual:([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['IE'] = trim($this->numero($i[0]));
+        }
+
+        preg_match('~documento de origem referencia 300-mensal -([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['REFERENCIA'] = trim($this->numero($i[0]));
+        }
+
+        preg_match('~data de vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['DATA_VENCTO'] =substr(trim($i[0]), 0,10);
+        }
+
+        preg_match('~validade do calculo: total a recolher:
+([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[1])));          
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[1])));
+        }
+
+        preg_match('~foo([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+        
+        fclose($handle);
+        return $icms;
+    }
+
+    public function icmsBA($value)
+    {
+        $icms = array();
         if (!file_exists($value['pathtxt'])) {
             return $icms;
         }
@@ -877,6 +1013,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
                     $data[] = $value;
                 }
             }
+            echo "oi";exit;
         if (!empty($data)) {
                $a = explode(' ', $data[2]);
                $icms['COD_RECEITA'] = $a[1];
@@ -954,7 +1091,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         preg_match('~referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['REFERENCIA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
+            $icms['REFERENCIA'] =str_replace('-', '', str_replace('.', '', trim($i[0])));
         }
 
         preg_match('~vencimento principal cm desconto juros multa total([^{]*)~i', $str, $match);

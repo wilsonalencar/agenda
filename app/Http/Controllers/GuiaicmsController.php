@@ -203,9 +203,9 @@ class GuiaicmsController extends Controller
             //     $icms = $this->icmsPB($value);
             // }
 
-            // if (strpos($arqu, 'SE')) {
-            //     $icms = $this->icmsSE($value);
-            // }
+            if (strpos($arqu, 'SE')) {
+                $icms = $this->icmsSE($value);
+            }
             
             // if (strpos($arqu, 'BA')) {
             //     $icms = $this->icmsBA($value);

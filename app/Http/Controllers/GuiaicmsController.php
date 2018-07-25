@@ -186,14 +186,14 @@ class GuiaicmsController extends Controller
             if (strpos($arqu, 'DF')) {
                 $icms = $this->icmsDF($value);
             }
-            /*
+            
             if (strpos($arqu, 'PA')) {
                 $icms = $this->icmsPA($value);
             }
 
             if (strpos($arqu, 'GO')) {
                 $icms = $this->icmsGO($value);
-            } */ 
+            }  
             
             if (strpos($arqu, 'ES')) {
                 $icms = $this->icmsES($value);
@@ -679,6 +679,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['IE'] = $estabelecimento->insc_estadual;
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -688,36 +689,37 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
-        echo "<Pre>";
-        print_r($icms);
-        echo "</pre>";
-        echo "<hr />";
-        echo "<Pre>";
-        print_r($str);
-        echo "</pre>";
-        exit;
-
-        preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
-        
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] = $this->numero($i[0]);
-            $icms['REFERENCIA'] = $this->numero($i[1]);
-            $lk = explode('
-', $i[2]);
-            $icms['IE'] = $this->numero($lk[0]);
-            $icms['DATA_VENCTO'] = $lk[1];
-
-            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[5]));
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[7])))));
-            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[16]))));
-        }
-
-        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        preg_match('~03 - receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            $icms['COD_RECEITA'] = $this->numero($i[2]);
+        }
+
+        preg_match('~06 - referencia([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['REFERENCIA'] = trim($i[0]);
+        }
+
+        preg_match('~07 - data de vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['DATA_VENCTO'] = trim($i[0]);
+        }
+
+        preg_match('~29 - matricula([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['VLR_RECEITA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[0])));
+            $icms['JUROS_MORA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[1])));
+            $icms['MULTA_MORA_INFRA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[2])));
+            $icms['VLR_TOTAL'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[1])));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[3]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
 
@@ -1489,10 +1491,6 @@ juros de mora
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Centro de custo não cadastrado', 'S');
             }
 
-            $alertCodigoSap = DB::select("select count(1) as countCodigoSap FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND codigo_sap <> '' AND codigo_sap is not null");
-            if (!$alertCodigoSap[0]->countCodigoSap) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código SAP do Municipio não cadastrado', 'S');
-            }
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
             $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;

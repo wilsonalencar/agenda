@@ -1124,7 +1124,7 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', substr($codbarras, 0,-2)));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-        
+
         fclose($handle);
         return $icms;
     }
@@ -1626,14 +1626,12 @@ juros de mora
                     }
                 }
             }
-        }        
-        
+        }           
         if (!empty($files)) {
             $this->savefiles($files);
         } else {
             echo "Não foram encontrados arquivos para realizar o processo.";exit;
         }
-    
         echo "Job foi rodado com sucesso.";exit;
     }
 
@@ -1774,7 +1772,6 @@ juros de mora
     }
 
     public function upload($data) {
-
         $file = array('image' => $data['image']);
         $rules = array('image' => 'required|mimes:pdf,zip'); 
         $validator = Validator::make($file, $rules);
@@ -1794,13 +1791,22 @@ juros de mora
                 $tipo_label = 'MUNICIPAIS'; break;
         }
             
-        $destinationPath = 'uploads/'.substr($estemp->cnpj,0,8).'/'.$estemp->cnpj.'/'.$tipo_label.'/'.$regra->tributo->nome.'/'.$atividade->periodo_apuracao;
-        copy($data['image'], $destinationPath);
+        $destinationPath = 'uploads/'.substr($estemp->cnpj,0,8).'/'.$estemp->cnpj.'/'.$tipo_label.'/'.$regra->tributo->nome;
+
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0777);
+        }
+        
+        $destinationPath .= '/'.$atividade->periodo_apuracao;
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0777);
+        }
+        $destinationPath .='/';
+        copy($data['image'], $destinationPath.$data['image']);
         unlink($data['image']);
 
         $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$regra->tributo->id." and Emp_id = ".$atividade->emp_id.") limit 1";
         $idanalistas = DB::select($query);
-        
         if (!empty($idanalistas)) {
             foreach ($idanalistas as $k => $analista) {
                 $atividade->Usuario_aprovador = $analista->id;

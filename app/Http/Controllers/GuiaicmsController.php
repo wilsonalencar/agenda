@@ -158,7 +158,6 @@ class GuiaicmsController extends Controller
             if (!empty($arrayExplode[4])) 
                 $UF = substr($arrayExplode[4], 0, 2); 
 
-            //buscando estemp_id
             $estemp_id = 0;
             $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = '.$CodigoEstabelecimento.' ');
             if (!empty($arrayEstempId[0]->id)) {
@@ -207,9 +206,9 @@ class GuiaicmsController extends Controller
             //     $icms = $this->icmsSE($value);
             // }
             
-            if (strpos($arqu, 'BA')) {
-                $icms = $this->icmsBA($value);
-            }
+            // if (strpos($arqu, 'BA')) {
+            //     $icms = $this->icmsBA($value);
+            // }
 
             if (empty($icms) || count($icms) < 6) {
                 $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
@@ -981,46 +980,74 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
-        echo "<Pre>";
-        print_r($icms);
-        echo "<hr />";
-        echo "<pre>";
-        print_r($str);exit;
 
-        preg_match('~inscricao estadual:([^{]*)~i', $str, $match);
+        preg_match('~3-inscricao estadual/cpf ou cnpj([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
+            $i = explode('
+', trim($match[1]));
             $icms['IE'] = trim($this->numero($i[0]));
         }
 
-        preg_match('~documento de origem referencia 300-mensal -([^{]*)~i', $str, $match);
+        preg_match('~4-referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['REFERENCIA'] = trim($this->numero($i[0]));
+            $i = explode('
+', trim($match[1]));
+            $icms['REFERENCIA'] = trim($i[0]);
         }
 
-        preg_match('~data de vencimento([^{]*)~i', $str, $match);
+        preg_match('~1-codigo da receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['DATA_VENCTO'] =substr(trim($i[0]), 0,10);
+            $i = explode('
+', trim($match[1]));
+            $icms['COD_RECEITA'] = trim($i[0]);
         }
 
-        preg_match('~validade do calculo: total a recolher:
-([^{]*)~i', $str, $match);
+        preg_match('~2-data de vencimento([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[1])));          
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[1])));
+            $i = explode('
+', trim($match[1]));
+            $valorData = $i[0];
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
         }
 
-        preg_match('~foo([^{]*)~i', $str, $match);
+        preg_match('~7-valor principal([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[1]);
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        preg_match('~9-acres. moratorio e/ou juros([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[1]);
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        preg_match('~10-multa por infracao([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[1]);
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        preg_match('~11-total a recolher([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[1]);
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+
+        preg_match('~---------------------------------------------------------------------------------------------------------------------------------------------------([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-        
+
         fclose($handle);
         return $icms;
     }

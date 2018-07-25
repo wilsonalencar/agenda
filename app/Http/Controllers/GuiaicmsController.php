@@ -195,6 +195,14 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsGO($value);
             } */ 
             
+            if (strpos($arqu, 'ES')) {
+                $icms = $this->icmsES($value);
+            }
+            
+            if (strpos($arqu, 'PB')) {
+                $icms = $this->icmsPB($value);
+            }
+
             if (empty($icms) || count($icms) < 6) {
                 $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
                 continue;
@@ -613,6 +621,111 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
     }
 
     public function icmsPA($value)
+    {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+
+        preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
+        
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['COD_RECEITA'] = $this->numero($i[0]);
+            $icms['REFERENCIA'] = $this->numero($i[1]);
+            $lk = explode('
+', $i[2]);
+            $icms['IE'] = $this->numero($lk[0]);
+            $icms['DATA_VENCTO'] = $lk[1];
+
+            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[5]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[7])))));
+            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[16]))));
+        }
+
+        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+
+        fclose($handle);
+        return $icms;
+    }
+
+    public function icmsPB($value)
+    {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+
+        echo "<Pre>";
+        print_r($icms);
+        echo "</pre>";
+        echo "<hr />";
+        echo "<Pre>";
+        print_r($str);
+        echo "</pre>";
+        exit;
+
+        preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
+        
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['COD_RECEITA'] = $this->numero($i[0]);
+            $icms['REFERENCIA'] = $this->numero($i[1]);
+            $lk = explode('
+', $i[2]);
+            $icms['IE'] = $this->numero($lk[0]);
+            $icms['DATA_VENCTO'] = $lk[1];
+
+            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[5]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[7])))));
+            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[16]))));
+        }
+
+        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+
+        fclose($handle);
+        return $icms;
+    }
+
+    public function icmsES($value)
     {
         $icms = array();
         if (!file_exists($value['pathtxt'])) {

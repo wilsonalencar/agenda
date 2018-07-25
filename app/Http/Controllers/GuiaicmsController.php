@@ -1167,7 +1167,9 @@ valor total([^{]*)~i', $str, $match);
         preg_match('~referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['REFERENCIA'] =str_replace('-', '', str_replace('.', '', trim($i[0])));
+            $a = explode('
+', $i[0]);
+            $icms['REFERENCIA'] =str_replace('-', '', str_replace('.', '', trim($a[0])));
         }
 
         preg_match('~vencimento principal cm desconto juros multa total([^{]*)~i', $str, $match);
@@ -1193,7 +1195,8 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
+        echo "<PRe>";
+        print_r($icms);exit;
         fclose($handle);
         return $icms;
     }

@@ -1072,46 +1072,43 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
-        echo "<Pre>";
-        print_r($icms);
-        echo "<hr />";
-        echo "<Pre>";
-        print_r($str);exit;
-        
+
+        preg_match('~01.cf/df 02.cod receita 03.cota ou refer. 04.vencimento 05.exercicio([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['COD_RECEITA'] = trim($this->numero($a[1]));
+            
+            $k = explode(' ', $i[1]);
+            $icms['REFERENCIA'] = $k[0];
+            $icms['DATA_VENCTO'] = $k[1];
+        }
+
+        preg_match('~13.principal - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$i[0]));
+        } 
+
+        preg_match('~14.multa - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$i[0]));
+        }
+
         preg_match('~15.juros - r\$ 16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $k = 0;
-            foreach ($i as $key => $value) {
-                if ($value == '15.juros - r$ 16.outros - r$ 17.valor total - r$') {
-                    $k = 1;
-                }
-                if ($k) {
-                    $data[] = $value;
-                }
-            }
-
-        if (!empty($data)) {
-               $a = explode(' ', $data[2]);
-               $icms['COD_RECEITA'] = $a[1];
-
-               $l = explode(' ', $data[3]);
-               $icms['REFERENCIA'] = $l[0];
-
-               $valorData = $l[1];
-               $data_vencimento = str_replace('/', '-', $valorData);
-               $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-               
-               $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$data[7]));
-               $p = explode(' ', $data[6]);
-               $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$p[0]));
-               $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$p[1]));
-               $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$p[2]));
-               $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$p[3]));
-           }   
+            $a = explode(' ', $i[0]);
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$a[0]));
+            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$a[1]));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$a[2]));
         }
-        
+
         $codbarras = '';
         preg_match('~aviso aos bancos : receber ate ([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -1127,7 +1124,7 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', substr($codbarras, 0,-2)));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
+        
         fclose($handle);
         return $icms;
     }

@@ -105,9 +105,10 @@ class RegrasenviolotesController extends Controller
             $data = DB::select($query);
             $data = json_decode(json_encode($data),true);
 
+            $download_link  = array();
+
             if (!empty($data)){
                 
-                $download_link  = array();
                 $server_name    = $_SERVER['SERVER_NAME'];
                 $document_root  = $_SERVER['DOCUMENT_ROOT'];
                     

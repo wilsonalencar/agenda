@@ -638,7 +638,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
-
+        $icms['UF'] = 'PA';
+        
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -689,6 +690,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['UF'] = 'PB';
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -750,6 +752,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['UF'] = 'ES';
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -824,6 +827,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['UF'] = 'GO';
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -883,6 +887,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['UF'] = 'SE';
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -972,6 +977,7 @@ valor total([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['UF'] = 'BA';
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -1064,6 +1070,8 @@ valor total([^{]*)~i', $str, $match);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['UF'] = 'DF';
+
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -1145,6 +1153,7 @@ valor total([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['UF'] = 'AL';
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -1171,7 +1180,7 @@ valor total([^{]*)~i', $str, $match);
             $i = explode(' ', trim($match[1]));
             $a = explode('
 ', $i[0]);
-            $icms['REFERENCIA'] =str_replace('-', '', str_replace('.', '', trim($a[0])));
+            $icms['REFERENCIA'] = trim($a[0]);
         }
 
         preg_match('~vencimento principal cm desconto juros multa total([^{]*)~i', $str, $match);
@@ -1197,7 +1206,8 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
+        echo "<pre>";
+        print_r($icms);exit;
         fclose($handle);
         return $icms;
     }

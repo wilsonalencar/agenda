@@ -1206,8 +1206,7 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-        echo "<pre>";
-        print_r($icms);exit;
+        
         fclose($handle);
         return $icms;
     }

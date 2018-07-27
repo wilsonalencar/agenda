@@ -396,9 +396,12 @@ class GuiaicmsController extends Controller
         }   
         $query = 'SELECT * FROM guiaicms WHERE CNPJ = "'.$icms['CNPJ'].'" AND REFERENCIA = "'.$icms['REFERENCIA'].'" AND TRIBUTO_ID = '.$icms['TRIBUTO_ID'].'';
 
+        if (!empty($icms['VLR_TOTAL'])) {
+            $query .= ' AND VLR_TOTAL = '.$icms['VLR_TOTAL'];
+        }
+
         $validate = DB::select($query);
         if (!empty($validate)) {
-            echo "oi";exit;
             return false;
         }
 

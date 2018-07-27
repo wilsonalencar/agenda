@@ -387,8 +387,7 @@ class GuiaicmsController extends Controller
     {
         if (empty($icms)) {
             return false;
-        }
-        
+        }   
         if (empty($icms['CNPJ'])) {
             $icms['CNPJ'] = 0;
         }
@@ -399,6 +398,7 @@ class GuiaicmsController extends Controller
 
         $validate = DB::select($query);
         if (!empty($validate)) {
+            echo "oi";exit;
             return false;
         }
 
@@ -654,17 +654,33 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $i = explode(' ', trim($match[1]));
             $icms['COD_RECEITA'] = $this->numero($i[0]);
             $icms['REFERENCIA'] = $i[1];
+
             $lk = explode('
 ', $i[2]);
             $icms['IE'] = $this->numero($lk[0]);
-     
+            
             $valorData = $lk[1];
+            if ($valorData == 0) {
+                $valorData = $i[3];
+            }
+
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
 
             $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[5]));
+            if ($i[5] == 'r$') {
+                $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[6]));
+            }
+
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[7])))));
+            if ($i[5] == 'r$') {
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[8])))));
+            }
+
             $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[16]))));
+            if ($i[16] == 'r$') {
+                $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[17]))));
+            }
         }
 
         preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
@@ -675,8 +691,6 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['CODBARRAS'] = trim($codbarras);
         }
 
-        echo "<PRe>";
-        print_r($icms);exit;
         fclose($handle);
         return $icms;
     }

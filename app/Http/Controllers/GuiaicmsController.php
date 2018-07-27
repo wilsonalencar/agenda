@@ -653,10 +653,11 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
             $icms['COD_RECEITA'] = $this->numero($i[0]);
-            $icms['REFERENCIA'] = $this->numero($i[1]);
+            $icms['REFERENCIA'] = $i[1];
             $lk = explode('
 ', $i[2]);
             $icms['IE'] = $this->numero($lk[0]);
+     
             $valorData = $lk[1];
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
@@ -674,6 +675,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['CODBARRAS'] = trim($codbarras);
         }
 
+        echo "<PRe>";
+        print_r($icms);exit;
         fclose($handle);
         return $icms;
     }
@@ -845,7 +848,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         preg_match('~documento de origem referencia 300-mensal -([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['REFERENCIA'] = trim($this->numero($i[0]));
+            $icms['REFERENCIA'] = trim($i[0]);
         }
 
         preg_match('~data de vencimento([^{]*)~i', $str, $match);

@@ -1251,14 +1251,9 @@ valor do documento([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $icms['COD_IDENTIFICACAO'] = trim($i[0]);
+            $a = explode(' ', $i[2]);
+            $icms['COD_IDENTIFICACAO'] = trim($this->numero($a[1]));
         }
-
-        echo "<pre>";
-        print_r($icms);
-        echo "<hr />";
-        echo "<Pre>";
-        print_r($str);exit;
 
         fclose($handle);
         return $icms;

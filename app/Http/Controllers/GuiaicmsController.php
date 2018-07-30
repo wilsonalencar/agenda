@@ -214,9 +214,9 @@ class GuiaicmsController extends Controller
             //     $icms = $this->icmsRN($value);
             // }
 
-            if (strpos($arqu, 'PE')) {
-                $icms = $this->icmsPE($value);
-            }
+            // if (strpos($arqu, 'PE')) {
+            //     $icms = $this->icmsPE($value);
+            // }
 
             if (empty($icms) || count($icms) < 6) {
                 $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');

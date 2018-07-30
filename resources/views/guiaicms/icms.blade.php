@@ -164,9 +164,40 @@
                             <td></td>
                             <td></td>
                         </tr>
-                    <?php } } ?>
-                            
+                    <?php } } ?>        
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
                 </table>
                 <br> 
                 <table class="table table-bordered display" id="dataTables-example_2333" style="width: 100%; height: 100%; font-size: 12px; display: none;">

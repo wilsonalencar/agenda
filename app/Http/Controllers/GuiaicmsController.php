@@ -81,7 +81,7 @@ class GuiaicmsController extends Controller
                                 continue;
                             }
 
-                            if ($arrayNameFile[2] != 'ICMS' && $arrayNameFile[2] != 'DIFAL') {
+                            if ($arrayNameFile[2] != 'ICMS' && $arrayNameFile[2] != 'DIFAL' && $arrayNameFile[2] != 'ANTECIPADOICMS' && $arrayNameFile[2] != 'TAXA' && $arrayNameFile[2] != 'PROTEGE') {
                                 continue;
                             }
 
@@ -198,17 +198,17 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsES($value);
             }
             
-            // if (strpos($arqu, 'PB')) {
-            //     $icms = $this->icmsPB($value);
-            // }
+            if (strpos($arqu, 'PB')) {
+                $icms = $this->icmsPB($value);
+            }
 
             if (strpos($arqu, 'SE')) {
                 $icms = $this->icmsSE($value);
             }
             
-            // if (strpos($arqu, 'BA')) {
-            //     $icms = $this->icmsBA($value);
-            // }
+            if (strpos($arqu, 'BA')) {
+                $icms = $this->icmsBA($value);
+            }
 
             // if (strpos($arqu, 'RN')) {
             //     $icms = $this->icmsRN($value);

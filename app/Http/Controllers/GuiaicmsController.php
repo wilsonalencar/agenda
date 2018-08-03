@@ -91,7 +91,6 @@ class GuiaicmsController extends Controller
                 }
             }
         }
-
         $funcao = 'pdftotext.exe ';
         
         if (!empty($files)) {
@@ -218,17 +217,17 @@ class GuiaicmsController extends Controller
             //     $icms = $this->icmsPE($value);
             // }
 
-            if (strpos($arqu, 'PR')) {
-                $icms = $this->icmsPR($value);
-            }
+            //if (strpos($arqu, 'PR')) {
+            //    $icms = $this->icmsPR($value);
+            //}
 
             // if (strpos($arqu, 'CE')) {
             //     $icms = $this->icmsCE($value);
             // }
 
-            // if (strpos($arqu, 'MG')) {
-            //     $icms = $this->icmsMG($value);
-            // }
+            if (strpos($arqu, 'MG')) {
+                $icms = $this->icmsMG($value);
+            }
 
             if (empty($icms) || count($icms) < 6) {
                 $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
@@ -1199,7 +1198,13 @@ valor do documento([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
-        
+     
+        echo "<PRE>";
+        print_r($icms);
+        echo "<hr />";
+        echo "<PrE>";
+        print_r($str);exit;
+
         preg_match('~receita ([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
@@ -1279,61 +1284,74 @@ valor do documento([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
-        
-        preg_match('~receita ([^{]*)~i', $str, $match);
+     
+        preg_match('~numeracao do codigo de barras([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] = trim($this->numero($i[0]));
+            $codbarras = '';
+            foreach ($i as $key => $value) {
+                $codbarras .= $this->numero($value);
+                if ($key == 3) {
+                    break;
+                }
+            }
+            $icms['CODBARRAS'] = substr($codbarras, 0, -1);
         }
-        
-        preg_match('~vencimento
-([^{]*)~i', $str, $match);
+
+        preg_match('~1 - codigo/especificacao da receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $valorData = $i[0];
+            $i = explode(' ', trim($match[1]));
+            $icms['COD_RECEITA'] = $i[0];
+        }
+
+        preg_match('~5 - periodo referencia([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['REFERENCIA'] = trim(substr($i[0], 0,-1));
+        }
+
+        preg_match('~2 - data vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $valorData = trim(substr($i[0], 0,-1));
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-            $referencia = date('m/Y', strtotime($data_vencimento));
-            $k = explode('/', $referencia);
-            $k[0] = $k[0]-1;
-            if ($k[0] == 0) {
-                $k[1] = $k[1] - 1;
-            }
-            if (strlen($k[0]) == 1) {
-                $k[0] = '0'.$k[0];
-            }
-            $icms['REFERENCIA'] = $k[0].'/'.$k[1];
         }
-        
-        preg_match('~
-valor do documento([^{]*)~i', $str, $match);
+
+        preg_match('~6 - valor principal \*\*\*\*\* r\$([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         }
 
+        preg_match('~7 - multa
 
-        preg_match('~
-valor do documento([^{]*)~i', $str, $match);
+\*\*\*\*\* r\$([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $codbarras = '';
-            foreach ($i as $k => $x) {
-                if (strlen($x) == 13) {
-                    $codbarras .= $this->numero($x); 
-                }
-                if ($k == 12) {
-                    break;
-                }
-            }
-            
-            $icms['CODBARRAS'] = trim($codbarras);
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         }
-        
+
+        preg_match('~8 - juros
+
+\*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+        } 
+
+        preg_match('~10 - total a recolher
+
+\*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+        }
+
         fclose($handle);
         return $icms;
     }
@@ -1359,67 +1377,63 @@ valor do documento([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
-        
-        echo "<PrE>";
-        print_r($icms);
-        echo "<hr />";
-        echo "<Pre>";
-        print_r($str);exit;
 
-        preg_match('~receita ([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] = trim($this->numero($i[0]));
-        }
-        
-        preg_match('~vencimento
-([^{]*)~i', $str, $match);
+        preg_match('~periodo de referencia
+05([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $valorData = $i[0];
+            $icms['REFERENCIA'] = trim($i[0]);
+        }
+
+        preg_match('~codigo da receita
+01
+data de vencimento
+02([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['COD_RECEITA'] = trim($a[0]);
+            $valorData = $a[1];
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-            $referencia = date('m/Y', strtotime($data_vencimento));
-            $k = explode('/', $referencia);
-            $k[0] = $k[0]-1;
-            if ($k[0] == 0) {
-                $k[1] = $k[1] - 1;
-            }
-            if (strlen($k[0]) == 1) {
-                $k[0] = '0'.$k[0];
-            }
-            $icms['REFERENCIA'] = $k[0].'/'.$k[1];
         }
         
-        preg_match('~
-valor do documento([^{]*)~i', $str, $match);
+        preg_match('~valor da receita \(r\$\)
+09([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$i[0]));;
         }
 
-
-        preg_match('~
-valor do documento([^{]*)~i', $str, $match);
+        preg_match('~total a recolher \(r\$\)
+13([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $codbarras = '';
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$i[0]));;
+        }
+        
+
+        preg_match('~contribuinte pagar no banco do brasil, itau, bradesco, santander, sicredi, bancoob ou rendimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+
             foreach ($i as $k => $x) {
-                if (strlen($x) == 13) {
-                    $codbarras .= $this->numero($x); 
+                if (strlen($this->numero($x)) == 48) {
+                    $codbarras = $this->numero($x); 
                 }
-                if ($k == 12) {
+                if ($k == 7) {
                     break;
                 }
             }
             
             $icms['CODBARRAS'] = trim($codbarras);
         }
-        
+
         fclose($handle);
         return $icms;
     }

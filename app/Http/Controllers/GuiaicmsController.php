@@ -1556,79 +1556,51 @@ data de vencimento
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
+
+        preg_match('~data vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $valorData = trim(substr($i[0], 0,10));
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+        }
         
+        preg_match('~referencia/ parcela vencimento codigo da receita valor principal valor dos juros valor da multa
+
+valor total([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['REFERENCIA'] = trim($i[0]);
+            $icms['COD_RECEITA'] = trim($i[4]);
+            $valores = explode(' ', $i[6]);
+            $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
+            $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
+            $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
+            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));
+        }
+
+        preg_match('~linha digitavel:([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $codbarras = '';
+            foreach ($i as $key => $value) {
+                if (is_numeric($this->numero($value)) && (strlen($this->numero($value)) == 11 || strlen($this->numero($value)) == 1)) {
+                    $codbarras .= $this->numero($value);
+                }
+                if ($key == 7) {
+                    break;
+                }
+            }
+            $codbarras = str_replace('-', '', str_replace(' ', '', substr($codbarras, 0,-2)));
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+
         echo "<pre>";
         print_r($icms);
         echo "<hr />";
         echo "<pre>";
         print_r($str);exit;
-
-        preg_match('~06 - codigo da receita([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['COD_RECEITA'] = trim($this->numero($i[0]));
-        }
-
-        preg_match('~07 - periodo fiscal([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['REFERENCIA'] = trim($i[0]);
-        }
-
-        preg_match('~02 - data de vencimento([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $valorData = trim($i[0]);
-            $data_vencimento = str_replace('/', '-', $valorData);
-            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-        }
-
-        preg_match('~05 - valor do tributo em r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
-        }        
-
-        preg_match('~10 - valor dos juros em r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
-        }
-
-        preg_match('~08 - valor da multa em r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
-        }
-
-        preg_match('~16 - total a pagar em r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
-        }
-
-        preg_match('~governo do estado de pernambuco secretaria da fazenda documento de arrecadacao estadual([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $codbarras = str_replace('-', '', str_replace(' ', '', $i[2]));
-            $icms['CODBARRAS'] = trim($codbarras);
-        }
-
-        preg_match('~09 - documento de identificacao do contribuinte([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $a = explode(' ', $i[2]);
-            $icms['COD_IDENTIFICACAO'] = trim($this->numero($a[1]));
-        }
 
         fclose($handle);
         return $icms;

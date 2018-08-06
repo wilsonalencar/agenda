@@ -1588,20 +1588,14 @@ valor total([^{]*)~i', $str, $match);
                 if (is_numeric($this->numero($value)) && (strlen($this->numero($value)) == 11 || strlen($this->numero($value)) == 1)) {
                     $codbarras .= $this->numero($value);
                 }
-                if ($key == 7) {
+                if ($key == 8) {
                     break;
                 }
             }
-            $codbarras = str_replace('-', '', str_replace(' ', '', substr($codbarras, 0,-2)));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $codbarras));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
-        echo "<pre>";
-        print_r($icms);
-        echo "<hr />";
-        echo "<pre>";
-        print_r($str);exit;
-
+        
         fclose($handle);
         return $icms;
     }

@@ -209,13 +209,17 @@ class GuiaicmsController extends Controller
                 $icms = $this->icmsBA($value);
             }
 
-            // if (strpos($arqu, 'RN')) {
-            //     $icms = $this->icmsRN($value);
-            // }
+            if (strpos($arqu, 'RN')) {
+                $icms = $this->icmsRN($value);
+            }
 
-            // if (strpos($arqu, 'PE')) {
-            //     $icms = $this->icmsPE($value);
-            // }
+            if (strpos($arqu, 'PE')) {
+                $icms = $this->icmsPE($value);
+            }
+
+            if (strpos($arqu, 'MA')) {
+               $icms = $this->icmsMA($value);
+            }
 
             //if (strpos($arqu, 'PR')) {
             //    $icms = $this->icmsPR($value);
@@ -225,9 +229,9 @@ class GuiaicmsController extends Controller
             //     $icms = $this->icmsCE($value);
             // }
 
-            if (strpos($arqu, 'MG')) {
-                $icms = $this->icmsMG($value);
-            }
+            // if (strpos($arqu, 'MG')) {
+            //     $icms = $this->icmsMG($value);
+            // }
 
             if (empty($icms) || count($icms) < 6) {
                 $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
@@ -1460,6 +1464,105 @@ data de vencimento
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
         
+        preg_match('~06 - codigo da receita([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['COD_RECEITA'] = trim($this->numero($i[0]));
+        }
+
+        preg_match('~07 - periodo fiscal([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['REFERENCIA'] = trim($i[0]);
+        }
+
+        preg_match('~02 - data de vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $valorData = trim($i[0]);
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+        }
+
+        preg_match('~05 - valor do tributo em r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
+        }        
+
+        preg_match('~10 - valor dos juros em r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
+        }
+
+        preg_match('~08 - valor da multa em r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
+        }
+
+        preg_match('~16 - total a pagar em r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[0]))));
+        }
+
+        preg_match('~governo do estado de pernambuco secretaria da fazenda documento de arrecadacao estadual([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[2]));
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+
+        preg_match('~09 - documento de identificacao do contribuinte([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', $i[2]);
+            $icms['COD_IDENTIFICACAO'] = trim($this->numero($a[1]));
+        }
+
+        fclose($handle);
+        return $icms;
+    }
+
+    public function icmsMA($value)
+    {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['UF'] = 'MA';
+        
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+        
+        echo "<pre>";
+        print_r($icms);
+        echo "<hr />";
+        echo "<pre>";
+        print_r($str);exit;
+
         preg_match('~06 - codigo da receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('

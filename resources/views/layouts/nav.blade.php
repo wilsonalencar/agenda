@@ -144,7 +144,6 @@
                                             <li class="panel panel-default" id="dropdown">
                                                 <li><a href="{{ route('guiaicms.icms') }}">ICMS</a></li>
                                                 <li><a href="{{ route('guiaicms.search_criticas') }}">Criticas</a></li>
-                                                <li><a href="{{ route('guiaicms.search_criticas_entrega') }}">Criticas Entrega</a></li>
                                             </li>
                                     </ul>
                                 </div>
@@ -162,6 +161,7 @@
                                         <ul class="nav navbar-nav">
                                             <li><a href="{{ route('aprovacao') }}"><i class="fa fa-btn fa-upload"></i>Aprovação</a></li>
                                             <li><a href="{{ route('entregas.index') }}"><i class="fa fa-btn fa-upload"></i>Entregas</a></li>
+                                            <li><a href="{{ route('guiaicms.search_criticas_entrega') }}"><i class="fa fa-btn fa-trash"></i>Criticas Entrega</a></li>
                                         </ul>
                                     </div>
                                 </div>

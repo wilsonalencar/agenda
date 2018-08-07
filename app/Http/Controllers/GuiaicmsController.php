@@ -2327,10 +2327,6 @@ juros de mora
                 continue;
             }
 
-            $alertCentroCusto = DB::select("select count(1) countCentroCusto FROM centrocustospagto where estemp_id = ".$estemp_id." AND centrocusto <> '' AND centrocusto is not null");
-            if (!$alertCentroCusto[0]->countCentroCusto) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Centro de custo não cadastrado', 'S');
-            }
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
             $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;

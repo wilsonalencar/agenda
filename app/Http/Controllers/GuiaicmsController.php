@@ -2357,7 +2357,7 @@ juros de mora
             mkdir($destinationPath, 0777);
         }
 
-        $destinationPath = '/'.$regra->tributo->nome;
+        $destinationPath .= '/'.$regra->tributo->nome;
         if (!is_dir($destinationPath)) {
             mkdir($destinationPath, 0777);
         }
@@ -2366,7 +2366,7 @@ juros de mora
         if (!is_dir($destinationPath)) {
             mkdir($destinationPath, 0777);
         }
-        
+
         $destinationPath .='/';
         copy($data['image'], $destinationPath.$data['image']);
         unlink($data['image']);

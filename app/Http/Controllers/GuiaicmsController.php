@@ -2240,7 +2240,7 @@ juros de mora
                 foreach ($pastas as $key => $arquivos) {
                     if (is_array($arquivos[1])) {
                         foreach ($arquivos[1] as $A => $arquivo) {
-                            if (substr($arquivo, -3) == 'pdf') {
+                            if (strlen($arquivo) > 2) {
                                 $arrayNameFile = explode("_", $arquivo);
                                 if (empty($arrayNameFile[2])) {
                                     continue;
@@ -2253,7 +2253,7 @@ juros de mora
                 }
             }
         }           
-
+        
         if (!empty($files)) {
             $this->savefiles($files);
         } else {

@@ -221,9 +221,9 @@ class GuiaicmsController extends Controller
                $icms = $this->icmsMA($value);
             }
 
-            if (strpos($arqu, 'PI')) {
-               $icms = $this->icmsPI($value);
-            }
+            // if (strpos($arqu, 'PI')) {
+            //    $icms = $this->icmsPI($value);
+            // }
 
             // if (strpos($arqu, 'CE')) {
             //     $icms = $this->icmsCE($value);
@@ -1612,10 +1612,6 @@ valor total([^{]*)~i', $str, $match);
         }
 
         $file_content = explode('_', $value['arquivo']);
-        $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
-        $icms['CNPJ'] = $estabelecimento->cnpj;
-        $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'PI';
         
         $handle = fopen($value['pathtxt'], "r");
@@ -1626,55 +1622,57 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
         
-        echo "<pre>";
-        print_r($icms);
-        echo "<hr />";
-        echo "<PrE>";
-        print_r($str);
-        exit;
+        preg_match('~01 - inscricao estadual/renavam
 
-        preg_match('~data vencimento([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $valorData = trim(substr($i[0], 0,10));
-            $data_vencimento = str_replace('/', '-', $valorData);
-            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-        }
-        
-        preg_match('~referencia/ parcela vencimento codigo da receita valor principal valor dos juros valor da multa
-
-valor total([^{]*)~i', $str, $match);
+02 - cnpj/cpf([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $icms['REFERENCIA'] = trim($i[0]);
-            $icms['COD_RECEITA'] = trim($i[4]);
-            $valores = explode(' ', $i[6]);
-            $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
-            $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
-            $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
-            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));
-        }
+            $icms['CNPJ'] = $i[2];
+            $icms['IE'] = $i[0];
+        } 
 
-        preg_match('~linha digitavel:([^{]*)~i', $str, $match);
+        preg_match('~valor principal 18 - atualizacao monetaria 19 - juros 20 - multa 21 - taxa 22 - total a recolher
+([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['REFERENCIA'] = $a[0];
+            $valorData = trim($a[1]);
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+
+            $k = explode(' ', $i[1]);
+            $icms['COD_RECEITA'] = $k[0];
+            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[3]))));;
+
+            $valores = explode(' ', $i[2]);
+            $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
+            $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[3]))));
+            $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
+        } 
+
+        preg_match('~11 - linha digitavel([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
             $codbarras = '';
             foreach ($i as $key => $value) {
-                if (is_numeric($this->numero($value)) && (strlen($this->numero($value)) == 11 || strlen($this->numero($value)) == 1)) {
+                if (is_numeric($this->numero($value))) {
                     $codbarras .= $this->numero($value);
                 }
-                if ($key == 8) {
+                if ($key == 5) {
                     break;
                 }
             }
             $codbarras = str_replace('-', '', str_replace(' ', '', $codbarras));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-        
         fclose($handle);
         return $icms;
     }
+
 
     public function icmsDF($value)
     {

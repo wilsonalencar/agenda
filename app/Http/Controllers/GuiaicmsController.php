@@ -2347,8 +2347,17 @@ juros de mora
                 $tipo_label = 'MUNICIPAIS'; break;
         }
             
-        $destinationPath = 'uploads/'.substr($estemp->cnpj,0,8).'/'.$estemp->cnpj.'/'.$tipo_label.'/'.$regra->tributo->nome;
-        
+        $destinationPath = 'uploads/'.substr($estemp->cnpj,0,8).'/'.$estemp->cnpj;
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0777);
+        }
+
+        $destinationPath .= '/'.$tipo_label;
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0777);
+        }
+
+        $destinationPath = '/'.$regra->tributo->nome;
         if (!is_dir($destinationPath)) {
             mkdir($destinationPath, 0777);
         }
@@ -2357,6 +2366,7 @@ juros de mora
         if (!is_dir($destinationPath)) {
             mkdir($destinationPath, 0777);
         }
+        
         $destinationPath .='/';
         copy($data['image'], $destinationPath.$data['image']);
         unlink($data['image']);

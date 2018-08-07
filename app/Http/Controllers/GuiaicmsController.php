@@ -2154,52 +2154,38 @@ juros de mora
         foreach ($arquivos as $k => $v) {
             if (strpbrk($v, '0123456789１２３４５６７８９０')) {
                 $path_name = $path.$v.'/';
-                $data[$k]['arquivos'] = scandir($path_name);   
-                $data[$k]['path'] = $path_name;    
+                $data[$k]['arquivos'][1][1] = scandir($path_name);   
+                $data[$k]['arquivos'][1][2]['path'] = $path_name;    
+                $data[$k]['arquivos'][2][1] = scandir($path_name.'/imported');
+                $data[$k]['arquivos'][2][2]['path'] = $path_name.'imported/';
             }
         }
-        foreach ($data as $X => $FILENAME) {
-            foreach ($FILENAME as $L => $arquivos) {
-                if (is_array($arquivos)) {
-                    foreach ($arquivos as $A => $arquivo) {
-                        if (substr($arquivo, -3) == 'pdf') {
-                            $arrayNameFile = explode("_", $arquivo);
-                            if (empty($arrayNameFile[2])) {
-                                continue;
-                            }
-                            
-                            if ($this->validateTributo($arrayNameFile[2])) {
-                                continue;
-                            }
 
-                            $files[] = $FILENAME['path'].$arquivo;
+        foreach ($data as $X => $FILENAME) {
+            foreach ($FILENAME as $L => $pastas) {
+                foreach ($pastas as $key => $arquivos) {
+                    if (is_array($arquivos[1])) {
+                        foreach ($arquivos[1] as $A => $arquivo) {
+                            if (substr($arquivo, -3) == 'pdf') {
+                                $arrayNameFile = explode("_", $arquivo);
+                                if (empty($arrayNameFile[2])) {
+                                    continue;
+                                }
+
+                                $files[] = $arquivos[2]['path'].$arquivo;
+                            }
                         }
                     }
                 }
             }
         }           
+
         if (!empty($files)) {
             $this->savefiles($files);
         } else {
             echo "Não foram encontrados arquivos para realizar o processo.";exit;
         }
         echo "Job foi rodado com sucesso.";exit;
-    }
-
-    private function validateTributo($tributo)
-    {
-        $permission = DB::table('tributoleitorpdf')
-            ->join('tributos', 'tributoleitorpdf.Tributo_id', '=', 'tributos.id')
-            ->select('tributoleitorpdf.id')
-            ->where('tributoleitorpdf.leitorpdf', '=', 'S')
-            ->where('tributos.nome', '=', $tributo)
-            ->get();
-
-        if (empty($permission)) {
-            return true;
-        }
-    
-    return false;
     }
 
     private function savefiles($files){
@@ -2271,7 +2257,6 @@ juros de mora
             if (!$alertCentroCusto[0]->countCentroCusto) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Centro de custo não cadastrado', 'S');
             }
-
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
             $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;
@@ -2282,7 +2267,7 @@ juros de mora
                 if (isset($singlearray['atividade'])) {
                     unset($singlearray['atividade']);
                 }
-
+                
                 $date = time();
                 $path = $date.'.zip';
                 $this->createZipFile($singlearray, $path);    
@@ -2307,14 +2292,34 @@ juros de mora
     public function createZipFile($f = array(),$fileName){
         $zip = new \ZipArchive();
         touch($fileName);
-
+        $arrayDelete = array();
         $res = $zip->open($fileName, \ZipArchive::CREATE);
         if($res === true){
-        foreach ($f as $in => $name) {
-                $zip->addFile($name['path'] , $name['filename']);
+            foreach ($f as $in => $name) {
+                if ($zip->addFile($name['path'] , $name['filename'])) {
+                    $destinoArray = explode('/', $name['path']);
+                    $destino = '';
+                    foreach ($destinoArray as $key => $value) {
+                        $destino .= $value.'/';
+                        if ($key == 2) {
+                            break;
+                        }
+                    }
+                    $destino .= 'uploaded/';
+                    $arrayDelete[$in]['path'] = $name['path']; 
+                    $arrayDelete[$in]['filename'] = $name['filename']; 
+                    $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+                }
             }
         }
         $zip->close();
+
+        if (!empty($arrayDelete)) {
+            foreach ($arrayDelete as $chave => $single) {
+                copy($single['path'], $single['destino']);
+                unlink($single['path']);
+            }
+        }
 
         if (file_exists($fileName)) {
             $data = ['image' => $fileName, 'atividade_id' => $name['atividade'], '_token' => csrf_token()];
@@ -2343,7 +2348,7 @@ juros de mora
         }
             
         $destinationPath = 'uploads/'.substr($estemp->cnpj,0,8).'/'.$estemp->cnpj.'/'.$tipo_label.'/'.$regra->tributo->nome;
-
+        
         if (!is_dir($destinationPath)) {
             mkdir($destinationPath, 0777);
         }

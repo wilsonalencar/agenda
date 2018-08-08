@@ -221,20 +221,20 @@ class GuiaicmsController extends Controller
                $icmsarray = $this->icmsMA($value);
             }
 
+            if (strpos($arqu, 'MG')) {
+                $icmsarray = $this->icmsMG($value);
+            }
+
+            if (strpos($arqu, 'CE')) {
+                $icmsarray = $this->icmsCE($value);
+            }
+
             // if (strpos($arqu, 'PI')) {
             //    $icmsarray = $this->icmsPI($value);
             // }
 
-            // if (strpos($arqu, 'CE')) {
-            //     $icmsarray = $this->icmsCE($value);
-            // }
-
             // if (strpos($arqu, 'PR')) {
             //    $icmsarray = $this->icmsPR($value);
-            // }
-
-            // if (strpos($arqu, 'MG')) {
-            //     $icmsarray = $this->icmsMG($value);
             // }
 
             if (!empty($icmsarray)) {
@@ -1344,8 +1344,7 @@ periodo ref.([^{]*)~i', $str, $match);
         if (count($icms[1]) > 8) {
             $icmsarray = $icms;
         }
-        echo "<Pre>";
-        print_r($icmsarray);exit;
+
         return $icmsarray;
     }
 

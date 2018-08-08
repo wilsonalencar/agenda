@@ -131,7 +131,7 @@ class GuiaicmsController extends Controller
 
     public function saveICMS($array)
     {
-        $icms = array();
+        $icmsarray = array();
 
         foreach ($array as $key => $value) {
 
@@ -166,140 +166,144 @@ class GuiaicmsController extends Controller
             $arqu = 'foo '.$value['arquivotxt'].' bar';    
             
             if (strpos($arqu, 'SP')) {
-                $icms = $this->icmsSP($value);
+                $icmsarray = $this->icmsSP($value);
             }
 
             if (strpos($arqu, 'RJ')) {
-                $icms = $this->icmsRJ($value);   
+                $icmsarray = $this->icmsRJ($value);   
             }
 
             if (strpos($arqu, 'RS')) {
-                $icms = $this->icmsRS($value);
+                $icmsarray = $this->icmsRS($value);
             }  
 
             if (strpos($arqu, 'AL')) {
-                $icms = $this->icmsAL($value);
+                $icmsarray = $this->icmsAL($value);
             }  
 
             if (strpos($arqu, 'DF')) {
-                $icms = $this->icmsDF($value);
+                $icmsarray = $this->icmsDF($value);
             }
             
             if (strpos($arqu, 'PA')) {
-                $icms = $this->icmsPA($value);
+                $icmsarray = $this->icmsPA($value);
             }
 
             if (strpos($arqu, 'GO')) {
-                $icms = $this->icmsGO($value);
+                $icmsarray = $this->icmsGO($value);
             }  
             
             if (strpos($arqu, 'ES')) {
-                $icms = $this->icmsES($value);
+                $icmsarray = $this->icmsES($value);
             }
             
             if (strpos($arqu, 'PB')) {
-                $icms = $this->icmsPB($value);
+                $icmsarray = $this->icmsPB($value);
             }
 
             if (strpos($arqu, 'SE')) {
-                $icms = $this->icmsSE($value);
+                $icmsarray = $this->icmsSE($value);
             }
             
             if (strpos($arqu, 'BA')) {
-                $icms = $this->icmsBA($value);
+                $icmsarray = $this->icmsBA($value);
             }
 
             if (strpos($arqu, 'RN')) {
-                $icms = $this->icmsRN($value);
+                $icmsarray = $this->icmsRN($value);
             }
 
             if (strpos($arqu, 'PE')) {
-                $icms = $this->icmsPE($value);
+                $icmsarray = $this->icmsPE($value);
             }
 
             if (strpos($arqu, 'MA')) {
-               $icms = $this->icmsMA($value);
+               $icmsarray = $this->icmsMA($value);
             }
 
             // if (strpos($arqu, 'PI')) {
-            //    $icms = $this->icmsPI($value);
+            //    $icmsarray = $this->icmsPI($value);
             // }
 
             // if (strpos($arqu, 'CE')) {
-            //     $icms = $this->icmsCE($value);
+            //     $icmsarray = $this->icmsCE($value);
             // }
 
             // if (strpos($arqu, 'PR')) {
-            //    $icms = $this->icmsPR($value);
+            //    $icmsarray = $this->icmsPR($value);
             // }
 
             // if (strpos($arqu, 'MG')) {
-            //     $icms = $this->icmsMG($value);
+            //     $icmsarray = $this->icmsMG($value);
             // }
 
-            if (empty($icms) || count($icms) < 6) {
-                $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
-                continue;
+            if (!empty($icmsarray)) {
+                foreach ($icmsarray as $key => $icms) {
+                    if (empty($icms) || count($icms) < 6) {
+                        $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
+                        continue;
+                    }
+
+                    $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID);
+                    if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código de atividade não existe', 'N');
+                        continue;
+                    }
+
+                    $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
+                    if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Filial divergente com a filial da atividade', 'N');
+                        continue;
+                    }
+
+                    $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
+                    if (!$validateTributo[0]->countTributo) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O Tributo ICMS não confere com o tributo da atividade', 'N');
+                        continue;
+                    }
+
+                    $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = '{$PeriodoApuracao}'");
+                    if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Período de apuração diverente do período da atividade', 'N');
+                        continue;
+                    }
+
+                    $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = (select estemp_id FROM atividades where id = ".$AtividadeID.")) AND uf = '".$UF."'");
+
+                    if (empty($UF) || !$validateUF[0]->countUF) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'UF divergente da UF da filial da atividade', 'N');
+                        continue;
+                    }
+
+                    $alertCentroCusto = DB::select("select count(1) countCentroCusto FROM centrocustospagto where estemp_id = ".$estemp_id." AND centrocusto <> '' AND centrocusto is not null");
+                    if (!$alertCentroCusto[0]->countCentroCusto) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Centro de custo não cadastrado', 'S');
+                    }
+
+                    $alertCodigoSap = DB::select("select count(1) as countCodigoSap FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND codigo_sap <> '' AND codigo_sap is not null");
+                    if (!$alertCodigoSap[0]->countCodigoSap && $UF == 'SP') {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código SAP do Municipio não cadastrado', 'S');
+                    } 
+                    
+                    if (!$this->validateEx($icms)) {
+                        continue;
+                    }
+                     
+
+                    if (!empty($icms['COD_RECEITA'])) {  
+                        $icms['COD_RECEITA'] = strtoupper($icms['COD_RECEITA']);
+                    }
+
+                    if (!empty($icms['UF'])) {  
+                        $icms['UF'] = strtoupper($icms['UF']);
+                    }
+
+                    Guiaicms::create($icms);
+                    $destino = str_replace('/imported', '', $value['path']);
+                    copy($destino, $value['path']);
+                    unlink($destino);
+                }
             }
-
-            $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID);
-            if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
-                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código de atividade não existe', 'N');
-                continue;
-            }
-
-            $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
-            if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
-                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Filial divergente com a filial da atividade', 'N');
-                continue;
-            }
-
-            $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
-            if (!$validateTributo[0]->countTributo) {
-                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O Tributo ICMS não confere com o tributo da atividade', 'N');
-                continue;
-            }
-
-            $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = '{$PeriodoApuracao}'");
-            if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
-                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Período de apuração diverente do período da atividade', 'N');
-                continue;
-            }
-
-            $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = (select estemp_id FROM atividades where id = ".$AtividadeID.")) AND uf = '".$UF."'");
-
-            if (empty($UF) || !$validateUF[0]->countUF) {
-                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'UF divergente da UF da filial da atividade', 'N');
-                continue;
-            }
-
-            $alertCentroCusto = DB::select("select count(1) countCentroCusto FROM centrocustospagto where estemp_id = ".$estemp_id." AND centrocusto <> '' AND centrocusto is not null");
-            if (!$alertCentroCusto[0]->countCentroCusto) {
-                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Centro de custo não cadastrado', 'S');
-            }
-
-            $alertCodigoSap = DB::select("select count(1) as countCodigoSap FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND codigo_sap <> '' AND codigo_sap is not null");
-            if (!$alertCodigoSap[0]->countCodigoSap && $UF == 'SP') {
-                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código SAP do Municipio não cadastrado', 'S');
-            } 
-            
-            if (!$this->validateEx($icms)) {
-                continue;
-            }
-             
-
-            if (!empty($icms['COD_RECEITA'])) {  
-                $icms['COD_RECEITA'] = strtoupper($icms['COD_RECEITA']);
-            }
-
-            if (!empty($icms['UF'])) {  
-                $icms['UF'] = strtoupper($icms['UF']);
-            }
-
-            Guiaicms::create($icms);
-            $destino = str_replace('/imported', '', $value['path']);
-            copy($destino, $value['path']);
-            unlink($destino);
         }
 
         if (empty($_GET['getType'])) {  
@@ -546,7 +550,9 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
                     
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
 
@@ -654,7 +660,9 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsPA($value)
@@ -722,7 +730,9 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsPB($value)
@@ -784,7 +794,9 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsES($value)
@@ -860,7 +872,9 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsGO($value)
@@ -920,7 +934,9 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
         
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsSE($value)
@@ -1010,7 +1026,9 @@ valor total([^{]*)~i', $str, $match);
         }
         
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsBA($value)
@@ -1102,7 +1120,9 @@ valor total([^{]*)~i', $str, $match);
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsRN($value)
@@ -1182,7 +1202,9 @@ valor do documento([^{]*)~i', $str, $match);
         }
         
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsMG($value)
@@ -1268,7 +1290,9 @@ valor do documento([^{]*)~i', $str, $match);
         }
         
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsCE($value)
@@ -1361,7 +1385,9 @@ valor do documento([^{]*)~i', $str, $match);
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsPR($value)
@@ -1443,7 +1469,9 @@ data de vencimento
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsPE($value)
@@ -1536,7 +1564,9 @@ data de vencimento
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsMA($value)
@@ -1601,7 +1631,9 @@ valor total([^{]*)~i', $str, $match);
         }
         
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsPI($value)
@@ -1670,7 +1702,9 @@ valor total([^{]*)~i', $str, $match);
             $icms['CODBARRAS'] = trim($codbarras);
         }
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
 
@@ -1750,7 +1784,9 @@ valor total([^{]*)~i', $str, $match);
         }
 
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function numero($str) {
@@ -1824,7 +1860,9 @@ valor total([^{]*)~i', $str, $match);
         }
         
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
 
@@ -1981,7 +2019,9 @@ juros de mora
         }
         
         fclose($handle);
-        return $icms;
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
 

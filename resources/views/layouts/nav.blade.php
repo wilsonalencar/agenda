@@ -135,7 +135,7 @@
 
                             </li>
                     @endif
-
+                    @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
                     <li class="panel panel-default" id="dropdown">
                             <a data-toggle="collapse" href="#pagamentos"><i class="fa fa-money" aria-hidden="true"></i>Pagamentos</a>
                                 <div id="pagamentos" class="panel-collapse collapse">
@@ -149,9 +149,8 @@
                                     </ul>
                                 </div>
                             </div>
-
                         </li>
-
+                    @endif
 
                         @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
                             <li class="panel panel-default" id="dropdown">
@@ -244,13 +243,13 @@
                             </a>
                         </li>
                     @endif
+                    @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
                     <li class="panel panel-default" id="dropdown">
                     <a data-toggle="collapse" href="#cronograma"><i class="fa fa-clock-o"></i>Cronograma</a>
                         <div id="cronograma" class="panel-collapse collapse">
                             <div class="panel-body">
                             <ul class="nav navbar-nav">
                                 <li class="panel panel-default" id="dropdown">
-                                 @if (Auth::user()->hasRole('admin'))
                                  <li class="panel panel-default" id="dropdown">
                                     <a data-toggle="collapse" href="#analistas">Analistas</a>
                                     <div id="analistas" class="panel-collapse collapse">
@@ -264,7 +263,6 @@
                                 </li>
                                 <li><a href="{{ route('cronogramaatividades.create') }}">Gerar</a></li>
                                 <li><a href="{{ route('cronogramaatividades.index') }}">Manipular</a></li>
-                                 @endif
                                 <li><a href="{{ route('cronogramaatividades.GerarConsulta') }}">Consulta</a></li>
                                 <li><a href="{{ route('cronogramaatividades.Gerarmensal') }}">Mensal</a></li>
                                 <li><a href="{{ route('cronogramaatividades.Gerarsemanal') }}">Semanal</a></li>
@@ -274,6 +272,7 @@
                             </div>
                         </div>
                     </li>
+                    @endif 
                 @endif 
             </ul>
         </div><!-- /.navbar-collapse -->

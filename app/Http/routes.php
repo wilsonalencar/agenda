@@ -243,6 +243,10 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::get('integracao/{state}/{estab}/changeStateEntrada', array('as'=>'cargas.changeStateEntrada', 'uses'=>'CargasController@changeStateEntrada'));
     Route::get('carga/{state}/{estab}/changeStateSaida', array('as'=>'cargas.changeStateSaida', 'uses'=>'CargasController@changeStateSaida'));
 
+});
+
+Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst']], function () {
+    
     Route::get('Atividade_Analista/adicionar', array('as'=>'atividadesanalista.adicionar', 'uses'=>'AtividadeanalistaController@create'));
     Route::post('Atividade_Analista/store', array('as'=>'atividadesanalista.store', 'uses'=>'AtividadeanalistaController@store'));
     Route::get('Atividade_Analista/store', array('as'=>'atividadesanalista.store', 'uses'=>'AtividadeanalistaController@store'));
@@ -252,7 +256,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::post('Atividade_Analista/filial', array('as'=>'atividadesanalistafilial.store', 'uses'=>'AtividadeanalistafilialController@store'));
     Route::get('Atividade_Analista/excluirFilial', array('as'=>'atividadesanalistafilial.excluirFilial', 'uses'=>'AtividadeanalistafilialController@excluirFilial'));
 
-    Route::resource('cronogramaatividades', 'CronogramaatividadesController');
+     Route::resource('cronogramaatividades', 'CronogramaatividadesController');
 
     Route::get('cronogramaatividades', array('as'=>'cronogramaatividades.index', 'uses'=>'CronogramaatividadesController@anyData'));
     Route::get('Gerarmensal', array('as'=>'cronogramaatividades.Gerarmensal', 'uses'=>'CronogramaatividadesController@Gerarmensal'));
@@ -280,7 +284,6 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|msaf|admin|
     Route::post('guiaicms/criticas_entrega', array('as'=>'guiaicms.criticas_entrega', 'uses'=>'GuiaicmsController@criticas_entrega'));
 
 });
-
 // Just the Owner, Admin, Manager and the Supervisor
 Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente|analyst']], function () {
 

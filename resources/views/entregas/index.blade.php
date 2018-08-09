@@ -80,8 +80,8 @@ $(function() {
                                                                     return retval;
                                                                   }
             },
-            {data: 'estemp.cnpj', name: 'estemp.cnpj',searchable: false, orderable: false, render: function (data) {return data.substring(0,2)+'.'+data.substring(2,5)+'.'+data.substring(5,8)+'/'+data.substring(8,12)+'-'+data.substring(12,14)} },
-            {data: 'estemp.codigo', name: 'estemp.codigo',searchable: false, orderable: false },
+            {data: 'estemp.cnpj', name: 'estemp.cnpj',searchable: false, orderable: false, render: function (data) { if (data != undefined) { return data.substring(0,2)+'.'+data.substring(2,5)+'.'+data.substring(5,8)+'/'+data.substring(8,12)+'-'+data.substring(12,14); } else return '-'; } },
+            {data: 'estemp.codigo', name: 'estemp.codigo',searchable: false, orderable: false, render: function (data) { if (data == undefined) { return '-'; } else { return data;}}},
             {data: 'id', name:'edit', searchable: false, orderable: false, render: function (data, type, row) {
 
                                                     var url = '';

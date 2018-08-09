@@ -284,6 +284,12 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::post('guiaicms/criticas_entrega', array('as'=>'guiaicms.criticas_entrega', 'uses'=>'GuiaicmsController@criticas_entrega'));
 
 });
+
+Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst|gcliente']], function () {
+    Route::get('guiaicms', array('as'=>'guiaicms.icms', 'uses'=>'GuiaicmsController@icms'));
+    Route::post('guiaicms/planilha', array('as'=>'guiaicms.planilha', 'uses'=>'GuiaicmsController@planilha'));
+});
+
 // Just the Owner, Admin, Manager and the Supervisor
 Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner|gbravo|gcliente|analyst']], function () {
 

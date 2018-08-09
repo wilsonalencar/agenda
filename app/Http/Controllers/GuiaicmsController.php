@@ -229,9 +229,9 @@ class GuiaicmsController extends Controller
                 $icmsarray = $this->icmsCE($value);
             }
 
-            // if (strpos($arqu, 'PI')) {
-            //    $icmsarray = $this->icmsPI($value);
-            // }
+            if (strpos($arqu, 'PI')) {
+               $icmsarray = $this->icmsPI($value);
+            }
 
             // if (strpos($arqu, 'PR')) {
             //    $icmsarray = $this->icmsPR($value);

@@ -12,6 +12,10 @@
             <option value="2" <?php if($switch == 2) echo "selected"; ?>>Todos</option>
             <option value="1" <?php if($switch == 1) echo "selected"; ?>>Carregados</option>
             <option value="0" <?php if($switch == 0) echo "selected"; ?>>Não Carregados</option>
+            <option value="3" <?php if($switch == 3) echo "selected"; ?>>Carregados Entradas</option>
+            <option value="4" <?php if($switch == 4) echo "selected"; ?>>Não Carregados Entradas</option>
+            <option value="5" <?php if($switch == 5) echo "selected"; ?>>Carregados Saídas</option>
+            <option value="6" <?php if($switch == 6) echo "selected"; ?>>Não Carregados Saídas</option>
         </select>
     </div>
     <div class="col-md-1">

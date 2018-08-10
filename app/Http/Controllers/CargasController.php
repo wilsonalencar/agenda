@@ -72,9 +72,25 @@ class CargasController extends Controller
 
         //echo '<Pre>';print_r($estabelecimentos);exit;
         $filter = $request->get('ativo');
-        
-        if ($filter != 2) {
+
+        if ($filter == 0 || $filter == 1) {
             $estabelecimentos->where('carga_msaf_entrada',$filter)->where('carga_msaf_saida',$filter);
+        }
+
+        if ($filter == 3) {
+            $estabelecimentos->where('carga_msaf_entrada', 1)->where('ativo', 1);
+        }
+        
+        if ($filter == 4) {
+            $estabelecimentos->where('carga_msaf_entrada', 0)->where('ativo', 1);
+        }
+        
+        if ($filter == 5) {
+            $estabelecimentos->where('carga_msaf_saida', 1)->where('ativo', 1);
+        }
+        
+        if ($filter == 6) {
+            $estabelecimentos->where('carga_msaf_saida', 0)->where('ativo', 1);
         }
 
         return Datatables::of($estabelecimentos)->make(true);

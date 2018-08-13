@@ -1925,6 +1925,12 @@ valor total([^{]*)~i', $str, $match);
         if (!file_exists($value['pathtxt'])) {
             return $icms;
         }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $icms['IE'] = $estabelecimento->insc_estadual;
+
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -2031,15 +2037,6 @@ juros de mora
         $string = explode('
 ',$string);
         $icms['CNAE'] = $string[0];
-        }
-        
-        
-        preg_match('~inscricao estadual
-04([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $string = explode('
-',trim($match[1]));
-            $icms['IE'] = trim(str_replace('.', '', $string[0]));
         }
         
         //cidade e endereço e data vencimento

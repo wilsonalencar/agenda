@@ -2380,7 +2380,7 @@ juros de mora
             if (!empty($arrayExplode[4])) 
                 $UF = substr($arrayExplode[4], 0, 2); 
             $estemp_id = 0;
-            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = '.$CodigoEstabelecimento.' ');
+            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = "'.$CodigoEstabelecimento.'"');
             if (!empty($arrayEstempId[0]->id)) {
                 $estemp_id = $arrayEstempId[0]->id;
             }
@@ -2405,16 +2405,21 @@ juros de mora
                 }
             }
 
-            $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = '{$PeriodoApuracao}'");
+            if (strlen($PeriodoApuracao) == 10) {
+                $PeriodoApuracao = substr($PeriodoApuracao, 0, -4);
+            }
+            $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = ".$PeriodoApuracao."");
             if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Período de apuração diverente do período da atividade', 'N');
                 continue;
             }
 
-            $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
-            if (empty($UF) || !$validateUF[0]->countUF) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
-                continue;
+            if (count($arrayExplode) >= 4) {
+                $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
+                if (empty($UF) || !$validateUF[0]->countUF) {
+                    $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
+                    continue;
+                }
             }
 
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;

@@ -537,7 +537,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             }
             $atividade = json_decode(json_encode(DB::select('SELECT * FROM atividades where id = '.$atividadeID.' limit 1')),true);
             if (!empty($atividade)) {
-                $estabelecimento = Estabelecimento::findOrFail($atividade[0]['estemp_id']);
+                $estabelecimento = Estabelecimento::findOrFail($atividade[0]['estemp_id'])->where('ativo', '=', 1);
                 if (!empty($estabelecimento)) {
                     $icms['CNPJ'] = $estabelecimento->cnpj;
                     $icms['ENDERECO'] = $estabelecimento->endereco.', '.$estabelecimento->num_endereco;
@@ -674,7 +674,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'PA';
         
@@ -744,7 +744,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'PB';
@@ -808,7 +808,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'ES';
@@ -886,7 +886,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'GO';
         $handle = fopen($value['pathtxt'], "r");
@@ -934,7 +934,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
         echo "<PrE>";
         print_r($str);exit;
-        
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -950,7 +950,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'SE';
 
@@ -1042,7 +1042,7 @@ valor total([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'BA';
         $handle = fopen($value['pathtxt'], "r");
@@ -1136,7 +1136,7 @@ valor total([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'RN';
@@ -1218,7 +1218,7 @@ valor do documento([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms[0]['CNPJ'] = $estabelecimento->cnpj;
         $icms[0]['IE'] = $estabelecimento->insc_estadual;
         $icms[0]['UF'] = 'MG';
@@ -1359,7 +1359,7 @@ periodo ref.([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'CE';
@@ -1454,7 +1454,7 @@ periodo ref.([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'PR';
@@ -1538,7 +1538,7 @@ data de vencimento
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'PE';
@@ -1633,7 +1633,7 @@ data de vencimento
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'MA';
@@ -1772,7 +1772,7 @@ valor total([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'DF';
@@ -1858,7 +1858,7 @@ valor total([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'AL';
 
@@ -1930,7 +1930,7 @@ valor total([^{]*)~i', $str, $match);
 
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id);
+        $estabelecimento = Estabelecimento::findOrFail($atividade->estemp_id)->where('ativo', '=', 1);
         $icms['IE'] = $estabelecimento->insc_estadual;
 
         $handle = fopen($value['pathtxt'], "r");

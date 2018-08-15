@@ -932,6 +932,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
+        echo "<PrE>";
+        print_r($str);exit;
         
         fclose($handle);
         $icmsarray = array();

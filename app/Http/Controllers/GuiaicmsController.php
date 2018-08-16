@@ -84,13 +84,17 @@ class GuiaicmsController extends Controller
                             if ($arrayNameFile[2] != 'ICMS' && $arrayNameFile[2] != 'DIFAL' && $arrayNameFile[2] != 'ANTECIPADOICMS' && $arrayNameFile[2] != 'TAXA' && $arrayNameFile[2] != 'PROTEGE') {
                                 continue;
                             }
-
+                            
                             $files[] = $FILENAME['path'].$arquivo;
+                            if (count($files) >= 40) {
+                                break;    
+                            }
                         }
                     }
                 }
             }
         }
+        
         $funcao = 'pdftotext.exe ';
         
         if (!empty($files)) {
@@ -1785,6 +1789,11 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+        echo "<pre>";
+        print_r($icms);
+        echo "<hr />";
+        echo "<PrE>";
+        print_r($str);exit;
 
         preg_match('~01.cf/df 02.cod receita 03.cota ou refer. 04.vencimento 05.exercicio([^{]*)~i', $str, $match);
         if (!empty($match)) {

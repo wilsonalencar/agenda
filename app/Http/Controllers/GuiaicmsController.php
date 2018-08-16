@@ -957,9 +957,6 @@ receita([^{]*)~i', $str, $match);
         }
     }
 
-    	echo "<Pre>";
-        print_r($icms);exit;
-
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -1831,9 +1828,6 @@ valor total([^{]*)~i', $str, $match);
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
             $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
         }
-
-        echo "<Pre>";
-        print_r($icms);exit;
 
         fclose($handle);
         $icmsarray = array();

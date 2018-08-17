@@ -129,7 +129,7 @@
                     ?>
                         <tr style="display: none">
                             <td><?php echo $value['uf'];?></td>
-                            <td>SEFAZ</td>
+                            <td><?php echo $value['IMPOSTO'];?></td>
                             <td><?php if (substr($value['CNPJ'], 0,8) == 13574594) {
                                 echo "1000";
                             } ?></td>
@@ -313,7 +313,7 @@
                     ?>
                         <tr style="display: none">
                             <td>046-2</td>
-                            <td>GAREI</td>
+                            <td><?php echo $value['IMPOSTO'];?></td>
                             <?php
                             $valorData = $value['DATA_VENCTO'];
                             $data_vencimento = str_replace('-', '/', $valorData);

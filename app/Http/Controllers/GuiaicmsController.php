@@ -2351,7 +2351,17 @@ valor total([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['COD_RECEITA'] = trim($k[0]);
         }
-        
+
+        if (empty($icms['IE'])) {
+         //inscricao estadual
+        preg_match('~inscricao estadual([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $k = explode('
+', trim($match[1]));
+            $icms['IE'] = $this->numero(trim($k[2]));
+        }   
+        }
+
         //observacao
         preg_match('~observacoes
 21([^{]*)~i', $str, $match);

@@ -2726,6 +2726,8 @@ juros de mora
     private function savefiles($files){
         $arr = array();
         foreach ($files as $K => $file) {
+            echo "<PrE>";
+            print_r($file);exit;
             $arquivo = explode('/', $file);
             foreach ($arquivo as $k => $fileexploded) {
             }
@@ -2751,7 +2753,7 @@ juros de mora
             if (!empty($arrayExplode[4])) 
                 $UF = substr($arrayExplode[4], 0, 2); 
             $estemp_id = 0;
-            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = "'.$CodigoEstabelecimento.'"');
+            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = "'.$CodigoEstabelecimento.'" and ativo = 1');
             if (!empty($arrayEstempId[0]->id)) {
                 $estemp_id = $arrayEstempId[0]->id;
             }

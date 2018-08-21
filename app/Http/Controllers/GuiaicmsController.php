@@ -181,7 +181,7 @@ class GuiaicmsController extends Controller
                 $icmsarray = $this->icmsRS($value);
             }  
 
-            if (strpos($arqu, 'AL')) {
+            if (strpos($arqu, 'AL') && substr($arqu, 0,-10) == 'AL.txt bar') {
                 $icmsarray = $this->icmsAL($value);
             }  
 

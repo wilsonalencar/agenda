@@ -2726,7 +2726,10 @@ juros de mora
     private function savefiles($files){
         $arr = array();
         foreach ($files as $K => $file) {
-        
+            $arquivo = explode('/', $file);
+            foreach ($arquivo as $k => $fileexploded) {
+            }
+
             $empresaraiz = explode('_', $arquivo[2]);
             $empresacnpjini = $empresaraiz[1];
             
@@ -2734,10 +2737,6 @@ juros de mora
             $empresaRaizBusca = DB::select('select id from empresas where LEFT(cnpj, 8)= "'.$empresacnpjini.'"');
             if (!empty($empresaRaizBusca[0]->id)) {
                 $empresaraizid = $empresaRaizBusca[0]->id;
-            }
-
-            $arquivo = explode('/', $file);
-            foreach ($arquivo as $k => $fileexploded) {
             }
 
             $arrayExplode = explode("_", $fileexploded);

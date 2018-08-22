@@ -304,8 +304,10 @@ class GuiaicmsController extends Controller
 
                     Guiaicms::create($icms);
                     $destino = str_replace('/imported', '', $value['path']);
-                    copy($destino, $value['path']);
-                    unlink($destino);
+                    if (is_file($value['path'])) {
+                        copy($destino, $value['path']);
+                        unlink($destino);
+                    }
                 }
             }
         }
@@ -1401,7 +1403,7 @@ valor do documento([^{]*)~i', $str, $match);
                 if (strlen($x) == 13) {
                     $codbarras .= $this->numero($x); 
                 }
-                if ($k == 12) {
+                if ($k == 14) {
                     break;
                 }
             }

@@ -1398,8 +1398,6 @@ valor do documento([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $codbarras = '';
             foreach ($i as $k => $x) {
-                echo "<pre>";
-                print_r($i);exit;
                 if (strlen($x) == 13) {
                     $codbarras .= $this->numero($x); 
                 }

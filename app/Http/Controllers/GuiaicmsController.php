@@ -290,6 +290,7 @@ class GuiaicmsController extends Controller
                     } 
                     
                     if (!$this->validateEx($icms)) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O ICMS já está cadastrado', 'N');
                         continue;
                     }
                      

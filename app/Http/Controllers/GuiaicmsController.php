@@ -464,7 +464,7 @@ class GuiaicmsController extends Controller
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -603,7 +603,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -737,7 +737,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -828,7 +828,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -912,7 +912,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1008,7 +1008,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1112,7 +1112,7 @@ receita([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1223,7 +1223,7 @@ valor total([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1338,7 +1338,7 @@ valor total([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1447,7 +1447,7 @@ valor do documento([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms[0]['IMPOSTO'] = 'GAREI';
+            $icms[0]['IMPOSTO'] = 'SEFAZ';
             $icms[1]['IMPOSTO'] = 'GAREI';
         }
 
@@ -1606,7 +1606,7 @@ periodo ref.([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1721,7 +1721,7 @@ periodo ref.([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1825,7 +1825,7 @@ data de vencimento
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -1940,7 +1940,7 @@ data de vencimento
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -2023,7 +2023,7 @@ valor total([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -2119,7 +2119,7 @@ valor total([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -2193,7 +2193,7 @@ valor total([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {
@@ -2285,7 +2285,7 @@ valor total([^{]*)~i', $str, $match);
         }
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
+            $icms['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {

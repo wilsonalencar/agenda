@@ -439,7 +439,7 @@ class GuiaicmsController extends Controller
         }
 
         if (!empty($icms['IMPOSTO'])) {
-            $query .= ' AND IMPOSTO = '.$icms['IMPOSTO'];
+            $query .= ' AND IMPOSTO = "'.$icms['IMPOSTO'].'"';
         }
 
         $validate = DB::select($query);

@@ -437,6 +437,10 @@ class GuiaicmsController extends Controller
             $query .= ' AND VLR_TOTAL = '.$icms['VLR_TOTAL'];
         }
 
+        if (!empty($icms['VLR_RECEITA'])) {
+            $query .= ' AND VLR_RECEITA = '.$icms['VLR_RECEITA'];
+        }
+
         $validate = DB::select($query);
         if (!empty($validate)) {
             return false;

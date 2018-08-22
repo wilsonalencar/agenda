@@ -304,7 +304,7 @@ class GuiaicmsController extends Controller
 
                     Guiaicms::create($icms);
                     $destino = str_replace('/imported', '', $value['path']);
-                    if (is_file($value['path'])) {
+                    if (file_exists($value['path'])) {
                         copy($destino, $value['path']);
                         unlink($destino);
                     }

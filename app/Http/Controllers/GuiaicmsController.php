@@ -597,6 +597,11 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
 
         $file_content = explode('_', $value['arquivo']);
+        
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
+        $icms['IE'] = $estabelecimento->insc_estadual;
+
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -657,10 +662,12 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
         }
 
-        preg_match('~apuracao \(debitos/creditos\) normal([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['IE'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
+        if (empty($icms['IE'])) {
+            preg_match('~apuracao \(debitos/creditos\) normal([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(' ', trim($match[1]));
+                $icms['IE'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
+            }   
         }
 
         preg_match('~\(06\) receita([^{]*)~i', $str, $match);

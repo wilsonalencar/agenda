@@ -38,7 +38,8 @@ class Guiaicms extends Model
         'OBSERVACAO',
         'MULTA_PENAL_FORMAL',
         'CODBARRAS',
-        'TAXA'
+        'TAXA',
+        'IMPOSTO'
     ];
 
 }

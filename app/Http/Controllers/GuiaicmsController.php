@@ -169,75 +169,75 @@ class GuiaicmsController extends Controller
 
             $arqu = 'foo '.$value['arquivotxt'].' bar';    
             
-            if (strpos($arqu, 'SP') && substr($arqu, 0,-10) == 'SP.txt bar') {
+            if (strpos($arqu, 'SP') && substr($arqu, -10) == 'SP.txt bar') {
                 $icmsarray = $this->icmsSP($value);
             }
 
-            if (strpos($arqu, 'RJ') && substr($arqu, 0,-10) == 'RJ.txt bar') {
+            if (strpos($arqu, 'RJ') && substr($arqu, -10) == 'RJ.txt bar') {
                 $icmsarray = $this->icmsRJ($value);   
             }
 
-            if (strpos($arqu, 'RS') && substr($arqu, 0,-10) == 'RS.txt bar') {
+            if (strpos($arqu, 'RS') && substr($arqu, -10) == 'RS.txt bar') {
                 $icmsarray = $this->icmsRS($value);
             }  
 
-            if (strpos($arqu, 'AL') && substr($arqu, 0,-10) == 'AL.txt bar') {
+            if (strpos($arqu, 'AL') && substr($arqu, -10) == 'AL.txt bar') {
                 $icmsarray = $this->icmsAL($value);
             }  
 
-            if (strpos($arqu, 'DF') && substr($arqu, 0,-10) == 'DF.txt bar') {
+            if (strpos($arqu, 'DF') && substr($arqu, -10) == 'DF.txt bar') {
                 $icmsarray = $this->icmsDF($value);
             }
             
-            if (strpos($arqu, 'PA') && substr($arqu, 0,-10) == 'PA.txt bar') {
+            if (strpos($arqu, 'PA') && substr($arqu, -10) == 'PA.txt bar') {
                 $icmsarray = $this->icmsPA($value);
             }
 
-            if (strpos($arqu, 'GO') && substr($arqu, 0,-10) == 'GO.txt bar') {
+            if (strpos($arqu, 'GO') && substr($arqu, -10) == 'GO.txt bar') {
                 $icmsarray = $this->icmsGO($value);
             }  
             
-            if (strpos($arqu, 'ES') && substr($arqu, 0,-10) == 'ES.txt bar') {
+            if (strpos($arqu, 'ES') && substr($arqu, -10) == 'ES.txt bar') {
                 $icmsarray = $this->icmsES($value);
             }
             
-            if (strpos($arqu, 'PB') && substr($arqu, 0,-10) == 'PB.txt bar') {
+            if (strpos($arqu, 'PB') && substr($arqu, -10) == 'PB.txt bar') {
                 $icmsarray = $this->icmsPB($value);
             }
 
-            if (strpos($arqu, 'SE') && substr($arqu, 0,-10) == 'SE.txt bar') {
+            if (strpos($arqu, 'SE') && substr($arqu, -10) == 'SE.txt bar') {
                 $icmsarray = $this->icmsSE($value);
             }
             
-            if (strpos($arqu, 'BA') && substr($arqu, 0,-10) == 'BA.txt bar') {
+            if (strpos($arqu, 'BA') && substr($arqu, -10) == 'BA.txt bar') {
                 $icmsarray = $this->icmsBA($value);
             }
 
-            if (strpos($arqu, 'RN') && substr($arqu, 0,-10) == 'RN.txt bar') {
+            if (strpos($arqu, 'RN') && substr($arqu, -10) == 'RN.txt bar') {
                 $icmsarray = $this->icmsRN($value);
             }
 
-            if (strpos($arqu, 'PE') && substr($arqu, 0,-10) == 'PE.txt bar') {
+            if (strpos($arqu, 'PE') && substr($arqu, -10) == 'PE.txt bar') {
                 $icmsarray = $this->icmsPE($value);
             }
 
-            if (strpos($arqu, 'MA') && substr($arqu, 0,-10) == 'MA.txt bar') {
+            if (strpos($arqu, 'MA') && substr($arqu, -10) == 'MA.txt bar') {
                $icmsarray = $this->icmsMA($value);
             }
 
-            if (strpos($arqu, 'MG') && substr($arqu, 0,-10) == 'MG.txt bar') {
+            if (strpos($arqu, 'MG') && substr($arqu, -10) == 'MG.txt bar') {
                 $icmsarray = $this->icmsMG($value);
             }
 
-            if (strpos($arqu, 'CE') && substr($arqu, 0,-10) == 'CE.txt bar') {
+            if (strpos($arqu, 'CE') && substr($arqu, -10) == 'CE.txt bar') {
                 $icmsarray = $this->icmsCE($value);
             }
 
-            if (strpos($arqu, 'PI') && substr($arqu, 0,-10) == 'PI.txt bar') {
+            if (strpos($arqu, 'PI') && substr($arqu, -10) == 'PI.txt bar') {
                $icmsarray = $this->icmsPI($value);
             }
 
-            if (strpos($arqu, 'PR') && substr($arqu, 0,-10) == 'PR.txt bar') {
+            if (strpos($arqu, 'PR') && substr($arqu, -10) == 'PR.txt bar') {
                $icmsarray = $this->icmsPR($value);
             }
 

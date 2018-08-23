@@ -278,8 +278,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::post('guiaicms/planilha', array('as'=>'guiaicms.planilha', 'uses'=>'GuiaicmsController@planilha'));
     Route::post('guiaicms/criticas', array('as'=>'guiaicms.criticas', 'uses'=>'GuiaicmsController@criticas'));
     Route::get('guiaicms/search_criticas', array('as'=>'guiaicms.search_criticas', 'uses'=>'GuiaicmsController@search_criticas'));
-    Route::get('guiaicms/search_criticas_entrega', array('as'=>'guiaicms.search_criticas_entrega', 'uses'=>'GuiaicmsController@search_criticas_entrega'));
-    Route::post('guiaicms/criticas_entrega', array('as'=>'guiaicms.criticas_entrega', 'uses'=>'GuiaicmsController@criticas_entrega'));
+    
 
 });
 
@@ -297,6 +296,9 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('atividade/{atividade}/reprovar', array('as'=>'atividades.reprovar', 'uses'=>'AtividadesController@reprovar'));
     Route::get('atividade/{atividade}/retificar', array('as'=>'atividades.retificar', 'uses'=>'AtividadesController@retificar'));
     Route::get('atividade/{atividade}/cancelar', array('as'=>'atividades.cancelar', 'uses'=>'AtividadesController@cancelar'));
+
+    Route::get('guiaicms/search_criticas_entrega', array('as'=>'guiaicms.search_criticas_entrega', 'uses'=>'GuiaicmsController@search_criticas_entrega'));
+    Route::post('guiaicms/criticas_entrega', array('as'=>'guiaicms.criticas_entrega', 'uses'=>'GuiaicmsController@criticas_entrega'));
 
     Route::resource('arquivos', 'ArquivosController');
     Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));

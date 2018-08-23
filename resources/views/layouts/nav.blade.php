@@ -218,95 +218,79 @@
                     @endif 
                 @endif 
 
-                 @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente'))
-                 <li class="panel panel-default" id="dropdown">
-                    <a data-toggle="collapse" href="#rh"><i class="fa fa-clock-o"></i>RH</a>
-                        <div id="rh" class="panel-collapse collapse">
-                            <div class="panel-body">
-                            <ul class="nav navbar-nav">
+             <li class="panel panel-default" id="dropdown">
+                <a data-toggle="collapse" href="#rh"><i class="fa fa-clock-o"></i>RH</a>
+                    <div id="rh" class="panel-collapse collapse">
+                        <div class="panel-body">
+                        <ul class="nav navbar-nav">
+                            <li class="panel panel-default" id="dropdown">
                                 <li class="panel panel-default" id="dropdown">
-
-                                @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
-                                    <li class="panel panel-default" id="dropdown">
-                                        <a data-toggle="collapse" href="#workflow-manager">Workflow Manager</a>
-                                        
-                                        <div id="workflow-manager" class="panel-collapse collapse">
-                                            <div class="panel-body">
-                                                <ul class="nav navbar-nav">
-                                                    <li><a href="{{ route('aprovacao') }}"><i class="fa fa-btn fa-upload"></i>Aprovação</a></li>
-                                                    <li><a href="{{ route('entregas.index') }}"><i class="fa fa-btn fa-upload"></i>Entregas</a></li>
-                                                    <li><a href="{{ route('guiaicms.search_criticas_entrega') }}"><i class="fa fa-btn fa-trash"></i>Criticas Entrega</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @endif
-
-                                @if ( Auth::user()->hasRole('analyst') || Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner'))
-                                    <li class="panel panel-default" id="dropdown">
-                                        <a data-toggle="collapse" href="#repository">Repository</a>
-                                        <div id="repository" class="panel-collapse collapse">
-                                            <div class="panel-body">
-                                                <ul class="nav navbar-nav">
-                                                    <li><a href="{{ route('arquivos.index') }}"><i class="fa fa-btn fa-upload"></i>Arquivos</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @endif
-
-
-                                <li><a href="{{ route('calendario') }}">Calendário</a></li>
-                                @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('manager') || Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('gbravo') || Auth::user()->hasRole('gcliente'))
-                                <li class="panel panel-default" id="dropdown">
-                                        <a data-toggle="collapse" href="#tax-calendar">Cockpit</a>
-                                            <div id="tax-calendar" class="panel-collapse collapse">
-                                                <div class="panel-body">
-                                                    <ul class="nav navbar-nav">
-                                                        <li class="panel panel-default" id="dropdown">
-                                                            <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
-                                                            <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
-                                                            <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
-                                                            <li><a href="{{ route('consulta_procadm') }}">Consulta Processos Administrativos</a></li>
-
-                                                            <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
-
-                                                            @if ( Auth::user()->hasRole('gbravo'))
-                                                                <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
-                                                            @endif
-                                                            @if ( !Auth::user()->hasRole('gcliente'))
-                                                                <li><a href="{{ route('about') }}">Performance</a></li>
-                                                                <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
-                                                                <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
-                                                                <li><a href="{{ route('desempenho_entregas') }}" target="_blank">Desempenho das Entregas</a></li>
-                                                            @endif
-                                                            <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
-                                                        </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                    </li>
-                                @endif
-                                 <li class="panel panel-default" id="dropdown">
-                                    <a data-toggle="collapse" href="#movimento">Movimento</a>
-                                    <div id="movimento" class="panel-collapse collapse">
+                                    <a data-toggle="collapse" href="#workflow-manager">Workflow Manager</a>
+                                    
+                                    <div id="workflow-manager" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <ul class="nav navbar-nav">
-                                                <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Contratação</a></li>
-                                                <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Demissão</a></li>
-                                                <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Férias</a></li>
-                                                <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Processos Judiciais</a></li>
+                                                <li><a href="{{ route('aprovacao') }}"><i class="fa fa-btn fa-upload"></i>Aprovação</a></li>
+                                                <li><a href="{{ route('entregas.index') }}"><i class="fa fa-btn fa-upload"></i>Entregas</a></li>
+                                                <li><a href="{{ route('guiaicms.search_criticas_entrega') }}"><i class="fa fa-btn fa-trash"></i>Criticas Entrega</a></li>
                                             </ul>
                                         </div>
                                     </div>
                                 </li>
+                                <li class="panel panel-default" id="dropdown">
+                                    <a data-toggle="collapse" href="#repository">Repository</a>
+                                    <div id="repository" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <ul class="nav navbar-nav">
+                                                <li><a href="{{ route('arquivos.index') }}"><i class="fa fa-btn fa-upload"></i>Arquivos</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </li>
-                            </ul>
-                            </div>
+                            <li><a href="{{ route('calendario') }}">Calendário</a></li>
+                            <li class="panel panel-default" id="dropdown">
+                                    <a data-toggle="collapse" href="#tax-calendar">Cockpit</a>
+                                        <div id="tax-calendar" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <ul class="nav navbar-nav">
+                                                    <li class="panel panel-default" id="dropdown">
+                                                        <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
+                                                        <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
+                                                        <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
+                                                        <li><a href="{{ route('consulta_procadm') }}">Consulta Processos Administrativos</a></li>
+
+                                                        <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
+
+                                                            <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
+                                                            <li><a href="{{ route('about') }}">Performance</a></li>
+                                                            <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
+                                                            <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
+                                                            <li><a href="{{ route('desempenho_entregas') }}" target="_blank">Desempenho das Entregas</a></li>
+                                                        <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
+                                                    </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                </li>
+                             <li class="panel panel-default" id="dropdown">
+                                <a data-toggle="collapse" href="#movimento">Movimento</a>
+                                <div id="movimento" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <ul class="nav navbar-nav">
+                                            <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Contratação</a></li>
+                                            <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Demissão</a></li>
+                                            <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Férias</a></li>
+                                            <li><a href="#"><i class="fa fa-btn fa-file-text-o"></i>Processos Judiciais</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                            </li>
+                        </ul>
                         </div>
-                    </li>
-                @endif
+                    </div>
+                </li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </nav>

@@ -261,12 +261,12 @@
 
                                                         <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
 
-                                                            <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
-                                                            <li><a href="{{ route('about') }}">Performance</a></li>
-                                                            <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
-                                                            <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
-                                                            <li><a href="{{ route('desempenho_entregas') }}" target="_blank">Desempenho das Entregas</a></li>
-                                                        <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
+                                                        <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
+                                                        <li><a href="{{ route('about') }}">Performance</a></li>
+                                                        <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
+                                                        <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
+                                                        <li><a href="{{ route('desempenho_entregas') }}" target="_blank">Desempenho das Entregas</a></li>
+                                                    <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
                                                     </li>
                                             </ul>
                                         </div>

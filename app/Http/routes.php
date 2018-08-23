@@ -84,9 +84,6 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::resource('entregas', 'EntregasController');
     Route::get('entrega/data', array('as'=>'entregas.data', 'uses'=>'EntregasController@anyData'));
 
-    Route::resource('arquivos', 'ArquivosController');
-    Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));
-
     Route::post('atividade/storeComentario', array('as'=>'atividades.storeComentario', 'uses'=>'AtividadesController@storeComentario'));
 
     Route::get('upload/{user}/entrega', array('as'=>'upload.entrega', 'uses'=>'UploadsController@entrega'));
@@ -175,9 +172,6 @@ Route::group(['middleware' => ['web','auth','role:user|analyst|supervisor|manage
         'uses' => 'PagesController@calendar'
     ]);
 
-    Route::resource('calendarios', 'CalendariosController');
-    Route::get('/calendario', array('as'=>'calendario', 'uses'=>'CalendariosController@index'));
-    Route::get('/feriados', array('as'=>'feriados', 'uses'=>'CalendariosController@showFeriados'));
 
 });
 
@@ -198,6 +192,10 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
 
     Route::resource('entregas', 'EntregasController');
     Route::get('entrega/data', array('as'=>'entregas.data', 'uses'=>'EntregasController@anyData'));
+
+    Route::resource('calendarios', 'CalendariosController');
+    Route::get('/calendario', array('as'=>'calendario', 'uses'=>'CalendariosController@index'));
+    Route::get('/feriados', array('as'=>'feriados', 'uses'=>'CalendariosController@showFeriados'));
 
     Route::resource('arquivos', 'ArquivosController');
     Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));
@@ -299,6 +297,9 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::get('atividade/{atividade}/reprovar', array('as'=>'atividades.reprovar', 'uses'=>'AtividadesController@reprovar'));
     Route::get('atividade/{atividade}/retificar', array('as'=>'atividades.retificar', 'uses'=>'AtividadesController@retificar'));
     Route::get('atividade/{atividade}/cancelar', array('as'=>'atividades.cancelar', 'uses'=>'AtividadesController@cancelar'));
+
+    Route::resource('arquivos', 'ArquivosController');
+    Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));
 
     Route::post('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));
     Route::get('dashboard_tributo', array('as'=>'dashboard_tributo', 'uses'=>'PagesController@dashboard_tributo'));

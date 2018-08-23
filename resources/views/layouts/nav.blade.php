@@ -112,7 +112,6 @@
                                                 <li><a href="{{ route('guiaicms.icms') }}">ICMS</a></li>
                                                 @if ( !Auth::user()->hasRole('gcliente'))
                                                 <li><a href="{{ route('guiaicms.search_criticas') }}">Criticas</a></li>
-                                                <li><a href="{{ route('guiaicms.search_criticas_entrega') }}">Criticas Entrega</a></li>
                                                 @endif
                                             </li>
                                     </ul>

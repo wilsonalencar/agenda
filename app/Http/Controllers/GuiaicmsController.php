@@ -81,10 +81,10 @@ class GuiaicmsController extends Controller
                                 continue;
                             }
 
-                            if ($arrayNameFile[2] != 'ICMS' && $arrayNameFile[2] != 'DIFAL' && $arrayNameFile[2] != 'ANTECIPADOICMS' && $arrayNameFile[2] != 'TAXA' && $arrayNameFile[2] != 'PROTEGE') {
+                            if ($arrayNameFile[2] != 'ICMS' && $arrayNameFile[2] != 'DIFAL' && $arrayNameFile[2] != 'ANTECIPADOICMS' && $arrayNameFile[2] != 'TAXA' && $arrayNameFile[2] != 'PROTEGE' && $arrayNameFile[2] != 'UNIVERSIDADE' && $arrayNameFile[2] != 'FITUR' && $arrayNameFile[2] != 'FECP' && $arrayNameFile[2] != 'FEEF') {
                                 continue;
                             }
-                            
+
                             $files[] = $FILENAME['path'].$arquivo;
                             if (count($files) >= 40) {
                                 break;    
@@ -169,75 +169,75 @@ class GuiaicmsController extends Controller
 
             $arqu = 'foo '.$value['arquivotxt'].' bar';    
             
-            if (strpos($arqu, 'SP')) {
+            if (strpos($arqu, 'SP') && substr($arqu, -10) == 'SP.txt bar') {
                 $icmsarray = $this->icmsSP($value);
             }
 
-            if (strpos($arqu, 'RJ')) {
+            if (strpos($arqu, 'RJ') && substr($arqu, -10) == 'RJ.txt bar') {
                 $icmsarray = $this->icmsRJ($value);   
             }
 
-            if (strpos($arqu, 'RS')) {
+            if (strpos($arqu, 'RS') && substr($arqu, -10) == 'RS.txt bar') {
                 $icmsarray = $this->icmsRS($value);
             }  
 
-            if (strpos($arqu, 'AL')) {
+            if (strpos($arqu, 'AL') && substr($arqu, -10) == 'AL.txt bar') {
                 $icmsarray = $this->icmsAL($value);
             }  
 
-            if (strpos($arqu, 'DF')) {
+            if (strpos($arqu, 'DF') && substr($arqu, -10) == 'DF.txt bar') {
                 $icmsarray = $this->icmsDF($value);
             }
             
-            if (strpos($arqu, 'PA')) {
+            if (strpos($arqu, 'PA') && substr($arqu, -10) == 'PA.txt bar') {
                 $icmsarray = $this->icmsPA($value);
             }
 
-            if (strpos($arqu, 'GO')) {
+            if (strpos($arqu, 'GO') && substr($arqu, -10) == 'GO.txt bar') {
                 $icmsarray = $this->icmsGO($value);
             }  
             
-            if (strpos($arqu, 'ES')) {
+            if (strpos($arqu, 'ES') && substr($arqu, -10) == 'ES.txt bar') {
                 $icmsarray = $this->icmsES($value);
             }
             
-            if (strpos($arqu, 'PB')) {
+            if (strpos($arqu, 'PB') && substr($arqu, -10) == 'PB.txt bar') {
                 $icmsarray = $this->icmsPB($value);
             }
 
-            if (strpos($arqu, 'SE')) {
+            if (strpos($arqu, 'SE') && substr($arqu, -10) == 'SE.txt bar') {
                 $icmsarray = $this->icmsSE($value);
             }
             
-            if (strpos($arqu, 'BA')) {
+            if (strpos($arqu, 'BA') && substr($arqu, -10) == 'BA.txt bar') {
                 $icmsarray = $this->icmsBA($value);
             }
 
-            if (strpos($arqu, 'RN')) {
+            if (strpos($arqu, 'RN') && substr($arqu, -10) == 'RN.txt bar') {
                 $icmsarray = $this->icmsRN($value);
             }
 
-            if (strpos($arqu, 'PE')) {
+            if (strpos($arqu, 'PE') && substr($arqu, -10) == 'PE.txt bar') {
                 $icmsarray = $this->icmsPE($value);
             }
 
-            if (strpos($arqu, 'MA')) {
+            if (strpos($arqu, 'MA') && substr($arqu, -10) == 'MA.txt bar') {
                $icmsarray = $this->icmsMA($value);
             }
 
-            if (strpos($arqu, 'MG')) {
+            if (strpos($arqu, 'MG') && substr($arqu, -10) == 'MG.txt bar') {
                 $icmsarray = $this->icmsMG($value);
             }
 
-            if (strpos($arqu, 'CE')) {
+            if (strpos($arqu, 'CE') && substr($arqu, -10) == 'CE.txt bar') {
                 $icmsarray = $this->icmsCE($value);
             }
 
-            if (strpos($arqu, 'PI')) {
+            if (strpos($arqu, 'PI') && substr($arqu, -10) == 'PI.txt bar') {
                $icmsarray = $this->icmsPI($value);
             }
 
-            if (strpos($arqu, 'PR')) {
+            if (strpos($arqu, 'PR') && substr($arqu, -10) == 'PR.txt bar') {
                $icmsarray = $this->icmsPR($value);
             }
 
@@ -290,6 +290,7 @@ class GuiaicmsController extends Controller
                     } 
                     
                     if (!$this->validateEx($icms)) {
+                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O ICMS já está cadastrado', 'N');
                         continue;
                     }
                      
@@ -304,8 +305,10 @@ class GuiaicmsController extends Controller
 
                     Guiaicms::create($icms);
                     $destino = str_replace('/imported', '', $value['path']);
-                    copy($destino, $value['path']);
-                    unlink($destino);
+                    if (file_exists($destino)) {
+                        copy($destino, $value['path']);
+                        unlink($destino);
+                    }
                 }
             }
         }
@@ -435,6 +438,10 @@ class GuiaicmsController extends Controller
             $query .= ' AND VLR_TOTAL = '.$icms['VLR_TOTAL'];
         }
 
+        if (!empty($icms['IMPOSTO'])) {
+            $query .= ' AND IMPOSTO = "'.$icms['IMPOSTO'].'"';
+        }
+
         $validate = DB::select($query);
         if (!empty($validate)) {
             return false;
@@ -449,6 +456,8 @@ class GuiaicmsController extends Controller
         if (!file_exists($value['pathtxt'])) {
             return $icms;
         }
+
+        $file_content = explode('_', $value['arquivo']);
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
@@ -457,6 +466,25 @@ class GuiaicmsController extends Controller
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
         
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
 
         preg_match('~razao social:([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -567,14 +595,40 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         if (!file_exists($value['pathtxt'])) {
             return $icms;
         }
+
+        $file_content = explode('_', $value['arquivo']);
+        
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
+        $icms['IE'] = $estabelecimento->insc_estadual;
+
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
         $str = 'foo '.$contents.' bar';
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
-
         $icms['TRIBUTO_ID'] = 8;
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
 
         preg_match('~\(01\) nome / razao social \(estabelecimento principal\)([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -608,10 +662,20 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
         }
 
-        preg_match('~apuracao \(debitos/creditos\) normal([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode(' ', trim($match[1]));
-            $icms['IE'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
+        if (empty($icms['IE'])) {
+            preg_match('~apuracao \(debitos/creditos\) normal([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(' ', trim($match[1]));
+                $icms['IE'] = str_replace(',', '.', trim(str_replace('.', '', $i[1])));
+            }   
+        }
+
+        if (empty($icms['IE'])) {
+            preg_match('~natureza da receita: cnpj/cpf: inscricao estadual/rj: nome/razao social: endereco: municipio: uf: cep: telefone:([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $a = explode(' ', trim($match[1]));
+                $icms['IE'] = trim($this->numero($a[4]));
+            }   
         }
 
         preg_match('~\(06\) receita([^{]*)~i', $str, $match);
@@ -690,6 +754,26 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
         
         if (!empty($match)) {
@@ -761,6 +845,26 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~03 - receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
@@ -824,6 +928,26 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
 
         preg_match('~servico icms - comercio([^{]*)~i', $str, $match);        
         if (!empty($match)) {
@@ -900,6 +1024,26 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
 
         preg_match('~inscricao estadual:([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -984,6 +1128,26 @@ receita([^{]*)~i', $str, $match);
         $str = strtolower($str);
         
         $icms['TRIBUTO_ID'] = 8;
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
 
 
         preg_match('~inscricao estadual / cpf / cnpj
@@ -1075,6 +1239,26 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
 
         preg_match('~3-inscricao estadual/cpf ou cnpj([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -1171,6 +1355,26 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
         
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~receita ([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
@@ -1217,7 +1421,7 @@ valor do documento([^{]*)~i', $str, $match);
                 if (strlen($x) == 13) {
                     $codbarras .= $this->numero($x); 
                 }
-                if ($k == 12) {
+                if ($k == 14) {
                     break;
                 }
             }
@@ -1258,6 +1462,31 @@ valor do documento([^{]*)~i', $str, $match);
         $icms[0]['TRIBUTO_ID'] = 8;
         $icms[1]['TRIBUTO_ID'] = 8;
      
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms[0]['IMPOSTO'] = 'GAREI';
+            $icms[1]['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms[0]['IMPOSTO'] = 'SEFAZ';
+            $icms[1]['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms[0]['IMPOSTO'] = 'SEFAZ';
+            $icms[1]['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms[0]['IMPOSTO'] = 'SEFAC';
+            $icms[1]['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms[0]['IMPOSTO'] = 'SEFAT';
+            $icms[1]['IMPOSTO'] = 'SEFAT';
+        }
         
         preg_match('~validade([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -1394,6 +1623,26 @@ periodo ref.([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
      
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~numeracao do codigo de barras([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
@@ -1489,6 +1738,26 @@ periodo ref.([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~periodo de referencia
 05([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -1573,6 +1842,26 @@ data de vencimento
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
         
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~06 - codigo da receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
@@ -1668,6 +1957,26 @@ data de vencimento
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~data vencimento([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
@@ -1731,6 +2040,26 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
         
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~01 - inscricao estadual/renavam
 
 02 - cnpj/cpf([^{]*)~i', $str, $match);
@@ -1807,6 +2136,26 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
 
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         preg_match('~17.valor total - r\$
 ([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -1860,6 +2209,26 @@ valor total([^{]*)~i', $str, $match);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
+        
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
         
         preg_match('~caceal([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -1932,6 +2301,27 @@ valor total([^{]*)~i', $str, $match);
         $str = strtolower($str);
         $icms['TRIBUTO_ID'] = 8;
         
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($file_content[2] == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($file_content[2] ==  'TAXA' || $file_content[2] ==  'PROTEGE' || $file_content[2] ==  'FECP' || $file_content[2] ==  'FEEF' || $file_content[2] ==  'UNIVERSIDADE' || $file_content[2] ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
         //razão social
         preg_match('~nome ou razao social
 15([^{]*)~i', $str, $match);
@@ -1983,7 +2373,17 @@ valor total([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['COD_RECEITA'] = trim($k[0]);
         }
-        
+
+        if (empty($icms['IE'])) {
+         //inscricao estadual
+        preg_match('~inscricao estadual([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $k = explode('
+', trim($match[1]));
+            $icms['IE'] = $this->numero(trim($k[2]));
+        }   
+        }
+
         //observacao
         preg_match('~observacoes
 21([^{]*)~i', $str, $match);
@@ -2352,6 +2752,15 @@ juros de mora
             foreach ($arquivo as $k => $fileexploded) {
             }
 
+            $empresaraiz = explode('_', $arquivo[2]);
+            $empresacnpjini = $empresaraiz[1];
+            
+            $empresaraizid = 0;
+            $empresaRaizBusca = DB::select('select id from empresas where LEFT(cnpj, 8)= "'.$empresacnpjini.'"');
+            if (!empty($empresaRaizBusca[0]->id)) {
+                $empresaraizid = $empresaRaizBusca[0]->id;
+            }
+
             $arrayExplode = explode("_", $fileexploded);
             $AtividadeID = 0;
             if (!empty($arrayExplode[0])) 
@@ -2373,7 +2782,7 @@ juros de mora
             if (!empty($arrayExplode[4])) 
                 $UF = substr($arrayExplode[4], 0, 2); 
             $estemp_id = 0;
-            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = "'.$CodigoEstabelecimento.'"');
+            $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = "'.$CodigoEstabelecimento.'" and ativo = 1 and empresa_id ='.$empresaraizid.'');
             if (!empty($arrayEstempId[0]->id)) {
                 $estemp_id = $arrayEstempId[0]->id;
             }

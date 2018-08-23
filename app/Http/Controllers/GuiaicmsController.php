@@ -1462,7 +1462,7 @@ valor do documento([^{]*)~i', $str, $match);
 
         if ($file_content[2] == 'ICMS' && $file_content[4] != 'SP.pdf') {
             $icms[0]['IMPOSTO'] = 'SEFAZ';
-            $icms[1]['IMPOSTO'] = 'GAREI';
+            $icms[1]['IMPOSTO'] = 'SEFAZ';
         }
 
         if ($file_content[2] == 'DIFAL') {

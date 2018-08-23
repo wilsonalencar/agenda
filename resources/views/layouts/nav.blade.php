@@ -254,9 +254,11 @@
                                                 <ul class="nav navbar-nav">
                                                     <li class="panel panel-default" id="dropdown">
                                                         <li><a href="{{ route('home') }}">Entregas Gerais</a></li>
-                                                        <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
-                                                        <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li>
-                                                        <li><a href="{{ route('consulta_procadm') }}">Consulta Processos Administrativos</a></li>
+                                                        <li><a href="#">Entregas Por Evento</a></li>
+                                                        <li><a href="#">Críticas Por Evento</a></li>
+                                                        <!-- <li><a href="{{ route('dashboard') }}">Entregas por Obrigação</a></li>
+                                                        <li><a href="{{ route('dashboard_analista') }}">Entregas por UF e Municípios</a></li> -->
+                                                        <!-- <li><a href="{{ route('consulta_procadm') }}">Consulta Processos Administrativos</a></li>
 
                                                         <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
 
@@ -264,7 +266,7 @@
                                                         <li><a href="{{ route('about') }}">Performance</a></li>
                                                         <li><a href="{{ route('cargas_grafico') }}"> Status das Integrações</a></li>
                                                         <li><a href="{{ route('graficos') }}" target="_blank">Visão Geral</a></li>
-                                                        <li><a href="{{ route('desempenho_entregas') }}" target="_blank">Desempenho das Entregas</a></li>
+                                                        <li><a href="{{ route('desempenho_entregas') }}" target="_blank">Desempenho das Entregas</a></li> -->
                                                     <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
                                                     </li>
                                             </ul>

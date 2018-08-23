@@ -670,6 +670,14 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             }   
         }
 
+        if (empty($icms['IE'])) {
+            preg_match('~natureza da receita: cnpj/cpf: inscricao estadual/rj: nome/razao social: endereco: municipio: uf: cep: telefone:([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $a = explode(' ', trim($match[1]));
+                $icms['IE'] = trim($this->numero($a[4]));
+            }   
+        }
+
         preg_match('~\(06\) receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('

@@ -2172,10 +2172,18 @@ valor total([^{]*)~i', $str, $match);
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
 
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
-            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
-            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
+            if (isset($custos[1])) {
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+            }
+            if (isset($custos[2])) {
+                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
+            }
+            if (isset($custos[3])) {
+                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+            }
+            if (isset($custos[5])) {
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
+            }
         }
 
         fclose($handle);

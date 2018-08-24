@@ -456,7 +456,8 @@ $(document).ready(function () {
                 fieldSeparator: ';',
                 fieldBoundary: ''
             }
-        ]
+        ],
+        "ordering": false
         <?php }?>
     });     
 
@@ -476,7 +477,8 @@ $(document).ready(function () {
                 fieldSeparator: ';',
                 fieldBoundary:''
             }
-        ]
+        ],
+        "ordering": false
         <?php }?>
     });     
 });

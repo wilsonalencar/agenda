@@ -81,12 +81,14 @@ class EntregasController extends Controller
 
             if (substr($filter_cnpj, -6, 4) == '0001') {
                 $estemp = Empresa::select('id')->where('cnpj', $filter_cnpj)->get();
+                $type = 'emp';
             } else {
                 $estemp = Estabelecimento::select('id')->where('cnpj', $filter_cnpj)->get();
+                $type = 'estab';
             }
 
             if (sizeof($estemp) > 0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id);
+                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type',$type);
             } else {
                 $atividades = new Collection();
             }
@@ -97,12 +99,14 @@ class EntregasController extends Controller
 
             if ($filter_codigo == '1001') {
                 $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
+                $type = 'emp';
             } else {
                 $estemp = Estabelecimento::select('id')->where('codigo','like','%'.$filter_codigo)->get();
+                $type = 'estab';
             }
 
             if (sizeof($estemp)>0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id);
+                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type',$type);
             } else {
                 $atividades = new Collection();
             }

@@ -81,14 +81,12 @@ class EntregasController extends Controller
 
             if (substr($filter_cnpj, -6, 4) == '0001') {
                 $estemp = Empresa::select('id')->where('cnpj', $filter_cnpj)->get();
-                $type = 'emp';
             } else {
                 $estemp = Estabelecimento::select('id')->where('cnpj', $filter_cnpj)->get();
-                $type = 'estab';
             }
 
             if (sizeof($estemp) > 0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type', $type);
+                $atividades = $atividades->where('estemp_id', $estemp[0]->id);
             } else {
                 $atividades = new Collection();
             }

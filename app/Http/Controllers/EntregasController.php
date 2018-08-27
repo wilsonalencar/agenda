@@ -97,14 +97,12 @@ class EntregasController extends Controller
 
             if ($filter_codigo == '1001') {
                 $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
-                $type = 'emp';
             } else {
                 $estemp = Estabelecimento::select('id')->where('codigo','like','%'.$filter_codigo)->get();
-                $type = 'estab';
             }
 
             if (sizeof($estemp)>0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type',$type);
+                $atividades = $atividades->where('estemp_id', $estemp[0]->id);
             } else {
                 $atividades = new Collection();
             }

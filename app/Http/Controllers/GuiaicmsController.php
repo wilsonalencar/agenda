@@ -2155,6 +2155,15 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAT';
         }
 
+        //IE
+        if (empty($icms['IE'])) {
+            preg_match('~df ([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $a = explode(' ', trim($match[1]));
+                $icms['IE'] = trim(substr($a[0], 0,8));
+            }
+        }
+
         preg_match('~17.valor total - r\$
 ([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -2165,32 +2174,49 @@ valor total([^{]*)~i', $str, $match);
             $k = explode(' ', $i[3]);
             $custos = explode(' ', $i[5]);
             $icms['COD_RECEITA'] = $a[1];
-			
             $icms['REFERENCIA'] = $k[0];
             $valorData = trim($k[1]);
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-
-            if (isset($custos[1])) {
-                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
-            }
-            if (isset($custos[2])) {
-                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
-            }
-            if (isset($custos[3])) {
-                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
-            }
-            if (isset($custos[5])) {
-                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
+            
+            if(count($custos) == 2){    
+                $custos_pp = explode(' ', $i[6]);
+                if (isset($custos[1])) {
+                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+                }
+                if (isset($custos_pp[1])) {
+                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[1]));
+                }
+                if (isset($custos_pp[2])) {
+                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[2]));
+                }
+                
+                if (isset($custos_pp[3])) {
+                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos_pp[3]));
+                }
+            } else {
+                if (isset($custos[1])) {
+                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+                }
+                if (isset($custos[2])) {
+                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
+                }
+                if (isset($custos[3])) {
+                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+                }
+                if (isset($custos[5])) {
+                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
+                }           
             }
         }
-        echo "<pre>";
+        echo "<PrE>";
         print_r($icms);exit;
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
         return $icmsarray;
     }
+
 
     public function numero($str) {
         return preg_replace("/[^0-9]/", "", $str);

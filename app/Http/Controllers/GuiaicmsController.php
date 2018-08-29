@@ -987,7 +987,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $i = explode('
 ', trim($match[1]));
             $a = explode(' ', $i[0]);
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
         }
 
         preg_match('~documento unico de arrecadacao versao internet([^{]*)~i', $str, $match);
@@ -1670,7 +1670,7 @@ periodo ref.([^{]*)~i', $str, $match);
         preg_match('~2 - data vencimento([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $valorData = trim(substr($i[0], 0,-1));
+            $valorData = trim(substr($i[0], 0,10));
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
         }
@@ -1681,7 +1681,7 @@ periodo ref.([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         }
-
+        
         preg_match('~7 - multa
 
 \*\*\*\*\* r\$([^{]*)~i', $str, $match);
@@ -1689,6 +1689,16 @@ periodo ref.([^{]*)~i', $str, $match);
             $i = explode('
 ', trim($match[1]));
             $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+        }
+
+        if(empty($icms['MULTA_MORA_INFRA'])){
+        preg_match('~7 - multa \*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', trim($i[0]));
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
         }
 
         preg_match('~8 - juros
@@ -1700,6 +1710,16 @@ periodo ref.([^{]*)~i', $str, $match);
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         } 
 
+        if(empty($icms['JUROS_MORA'])){
+        preg_match('~8 - juros \*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', trim($i[0]));
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        }
+
         preg_match('~10 - total a recolher
 
 \*\*\*\*\* r\$([^{]*)~i', $str, $match);
@@ -1708,7 +1728,17 @@ periodo ref.([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         }
-
+        
+        if(empty($icms['VLR_TOTAL'])){
+        preg_match('~10 - total a recolher \*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        }
+            
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -2209,7 +2239,7 @@ valor total([^{]*)~i', $str, $match);
                 }           
             }
         }
-        
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -2294,9 +2324,16 @@ valor total([^{]*)~i', $str, $match);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
             
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[1])));
+            if(strlen($a[1]) == 1){
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[2])));             
+            }
+
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',trim($a[4])));
             $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',trim($a[5])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[6])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[7])));
+            if(strlen($a[7]) == 1){
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[8])));
+            }
         }
 
         preg_match('~via - banco([^{]*)~i', $str, $match);

@@ -2209,8 +2209,7 @@ valor total([^{]*)~i', $str, $match);
                 }           
             }
         }
-        echo "<PrE>";
-        print_r($icms);exit;
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

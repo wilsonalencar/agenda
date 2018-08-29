@@ -290,7 +290,6 @@ class GuiaicmsController extends Controller
                     } 
                     
                     if (!$this->validateEx($icms)) {
-                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O ICMS já está cadastrado', 'N');
                         continue;
                     }
                      
@@ -2185,7 +2184,8 @@ valor total([^{]*)~i', $str, $match);
                 $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
             }
         }
-
+        echo "<pre>";
+        print_r($icms);exit;
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

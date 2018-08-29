@@ -2781,10 +2781,8 @@ juros de mora
         foreach ($arquivos as $k => $v) {
             if (strpbrk($v, '0123456789１２３４５６７８９０')) {
                 $path_name = $path.$v.'/';
-                $data[$k]['arquivos'][1][1] = scandir($path_name);   
-                $data[$k]['arquivos'][1][2]['path'] = $path_name;    
-                $data[$k]['arquivos'][2][1] = scandir($path_name.'/imported');
-                $data[$k]['arquivos'][2][2]['path'] = $path_name.'imported/';
+                $data[$k]['arquivos'][1][1] = scandir($path_name.'/entregar');
+                $data[$k]['arquivos'][1][2]['path'] = $path_name.'entregar/';
             }
         }
 
@@ -2860,20 +2858,20 @@ juros de mora
             $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
             if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código de atividade não existe', 'N');
-                continue;
+                break;
             }
 
             $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
             if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
-                continue;
+                break;
             }
 
             if ($this->checkTributo($NomeTributo)) {
                 $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
                 if (!$validateTributo[0]->countTributo) {
                     $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'O Tributo ICMS não confere com o tributo da atividade', 'N');
-                    continue;
+                    break;
                 }
             }
 
@@ -2883,14 +2881,14 @@ juros de mora
             $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = ".$PeriodoApuracao."");
             if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Período de apuração diverente do período da atividade', 'N');
-                continue;
+                break;
             }
 
             if (count($arrayExplode) >= 4) {
                 $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
                 if (empty($UF) || !$validateUF[0]->countUF) {
                     $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
-                    continue;
+                    break;
                 }
             }
 

@@ -54,6 +54,10 @@
         <th>DIF</th>
         <th>STATUS</th>
         <th>OBS</th>
+        <th>Data Início</th>
+        <th>Data Prazo</th>
+        <th></th>
+        <th>Responsável</th>
         <th></th>
         <th></th>
     </tr>
@@ -88,6 +92,23 @@ function mascaraValor(valor) {
     valor = valor.toString().replace(/(\d)(\d{5})$/,"$1.$2");
     valor = valor.toString().replace(/(\d)(\d{2})$/,"$1,$2");
     return valor                    
+}
+
+function mascaraDataNull(valor) {
+    if (valor != '' && valor != '0000-00-00 00:00:00') {
+        var res = valor.split("-");
+        var day = res[2].split(" ");
+        var data = day[0]+'/'+res[1]+'/'+res[0];
+        return data;
+    }            
+    return ''
+}
+
+function mascaraNulo(valor) {
+    if (valor == null) {
+        return 'Sem Responsável'
+    }
+    return valor 
 }
 
 function dataHora()
@@ -222,6 +243,16 @@ $(function() {
                }
             },
             
+            {data: 'DataPrazo', name: 'DataPrazo', render: function ( data ) {
+                                                      return mascaraDataNull(data);
+                                                    }},
+            {data: 'Data_inicio', name: 'Data_Inicio', render: function ( data ) {
+                                                      return mascaraDataNull(data);
+                                                    }},
+            {data: 'observacao', name: 'observacao'},
+            {data: 'Responsavel', searchable: true, name: 'Responsavel', render: function ( data ) {
+                                                      return mascaraNulo(data);
+                                                    }},
             
             {data: 'IdMovtoContaCorrente', name:'edit', searchable: false, orderable: false, render: function (data) {
 
@@ -236,7 +267,6 @@ $(function() {
                 url = url.replace(':id_edit', data);
                 return url;
             }},
-            {data: 'observacao', name: 'observacao'},
         ],
         "columnDefs": [
             { "width": "1%", "targets": 0 },
@@ -252,9 +282,9 @@ $(function() {
             { "width": "5%", "targets": 10, className: "dt-right"},
             { "width": "5%", "targets": 11, className: "dt-right"},
             { "width": "1%", "targets": 12 },
-            { "width": "12%", "targets": 13 },
-            { "width": "12%", "targets": 14 },
-            { "width": "12%", "targets": 15, "visible":false, "title": "Observação"},
+            { "width": "5%", "targets": 13 },   
+            { "width": "5%", "targets": 14 },
+            { "width": "10%", "targets": 15, "visible":false, "title": "Observação"}
         ],
         language: {
             //"searchPlaceholder": "ID, P.A. ou descrição",
@@ -266,27 +296,27 @@ $(function() {
              {
                 extend: 'excelHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15  ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13 ,14, 16,15]
                 }
              },
             
              {
                 extend: 'csvHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15 ]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13 ,14, 16,15 ]
                 }
              },
 
              {
                 extend: 'copyHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13 ,14, 16 ,15]
                 }
              },
              {
                 extend: 'pdfHtml5',
                 exportOptions: {
-                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15]
+                    columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13 ,14, 16 ,15]
                 },
                 customize: function(doc) {
                   //pageMargins [left, top, right, bottom] 
@@ -329,6 +359,7 @@ $(function() {
 });
 
 jQuery(function($){
+    $('#sidebarCollapse').click();
     $('input[name="src_cnpj"]').mask("99.999.999/9999-99");
     $('input[name="src_periodo"]').mask("99/9999");
 });

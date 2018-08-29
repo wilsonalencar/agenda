@@ -24,7 +24,10 @@ class Movtocontacorrente extends Model
         'usuario_update',
         'dipam',
         'status_id',
-        'observacao'
+        'observacao',
+        'Responsavel',
+        'Data_inicio',
+        'DataPrazo'
     ];
 
     /**

@@ -10,6 +10,7 @@ use App\Models\Municipio;
 use App\Models\HistoricoContaCorrente;
 use App\Models\FeriadoEstadual;
 use App\Models\FeriadoMunicipal;
+use App\Models\Respfinanceiro;
 use App\Models\Movtocontacorrente;
 use App\Services\EntregaService;
 use App\Models\Statusprocadm;
@@ -218,9 +219,10 @@ class MovtocontacorrentesController extends Controller
 
     public function anyData(Request $request)
     {
-	    $movtocontacorrentes = Movtocontacorrente::join('estabelecimentos', 'movtocontacorrentes.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->leftjoin('statusprocadms', 'movtocontacorrentes.status_id', '=', 'statusprocadms.id')->select(
+	    $movtocontacorrentes = Movtocontacorrente::join('estabelecimentos', 'movtocontacorrentes.estabelecimento_id', '=', 'estabelecimentos.id')->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')->leftjoin('statusprocadms', 'movtocontacorrentes.status_id', '=', 'statusprocadms.id')->leftjoin('respfinanceiros', 'movtocontacorrentes.Responsavel', '=', 'respfinanceiros.id')->select(
                 'movtocontacorrentes.*',
                 'movtocontacorrentes.id as IdMovtoContaCorrente',
+                'respfinanceiros.descricao as Responsavel',
                 'estabelecimentos.*',
                 'municipios.*', 
                 DB::raw('(IFNULL(statusprocadms.descricao, "")) as descricaoStatus'),
@@ -265,7 +267,7 @@ class MovtocontacorrentesController extends Controller
         if ( isset($request['search']) && $request['search']['value'] != '' ) {
             $str_filter = $request['search']['value'];
         }
-        
+
         return Datatables::of($movtocontacorrentes)->make(true);
     }
 
@@ -341,6 +343,8 @@ class MovtocontacorrentesController extends Controller
     {
         
         $status = Statusprocadm::all(['id', 'descricao'])->pluck('descricao', 'id');
+        $Responsaveis = Respfinanceiro::all(['id', 'descricao'])->pluck('descricao', 'id');
+
         $data = $request->session()->all();
         $periodo_apuracao = '';
         if (!empty($data['periodo_apuracao'])) {
@@ -348,12 +352,13 @@ class MovtocontacorrentesController extends Controller
             Session::forget('periodo_apuracao');
         }
 
-       return view('movtocontacorrentes.create')->with('periodo_apuracao', $periodo_apuracao)->with('status', $status);
+       return view('movtocontacorrentes.create')->with('periodo_apuracao', $periodo_apuracao)->with('status', $status)->with('Responsaveis', $Responsaveis);
     }
 
 
     public function edit($id)
     {   
+        $Responsaveis = Respfinanceiro::all(['id', 'descricao'])->pluck('descricao', 'id');
         $status         = Statusprocadm::all(['id', 'descricao'])->pluck('descricao', 'id');
         $movtocontacorrentes = Movtocontacorrente::findOrFail($id);
         $movtocontacorrentes->vlr_gia  = number_format($movtocontacorrentes->vlr_gia, 2, ',', '.');
@@ -362,8 +367,25 @@ class MovtocontacorrentesController extends Controller
         if ($movtocontacorrentes->dipam == 'S') {
             $movtocontacorrentes->vlr_dipam = number_format($movtocontacorrentes->vlr_dipam, 2, ',', '.');
         }
-        
-        return view('movtocontacorrentes.edit')->withMovtocontacorrentes($movtocontacorrentes)->with('status', $status);
+
+        $movtocontacorrentes->Data_inicio = $this->formatData($movtocontacorrentes->Data_inicio);
+        $movtocontacorrentes->DataPrazo = $this->formatData($movtocontacorrentes->DataPrazo);
+
+        return view('movtocontacorrentes.edit')->withMovtocontacorrentes($movtocontacorrentes)->with('status', $status)->with('Responsaveis', $Responsaveis);
+    }
+
+    public function formatData($receiveDate)
+    {
+        if ($receiveDate != '0000-00-00 00:00:00') {
+            $explodedDate = explode('-', $receiveDate);
+            $day = substr($explodedDate[2], 0,2);
+            $month = $explodedDate[1];
+            $year = $explodedDate[0];
+            $timestamp = mktime(null, null, null, $month, $day, $year);
+            $receiveDate = date('Y-m-d', $timestamp);
+            return $receiveDate;
+        }
+        return $receiveDate;
     }
 
 
@@ -379,7 +401,9 @@ class MovtocontacorrentesController extends Controller
             'vlr_gia' => 'required',
             'vlr_sped' => 'required',
             'status_id' => 'required',
-            'observacao' => 'required'
+            'observacao' => 'required',
+            'Data_inicio' => 'required',
+            'DataPrazo' => 'required'
         ],
         $messages = [
             'periodo_apuracao.required' => 'Informar um periodo de apuração',
@@ -389,7 +413,9 @@ class MovtocontacorrentesController extends Controller
             'vlr_gia.required' => 'Informar Valor Gia.',
             'vlr_sped.required' => 'Informar Valor Sped.',
             'status_id.required' => 'Informar Status.',
-            'observacao.required' => 'Informar Observação.'
+            'observacao.required' => 'Informar Observação.',
+            'Data_inicio.required' => 'Informar Data Inicio.',
+            'DataPrazo.required' => 'Informar Prazo.'
 
         ]);
 
@@ -397,6 +423,13 @@ class MovtocontacorrentesController extends Controller
             Session::flash('alert', 'Informar valor Dipam');
             return redirect()->route('movtocontacorrentes.edit', $id);
         }   
+
+        if (!empty($input['Data_inicio'] && !empty($input['DataPrazo']))) {
+            if (strtotime($input['Data_inicio']) > strtotime($input['DataPrazo'])) {
+                Session::flash('alert', 'Data de Início não pode ser maior que a data do Prazo');
+                return redirect()->route('movtocontacorrentes.edit', $id);
+            }
+        }
 
         $input['vlr_guia']          =  $this->formatar_valor($input['vlr_guia']);
         $input['vlr_gia']           =  $this->formatar_valor($input['vlr_gia']);
@@ -411,8 +444,8 @@ class MovtocontacorrentesController extends Controller
         
         $arrayMovto = json_decode(json_encode($movtocontacorrentes),true);
         $Historico = $this->historic($arrayMovto, $input);
-
         $movtocontacorrentes->fill($input)->save();
+
         return redirect()->back()->with('status', 'Conta Corrente atualizada com sucesso!');
     }
     public function historic($atual, $new)
@@ -470,7 +503,9 @@ class MovtocontacorrentesController extends Controller
             'vlr_gia' => 'required',
             'vlr_sped' => 'required',
             'status_id' => 'required',
-            'observacao' => 'required'
+            'observacao' => 'required',
+            'Data_inicio' => 'required',
+            'DataPrazo' => 'required'
         ],
         $messages = [
             'periodo_apuracao.required' => 'Informar um periodo de apuração',
@@ -480,13 +515,22 @@ class MovtocontacorrentesController extends Controller
             'vlr_gia.required' => 'Informar Valor Gia.',
             'vlr_sped.required' => 'Informar Valor Sped.',
             'status_id.required' => 'Informar Status.',
-            'observacao.required' => 'Informar Observação.'
+            'observacao.required' => 'Informar Observação.',
+            'Data_inicio.required' => 'Informar Data Inicio.',
+            'DataPrazo.required' => 'Informar Prazo.'
         ]);
 
         if (!empty($input['dipam']) && !$input['vlr_dipam']) {
             Session::flash('alert', 'Informar valor Dipam');
             return redirect()->route('movtocontacorrentes.create');
         } 
+
+        if (!empty($input['Data_inicio'] && !empty($input['DataPrazo']))) {
+            if (strtotime($input['Data_inicio']) > strtotime($input['DataPrazo'])) {
+                Session::flash('alert', 'Data de Início não pode ser maior que a data do Prazo');
+                return redirect()->route('movtocontacorrentes.create');
+            }
+        }
 
         $input['vlr_guia'] =  $this->formatar_valor($input['vlr_guia']);
         $input['vlr_gia']  =  $this->formatar_valor($input['vlr_gia']);

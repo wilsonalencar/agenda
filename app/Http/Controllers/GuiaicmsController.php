@@ -2867,13 +2867,13 @@ juros de mora
                 break;
             }
 
-            if ($this->checkTributo($NomeTributo)) {
-                $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
-                if (!$validateTributo[0]->countTributo) {
-                    $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'O Tributo ICMS não confere com o tributo da atividade', 'N');
-                    break;
-                }
-            }
+            // if ($this->checkTributo($NomeTributo)) {
+            //     $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
+            //     if (!$validateTributo[0]->countTributo) {
+            //         $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'O Tributo ICMS não confere com o tributo da atividade', 'N');
+            //         break;
+            //     }
+            // }
 
             if (strlen($PeriodoApuracao) == 10) {
                 $PeriodoApuracao = substr($PeriodoApuracao, 0, -4);

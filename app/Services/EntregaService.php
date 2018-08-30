@@ -667,6 +667,10 @@ class EntregaService {
                 $val['estemp_id'] = $estab->id;
                 $val['emp_id'] = $estab->empresa_id;
 
+                if (!$this->checkDuplicidade($val)) {
+                    continue;
+                }
+
                 $nova_atividade = Atividade::create($val);
                 $count++;
 
@@ -854,6 +858,9 @@ class EntregaService {
 
                         //Verifica blacklist dos estabelecimentos para esta regra
                         if (!in_array($ae->id,$blacklist)) {
+                            if (!$this->checkDuplicidade($val)) {
+                                continue;
+                            }
                             Atividade::create($val);
                             $count++;
                         }
@@ -907,6 +914,9 @@ class EntregaService {
 
                             //Verifica blacklist dos estabelecimentos para esta regra
                             if (!in_array($el->id,$blacklist)) {
+                                if (!$this->checkDuplicidade($val)) {
+                                    continue;
+                                }
                                 Atividade::create($val);
                                 $count++;
                             }
@@ -1054,6 +1064,10 @@ class EntregaService {
                             $id_estab = $this->findEstabelecimentoCNPJ($el->cnpj);
                             $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
                             $val['estemp_id'] = $id_estab;
+                        }
+
+                        if (!$this->checkDuplicidade($val)) {
+                            continue;
                         }
 
                         $nova_atividade = Atividade::create($val);
@@ -1381,6 +1395,34 @@ class EntregaService {
 
         return sizeof($atividades);
 
+    }
+
+    private function checkDuplicidade($atividade) 
+    {
+        $atividades = DB::table('atividades')
+                ->select('atividades.id');
+
+        if (isset($atividade['estemp_id'])) {
+            $atividades = $atividades->where('estemp_id', $atividade['estemp_id']);
+        }
+
+        if (isset($atividade['emp_id'])) {
+            $atividades = $atividades->where('emp_id', $atividade['emp_id']);
+        }
+
+        if (isset($atividade['periodo_apuracao'])) {
+            $atividades = $atividades->where('periodo_apuracao', $atividade['periodo_apuracao']);
+        }
+        
+        if (isset($atividade['regra_id'])) {
+            $atividades = $atividades->where('regra_id', $atividade['regra_id']);
+        }
+     
+        $atividades = $atividades->get();
+        if (!empty($atividades)) {
+            return false;
+        }
+        return true;
     }
 
     public function generateAdminNotifications($user) {

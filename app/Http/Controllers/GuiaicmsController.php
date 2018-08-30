@@ -290,7 +290,6 @@ class GuiaicmsController extends Controller
                     } 
                     
                     if (!$this->validateEx($icms)) {
-                        $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O ICMS já está cadastrado', 'N');
                         continue;
                     }
                      
@@ -988,7 +987,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $i = explode('
 ', trim($match[1]));
             $a = explode(' ', $i[0]);
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
         }
 
         preg_match('~documento unico de arrecadacao versao internet([^{]*)~i', $str, $match);
@@ -1671,7 +1670,7 @@ periodo ref.([^{]*)~i', $str, $match);
         preg_match('~2 - data vencimento([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $valorData = trim(substr($i[0], 0,-1));
+            $valorData = trim(substr($i[0], 0,10));
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
         }
@@ -1682,7 +1681,7 @@ periodo ref.([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         }
-
+        
         preg_match('~7 - multa
 
 \*\*\*\*\* r\$([^{]*)~i', $str, $match);
@@ -1690,6 +1689,16 @@ periodo ref.([^{]*)~i', $str, $match);
             $i = explode('
 ', trim($match[1]));
             $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+        }
+
+        if(empty($icms['MULTA_MORA_INFRA'])){
+        preg_match('~7 - multa \*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', trim($i[0]));
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
         }
 
         preg_match('~8 - juros
@@ -1701,6 +1710,16 @@ periodo ref.([^{]*)~i', $str, $match);
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         } 
 
+        if(empty($icms['JUROS_MORA'])){
+        preg_match('~8 - juros \*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', trim($i[0]));
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        }
+
         preg_match('~10 - total a recolher
 
 \*\*\*\*\* r\$([^{]*)~i', $str, $match);
@@ -1709,7 +1728,17 @@ periodo ref.([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
         }
-
+        
+        if(empty($icms['VLR_TOTAL'])){
+        preg_match('~10 - total a recolher \*\*\*\*\* r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        }
+            
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -2156,6 +2185,15 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAT';
         }
 
+        //IE
+        if (empty($icms['IE'])) {
+            preg_match('~df ([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $a = explode(' ', trim($match[1]));
+                $icms['IE'] = trim(substr($a[0], 0,8));
+            }
+        }
+
         preg_match('~17.valor total - r\$
 ([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -2166,23 +2204,39 @@ valor total([^{]*)~i', $str, $match);
             $k = explode(' ', $i[3]);
             $custos = explode(' ', $i[5]);
             $icms['COD_RECEITA'] = $a[1];
-			
             $icms['REFERENCIA'] = $k[0];
             $valorData = trim($k[1]);
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-
-            if (isset($custos[1])) {
-                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
-            }
-            if (isset($custos[2])) {
-                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
-            }
-            if (isset($custos[3])) {
-                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
-            }
-            if (isset($custos[5])) {
-                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
+            
+            if(count($custos) == 2){    
+                $custos_pp = explode(' ', $i[6]);
+                if (isset($custos[1])) {
+                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+                }
+                if (isset($custos_pp[1])) {
+                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[1]));
+                }
+                if (isset($custos_pp[2])) {
+                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[2]));
+                }
+                
+                if (isset($custos_pp[3])) {
+                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos_pp[3]));
+                }
+            } else {
+                if (isset($custos[1])) {
+                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+                }
+                if (isset($custos[2])) {
+                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
+                }
+                if (isset($custos[3])) {
+                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+                }
+                if (isset($custos[5])) {
+                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
+                }           
             }
         }
 
@@ -2191,6 +2245,7 @@ valor total([^{]*)~i', $str, $match);
         $icmsarray[0] = $icms;
         return $icmsarray;
     }
+
 
     public function numero($str) {
         return preg_replace("/[^0-9]/", "", $str);
@@ -2269,9 +2324,16 @@ valor total([^{]*)~i', $str, $match);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
             
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[1])));
+            if(strlen($a[1]) == 1){
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[2])));             
+            }
+
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',trim($a[4])));
             $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',trim($a[5])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[6])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[7])));
+            if(strlen($a[7]) == 1){
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[8])));
+            }
         }
 
         preg_match('~via - banco([^{]*)~i', $str, $match);
@@ -2719,10 +2781,8 @@ juros de mora
         foreach ($arquivos as $k => $v) {
             if (strpbrk($v, '0123456789１２３４５６７８９０')) {
                 $path_name = $path.$v.'/';
-                $data[$k]['arquivos'][1][1] = scandir($path_name);   
-                $data[$k]['arquivos'][1][2]['path'] = $path_name;    
-                $data[$k]['arquivos'][2][1] = scandir($path_name.'/imported');
-                $data[$k]['arquivos'][2][2]['path'] = $path_name.'imported/';
+                $data[$k]['arquivos'][1][1] = scandir($path_name.'/entregar');
+                $data[$k]['arquivos'][1][2]['path'] = $path_name.'entregar/';
             }
         }
 
@@ -2798,22 +2858,22 @@ juros de mora
             $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
             if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código de atividade não existe', 'N');
-                continue;
+                break;
             }
 
             $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
             if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
-                continue;
+                break;
             }
 
-            if ($this->checkTributo($NomeTributo)) {
-                $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
-                if (!$validateTributo[0]->countTributo) {
-                    $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'O Tributo ICMS não confere com o tributo da atividade', 'N');
-                    continue;
-                }
-            }
+            // if ($this->checkTributo($NomeTributo)) {
+            //     $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
+            //     if (!$validateTributo[0]->countTributo) {
+            //         $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'O Tributo ICMS não confere com o tributo da atividade', 'N');
+            //         break;
+            //     }
+            // }
 
             if (strlen($PeriodoApuracao) == 10) {
                 $PeriodoApuracao = substr($PeriodoApuracao, 0, -4);
@@ -2821,14 +2881,14 @@ juros de mora
             $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = ".$PeriodoApuracao."");
             if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Período de apuração diverente do período da atividade', 'N');
-                continue;
+                break;
             }
 
             if (count($arrayExplode) >= 4) {
                 $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
                 if (empty($UF) || !$validateUF[0]->countUF) {
                     $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
-                    continue;
+                    break;
                 }
             }
 

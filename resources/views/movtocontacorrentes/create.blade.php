@@ -109,7 +109,7 @@
         </div>
     </div>
     <div class="form-group">
-        <div style="width:30%">
+        <div style="width:50%">
             {!! Form::label('observacao', 'Observação:', ['class' => 'control-label']) !!}
             {!! Form::textarea('observacao', '', array('class' => 'form-control', 'id'=>'observacao')) !!}
         </div>
@@ -120,16 +120,13 @@
 
 <div class="col-md-4">
     <div class="detailBox">
-        <div class="titleBox">
-          <label class="lead-bold">Dados Complementares</label>
-        </div>
         <div class="actionBox">
             <div>
-                <div style="width: 40%">
+                <div style="width: 50%">
                 {!! Form::label('Data_inicio', 'Data Início:', ['class' => 'control-label']) !!}
                 {!! Form::date('Data_inicio', null, ['class' => 'form-control']) !!}
                 </div>
-                <div style="width: 40%">
+                <div style="width: 50%">
                 {!! Form::label('DataPrazo', 'Data Prazo:', ['class' => 'control-label']) !!}
                 {!! Form::date('DataPrazo', null, ['class' => 'form-control']) !!}
                 </div>

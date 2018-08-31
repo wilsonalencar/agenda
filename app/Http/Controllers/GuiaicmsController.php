@@ -1590,7 +1590,7 @@ periodo ref.([^{]*)~i', $str, $match);
         fclose($handle);
         $icmsarray = array();
         
-        $icmsarray = $icms[0];
+        $icmsarray[0] = $icms[0];
         return $icmsarray;
     }
 

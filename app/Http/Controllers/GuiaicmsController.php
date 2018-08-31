@@ -3010,14 +3010,14 @@ juros de mora
         $idanalistas = DB::select($query);
         if (!empty($idanalistas)) {
             foreach ($idanalistas as $k => $analista) {
-                $atividade->Usuario_aprovador = $analista->id;
+                // $atividade->Usuario_aprovador = $analista->id;
                 $atividade->usuario_entregador = $analista->id;
             }
         }
         $atividade->arquivo_entrega = $data['image'];
         $atividade->data_entrega = date("Y-m-d H:i:s");
-        $atividade->data_aprovacao = date("Y-m-d H:i:s");
-        $atividade->status = 3;
+        // $atividade->data_aprovacao = date("Y-m-d H:i:s");
+        $atividade->status = 2;
         $atividade->save();
     }    
 }

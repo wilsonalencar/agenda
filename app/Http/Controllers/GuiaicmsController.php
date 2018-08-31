@@ -2330,7 +2330,7 @@ valor total([^{]*)~i', $str, $match);
 
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',trim($a[4])));
             $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',trim($a[5])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[7])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[6])));
             if(strlen($a[7]) == 1){
                 $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[8])));
             }

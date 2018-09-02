@@ -1568,6 +1568,17 @@ periodo ref.([^{]*)~i', $str, $match);
             }
         }
 
+        preg_match('~total
+
+r\$
+([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+                $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+                $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+        }
+
         preg_match('~linha digitavel:([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('

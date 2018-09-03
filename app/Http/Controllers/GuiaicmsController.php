@@ -1155,8 +1155,8 @@ numero do documento([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['IE'] = trim($this->numero($i[0]));
         }
-
-        if ($this->letras($file_content) == 'ANTECIPADOICMS'){
+        
+        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS'){
 
         preg_match('~
 valor total
@@ -1219,32 +1219,13 @@ valor total([^{]*)~i', $str, $match);
             $i = explode('
 ', trim($match[1]));
             $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[4]));
             $icms['CODBARRAS'] = trim($codbarras);
-        }
-        preg_match('~observacao([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $a = explode(' ', $i[0]);
-            $icms['OBSERVACAO'] = '';
-            foreach ($a as $key => $value) {
-                if ($value == 'instrucoes') {
-                    break;
-                }
-                $icms['OBSERVACAO'] .= $value.' ';
-            }
         }
 
         }
         
-
-        echo "<Pre>";
-        print_r($icms);
-        echo "<hr />";
-        echo "<PrE>";
-        print_r($str);exit;
-
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

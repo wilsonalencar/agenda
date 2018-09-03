@@ -2336,14 +2336,14 @@ valor total([^{]*)~i', $str, $match);
             
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[1])));
             if(isset($a[1]) && strlen($a[1]) == 1){
-                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[2])));             
+                $icms['VLR_RECEITA'] = $a[1].str_replace(',', '.', str_replace('.', '',trim($a[2])));             
             }
 
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',trim($a[4])));
             $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',trim($a[5])));
             $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[6])));
             if(isset($a[7]) && strlen($a[7]) == 1){
-                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[8])));
+                $icms['VLR_TOTAL'] = $a[7].str_replace(',', '.', str_replace('.', '',trim($a[8])));
             }
         }
 

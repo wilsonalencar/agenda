@@ -1156,6 +1156,41 @@ numero do documento([^{]*)~i', $str, $match);
             $icms['IE'] = trim($this->numero($i[0]));
         }
 
+        if ($this->letras($file_content) == 'ANTECIPADOICMS'){
+
+        preg_match('~
+valor total
+
+([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
+            $icms['CODBARRAS'] = trim(str_replace('observacao', '', trim(str_replace(' ', '', $i[0]))));
+       }
+
+       preg_match('~
+validade([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $valorData = substr($i[0], 0,10);
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            $referencia = date('m/Y', strtotime($data_vencimento));
+            $k = explode('/', $referencia);
+            $k[0] = $k[0]-1;
+            if ($k[0] == 0) {
+                $k[1] = $k[1] - 1;
+            }
+            if (strlen($k[0]) == 1) {
+                $k[0] = '0'.$k[0];
+            }
+            $icms['REFERENCIA'] = $k[0].'/'.$k[1];
+       }
+        
+        } else {
+
         preg_match('~validade
 
 valor total([^{]*)~i', $str, $match);
@@ -1176,19 +1211,7 @@ valor total([^{]*)~i', $str, $match);
            }
            $icms['REFERENCIA'] = $k[0].'/'.$k[1];
         }
-        
-        preg_match('~
-valor total
-
-([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
-            $icms['CODBARRAS'] = trim(str_replace('observacao', '', trim(str_replace(' ', '', $i[0]))));
-       }
-        /*
+            
         preg_match('~validade
 
 valor total([^{]*)~i', $str, $match);
@@ -1212,7 +1235,9 @@ valor total([^{]*)~i', $str, $match);
                 $icms['OBSERVACAO'] .= $value.' ';
             }
         }
-        */
+
+        }
+        
 
         echo "<Pre>";
         print_r($icms);

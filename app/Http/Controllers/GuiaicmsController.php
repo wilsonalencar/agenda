@@ -1213,7 +1213,13 @@ valor total([^{]*)~i', $str, $match);
             }
         }
         */
-        
+
+        echo "<Pre>";
+        print_r($icms);
+        echo "<hr />";
+        echo "<PrE>";
+        print_r($str);exit;
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

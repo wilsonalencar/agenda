@@ -1177,14 +1177,18 @@ valor total([^{]*)~i', $str, $match);
            $icms['REFERENCIA'] = $k[0].'/'.$k[1];
         }
         
-        preg_match('~codigo numerico linha digitavel([^{]*)~i', $str, $match);
+        preg_match('~
+valor total
+
+([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
-            $a = explode(' ', $i[0]);
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
-        }
-
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
+            $icms['CODBARRAS'] = trim(str_replace('observacao', '', trim(str_replace(' ', '', $i[0]))));
+       }
+        /*
         preg_match('~validade
 
 valor total([^{]*)~i', $str, $match);
@@ -1195,7 +1199,6 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[4]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
         preg_match('~observacao([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
@@ -1209,6 +1212,7 @@ valor total([^{]*)~i', $str, $match);
                 $icms['OBSERVACAO'] .= $value.' ';
             }
         }
+        */
         
         fclose($handle);
         $icmsarray = array();

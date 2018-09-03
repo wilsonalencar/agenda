@@ -243,10 +243,10 @@ $(function() {
                }
             },
             
-            {data: 'DataPrazo', name: 'DataPrazo', render: function ( data ) {
+            {data: 'Data_inicio', name: 'Data_Inicio', render: function ( data ) {
                                                       return mascaraDataNull(data);
                                                     }},
-            {data: 'Data_inicio', name: 'Data_Inicio', render: function ( data ) {
+            {data: 'DataPrazo', name: 'DataPrazo', render: function ( data ) {
                                                       return mascaraDataNull(data);
                                                     }},
             {data: 'observacao', name: 'observacao'},

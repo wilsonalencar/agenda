@@ -1442,6 +1442,10 @@ valor do documento([^{]*)~i', $str, $match);
             $icms['CODBARRAS'] = trim($codbarras);
         }
         
+        if (isset($icms['COD_RECEITA']) && trim($icms['COD_RECEITA']) == 1245) {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -2290,6 +2294,7 @@ valor total([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'AL';
 
         $handle = fopen($value['pathtxt'], "r");
@@ -2329,7 +2334,7 @@ valor total([^{]*)~i', $str, $match);
         preg_match('~receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] =str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0])))));
+            $icms['COD_RECEITA'] =substr(str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0]))))), 0, -6);
         }
 
         preg_match('~referencia([^{]*)~i', $str, $match);
@@ -2337,7 +2342,9 @@ valor total([^{]*)~i', $str, $match);
             $i = explode(' ', trim($match[1]));
             $a = explode('
 ', $i[0]);
-            $icms['REFERENCIA'] = trim($a[0]);
+            if(isset($a[2])){
+                $icms['REFERENCIA'] = trim($a[2]);          
+            }
         }
 
         preg_match('~vencimento principal cm desconto juros multa total([^{]*)~i', $str, $match);
@@ -2349,6 +2356,29 @@ valor total([^{]*)~i', $str, $match);
             $valorData = trim($a[0]);
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            if(empty($icms['REFERENCIA'])){
+                $referencia = date('m/Y', strtotime($data_vencimento));
+                $k = explode('/', $referencia);
+                $k[0] = $k[0]-1;
+                if ($k[0] == 0) {
+                    $k[1] = $k[1] - 1;
+                }
+                if (strlen($k[0]) == 1) {
+                    $k[0] = '0'.$k[0];
+                }
+                $icms['REFERENCIA'] = $k[0].'/'.$k[1];          
+            }
+            
+            if(empty($icms['COD_RECEITA'])){
+        preg_match('~
+data de emissao
+([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['COD_RECEITA'] = $this->numero(trim($i[0]));
+        }
+            }
             
             $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[1])));
             if(isset($a[1]) && strlen($a[1]) == 1){

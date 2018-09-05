@@ -846,7 +846,7 @@ class EntregaService {
 
                         //FILTRO TRIBUTOS SUSPENSOS (ex. DIPAM)
 
-                        $val['estemp_type'] = substr($ae->cnpj, -6, 4) === '0001' ? 'estab' : 'estab';
+                        $val['estemp_type'] = substr($ae->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                         $val['estemp_id'] = $ae->id;
                         if ($val['estemp_type'] == 'estab') {
                             $val['emp_id'] = $ae->empresa_id;
@@ -854,6 +854,7 @@ class EntregaService {
                            $id_estab = $this->findEstabelecimentoCNPJ($ae->cnpj);
                             $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
                             $val['estemp_id'] = $id_estab;
+                            $val['estemp_type'] = 'estab';
                         }
 
                         //Verifica blacklist dos estabelecimentos para esta regra
@@ -902,7 +903,7 @@ class EntregaService {
                     if (sizeof($ativ_estemps) > 0) {
                         foreach ($ativ_estemps as $el) {
 
-                            $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'estab' : 'estab';
+                            $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                             $val['estemp_id'] = $el->id;
                             if ($val['estemp_type'] == 'estab') {
                                 $val['emp_id'] = $el->empresa_id;
@@ -910,6 +911,7 @@ class EntregaService {
                                 $id_estab = $this->findEstabelecimentoCNPJ($el->cnpj);
                             $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
                             $val['estemp_id'] = $id_estab;
+                            $val['estemp_type'] = 'estab';
                             }
 
                             //Verifica blacklist dos estabelecimentos para esta regra
@@ -1056,7 +1058,7 @@ class EntregaService {
                 if (sizeof($ativ_estemps) > 0) {
                     foreach ($ativ_estemps as $el) {
 
-                        $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'estab' : 'estab';
+                        $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                         $val['estemp_id'] = $el->id;
                         if ($val['estemp_type'] == 'estab') {
                             $val['emp_id'] = $el->empresa_id;
@@ -1064,6 +1066,7 @@ class EntregaService {
                             $id_estab = $this->findEstabelecimentoCNPJ($el->cnpj);
                             $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
                             $val['estemp_id'] = $id_estab;
+                            $val['estemp_type'] = 'estab';
                         }
 
                         if (!$this->checkDuplicidade($val)) {
@@ -1240,7 +1243,7 @@ class EntregaService {
 
                         //FILTRO TRIBUTOS SUSPENSOS (ex. DIPAM)
 
-                        $val['estemp_type'] = substr($ae->cnpj, -6, 4) === '0001' ? 'estab' : 'estab';
+                        $val['estemp_type'] = substr($ae->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                         $val['estemp_id'] = $ae->id;
                         if ($val['estemp_type'] == 'estab') {
                             $val['emp_id'] = $ae->empresa_id;
@@ -1248,6 +1251,7 @@ class EntregaService {
                             $id_estab = $this->findEstabelecimentoCNPJ($ae->cnpj);
                             $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
                             $val['estemp_id'] = $id_estab;
+                            $val['estemp_type'] = 'estab';
                         }
 
 
@@ -1317,7 +1321,7 @@ class EntregaService {
                             } else {
                                 $empresa_id = $el->empresa_id;
                             }
-                            $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'estab' : 'estab';
+                            $val['estemp_type'] = substr($el->cnpj, -6, 4) === '0001' ? 'emp' : 'estab';
                             $val['estemp_id'] = $el->id;
                             if ($val['estemp_type'] == 'estab') {
                                 $val['emp_id'] = $el->empresa_id;
@@ -1325,6 +1329,7 @@ class EntregaService {
                                 $id_estab = $this->findEstabelecimentoCNPJ($el->cnpj);
                             $val['emp_id'] = $this->findEmpresaEstabelecimentoID($id_estab);
                             $val['estemp_id'] = $id_estab;
+                            $val['estemp_type'] = 'estab';
                             }
                             $anali = DB::table('atividadeanalista')
                             ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')

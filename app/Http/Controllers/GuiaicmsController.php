@@ -2946,6 +2946,112 @@ juros de mora
         return view('guiaicms.icms')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
     }
 
+    public function conferencia(Request $request)
+    {  
+        $estabelecimentos = Estabelecimento::where('empresa_id', $this->s_emp->id)->selectRaw("codigo, id")->lists('codigo','id');
+        $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+        $estabelecimentosselected = array();
+        $ufselected = array();
+
+        $input = $request->all();
+        if (!empty($input)) {
+
+            $estabelecimentosselected = array();
+            if (!empty($input['multiple_select_estabelecimentos'])) {
+                $estabelecimentosselected = $input['multiple_select_estabelecimentos'];
+            }
+
+            $ufselected = array();
+            if (!empty($input['multiple_select_uf'])) {
+                $ufselected = $input['multiple_select_uf'];
+            }
+            
+
+            $estabelecimentos = Estabelecimento::where('empresa_id', $this->s_emp->id)->selectRaw("codigo, id")->lists('codigo','id');
+            $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+
+            if (empty($input['inicio']) || empty($input['fim'])) {
+                return redirect()->back()->with('status', 'É necessário informar as duas datas.');
+            }
+            $data_inicio = $input['inicio'].' 00:00:00';
+            $data_fim = $input['fim'].' 23:59:59';
+            
+            $sql = "SELECT A.*, B.codigo, B.empresa_id FROM guiaicms A INNER JOIN estabelecimentos B on replace(replace(replace(A.CNPJ,'-',''),'/',''), '.', '') = B.cnpj WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."'";
+            
+            if (!empty($input['multiple_select_estabelecimentos'])) {
+                $sql .= " AND replace(replace(replace(A.CNPJ,'-',''),'/',''), '.', '') IN (Select cnpj FROM estabelecimentos where id IN (".implode(',', $input['multiple_select_estabelecimentos'])."))";
+            }
+
+            if (!empty($input['multiple_select_uf'])) {
+                $sql .= " AND A.UF IN (".implode(',', array_map(function($value){
+                    return "'$value'";
+                }, $input['multiple_select_uf'])).")";
+            }
+
+            $dados = json_decode(json_encode(DB::Select($sql)),true);
+            $planilha = array();
+            foreach ($dados as $key => $dado) {
+                if ($dado['empresa_id'] == $this->s_emp->id) {
+                    $planilha[] = $dado;
+                }
+            }
+
+            foreach ($planilha as $chave => $valorl) {
+                if ($valorl['MULTA_MORA_INFRA'] == 0) {
+                    $planilha[$chave]['MULTA_MORA_INFRA'] = '0.00';
+                }
+
+                if ($valorl['HONORARIOS_ADV'] == 0) {
+                    $planilha[$chave]['HONORARIOS_ADV'] = '0.00';
+                }
+
+                if ($valorl['ACRESC_FINANC'] == 0) {
+                    $planilha[$chave]['ACRESC_FINANC'] = '0.00';
+                }
+
+                if ($valorl['JUROS_MORA'] == 0) {
+                    $planilha[$chave]['JUROS_MORA'] = '0.00';
+                }
+
+                if ($valorl['MULTA_PENAL_FORMAL'] == 0) {
+                    $planilha[$chave]['MULTA_PENAL_FORMAL'] = '0.00';
+                }
+            }
+
+            $valorData = $data_fim;
+            $data_vencimento_2 = str_replace('-', '/', $valorData);
+            $data_fim = date('dmY', strtotime($data_vencimento_2));
+
+            $valorData2 = $data_inicio;
+            $data_vencimento = str_replace('-', '/', $valorData2);
+            $data_inicio = date('dmY', strtotime($data_vencimento));   
+            $mensagem = 'Período carregado com sucesso';
+            if (empty($dados)) {
+                $mensagem = 'Não há dados nesse período';
+            }
+
+            if (!empty($planilha)) {
+                foreach ($planilha as $key => $value) {
+                    $dataven = $value['DATA_VENCTO'];
+                    $data_vencimento2 = str_replace('-', '/', $dataven);
+                    $dataven2 = date('d/m/Y', strtotime($data_vencimento2));
+                    $planilha[$key]['DATA_VENCTO'] = $dataven2;
+                    $planilha[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
+                    $planilha[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
+                    $planilha[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
+                    $planilha[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
+                    $planilha[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
+                    $planilha[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
+                    $planilha[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
+                }
+            }
+
+            return view('guiaicms.conferencia')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
+        }
+
+    return view('guiaicms.conferencia')->withEstabelecimentos($estabelecimentos)->withUf($uf)->withestabelecimentosselected($estabelecimentosselected)->withufselected($estabelecimentosselected);
+    }
+
     private function maskMoeda($valor)
     {
         $string = '';

@@ -143,6 +143,9 @@
                                         <ul class="nav navbar-nav">
                                             <li class="panel panel-default" id="dropdown">
                                                 <li><a href="{{ route('guiaicms.icms') }}">ICMS</a></li>
+                                                @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
+                                                    <li><a href="{{ route('guiaicms.conferencia') }}">Conferência</a></li>
+                                                @endif
                                                 @if ( !Auth::user()->hasRole('gcliente'))
                                                 <li><a href="{{ route('guiaicms.search_criticas') }}">Criticas</a></li>
                                                 @endif

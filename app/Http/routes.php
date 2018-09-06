@@ -282,7 +282,24 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::get('guiaicms/search_criticas', array('as'=>'guiaicms.search_criticas', 'uses'=>'GuiaicmsController@search_criticas'));
     Route::get('guiaicms/search_criticas_entrega', array('as'=>'guiaicms.search_criticas_entrega', 'uses'=>'GuiaicmsController@search_criticas_entrega'));
     Route::post('guiaicms/criticas_entrega', array('as'=>'guiaicms.criticas_entrega', 'uses'=>'GuiaicmsController@criticas_entrega'));
+    
+    //icms inicio crud
+    Route::get('guiaicms/icms', array('as'=>'guiaicms.listar', 'uses'=>'GuiaicmsController@listar'));
 
+    Route::get('guiaicms/novo', array('as'=>'guiaicms.create', 'uses'=>'GuiaicmsController@create'));
+    Route::post('guiaicms/novo', array('as'=>'guiaicms.create', 'uses'=>'GuiaicmsController@create'));
+
+    Route::get('guiaicms/editar/{id}', array('as'=>'guiaicms.editar', 'uses'=>'GuiaicmsController@editar'));
+    Route::post('guiaicms/editar/{id}', array('as'=>'guiaicms.editar', 'uses'=>'GuiaicmsController@editar'));
+
+    Route::get('guiaicms/excluir/{id}', array('as'=>'guiaicms.excluir', 'uses'=>'GuiaicmsController@excluir'));
+    //ICMS fim de crud
+
+    Route::get('centrocustos/', array('as'=>'centrocustos.create', 'uses'=>'CentrocustospgtoController@create'));
+    Route::post('centrocustos/', array('as'=>'centrocustos.create', 'uses'=>'CentrocustospgtoController@create'));
+    
+    Route::get('codigosap/', array('as'=>'codigosap.create', 'uses'=>'CentrocustospgtoController@createsap'));
+    Route::post('codigosap/', array('as'=>'codigosap.create', 'uses'=>'CentrocustospgtoController@createsap'));
 });
 
 Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst|gcliente']], function () {

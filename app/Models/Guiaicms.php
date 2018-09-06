@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Guiaicms extends Model
 {
+    protected $primaryKey = 'ID';
     protected $table = 'guiaicms';
     public $timestamps = false;
 
@@ -39,7 +40,9 @@ class Guiaicms extends Model
         'MULTA_PENAL_FORMAL',
         'CODBARRAS',
         'TAXA',
-        'IMPOSTO'
+        'IMPOSTO',
+        'USUARIO',
+        'DATA'
     ];
 
 }

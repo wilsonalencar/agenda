@@ -43,9 +43,142 @@ class GuiaicmsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function listar()
+    {   
+        $status = 'success';
+        $Registros = Guiaicms::all();
+        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
+    }
+
+    public function create(Request $request)
     {
-        //
+        $status = 'success';
+        $this->msg = '';
+        $input = $request->all();
+
+        if (!empty($input)) {
+            if (!$this->validation($input)) {
+                $status = 'error';
+                return view('guiaicms.create')->with('msg', $this->msg)->with('status', $status);
+            }
+            $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
+            $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+            $input['UF'] = $municipio->uf;
+            $input['USUARIO'] = Auth::user()->id;
+            $input['DATA'] = date('Y-m-d');
+
+            Guiaicms::create($input);
+            $this->msg = 'Guia criada com sucesso';            
+        }
+
+    return view('guiaicms.create')->with('msg', $this->msg)->with('status', $status);   
+    }
+
+    private function validation($input)
+    {
+        if (empty($input['CNPJ'])) {
+            $this->msg = 'Favor informar o cnpj';
+            return false;
+        }
+        if (!empty($input['CNPJ'])) {
+            $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
+            if (empty($estabelecimento)) {
+                $this->msg = 'Estabelecimento não habilitado';
+                return false;
+            }
+        }
+
+        if (empty($input['IE'])) {
+            $this->msg = 'Favor informar a inscrição estadual';
+            return false;
+        }
+        if (empty($input['COD_RECEITA'])) {
+            $this->msg = 'Favor informar o código da receita';
+            return false;
+        }
+        if (empty($input['REFERENCIA'])) {
+            $this->msg = 'Favor informar a referência';
+            return false;
+        }
+        if (empty($input['DATA_VENCTO'])) {
+            $this->msg = 'Favor informar a data de vencimento';
+            return false;
+        }
+        if (empty($input['VLR_RECEITA'])) {
+            $this->msg = 'Favor informar o valor da receita';
+            return false;
+        }
+        if (empty($input['JUROS_MORA'])) {
+            $this->msg = 'Favor informar o Juros Mora ';
+            return false;
+        }
+        if (empty($input['MULTA_MORA_INFRA'])) {
+            $this->msg = 'Favor informar o valor da multa mora infra';
+            return false;
+        }
+        if (empty($input['ACRESC_FINANC'])) {
+            $this->msg = 'Favor informar o acrescimo financeiro ';
+            return false;
+        }
+        if (empty($input['TAXA'])) {
+            $this->msg = 'Favor informar a taxa';
+            return false;
+        }
+        if (empty($input['VLR_TOTAL'])) {
+            $this->msg = 'Favor informar o valor total da guia';
+            return false;
+        }
+        if (empty($input['CODBARRAS'])) {
+            $this->msg = 'Favor informar o código de barras';
+            return false;
+        }
+
+    return true;
+    }
+
+    public function editar($id, Request $request)
+    {
+        $status = 'success';
+        $this->msg = '';
+        $input = $request->all();
+        $guiaicms = Guiaicms::findOrFail($id);
+
+        if (!empty($input)) {
+     
+            if (!$this->validation($input)) {
+                $status = 'error';
+                return view('guiaicms.editar')->with('icms', $guiaicms)->with('msg', $this->msg)->with('status', $status);
+            }
+
+            if (!empty($guiaicms)) {
+                
+                $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
+                $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+                $input['UF'] = $municipio->uf;
+                $input['USUARIO'] = Auth::user()->id;
+                $input['DATA'] = date('Y-m-d');
+                           
+                $guiaicms->fill($input);
+                $guiaicms->save();
+                $this->msg = 'Guia atualizada com sucesso';
+            }
+        }
+
+    return view('guiaicms.editar')->with('icms', $guiaicms)->with('msg', $this->msg)->with('status', $status);   
+    }
+
+    public function excluir($id)
+    {
+        $this->msg = '';
+        $status = 'success';
+
+        if (!empty($id)) {
+            Guiaicms::destroy($id);
+            $this->msg = 'Registro excluído com sucesso';
+        }
+
+        $Registros = Guiaicms::all();
+        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
     }
 
     public function Job()

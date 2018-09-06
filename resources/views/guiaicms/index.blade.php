@@ -45,7 +45,9 @@
             $data_vencimento = str_replace('/', '-', $valorData);
             $registro['DATA_VENCTO'] = date('d/m/Y', strtotime($data_vencimento));
             ?>
-                <td><?php echo $registro['CNPJ']; ?> </td>
+                <td><?php if (strlen($registro['CNPJ']) == 14) {
+                    echo printMaskCnpj($registro['CNPJ']);
+                } else { echo $registro['CNPJ']; } ?> </td>
                 <td><?php echo $registro['REFERENCIA']; ?> </td>
                 <td><?php echo $registro['DATA_VENCTO']; ?> </td>
                 <td>R$ <?php echo $registro['VLR_TOTAL']; ?> </td>
@@ -73,4 +75,11 @@ $(document).ready(function (){
 });
 
 </script>
+
+<?php
+function printMaskCnpj($data) {
+    return substr($data, 0,2).'.'.substr($data, 2,3).'.'.substr($data,5,3).'/'.substr($data, 8,4).'-'.substr($data, 12,2);
+    return substr($data, 0,2).'.'.substr($data, 2,3).'.'.substr($data,5,8).'/'.substr($data, 8,12).'-'.substr($data, 12,14);
+}
+?>
 @stop

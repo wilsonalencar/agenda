@@ -51,6 +51,9 @@
         </div>
         <hr />
         <div class="row">
+            <?php
+                if (!empty($planilha)) {
+            ?>
             <table class="table table-bordered display" id="dataTables-example" style="width: 100%; font-size: 12px;">
             <thead>
             <tr>
@@ -69,9 +72,6 @@
             </thead>
                 <tbody>
                 <?php
-                    if (!empty($planilha)) {
-                ?>
-                <?php
                       foreach ($planilha as $key => $value) {  
                 ?>
                     <tr>
@@ -87,9 +87,10 @@
                         <td><?php echo $value['CODBARRAS']; ?></td>
                         <td><?php echo $value['IMPOSTO']; ?></td>
                     </tr>
-                <?php } } ?>        
+                <?php } ?>        
                 </tbody>
             </table>
+            <?php } ?>
             <br> 
         </div>
     </div>

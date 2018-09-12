@@ -2131,6 +2131,10 @@ valor total([^{]*)~i', $str, $match);
         }
 
         $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
+        //$icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'PI';
         
         $handle = fopen($value['pathtxt'], "r");

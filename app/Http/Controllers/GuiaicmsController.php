@@ -995,6 +995,17 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['COD_RECEITA'] = $this->numero($a[1]);
         }
 
+        if(empty($icms['COD_RECEITA'])){
+            preg_match('~
+receita ([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['COD_RECEITA'] = $this->numero($a[0]);
+        }
+        }
+
         preg_match('~data de referencia([^{]*)~i', $str, $match);        
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));

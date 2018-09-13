@@ -61,11 +61,20 @@ class GuiaicmsController extends Controller
                 $status = 'error';
                 return view('guiaicms.create')->with('msg', $this->msg)->with('status', $status);
             }
+            
             $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
             $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
             $input['UF'] = $municipio->uf;
             $input['USUARIO'] = Auth::user()->id;
             $input['DATA'] = date('Y-m-d');
+            $input['CNPJ'] = $this->numero($input['CNPJ']);
+
+            $input['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', $input['VLR_RECEITA']));
+            $input['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', $input['VLR_TOTAL']));
+            $input['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $input['MULTA_MORA_INFRA']));
+            $input['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $input['JUROS_MORA']));
+            $input['TAXA'] = str_replace(',', '.', str_replace('.', '', $input['TAXA']));
+            $input['ACRESC_FINANC'] = str_replace(',', '.', str_replace('.', '', $input['ACRESC_FINANC']));
 
             Guiaicms::create($input);
             $this->msg = 'Guia criada com sucesso';            
@@ -142,6 +151,13 @@ class GuiaicmsController extends Controller
         $this->msg = '';
         $input = $request->all();
         $guiaicms = Guiaicms::findOrFail($id);
+        
+        $guiaicms->VLR_RECEITA = $this->maskMoeda($guiaicms->VLR_RECEITA);
+        $guiaicms->VLR_TOTAL = $this->maskMoeda($guiaicms->VLR_TOTAL);
+        $guiaicms->MULTA_MORA_INFRA = $this->maskMoeda($guiaicms->MULTA_MORA_INFRA);
+        $guiaicms->JUROS_MORA = $this->maskMoeda($guiaicms->JUROS_MORA);
+        $guiaicms->TAXA = $this->maskMoeda($guiaicms->TAXA);
+        $guiaicms->ACRESC_FINANC = $this->maskMoeda($guiaicms->ACRESC_FINANC);
 
         if (!empty($input)) {
      
@@ -157,7 +173,14 @@ class GuiaicmsController extends Controller
                 $input['UF'] = $municipio->uf;
                 $input['USUARIO'] = Auth::user()->id;
                 $input['DATA'] = date('Y-m-d');
-                           
+                $input['CNPJ'] = $this->numero($input['CNPJ']);
+                $input['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', $input['VLR_RECEITA']));
+                $input['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', $input['VLR_TOTAL']));
+                $input['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $input['MULTA_MORA_INFRA']));
+                $input['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $input['JUROS_MORA']));
+                $input['TAXA'] = str_replace(',', '.', str_replace('.', '', $input['TAXA']));
+                $input['ACRESC_FINANC'] = str_replace(',', '.', str_replace('.', '', $input['ACRESC_FINANC']));
+
                 $guiaicms->fill($input);
                 $guiaicms->save();
                 $this->msg = 'Guia atualizada com sucesso';

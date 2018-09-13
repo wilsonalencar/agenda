@@ -60,6 +60,14 @@ if (strlen($icms['REFERENCIA']) == 6) {
 
     <div class="form-group">
         <div style="width:30%">
+        {!! Form::label('IMPOSTO', 'Imposto:', ['class' => 'control-label']) !!}
+        {!! Form::text('IMPOSTO', $icms['IMPOSTO'], ['class' => 'form-control']) !!}
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div style="width:30%">
         {!! Form::label('DATA_VENCTO', 'Data de Vencimento:', ['class' => 'control-label']) !!}
         {!! Form::date('DATA_VENCTO', $icms['DATA_VENCTO'], ['class' => 'form-control']) !!}
         </div>
@@ -109,7 +117,7 @@ if (strlen($icms['REFERENCIA']) == 6) {
     </div>
 
     <div class="form-group">
-        <div style="width:30%">
+        <div style="width:70%">
         {!! Form::label('CODBARRAS', 'Código de Barras:', ['class' => 'control-label']) !!}
         {!! Form::text('CODBARRAS', $icms['CODBARRAS'], ['class' => 'form-control']) !!}
         </div>
@@ -120,7 +128,7 @@ if (strlen($icms['REFERENCIA']) == 6) {
         {!! Form::hidden('TRIBUTO_ID', 8, ['class' => 'form-control']) !!}
         </div>
     </div>
-
+    '<a href="{{ route('guiaicms.listar') }}" class="btn btn-default">Voltar</a>
     {!! Form::submit('Atualizar', ['class' => 'btn btn-default']) !!}
 </div>
 

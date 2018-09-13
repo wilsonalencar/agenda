@@ -9,6 +9,7 @@
         <?php echo $mensagem; ?>
     </div>
 <?php } ?>
+
 <div class="main" id="empresaMultipleSelectSelecionar" style="display:block;">
         <div class="row">
             <div class="col-md-12">
@@ -17,7 +18,7 @@
         </div>
         <div class="row">
             <div class="col-md-2">
-                {!! Form::label('multiple_select_tributos[]', 'Estabelecimentos', ['class' => 'control-label'] )  !!}
+                {!! Form::label('multiple_select_tributos[]', 'Estabelecimentos', ['class' => 'control-label'] )  !!}<br/>
                 <select multiple="multiple" name="multiple_select_estabelecimentos[]" id="estabelecimentos" class="form-control s2_multi">
                 <?php foreach($estabelecimentos as $aKey => $value) { 
                     $selected = false;
@@ -32,7 +33,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                {!! Form::label('multiple_select_tributos[]', 'UF', ['class' => 'control-label'] )  !!}
+                {!! Form::label('multiple_select_uf[]', 'UF', ['class' => 'control-label'] )  !!}<br />
                 {!!  Form::select('multiple_select_uf[]', $uf, $ufselected, ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
             </div>
             <div class="col-md-2">     
@@ -54,7 +55,7 @@
             <?php
                 if (!empty($planilha)) {
             ?>
-            <table class="table table-bordered display" id="dataTables-example" style="width: 100%; font-size: 12px;">
+            <table class="table table-bordered display" id="dataTables-example" style="width: 100%; font-size: 10px;">
             <thead>
             <tr>
                 <th>Filial</th>
@@ -96,9 +97,10 @@
     </div>
 
 <script type="text/javascript">
-    
+$('#sidebar').toggleClass('active');
+$('#sidebarCollapse').toggleClass('auto-left');
+$('#content').toggleClass('auto-left');
 $('select').select2();
-
 $(document).ready(function () {
     $('#dataTables-example').dataTable({
         language: {                        
@@ -120,6 +122,13 @@ $(document).ready(function () {
                 exportOptions: {
                     columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                 },
+                "autoWidth": true,
+                customize: function ( doc ) {
+                  doc.defaultStyle.fontSize = 9;
+                  doc.styles.tableHeader.fontSize = 11;
+                },
+                orientation: 'landscape',
+                pageSize: 'A4',
             }
         ],
         "ordering": false

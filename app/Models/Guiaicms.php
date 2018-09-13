@@ -27,7 +27,7 @@ class Guiaicms extends Model
         'VLR_RECEITA',
         'JUROS_MORA',
         'MULTA_MORA_INFRA',
-        'ACRES_FINANC',
+        'ACRESC_FINANC',
         'HONORARIOS_ADV',
         'VLR_TOTAL',
         'CONTRIBUINTE',

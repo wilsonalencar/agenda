@@ -149,7 +149,7 @@
                                                 @if ( !Auth::user()->hasRole('gcliente'))
                                                 <li><a href="{{ route('guiaicms.search_criticas') }}">Criticas</a></li>
                                                 @endif
-                                                <li><a href="{{ route('guiaicms.create') }}">Incluir</a></li>
+                                                <li><a href="{{ route('guiaicms.cadastrar') }}">Incluir</a></li>
                                                 <li><a href="{{ route('guiaicms.listar') }}">Manipular</a></li>
                                                 <li><a href="{{ route('codigosap.create') }}">Atualizar código SAP</a></li>
                                                 <li><a href="{{ route('centrocustos.create') }}">Atualizar Centro de Custo</a></li>

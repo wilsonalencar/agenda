@@ -54,6 +54,13 @@
 
     <div class="form-group">
         <div style="width:30%">
+        {!! Form::label('IMPOSTO', 'Imposto:', ['class' => 'control-label']) !!}
+        {!! Form::text('IMPOSTO', null, ['class' => 'form-control']) !!}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div style="width:30%">
         {!! Form::label('DATA_VENCTO', 'Data de Vencimento:', ['class' => 'control-label']) !!}
         {!! Form::date('DATA_VENCTO', null, ['class' => 'form-control']) !!}
         </div>
@@ -63,47 +70,47 @@
     <div class="form-group">
         <div style="width:30%">
         {!! Form::label('VLR_RECEITA', 'Valor Receita R$:', ['class' => 'control-label']) !!}
-        {!! Form::text('VLR_RECEITA', null, ['class' => 'form-control reais']) !!}
+        {!! Form::text('VLR_RECEITA', '0,00', ['class' => 'form-control reais']) !!}
         </div>
     </div>
 
     <div class="form-group">
         <div style="width:30%">
         {!! Form::label('JUROS_MORA', 'Juros Mora R$:', ['class' => 'control-label']) !!}
-        {!! Form::text('JUROS_MORA', null, ['class' => 'form-control reais']) !!}
+        {!! Form::text('JUROS_MORA', '0,00', ['class' => 'form-control reais']) !!}
         </div>
     </div>
 
     <div class="form-group">
         <div style="width:30%">
         {!! Form::label('MULTA_MORA_INFRA', 'Multa Mora Infra R$:', ['class' => 'control-label']) !!}
-        {!! Form::text('MULTA_MORA_INFRA', null, ['class' => 'form-control reais']) !!}
+        {!! Form::text('MULTA_MORA_INFRA', '0,00', ['class' => 'form-control reais']) !!}
         </div>
     </div>
 
     <div class="form-group">
         <div style="width:30%">
         {!! Form::label('ACRESC_FINANC', 'Acréscimo Financeiro R$:', ['class' => 'control-label']) !!}
-        {!! Form::text('ACRESC_FINANC', null, ['class' => 'form-control reais']) !!}
+        {!! Form::text('ACRESC_FINANC', '0,00', ['class' => 'form-control reais']) !!}
         </div>
     </div>
 
     <div class="form-group">
         <div style="width:30%">
         {!! Form::label('TAXA', 'Taxa R$:', ['class' => 'control-label']) !!}
-        {!! Form::text('TAXA', null, ['class' => 'form-control reais']) !!}
+        {!! Form::text('TAXA', '0,00', ['class' => 'form-control reais']) !!}
         </div>
     </div>
 
     <div class="form-group">
         <div style="width:30%">
         {!! Form::label('VLR_TOTAL', 'Valor Total R$:', ['class' => 'control-label']) !!}
-        {!! Form::text('VLR_TOTAL', null, ['class' => 'form-control reais']) !!}
+        {!! Form::text('VLR_TOTAL', '0,00', ['class' => 'form-control reais']) !!}
         </div>
     </div>
 
     <div class="form-group">
-        <div style="width:30%">
+        <div style="width:70%">
         {!! Form::label('CODBARRAS', 'Código de Barras:', ['class' => 'control-label']) !!}
         {!! Form::text('CODBARRAS', null, ['class' => 'form-control']) !!}
         </div>

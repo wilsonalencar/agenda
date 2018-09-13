@@ -897,6 +897,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
         $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'PA';
         
         $handle = fopen($value['pathtxt'], "r");
@@ -927,49 +928,89 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAT';
         }
 
-        preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 -correcao: 11 -acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
-        
+        preg_match('~1 - codigo da receita 2 - referencia 34 - documento origem
+([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
-            $icms['COD_RECEITA'] = $this->numero($i[0]);
-            $icms['REFERENCIA'] = $i[1];
-
-            $lk = explode('
-', $i[2]);
-            $icms['IE'] = $this->numero($lk[0]);
-            
-            $valorData = $lk[1];
-            if ($valorData == 0) {
-                $valorData = $i[3];
+            $icms['COD_RECEITA'] = $i[0];
+            if (empty($icms['IE'])) {
+                $icms['IE'] = $this->numero($i[4]);
             }
-
+        }
+        
+        preg_match('~5 - vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $valorData = trim(substr($i[0], 0, 10));
             $data_vencimento = str_replace('/', '-', $valorData);
             $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-
-            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[5]));
-            if ($i[5] == 'r$') {
-                $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$i[6]));
+            $referencia = date('m/Y', strtotime($data_vencimento));
+            $k = explode('/', $referencia);
+            $k[0] = $k[0]-1;
+            if ($k[0] == 0) {
+                $k[1] = $k[1] - 1;
             }
-
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[7])))));
-            if ($i[5] == 'r$') {
-                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim(str_replace('r$', '', trim($i[8])))));
+            if (strlen($k[0]) == 1) {
+                $k[0] = '0'.$k[0];
             }
-
-            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[16]))));
-            if ($i[16] == 'r$') {
-                $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim($i[17]))));
-            }
+            $icms['REFERENCIA'] = $k[0].'/'.$k[1];
         }
-
-        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        
+        preg_match('~1 - codigo da receita 2 - referencia 34 - documento origem
+([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+            $i = explode(' ', trim($match[1]));
+            $icms['CODBARRAS'] = trim($i[0]);
+        }
+        
+        preg_match('~8 - taxa r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        
+        preg_match('~14 - total r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+        
+        preg_match('~9 - principal([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['VLR_RECEITA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', trim($a[0]))));
+        }
+        
+        preg_match('~12 - multa([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['MULTA_MORA_INFRA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', trim($a[0]))));
+        }
+        
+        preg_match('~\*\*\* autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $codbarras = '';
+            foreach ($i as $k => $x) {
+                if (strlen($x) > 6) {
+                    $codbarras .= $this->numero($x); 
+                }
+                if ($k == 4) {
+                    break;
+                }
+            }
+            
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -1108,6 +1149,17 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $a = explode(' ', $i[4]);
             $icms['COD_RECEITA'] = $this->numero($a[1]);
+        }
+
+        if(empty($icms['COD_RECEITA'])){
+            preg_match('~
+receita ([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode('
+', $i[0]);
+            $icms['COD_RECEITA'] = $this->numero($a[0]);
+        }
         }
 
         preg_match('~data de referencia([^{]*)~i', $str, $match);        
@@ -2246,6 +2298,10 @@ valor total([^{]*)~i', $str, $match);
         }
 
         $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
+        //$icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['CNPJ'] = $estabelecimento->cnpj;
         $icms['UF'] = 'PI';
         
         $handle = fopen($value['pathtxt'], "r");

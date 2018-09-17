@@ -2236,7 +2236,6 @@ valor total([^{]*)~i', $str, $match);
         if (!file_exists($value['pathtxt'])) {
             return $icms;
         }
-
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
@@ -2272,7 +2271,58 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAT';
         }
 
-        //IE
+
+        preg_match('~12.res. sef([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $a = explode('
+', trim($match[1]));
+            $i = explode(' ', $a[0]);
+            $k = explode(' ', $a[1]);
+            
+            $icms['COD_RECEITA'] = $i[1];
+            
+            if(empty($icms['IE'])){
+                $icms['IE'] = $i[0];
+            }
+            
+            $icms['REFERENCIA'] = $k[0];
+            
+            if (isset($k[1])) {
+                $valorData = trim($k[1]);
+                $data_vencimento = str_replace('/', '-', $valorData);
+                $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            }
+        }
+        
+        preg_match('~13.principal - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $a = explode('
+', trim($match[1]));
+            
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$a[0]));
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$a[4]));
+            
+            $codbarras = '';
+            $cod_barras = explode(' ', $a[6]);
+            foreach($cod_barras as $single){
+                if($this->numero($single) > 8){
+                    $codbarras .= $this->numero($single);
+                }
+            }
+            $icms['CODBARRAS'] = $codbarras;
+        }
+        
+        preg_match('~15.juros - r\$ 16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $a = explode('
+', trim($match[1]));
+            $p = explode(' ', $a[0]);
+            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$p[1]));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$p[2]));
+        }
+    
+    
+    /* -------------- PRIMEIRO LAYOUT ----------------
         if (empty($icms['IE'])) {
             preg_match('~df ([^{]*)~i', $str, $match);
             if (!empty($match)) {
@@ -2286,15 +2336,19 @@ valor total([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
+
             $icms['CODBARRAS'] = trim($this->numero($i[0]));
             $a = explode(' ', $i[2]);
             $k = explode(' ', $i[3]);
             $custos = explode(' ', $i[5]);
             $icms['COD_RECEITA'] = $a[1];
             $icms['REFERENCIA'] = $k[0];
-            $valorData = trim($k[1]);
-            $data_vencimento = str_replace('/', '-', $valorData);
-            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            
+            if (isset($k[1])) {
+                $valorData = trim($k[1]);
+                $data_vencimento = str_replace('/', '-', $valorData);
+                $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            }
             
             if(count($custos) == 2){    
                 $custos_pp = explode(' ', $i[6]);
@@ -2326,13 +2380,13 @@ valor total([^{]*)~i', $str, $match);
                 }           
             }
         }
-
-        fclose($handle);
-        $icmsarray = array();
-        $icmsarray[0] = $icms;
-        return $icmsarray;
+    */
+    
+    fclose($handle);
+    $icmsarray = array();
+    $icmsarray[0] = $icms;
+    return $icmsarray;
     }
-
 
     public function numero($str) {
         return preg_replace("/[^0-9]/", "", $str);

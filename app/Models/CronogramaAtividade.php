@@ -29,7 +29,8 @@ class CronogramaAtividade extends Model
         'retificacao_id',
         'Id_usuario_analista',
         'Resp_cronograma',
-        'Data_cronograma'
+        'Data_cronograma',
+        'data_atividade'
     ];
 
     /**

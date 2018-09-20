@@ -2320,9 +2320,10 @@ valor total([^{]*)~i', $str, $match);
             $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$p[1]));
             $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$p[2]));
         }
-    
-    
-    /* -------------- PRIMEIRO LAYOUT ----------------
+
+        if (count($icms) <= 6) {
+            unset($icms);
+
         if (empty($icms['IE'])) {
             preg_match('~df ([^{]*)~i', $str, $match);
             if (!empty($match)) {
@@ -2380,7 +2381,9 @@ valor total([^{]*)~i', $str, $match);
                 }           
             }
         }
-    */
+        }
+    
+    
     
     fclose($handle);
     $icmsarray = array();

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Models\CronogramaAtividade;
 use App\Models\Atividade;
+use App\Models\CronogramaMensal;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
@@ -102,7 +103,7 @@ class CronogramaatividadesController extends Controller
             $data_termino = $input['data_termino'];
         }
 
-        $query = 'SELECT A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.limite, "%d/%m/%Y") as limite, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual, A.Id_usuario_analista from cronogramaatividades A inner join estabelecimentos B on A.estemp_id = B.id inner join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id where 1 ';
+        $query = 'SELECT A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.data_atividade, "%d/%m/%Y") as data_atividade, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual, A.Id_usuario_analista from cronogramaatividades A inner join estabelecimentos B on A.estemp_id = B.id inner join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id where 1 ';
         
         if (!empty($empresa_busca) && $permite_empresa) {
             $query .= 'AND A.emp_id = '.$empresa_busca.'';
@@ -141,6 +142,60 @@ class CronogramaatividadesController extends Controller
 
         return view('cronogramaatividades.index')->with('tabela', $atividades)->with('empresas', $empresas)->with('analistas', $analistas)->with('estabelecimentos', $estabelecimentos)->with('municipios', $municipios);
     }
+
+    public function alterarAnalistas(Request $request)
+    {
+        $input = $request->all();   
+
+        if (!empty($input['alterar']) && !empty($input['Analista_id'])) {
+            DB::table('cronogramaatividades')
+                ->wherein('id', $input['alterar'])
+                ->update(['Id_usuario_analista' => $input['Analista_id']]);
+        }
+
+        return redirect()->back()->with('status', 'Analistas Alterados com sucesso');
+    }
+
+
+    public function planejamento(Request $request)
+    {
+        $input = $request->all();
+        $dados = DB::table('cronogramamensal')->select('cronogramamensal.*');
+        if (!empty($input)) {
+            $dados = $dados->where('periodo_apuracao', '=', str_replace('/', '', $input['periodo_apuracao']));
+        }
+        // $dados = $dados->orderby('Empresa_id', '=', str_replace('/', '', $input['periodo_apuracao']));
+        $dados = $dados->get();
+        $array = array();
+
+        if (!empty($dados)) {
+            foreach ($dados as $key => $value) {
+                $Tributo = Tributo::find($value->Tributo_id);
+                $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$value->periodo_apuracao.'" AND A.Tributo_id = '.$value->Tributo_id);
+
+                $value->Tributo_nome = $Tributo->nome;
+                $value->Tempo_estab = $value->Tempo_estab/60;
+                $value->Tempo_total = $value->Tempo_total/60;
+                $value->Tempo_geracao = $value->Tempo_geracao/60;
+                
+                
+                $value->Qtd_analistas = round($value->Qtd_analistas);
+                $value->Inicio = date('d/m/Y', strtotime("+1 days",strtotime($data_carga[0]->Data_prev_carga))); 
+                $value->Termino = date('d/m/Y', strtotime("+".$value->Qtd_dias." days",strtotime($value->Inicio)));
+                $data_vencimento = str_replace('-', '/', $value->DATA_SLA);
+                $value->DATA_SLA = date('d/m/Y', strtotime($data_vencimento));
+                
+                $array[] = $value;
+            }
+        }
+
+        return view('cronogramaatividades.planejamento')->with('dados', $dados);
+    }
+
+    public function loadPlanejamento()
+    {
+        return view('cronogramaatividades.Loadplanejamento');
+    }
     
     public function alterar(Request $request)
     {
@@ -163,6 +218,10 @@ class CronogramaatividadesController extends Controller
 
             if (array_key_exists('Id_usuario_analista', $input) && !empty($input['Id_usuario_analista'])) {
                 $obj->Id_usuario_analista = $input['Id_usuario_analista'];
+            }
+
+            if (array_key_exists('data_atividade', $input) && !empty($input['data_atividade'])) {
+                $obj->data_atividade = $input['data_atividade'];
             }
 
         $obj->save();
@@ -190,6 +249,10 @@ class CronogramaatividadesController extends Controller
 
                 if (array_key_exists('Id_usuario_analista', $input) && !empty($input['Id_usuario_analista'])) {
                     $obj->Id_usuario_analista = $input['Id_usuario_analista'];
+                }
+
+                if (array_key_exists('data_atividade', $input) && !empty($input['data_atividade'])) {
+                    $obj->data_atividade = $input['data_atividade'];
                 }
 
             $obj->save();
@@ -462,7 +525,7 @@ class CronogramaatividadesController extends Controller
         }
         $user = User::findOrFail(Auth::user()->id);
         $query = "SELECT 
-                    DATE_FORMAT(A.limite, '%d/%m/%Y %H:%i:%s') as limite,
+                    DATE_FORMAT(A.data_atividade, '%d/%m/%Y %H:%i:%s') as limite,
                     B.codigo as codigo,
                     B.cnpj as CNPJ,
                     D.nome as Tributo,
@@ -480,7 +543,7 @@ class CronogramaatividadesController extends Controller
                 LEFT JOIN 
                     users E on A.Id_usuario_analista = E.id ";
         
-        $query .= " WHERE DATE_FORMAT(A.limite, '%Y-%m-%d') in (".$string['Datas'].") ";
+        $query .= " WHERE DATE_FORMAT(A.data_atividade, '%Y-%m-%d') in (".$string['Datas'].") ";
         $query .= " AND A.emp_id in (".$string['emps'].") ";
 
         if (!empty($string['analista_selected']) && !$user->hasRole('analyst')) {

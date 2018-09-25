@@ -264,6 +264,7 @@
                                     </div>
                                 </li>
                                 <li><a href="{{ route('cronogramaatividades.create') }}">Gerar</a></li>
+                                <li><a href="{{ route('cronogramaatividades.Loadplanejamento') }}">Planejamento</a></li>
                                 <li><a href="{{ route('cronogramaatividades.index') }}">Manipular</a></li>
                                 <li><a href="{{ route('cronogramaatividades.GerarConsulta') }}">Consulta</a></li>
                                 <li><a href="{{ route('cronogramaatividades.Gerarmensal') }}">Mensal</a></li>

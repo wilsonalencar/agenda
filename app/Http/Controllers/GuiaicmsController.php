@@ -258,7 +258,7 @@ class GuiaicmsController extends Controller
                         continue;
                     }
 
-                    $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
+                    $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8 or tributo_id = 28");
                     if (!$validateTributo[0]->countTributo) {
                         $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O Tributo ICMS não confere com o tributo da atividade', 'N');
                         continue;

@@ -18,6 +18,7 @@
     </div>
 <?php } ?>
 
+<p class="lead">Limpar Formulário -> <a href="{!! route('guiaicms.cadastrar') !!}" class="btn btn-default">Novo Registro</a></p>
 <hr>
 {!! Form::open([
     'route' => 'guiaicms.create'

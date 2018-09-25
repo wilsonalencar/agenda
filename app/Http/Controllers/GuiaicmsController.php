@@ -91,6 +91,8 @@ class GuiaicmsController extends Controller
         }
         if (!empty($input['CNPJ'])) {
             $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
+            $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+
             if (empty($estabelecimento)) {
                 $this->msg = 'Estabelecimento não habilitado';
                 return false;
@@ -137,9 +139,12 @@ class GuiaicmsController extends Controller
             $this->msg = 'Favor informar o valor total da guia';
             return false;
         }
-        if (empty($input['CODBARRAS'])) {
-            $this->msg = 'Favor informar o código de barras';
-            return false;
+        
+        if (strtolower($municipio->uf) != 'sp') {
+            if (empty($input['CODBARRAS'])) {
+                $this->msg = 'Favor informar o código de barras';
+                return false;
+            }
         }
 
     return true;

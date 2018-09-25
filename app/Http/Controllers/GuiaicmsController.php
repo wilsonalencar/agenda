@@ -1750,7 +1750,7 @@ r\$
             $icms['REFERENCIA'] = trim(substr($i[0], 0,-1));
         }
 
-        preg_match('~2 - data vencimento([^{]*)~i', $str, $match);
+        preg_match('~3 - pagamento ate([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
             $valorData = trim(substr($i[0], 0,10));
@@ -2534,6 +2534,7 @@ data de emissao
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
         $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['UF'] = 'SP';
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -2573,14 +2574,6 @@ data de emissao
             $icms['CONTRIBUINTE'] = trim($a[0]);
         }
 
-        //uf
-        preg_match('~uf([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['UF'] = trim($i[0]);
-        }
-        
         //municipio
         preg_match('~municipio([^{]*)~i', $str, $match);
         if (!empty($match)) {

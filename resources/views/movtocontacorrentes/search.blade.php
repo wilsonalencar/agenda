@@ -188,7 +188,7 @@ $(function() {
 
     $('#movtocontacorrentes-table').DataTable({
         processing: true,
-        serverSide: true,
+        // serverSide: true,
         stateSave: true,
         ajax: {
                 url: "{!! route('movtocontacorrentes.data') !!}",
@@ -232,12 +232,7 @@ $(function() {
                    }
                }
             },
-            {data: 'descricaoStatus', name: 'descricaoStatus', searchable: false, render: function (data) {
-                    if (data != null) {
-                        return data;
-                    }
-               }
-            },
+            {data: 'descricaoStatus', name: 'descricaoStatus', searchable: true},
             {data: 'observacaoSubstr', name: 'observacaoSubstr', searchable: false, render: function (data) {
                    return data;
                }
@@ -287,7 +282,7 @@ $(function() {
             { "width": "10%", "targets": 15, "visible":false, "title": "Observação"}
         ],
         language: {
-            //"searchPlaceholder": "ID, P.A. ou descrição",
+            // "searchPlaceholder": "ID, P.A. ou descrição",
             "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
         dom: 'l<"centerBtn"B>frtip',

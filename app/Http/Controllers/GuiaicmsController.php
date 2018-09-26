@@ -3228,14 +3228,13 @@ juros de mora
                                 if (empty($arrayNameFile[2])) {
                                     continue;
                                 }
-
                                 $files[] = $arquivos[2]['path'].$arquivo;
                             }
                         }
                     }
                 }
             }
-        }           
+        }              
         
         if (!empty($files)) {
             $this->savefiles($files);
@@ -3334,7 +3333,7 @@ juros de mora
                 if (isset($singlearray['atividade'])) {
                     unset($singlearray['atividade']);
                 }
-                
+
                 $date = time();
                 $path = $date.'.zip';
                 $this->createZipFile($singlearray, $path);    
@@ -3358,33 +3357,91 @@ juros de mora
 
     public function createZipFile($f = array(),$fileName){
         $zip = new \ZipArchive();
+
         touch($fileName);
         $arrayDelete = array();
         $res = $zip->open($fileName, \ZipArchive::CREATE);
         if($res === true){
             foreach ($f as $in => $name) {
-                if ($zip->addFile($name['path'] , $name['filename'])) {
-                    $destinoArray = explode('/', $name['path']);
-                    $destino = '';
-                    foreach ($destinoArray as $key => $value) {
-                        $destino .= $value.'/';
-                        if ($key == 2) {
-                            break;
+
+                if (!is_file($name['path'])) {
+                    $name['path'] = $name['path'].'/';
+                    $name['filename'] = $name['filename'].'/';
+                    
+                    $arrayExtra = scandir($name['path']);
+                    foreach ($arrayExtra as $M => $singlefile) {
+                        if (strlen($singlefile) > 2) {
+                            $extra_files[$M]['path'] = $name['path'].$singlefile;
+                            $extra_files[$M]['filename'] = $singlefile;
                         }
                     }
-                    $destino .= 'uploaded/';
-                    $arrayDelete[$in]['path'] = $name['path']; 
-                    $arrayDelete[$in]['filename'] = $name['filename']; 
-                    $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+
+                    foreach ($extra_files as $keyExtra => $extra_file) {
+                        if ($zip->addFile($extra_file['path'] , $extra_file['filename'])) {
+                            $destinoArray = explode('/', $extra_file['path']);
+                            $destino = '';
+                            foreach ($destinoArray as $key => $value) {
+                                $destino .= $value.'/';
+                                if ($key == 2) {
+                                    break;
+                                }
+                            }
+                            $destino .= 'uploaded/';
+                            $arrayDelete['pasta'][$keyExtra]['path'] = $extra_file['path']; 
+                            $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename']; 
+                            $arrayDelete['pasta'][$keyExtra]['pastaname'] = $name['filename']; 
+                            $arrayDelete['pasta'][$keyExtra]['destino'] = $destino;
+                            $arrayDelete['pasta'][$keyExtra]['raiz'] = $name['path'];
+                            $arrayDelete['pasta'][$keyExtra]['pasta'] = 1;
+                        }
+                    }
                 }
+
+                if (is_file($name['path'])) {
+                    if ($zip->addFile($name['path'] , $name['filename'])) {
+                        $destinoArray = explode('/', $name['path']);
+                        $destino = '';
+                        foreach ($destinoArray as $key => $value) {
+                            $destino .= $value.'/';
+                            if ($key == 2) {
+                                break;
+                            }
+                        }
+                        $destino .= 'uploaded/';
+                        $arrayDelete[$in]['path'] = $name['path']; 
+                        $arrayDelete[$in]['filename'] = $name['filename']; 
+                        $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+                    }
+                }
+
             }
         }
-        $zip->close();
 
+        $zip->close();
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
-                copy($single['path'], $single['destino']);
-                unlink($single['path']);
+                
+                if (is_array($single)) {
+                    foreach ($single as $p => $mostsingle) {
+                        $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
+                     
+                        if (!is_dir($creationpath)) {
+                            mkdir($creationpath, 0777);
+                        }
+                     
+                        $creationpath = $creationpath.'/';
+                        $currentFile = $creationpath.'/'.$mostsingle['filename'];
+                        copy($mostsingle['path'], $currentFile);
+                        unlink($mostsingle['path']);
+                    }
+                    
+                rmdir($mostsingle['raiz']);
+                }
+
+                if (!is_array($single)) {
+                    copy($single['path'], $single['destino']);
+                    unlink($single['path']);
+                }
             }
         }
 

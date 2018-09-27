@@ -2266,6 +2266,9 @@ valor total([^{]*)~i', $str, $match);
 ', trim($match[1]));
             $icms['REFERENCIA'] = trim($i[0]);
             $icms['COD_RECEITA'] = trim($i[4]);
+            if(strlen($i[4]) > 4){
+                $icms['COD_RECEITA'] = trim($i[6]);
+            }
             $valores = explode(' ', $i[6]);
             if(count($valores) > 3){
                 $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));

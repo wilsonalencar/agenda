@@ -2264,7 +2264,12 @@ valor total([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
+            
             $icms['REFERENCIA'] = trim($i[0]);
+            if(strlen($i[0]) > 7){
+                $icms['REFERENCIA'] = trim($i[2]);
+            }
+
             $icms['COD_RECEITA'] = trim($i[4]);
             if(strlen($i[4]) > 4){
                 $icms['COD_RECEITA'] = trim($i[6]);

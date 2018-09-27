@@ -2267,10 +2267,18 @@ valor total([^{]*)~i', $str, $match);
             $icms['REFERENCIA'] = trim($i[0]);
             $icms['COD_RECEITA'] = trim($i[4]);
             $valores = explode(' ', $i[6]);
-            $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
-            $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
-            $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
-            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));
+            if(count($valores) > 3){
+                $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
+                $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
+                $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
+                $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));                
+            } else {
+                $valores = explode(' ', $i[8]);
+                $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
+                $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
+                $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
+                $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));
+            }
         }
 
         preg_match('~linha digitavel:([^{]*)~i', $str, $match);

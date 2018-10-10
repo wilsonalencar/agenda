@@ -33,7 +33,7 @@
         <small style="color:red">entrega em atraso (data limite prefixada {{ date("d/m/Y", strtotime($atividade->limite)) }})</small>
         @endif
     </p>
-    <p class="lead">Usuário entregador:  <b>{{ $atividade->entregador->name }}</b></p>
+    <p class="lead">Usuário entregador:  <b><?php if (!empty($atividade->entregador)) { echo $atividade->entregador->nome; } ?></b></p>
         @if ($atividade->status >2)
             <p class="lead">Data aprovação: {{ date("d/m/Y", strtotime($atividade->data_aprovacao)) }}</p>
             <p class="lead">Usuário aprovador: <b>{{ $atividade->aprovador->name }}</b></p>
@@ -82,7 +82,7 @@
                 <div class="row">
                     @if ( Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor'))
 
-                        @if ($atividade->status == 2 && $atividade->entregador->id != Auth::user()->id)
+                        @if ($atividade->status == 2 && $atividade->entregador->id != Auth::user()->id && !empty($atividade->entregador))
                         <div class="col-md-4">
                             <a href="{{ route('atividades.aprovar', $atividade->id) }}" class="btn-success btn btn-default">Aprovar entrega atividade</a>
                         </div>

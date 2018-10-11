@@ -2456,7 +2456,9 @@ valor total([^{]*)~i', $str, $match);
             $i = explode(' ', $a[0]);
             $k = explode(' ', $a[1]);
             
-            $icms['COD_RECEITA'] = $i[1];
+            if (!empty($i['0'])) {
+                $icms['COD_RECEITA'] = $i[1];
+            }
             
             if(empty($icms['IE'])){
                 $icms['IE'] = $i[0];

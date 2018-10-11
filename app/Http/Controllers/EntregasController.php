@@ -101,7 +101,7 @@ class EntregasController extends Controller
             //     $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
             //     $type = 'emp';
             // } else {
-                $estemp = Estabelecimento::select('id')->where('codigo','like','%'.$filter_codigo)->get();
+                $estemp = Estabelecimento::select('id')->where('codigo','=',$filter_codigo)->get();
                 $type = 'estab';
             // }
 

@@ -8,7 +8,7 @@
                     <td colspan="10">
                         <div class="form-group">
                             <div class="col-xs-5 pull-left">
-                                <input style="width: 145px; position:relative; left:10px; " placeholder="codigo" type="text" id="src_codigo" name="src_codigo" value="<?= $filter_codigo ?>">
+                                <input style="width: 145px; position:relative; left:10px; " class="codigo" placeholder="codigo" type="text" id="src_codigo" maxlength="5" name="src_codigo" value="<?= $filter_codigo ?>">
                                 <input style="width: 145px; position:relative; left:10px; " placeholder="cnpj" type="text" id="src_cnpj" name="src_cnpj" value="<?= $filter_cnpj ?>">
                                 <button id="adv_search" style="position:relative; left:10px;">BUSCAR</button>
                             </div>
@@ -133,7 +133,7 @@ $(function() {
             var val_status = $('#src_status option:selected').val();
 
             if (val_cnpj || val_codigo || val_status) {
-                var url = "{{ route('entregas.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo.replace(/[^0-9]/g,'')+"&vst="+val_status;
+                var url = "{{ route('entregas.index') }}?vcn="+val_cnpj.replace(/[^0-9]/g,'')+"&vco="+val_codigo+"&vst="+val_status;
             } else {
                 var url = "{{ route('entregas.index') }}";
             }
@@ -149,7 +149,6 @@ $(function() {
 });
 jQuery(function($){
     $('input[name="src_cnpj"]').mask("99.999.999/9999-99");
-    $('input[name="src_codigo"]').mask("9999");
 });
 </script>
 

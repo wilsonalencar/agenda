@@ -2456,7 +2456,7 @@ valor total([^{]*)~i', $str, $match);
             $i = explode(' ', $a[0]);
             $k = explode(' ', $a[1]);
             
-            if (!empty($i['0'])) {
+            if (isset($i[1])) {
                 $icms['COD_RECEITA'] = $i[1];
             }
             
@@ -2500,8 +2500,7 @@ valor total([^{]*)~i', $str, $match);
             $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$p[2]));
         }
 
-        if (count($icms) <= 6) {
-            unset($icms);
+        if (count($icms['CODBARRAS']) <= 8) {
 
         if (empty($icms['IE'])) {
             preg_match('~df ([^{]*)~i', $str, $match);
@@ -2561,8 +2560,7 @@ valor total([^{]*)~i', $str, $match);
             }
         }
         }
-    
-    
+        
     
     fclose($handle);
     $icmsarray = array();

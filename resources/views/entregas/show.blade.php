@@ -33,7 +33,7 @@
         <small style="color:red">entrega em atraso (data limite prefixada {{ date("d/m/Y", strtotime($atividade->limite)) }})</small>
         @endif
     </p>
-    <p class="lead">Usuário entregador:  <b><?php if (!empty($atividade->entregador)) { echo $atividade->entregador->nome; } ?></b></p>
+    <p class="lead">Usuário entregador:  <b>{{ $atividade->entregador->nome }}</b></p>
         @if ($atividade->status >2)
             <p class="lead">Data aprovação: {{ date("d/m/Y", strtotime($atividade->data_aprovacao)) }}</p>
             <p class="lead">Usuário aprovador: <b>{{ $atividade->aprovador->name }}</b></p>
@@ -81,25 +81,14 @@
             <div style="padding:20px" class="panel-body">
                 <div class="row">
                     @if ( Auth::user()->hasRole('admin') || Auth::user()->hasRole('owner') || Auth::user()->hasRole('supervisor'))
-                        <?php if (!empty($atividade->entregador)) { ?>
-                            @if ($atividade->status == 2 && $atividade->entregador->id != Auth::user()->id)
-                            <div class="col-md-4">
-                                <a href="{{ route('atividades.aprovar', $atividade->id) }}" class="btn-success btn btn-default">Aprovar entrega atividade</a>
-                            </div>
-                            <div class="col-md-4">
-                                <a href="{{ route('atividades.reprovar', $atividade->id) }}" class="btn-danger btn btn-default">Reprovar entrega atividade</a>
-                            </div>
-                            @endif
-                        <?php } else { ?>
-                            @if ($atividade->status == 2)
-                            <div class="col-md-4">
-                                <a href="{{ route('atividades.aprovar', $atividade->id) }}" class="btn-success btn btn-default">Aprovar entrega atividade</a>
-                            </div>
-                            <div class="col-md-4">
-                                <a href="{{ route('atividades.reprovar', $atividade->id) }}" class="btn-danger btn btn-default">Reprovar entrega atividade</a>
-                            </div>
-                            @endif
-                        <?php } ?>
+                        @if ($atividade->status == 2 && $atividade->entregador->id != Auth::user()->id)
+                        <div class="col-md-4">
+                            <a href="{{ route('atividades.aprovar', $atividade->id) }}" class="btn-success btn btn-default">Aprovar entrega atividade</a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ route('atividades.reprovar', $atividade->id) }}" class="btn-danger btn btn-default">Reprovar entrega atividade</a>
+                        </div>
+                        @endif
                         @if ($atividade->status == 3 && false)
                         <div class="col-md-3">
                             <a href="{{ route('atividades.retificar', $atividade->id) }}" class="btn btn-default">Retificar entrega?</a>

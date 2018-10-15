@@ -2502,7 +2502,7 @@ valor total([^{]*)~i', $str, $match);
 
         if (count($icms['CODBARRAS']) <= 8) {
 
-        if (empty($icms['IE'])) {
+        if (empty($icms['IE']) || strlen($this->letras($icms['IE'])) > 4) {
             preg_match('~df ([^{]*)~i', $str, $match);
             if (!empty($match)) {
                 $a = explode(' ', trim($match[1]));
@@ -2522,7 +2522,7 @@ valor total([^{]*)~i', $str, $match);
             $custos = explode(' ', $i[5]);
             $icms['COD_RECEITA'] = $a[1];
             $icms['REFERENCIA'] = $k[0];
-            
+
             if (isset($k[1])) {
                 $valorData = trim($k[1]);
                 $data_vencimento = str_replace('/', '-', $valorData);
@@ -2560,8 +2560,50 @@ valor total([^{]*)~i', $str, $match);
             }
         }
         }
-        
     
+    if (strlen($this->letras($icms['JUROS_MORA'])) > 5) {
+        preg_match('~16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $custos = explode(' ', $i[7]);
+            if (isset($custos[0])) {
+                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[0]));
+            }
+            if (isset($custos[1])) {
+                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+            }
+            if (isset($custos[3])) {
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+            }
+        } else {
+        preg_match('~17.valor total - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $custos = explode(' ', $i[7]);
+            if (isset($custos[0])) {
+                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[0]));
+            }
+            if (isset($custos[1])) {
+                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+            }
+            if (isset($custos[3])) {
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+            }
+        }
+        }
+
+        preg_match('~valor original: r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            if (isset($i[0])) {
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$i[0]));
+            }
+        }
+    }
+        
     fclose($handle);
     $icmsarray = array();
     $icmsarray[0] = $icms;

@@ -30,7 +30,8 @@ class CronogramaAtividade extends Model
         'Id_usuario_analista',
         'Resp_cronograma',
         'Data_cronograma',
-        'data_atividade'
+        'data_atividade',
+        'tempo'
     ];
 
     /**

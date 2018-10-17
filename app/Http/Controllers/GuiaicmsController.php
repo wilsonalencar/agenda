@@ -165,6 +165,14 @@ class GuiaicmsController extends Controller
                 $estemp_id = $arrayEstempId[0]->id;
             }
 
+            $validateAtividade = DB::select("Select count(1) as countAtividade from atividades where id = ".$AtividadeID."");
+            if (!$validateAtividade[0]->countAtividade) {
+                echo "oi";exit;
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'A Atividade não existe', 'N');
+                continue;
+            }
+            echo "fodeu";exit;
+
             $arqu = 'foo '.$value['arquivotxt'].' bar';    
             
             if (strpos($arqu, 'SP') && substr($arqu, -10) == 'SP.txt bar') {

@@ -159,13 +159,16 @@ class CronogramaatividadesController extends Controller
 
     public function planejamento(Request $request)
     {
+
         $input = $request->all();
         $dados = DB::table('cronogramamensal')->select('cronogramamensal.*');
         if (!empty($input)) {
-            $dados = $dados->where('periodo_apuracao', '=', str_replace('/', '', $input['periodo_apuracao']));
+            $periodo = str_replace('/', '', $input['periodo_apuracao']);
+            $dados = $dados->where('cronogramamensal.periodo_apuracao', '=', $periodo);
         }
         // $dados = $dados->orderby('Empresa_id', '=', str_replace('/', '', $input['periodo_apuracao']));
         $dados = $dados->get();
+
         $array = array();
 
         if (!empty($dados)) {
@@ -173,14 +176,17 @@ class CronogramaatividadesController extends Controller
                 $Tributo = Tributo::find($value->Tributo_id);
                 $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$value->periodo_apuracao.'" AND A.Tributo_id = '.$value->Tributo_id);
 
+                $empresa = Empresa::findOrFail($value->Empresa_id);
+
+                $value->cnpj = $empresa->cnpj;
                 $value->Tributo_nome = $Tributo->nome;
                 $value->Tempo_estab = $value->Tempo_estab/60;
                 $value->Tempo_total = $value->Tempo_total/60;
                 $value->Tempo_geracao = $value->Tempo_geracao/60;
                 
-                
                 $value->Qtd_analistas = round($value->Qtd_analistas);
                 $value->Inicio = date('d/m/Y', strtotime("+1 days",strtotime($data_carga[0]->Data_prev_carga))); 
+                $value->carga = date('d/m/Y', strtotime($data_carga[0]->Data_prev_carga)); 
                 $value->Termino = date('d/m/Y', strtotime("+".$value->Qtd_dias." days",strtotime($value->Inicio)));
                 $data_vencimento = str_replace('-', '/', $value->DATA_SLA);
                 $value->DATA_SLA = date('d/m/Y', strtotime($data_vencimento));
@@ -686,18 +692,17 @@ class CronogramaatividadesController extends Controller
         $events = [];
         
         $vall = count($datas);
-
+        $datasB = '"';
         foreach ($datas as $key => $dataSing) {
-            $datas[$key] = $dataSing.' 00:00:00';
-            $datas[$vall] = $dataSing.' 23:59:59';
-            $vall += 1;
+            $datasB .= $dataSing.'","';
         }
-            
+        $datasB = substr($datasB, 0,-2);
+        
         $user = User::findOrFail(Auth::user()->id);
             $atividades_estab = DB::table('cronogramaatividades')
                 ->join('estabelecimentos', 'estabelecimentos.id', '=', 'cronogramaatividades.estemp_id')
                 ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite','cronogramaatividades.data_atividade', 'cronogramaatividades.status')
-                ->whereIN('cronogramaatividades.limite', $datas)
+                ->whereRaw('DATE_FORMAT(cronogramaatividades.data_atividade, "%Y-%m-%d") in ('.$datasB.')')
                 ->where('cronogramaatividades.estemp_type','estab');
             
             if ($user->hasRole('analyst')){
@@ -705,7 +710,6 @@ class CronogramaatividadesController extends Controller
             }
 
             $atividades_estab = $atividades_estab->get();
-
         $b = 0;
         foreach($atividades_estab as $atividade) {
             $cor = 'green';
@@ -714,20 +718,20 @@ class CronogramaatividadesController extends Controller
                 $b = 1;
             }
 
-            $events[$atividade->data_atividade] = \Calendar::event(
+            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
                 'Atividades (clique para detalhes)', 
                 true, 
-                $atividade->data_atividade, 
-                $atividade->data_atividade, 
+                substr($atividade->data_atividade, 0,10), 
+                substr($atividade->data_atividade, 0,10), 
                 $atividade->id, 
-                ['url' => url('/uploadCron/'.$atividade->data_atividade.'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
             );
         }
 
         $atividades_emp = DB::table('cronogramaatividades')
             ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
             ->select('cronogramaatividades.id','cronogramaatividades.data_atividade', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-            ->whereIN('cronogramaatividades.limite', $datas)
+            ->whereRaw('DATE_FORMAT(cronogramaatividades.data_atividade, "%Y-%m-%d") in ('.$datasB.')')
             ->where('cronogramaatividades.estemp_type','emp');
      
             if ($user->hasRole('analyst')){
@@ -745,13 +749,13 @@ class CronogramaatividadesController extends Controller
                 $a = 1;
             }
 
-            $events[$atividade->data_atividade] = \Calendar::event(
+            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
                 'Atividades (clique para detalhes)',
                 true, 
-                $atividade->data_atividade,
-                $atividade->data_atividade,
+                substr($atividade->data_atividade, 0,10),
+                substr($atividade->data_atividade, 0,10),
                 $atividade->id,
-                ['url' => url('/uploadCron/'.$atividade->data_atividade.'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
             );
         }
 
@@ -788,11 +792,6 @@ class CronogramaatividadesController extends Controller
     public function mensal(Request $request)
     {
         $input = $request->all();
-
-        // if (!isset($input['empresas_selected']) || empty($input['empresas_selected'])) {
-        //     return redirect()->back()->with('status', 'Favor informar a(s) empresa(s)');
-        // }
-
         if (!isset($input['periodo_apuracao']) || empty($input['periodo_apuracao'])) {
             return redirect()->back()->with('status', 'Favor informar o período corretamente');
         }
@@ -800,10 +799,6 @@ class CronogramaatividadesController extends Controller
         $user_id = Auth::user()->id;
         $events = [];
         $empresas = array();
-
-        // foreach ($input['empresas_selected'] as $key => $value) {
-        //     $empresas[] = $value;
-        // }
 
         $periodo_apuracao = str_replace('/', '', $input['periodo_apuracao']);
         $feriados = $this->eService->getFeriadosNacionais();
@@ -815,13 +810,11 @@ class CronogramaatividadesController extends Controller
                 // ->whereIN('cronogramaatividades.emp_id', $empresas)
                 ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
                 ->where('cronogramaatividades.estemp_type','estab');
-                
+
                 if ($user->hasRole('analyst')){
                    $atividades_estab = $atividades_estab->where('cronogramaatividades.Id_usuario_analista', $user->id);
                 }
-
                 $atividades_estab = $atividades_estab->get();
-
         $b = 0;
         foreach($atividades_estab as $atividade) {
             $cor = 'green';
@@ -829,14 +822,14 @@ class CronogramaatividadesController extends Controller
                 $cor = 'red';
                 $b = 1;
             }
-            
-            $events[$atividade->data_atividade] = \Calendar::event(
+
+            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
                 'Atividades (clique para detalhes)',
                 true, 
-                $atividade->data_atividade, 
-                $atividade->data_atividade, 
+                substr($atividade->data_atividade, 0,10), 
+                substr($atividade->data_atividade, 0,10), 
                 $atividade->id, 
-                ['url' => url('/uploadCron/'.$atividade->data_atividade.'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
             );
         }
         
@@ -844,7 +837,6 @@ class CronogramaatividadesController extends Controller
         $atividades_emp = DB::table('cronogramaatividades')
             ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
             ->select('cronogramaatividades.id','cronogramaatividades.data_atividade', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-            // ->whereIN('cronogramaatividades.emp_id', $empresas)
             ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
             ->where('cronogramaatividades.estemp_type','emp');
 
@@ -863,25 +855,28 @@ class CronogramaatividadesController extends Controller
                 $a = 1;
             }
 
-            $events[$atividade->data_atividade] = \Calendar::event(
+            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
                 'Atividades (clique para detalhes)',
                 true, 
-                $atividade->data_atividade,
-                $atividade->data_atividade,
+                substr($atividade->data_atividade, 0,10),
+                substr($atividade->data_atividade, 0,10),
                 $atividade->id,
-                ['url' => url('/uploadCron/'.$atividade->data_atividade.'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
             );
         }  
         //Geração do calendario
         $mes = substr($periodo_apuracao, 0, -4)+1;
         $ano = substr($periodo_apuracao, 2);
-        $dataAcima = $ano.'-'.$mes.'-01';
+        if (strlen($mes) == 1) {
+            $mes = '0'.$mes;
+        }
+        $dataAcima = $ano.'-'.$mes.'';
         $calendar = \Calendar::addEvents($events) //add an array with addEvents
         ->setOptions([ //set fullcalendar options
                 'lang' => 'pt',
                 'firstDay' => 1,
-                'defaultDate' => $dataAcima,
-                'aspectRatio' => 2.3,
+                'defaultDate' => '2018-10-01',
+                'aspectRatio' => 2.5,
                 'header' => ['left' => '', 'center'=>'title', 'right' => ''] //, 'right' => 'month,agendaWeek'
             ])
         ->setCallbacks([ //set fullcalendar callback options (will not be JSON encoded)

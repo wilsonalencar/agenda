@@ -477,7 +477,8 @@ class EntregaService {
                             'limite' => $data_limite,
                             'tipo_geracao' => 'A',
                             'regra_id' => $regra->id,
-                            'Data_cronograma' => date('d-m-Y'),
+                            'Data_cronograma' => date('Y-m-d H:i:s'),
+                            'data_atividade' => date('Y-m-d H:i:s'),
                             'Resp_cronograma' => $id_user
                         );
                     }
@@ -534,15 +535,23 @@ class EntregaService {
                 } 
 
                 $val['Resp_cronograma'] =$id_user;
-                $val['Data_cronograma'] = date('d-m-Y');
-                $val['tempo'] = $this->getTempo($tributo_id, $uf_cron->uf);
+                $val['Data_cronograma'] = date('Y-m-d H:i:s');
+                $val['data_atividade'] = date('Y-m-d H:i:s');
+                
+               	if ($val['estemp_id'] > 0) {
+                    $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
+                        if (!empty($estabelecimento_tempo)) {
+	                        $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
+	                        $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                	}
+                }
 
                 if (!$this->checkDuplicidadeCronograma($val)) {
                     continue;
                 }
-                // $nova_atividade = CronogramaAtividade::create($val);
+                $nova_atividade = CronogramaAtividade::create($val);
                 if (!empty($val)) {
-                    $this->array[$val['estemp_id']][] = $val;
+                    $this->array[$val['estemp_id']][$tributo_id][] = $val;
                 }
                 $count++;
             }
@@ -559,29 +568,33 @@ class EntregaService {
     public function generateMensal($array)
     {   
         $var = array();
-        $var['Tempo_total'] = 0;
         foreach ($array as $estab_id => $single) {
-            foreach ($single as $key => $atividade) {
-                $var['Qtde_estab'] = count($array[$estab_id]);
-                $var['Tempo_estab'] = $atividade['tempo'];
-                $var['DATA_SLA'] = $atividade['limite'];
-                $var['periodo_apuracao'] = $atividade['periodo_apuracao'];
-                $var['Empresa_id'] = $atividade['emp_id'];
-                $var['Tempo_total'] += $atividade['tempo'];
+            foreach ($single as $tributo => $mostsingle) {
+                foreach ($mostsingle as $key => $atividade) {
+                    $var['Qtde_estab'] = count($array[$estab_id]);
+                    $var['Tempo_estab'] = $atividade['tempo'];
+                    $var['DATA_SLA'] = $atividade['limite'];
+                    $var['periodo_apuracao'] = $atividade['periodo_apuracao'];
+                    $var['Empresa_id'] = $atividade['emp_id'];
 
-                $Regra = Regra::find($atividade['regra_id']);
-                $Estabelecimento = Estabelecimento::find($atividade['estemp_id']);
-                $Municipio = Municipio::find($Estabelecimento->cod_municipio);
-                $var['Tributo_id'] = $Regra->tributo_id;
-                $var['uf'] = $Municipio->uf;
-                $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$atividade['periodo_apuracao'].'" AND A.Tributo_id = '.$var['Tributo_id']);
+                    $Regra = Regra::find($atividade['regra_id']);
+                    $Estabelecimento = Estabelecimento::find($atividade['estemp_id']);
+                    $Municipio = Municipio::find($Estabelecimento->cod_municipio);
+                    $var['Tributo_id'] = $tributo;
+                    $var['uf'] = $Municipio->uf;
 
-                if (!empty($data_carga)) {
-                    $var['Qtd_dias'] = $this->diffTempo(substr($atividade['limite'], 0,10), $data_carga[0]->Data_prev_carga);
-                    $var['Tempo_geracao'] = $var['Qtd_dias'] * 480;
-                    $var['Qtd_analista'] = $var['Tempo_total']/$var['Tempo_geracao'];
+                    $tempo = $this->getTempo($tributo, $Municipio->uf);
+                    $var['Tempo_total'] = $tempo * $var['Qtde_estab'];
 
-                    CronogramaMensal::Create($var);
+                    $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$atividade['periodo_apuracao'].'" AND A.Tributo_id = '.$var['Tributo_id']);
+
+                    if (!empty($data_carga)) {
+                        $var['Qtd_dias'] = $this->diffTempo(substr($atividade['limite'], 0,10), $data_carga[0]->Data_prev_carga);
+                        $var['Tempo_geracao'] = $var['Qtd_dias'] * 480;
+                        $var['Qtd_analista'] = $var['Tempo_total']/$var['Tempo_geracao'];
+
+                        CronogramaMensal::Create($var);
+                    }
                 }
             }
         }
@@ -601,7 +614,7 @@ class EntregaService {
     {
         $tempo = 0;
         $tributo_tempo = DB::select('SELECT A.Qtd_minutos FROM tempoatividade A where A.Tributo_id ='.$tributo.' AND A.UF ="'.$uf.'"');
-
+        
         if (!empty($tributo_tempo)) {
             $tempo = $tributo_tempo[0]->Qtd_minutos;
         }
@@ -678,6 +691,7 @@ class EntregaService {
 
                     $param = array('cnpj'=>$estab->cnpj,'IE'=>$estab->insc_estadual);
                     $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega,$param,$periodo_apuracao,$offset,$adiant_fds);
+
 
                     foreach ($retval_array as $el) {
                         $data_limite = $el['data']->toDateTimeString();
@@ -894,6 +908,7 @@ class EntregaService {
                     foreach($ativ_estemps as $ae) {
                         $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
                         $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
+
 
                         $data_limite = $retval_array[0]['data']->toDateTimeString();
                         $alerta = intval($regra->tributo->alerta);
@@ -1283,6 +1298,7 @@ class EntregaService {
                         $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
                         $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
 
+
                         $data_limite = $retval_array[0]['data']->toDateTimeString();
                         $alerta = intval($regra->tributo->alerta);
                         $inicio_aviso = $retval_array[0]['data']->subDays($alerta)->toDateTimeString();
@@ -1303,7 +1319,8 @@ class EntregaService {
                             'limite' => $data_limite,
                             'tipo_geracao' => 'A',
                             'regra_id' => $regra->id,
-                            'Data_cronograma' => date('d-m-Y'),
+                            'Data_cronograma' => date('Y-m-d H:i:s'),
+                            'data_atividade' => date('Y-m-d H:i:s'),
                             'Resp_cronograma' => $id_user
                         );
 
@@ -1320,14 +1337,6 @@ class EntregaService {
                             $val['estemp_type'] = 'estab';
                         }
 
-                        if ($val['estemp_id'] > 0) {
-                            $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
-                                if (!empty($estabelecimento_tempo)) {
-                                    $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                                    $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
-                                }
-                        }
-
                         $anali = DB::table('atividadeanalista')
                             ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
                             ->select('atividadeanalista.Id_usuario_analista')
@@ -1340,6 +1349,14 @@ class EntregaService {
                             $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
                         } 
 
+                        if ($val['estemp_id'] > 0) {
+                            $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
+                            if (!empty($estabelecimento_tempo)) {
+                                $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
+                                $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                            }
+                        }
+
                         if (!$this->checkDuplicidadeCronograma($val)) {
                             continue;
                         }
@@ -1347,7 +1364,7 @@ class EntregaService {
                         //Verifica blacklist dos estabelecimentos para esta regra
                         if (!in_array($ae->id,$blacklist)) {
                             CronogramaAtividade::create($val);
-                            $this->array[$val['estemp_id']][] = $val;
+                            $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
                             $count++;
                         }
 
@@ -1420,16 +1437,17 @@ class EntregaService {
                                 $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
                             }
 
-                            if ($val['estemp_id'] > 0) {
-                                $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
-                                    if (!empty($estabelecimento_tempo)) {
-                                        $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                                        $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
-                                    }
-                            }
-
                             $val['Resp_cronograma'] = $id_user;
-                            $val['Data_cronograma'] = date('d-m-Y');
+                            $val['Data_cronograma'] = date('Y-m-d H:i:s');
+                            $val['data_atividade'] = date('Y-m-d H:i:s');
+                            
+                            if ($val['estemp_id'] > 0) {
+                            $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
+                                if (!empty($estabelecimento_tempo)) {
+                                    $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
+                                    $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                                }
+                        	}
 
                             if (!$this->checkDuplicidadeCronograma($val)) {
                                 continue;
@@ -1438,7 +1456,7 @@ class EntregaService {
                             //Verifica blacklist dos estabelecimentos para esta regra
                             if (!in_array($el->id,$blacklist)) {
                                 CronogramaAtividade::create($val);
-                                $this->array[$val['estemp_id']][] = $val; 
+                                $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
                                 $count++;
                             }
                         }

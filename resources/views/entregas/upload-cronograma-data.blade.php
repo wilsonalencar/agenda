@@ -6,7 +6,7 @@
 
 <div class="about-section">
    <div class="text-content">
-        <h2>Atividades</h2>
+        <h2>Cronograma Mensal</h2>
         <table width="70%" class="table table-bordered display">
             <thead>
                     <td colspan="2" style="width: 20%" align="center"><b>Atividade</b></td>

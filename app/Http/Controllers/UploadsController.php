@@ -44,7 +44,7 @@ class UploadsController extends Controller
     public function entregaCronogramaData($data_atividade) {
         $usuario = User::findOrFail(Auth::user()->id);
         $atividadesFiltered = array();
-        $atividades = DB::select('Select A.*, C.nome as tributo, E.uf, F.name from cronogramaatividades A left join regras B on A.regra_id = B.id left join tributos C on B.tributo_id = C.id left join estabelecimentos D on A.estemp_id = D.id left join municipios E on D.cod_municipio = E.codigo left join users F on A.Id_usuario_analista = F.id where A.data_atividade = "'.$data_atividade.'";');
+        $atividades = DB::select('Select A.*, C.nome as tributo, E.uf, F.name from cronogramaatividades A left join regras B on A.regra_id = B.id left join tributos C on B.tributo_id = C.id left join estabelecimentos D on A.estemp_id = D.id left join municipios E on D.cod_municipio = E.codigo left join users F on A.Id_usuario_analista = F.id where DATE_FORMAT(A.data_atividade, "%Y-%m-%d") = "'.$data_atividade.'";');
         
         if (!empty($atividades)) {
             foreach ($atividades as $key => $atividade) {

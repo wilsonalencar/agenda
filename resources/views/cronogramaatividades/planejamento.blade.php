@@ -10,8 +10,8 @@
     </div>   
 @endif
 
-<h1>Atividade do Analista</h1>
-<p class="lead">Segue a lista de todas as atividades cadastradas.</p>
+<h1>Planejamento</h1>
+<p class="lead">Planejamento de atividades.</p>
 <a href="{!! route('cronogramaatividades.Loadplanejamento') !!}" class="btn btn-default">Voltar</a>
 <hr>
    <table class="table table-bordered display" id="myTableAprovacao">   
@@ -21,6 +21,7 @@
                 <th>Tributo</th>
                 <th>SLA</th>
                 <th>Período</th>
+                <th>Carga</th>
                 <th>UF</th>
                 <th>Qtd Estabelecimento</th>
                 <th>Tempo Estabelecimento</th>
@@ -38,10 +39,11 @@
                     foreach ($dados as $chave => $value) {
                 ?>  
                 <tr>
-                    <td><?php echo $value->Empresa_id; ?></td>
+                    <td><?php echo substr($value->cnpj, 0,8); ?></td>
                     <td><?php echo $value->Tributo_nome; ?></td>
                     <td><?php echo $value->DATA_SLA; ?></td>
                     <td><?php echo $value->periodo_apuracao; ?></td>
+                    <td><?php echo $value->carga; ?></td>
                     <td><?php echo $value->uf; ?></td>
                     <td><?php echo $value->Qtde_estab; ?></td>
                     <td><?php echo $value->Tempo_estab; ?></td>
@@ -57,6 +59,11 @@
     </table>                                            
 
 <script type="text/javascript">
+
+jQuery(function($){
+    $('#sidebarCollapse').click();
+});
+
 $(document).ready(function (){
     $('#myTableAprovacao').dataTable({
         language: {

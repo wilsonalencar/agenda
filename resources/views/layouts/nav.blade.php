@@ -143,9 +143,16 @@
                                         <ul class="nav navbar-nav">
                                             <li class="panel panel-default" id="dropdown">
                                                 <li><a href="{{ route('guiaicms.icms') }}">ICMS</a></li>
+                                                @if ( Auth::user()->hasRole('supervisor') || Auth::user()->hasRole('admin'))
+                                                    <li><a href="{{ route('guiaicms.conferencia') }}">Conferência</a></li>
+                                                @endif
                                                 @if ( !Auth::user()->hasRole('gcliente'))
                                                 <li><a href="{{ route('guiaicms.search_criticas') }}">Criticas</a></li>
                                                 @endif
+                                                <li><a href="{{ route('guiaicms.cadastrar') }}">Incluir</a></li>
+                                                <li><a href="{{ route('guiaicms.listar') }}">Manipular</a></li>
+                                                <li><a href="{{ route('codigosap.create') }}">Atualizar código SAP</a></li>
+                                                <li><a href="{{ route('centrocustos.create') }}">Atualizar Centro de Custo</a></li>
                                             </li>
                                     </ul>
                                 </div>

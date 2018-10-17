@@ -43,9 +43,170 @@ class GuiaicmsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function listar()
+    {   
+        $status = 'success';
+        $Registros = Guiaicms::all();
+        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
+    }
+
+    public function create(Request $request)
     {
-        //
+        $status = 'success';
+        $this->msg = '';
+        $input = $request->all();
+
+        if (!empty($input)) {
+            if (!$this->validation($input)) {
+                $status = 'error';
+                return view('guiaicms.create')->with('msg', $this->msg)->with('status', $status);
+            }
+            
+            $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
+            $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+            $input['UF'] = $municipio->uf;
+            $input['USUARIO'] = Auth::user()->id;
+            $input['DATA'] = date('Y-m-d');
+            $input['CNPJ'] = $this->numero($input['CNPJ']);
+
+            $input['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', $input['VLR_RECEITA']));
+            $input['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', $input['VLR_TOTAL']));
+            $input['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $input['MULTA_MORA_INFRA']));
+            $input['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $input['JUROS_MORA']));
+            $input['TAXA'] = str_replace(',', '.', str_replace('.', '', $input['TAXA']));
+            $input['ACRESC_FINANC'] = str_replace(',', '.', str_replace('.', '', $input['ACRESC_FINANC']));
+
+            Guiaicms::create($input);
+            $this->msg = 'Guia criada com sucesso';            
+        }
+
+    return view('guiaicms.create')->with('msg', $this->msg)->with('status', $status);   
+    }
+
+    private function validation($input)
+    {
+        if (empty($input['CNPJ'])) {
+            $this->msg = 'Favor informar o cnpj';
+            return false;
+        }
+        if (!empty($input['CNPJ'])) {
+            $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
+            $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+
+            if (empty($estabelecimento)) {
+                $this->msg = 'Estabelecimento não habilitado';
+                return false;
+            }
+        }
+
+        if (empty($input['IE'])) {
+            $this->msg = 'Favor informar a inscrição estadual';
+            return false;
+        }
+        if (empty($input['COD_RECEITA'])) {
+            $this->msg = 'Favor informar o código da receita';
+            return false;
+        }
+        if (empty($input['REFERENCIA'])) {
+            $this->msg = 'Favor informar a referência';
+            return false;
+        }
+        if (empty($input['DATA_VENCTO'])) {
+            $this->msg = 'Favor informar a data de vencimento';
+            return false;
+        }
+        if (empty($input['VLR_RECEITA'])) {
+            $this->msg = 'Favor informar o valor da receita';
+            return false;
+        }
+        if (empty($input['JUROS_MORA'])) {
+            $this->msg = 'Favor informar o Juros Mora ';
+            return false;
+        }
+        if (empty($input['MULTA_MORA_INFRA'])) {
+            $this->msg = 'Favor informar o valor da multa mora infra';
+            return false;
+        }
+        if (empty($input['ACRESC_FINANC'])) {
+            $this->msg = 'Favor informar o acrescimo financeiro ';
+            return false;
+        }
+        if (empty($input['TAXA'])) {
+            $this->msg = 'Favor informar a taxa';
+            return false;
+        }
+        if (empty($input['VLR_TOTAL'])) {
+            $this->msg = 'Favor informar o valor total da guia';
+            return false;
+        }
+        
+        if (strtolower($municipio->uf) != 'sp') {
+            if (empty($input['CODBARRAS'])) {
+                $this->msg = 'Favor informar o código de barras';
+                return false;
+            }
+        }
+
+    return true;
+    }
+
+    public function editar($id, Request $request)
+    {
+        $status = 'success';
+        $this->msg = '';
+        $input = $request->all();
+        $guiaicms = Guiaicms::findOrFail($id);
+        
+        $guiaicms->VLR_RECEITA = $this->maskMoeda($guiaicms->VLR_RECEITA);
+        $guiaicms->VLR_TOTAL = $this->maskMoeda($guiaicms->VLR_TOTAL);
+        $guiaicms->MULTA_MORA_INFRA = $this->maskMoeda($guiaicms->MULTA_MORA_INFRA);
+        $guiaicms->JUROS_MORA = $this->maskMoeda($guiaicms->JUROS_MORA);
+        $guiaicms->TAXA = $this->maskMoeda($guiaicms->TAXA);
+        $guiaicms->ACRESC_FINANC = $this->maskMoeda($guiaicms->ACRESC_FINANC);
+
+        if (!empty($input)) {
+     
+            if (!$this->validation($input)) {
+                $status = 'error';
+                return view('guiaicms.editar')->with('icms', $guiaicms)->with('msg', $this->msg)->with('status', $status);
+            }
+
+            if (!empty($guiaicms)) {
+                
+                $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
+                $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+                $input['UF'] = $municipio->uf;
+                $input['USUARIO'] = Auth::user()->id;
+                $input['DATA'] = date('Y-m-d');
+                $input['CNPJ'] = $this->numero($input['CNPJ']);
+                $input['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', $input['VLR_RECEITA']));
+                $input['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', $input['VLR_TOTAL']));
+                $input['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $input['MULTA_MORA_INFRA']));
+                $input['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $input['JUROS_MORA']));
+                $input['TAXA'] = str_replace(',', '.', str_replace('.', '', $input['TAXA']));
+                $input['ACRESC_FINANC'] = str_replace(',', '.', str_replace('.', '', $input['ACRESC_FINANC']));
+
+                $guiaicms->fill($input);
+                $guiaicms->save();
+                $this->msg = 'Guia atualizada com sucesso';
+            }
+        }
+
+    return view('guiaicms.editar')->with('icms', $guiaicms)->with('msg', $this->msg)->with('status', $status);   
+    }
+
+    public function excluir($id)
+    {
+        $this->msg = '';
+        $status = 'success';
+
+        if (!empty($id)) {
+            Guiaicms::destroy($id);
+            $this->msg = 'Registro excluído com sucesso';
+        }
+
+        $Registros = Guiaicms::all();
+        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
     }
 
     public function Job()
@@ -266,7 +427,7 @@ class GuiaicmsController extends Controller
                         continue;
                     }
 
-                    $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
+                    $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8 or tributo_id = 28");
                     if (!$validateTributo[0]->countTributo) {
                         $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'O Tributo ICMS não confere com o tributo da atividade', 'N');
                         continue;
@@ -1758,7 +1919,7 @@ r\$
             $icms['REFERENCIA'] = trim(substr($i[0], 0,-1));
         }
 
-        preg_match('~2 - data vencimento([^{]*)~i', $str, $match);
+        preg_match('~3 - pagamento ate([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
             $valorData = trim(substr($i[0], 0,10));
@@ -2111,13 +2272,29 @@ valor total([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
 ', trim($match[1]));
+            
             $icms['REFERENCIA'] = trim($i[0]);
+            if(strlen($i[0]) > 7){
+                $icms['REFERENCIA'] = trim($i[2]);
+            }
+
             $icms['COD_RECEITA'] = trim($i[4]);
+            if(strlen($i[4]) > 4){
+                $icms['COD_RECEITA'] = trim($i[6]);
+            }
             $valores = explode(' ', $i[6]);
-            $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
-            $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
-            $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
-            $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));
+            if(count($valores) > 3){
+                $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
+                $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
+                $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
+                $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));                
+            } else {
+                $valores = explode(' ', $i[8]);
+                $icms['VLR_RECEITA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[0]))));
+                $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[1]))));
+                $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '', trim($valores[2]))));
+                $icms['VLR_TOTAL'] = trim(str_replace(',', '.', str_replace('.', '', trim(str_replace('*', '', $valores[3])))));
+            }
         }
 
         preg_match('~linha digitavel:([^{]*)~i', $str, $match);
@@ -2287,7 +2464,9 @@ valor total([^{]*)~i', $str, $match);
             $i = explode(' ', $a[0]);
             $k = explode(' ', $a[1]);
             
-            $icms['COD_RECEITA'] = $i[1];
+            if (!empty($i['0'])) {
+                $icms['COD_RECEITA'] = $i[1];
+            }
             
             if(empty($icms['IE'])){
                 $icms['IE'] = $i[0];
@@ -2542,6 +2721,7 @@ data de emissao
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
         $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['UF'] = 'SP';
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -2581,14 +2761,6 @@ data de emissao
             $icms['CONTRIBUINTE'] = trim($a[0]);
         }
 
-        //uf
-        preg_match('~uf([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $icms['UF'] = trim($i[0]);
-        }
-        
         //municipio
         preg_match('~municipio([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -2934,6 +3106,112 @@ juros de mora
         return view('guiaicms.icms')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('planilha_semcod', $planilha_semcod)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
     }
 
+    public function conferencia(Request $request)
+    {  
+        $estabelecimentos = Estabelecimento::where('empresa_id', $this->s_emp->id)->selectRaw("codigo, id")->lists('codigo','id');
+        $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+        $estabelecimentosselected = array();
+        $ufselected = array();
+
+        $input = $request->all();
+        if (!empty($input)) {
+
+            $estabelecimentosselected = array();
+            if (!empty($input['multiple_select_estabelecimentos'])) {
+                $estabelecimentosselected = $input['multiple_select_estabelecimentos'];
+            }
+
+            $ufselected = array();
+            if (!empty($input['multiple_select_uf'])) {
+                $ufselected = $input['multiple_select_uf'];
+            }
+            
+
+            $estabelecimentos = Estabelecimento::where('empresa_id', $this->s_emp->id)->selectRaw("codigo, id")->lists('codigo','id');
+            $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+
+            if (empty($input['inicio']) || empty($input['fim'])) {
+                return redirect()->back()->with('status', 'É necessário informar as duas datas.');
+            }
+            $data_inicio = $input['inicio'].' 00:00:00';
+            $data_fim = $input['fim'].' 23:59:59';
+            
+            $sql = "SELECT A.*, B.codigo, B.empresa_id FROM guiaicms A INNER JOIN estabelecimentos B on replace(replace(replace(A.CNPJ,'-',''),'/',''), '.', '') = B.cnpj WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."'";
+            
+            if (!empty($input['multiple_select_estabelecimentos'])) {
+                $sql .= " AND replace(replace(replace(A.CNPJ,'-',''),'/',''), '.', '') IN (Select cnpj FROM estabelecimentos where id IN (".implode(',', $input['multiple_select_estabelecimentos'])."))";
+            }
+
+            if (!empty($input['multiple_select_uf'])) {
+                $sql .= " AND A.UF IN (".implode(',', array_map(function($value){
+                    return "'$value'";
+                }, $input['multiple_select_uf'])).")";
+            }
+
+            $dados = json_decode(json_encode(DB::Select($sql)),true);
+            $planilha = array();
+            foreach ($dados as $key => $dado) {
+                if ($dado['empresa_id'] == $this->s_emp->id) {
+                    $planilha[] = $dado;
+                }
+            }
+
+            foreach ($planilha as $chave => $valorl) {
+                if ($valorl['MULTA_MORA_INFRA'] == 0) {
+                    $planilha[$chave]['MULTA_MORA_INFRA'] = '0.00';
+                }
+
+                if ($valorl['HONORARIOS_ADV'] == 0) {
+                    $planilha[$chave]['HONORARIOS_ADV'] = '0.00';
+                }
+
+                if ($valorl['ACRESC_FINANC'] == 0) {
+                    $planilha[$chave]['ACRESC_FINANC'] = '0.00';
+                }
+
+                if ($valorl['JUROS_MORA'] == 0) {
+                    $planilha[$chave]['JUROS_MORA'] = '0.00';
+                }
+
+                if ($valorl['MULTA_PENAL_FORMAL'] == 0) {
+                    $planilha[$chave]['MULTA_PENAL_FORMAL'] = '0.00';
+                }
+            }
+
+            $valorData = $data_fim;
+            $data_vencimento_2 = str_replace('-', '/', $valorData);
+            $data_fim = date('dmY', strtotime($data_vencimento_2));
+
+            $valorData2 = $data_inicio;
+            $data_vencimento = str_replace('-', '/', $valorData2);
+            $data_inicio = date('dmY', strtotime($data_vencimento));   
+            $mensagem = 'Período carregado com sucesso';
+            if (empty($dados)) {
+                $mensagem = 'Não há dados nesse período';
+            }
+
+            if (!empty($planilha)) {
+                foreach ($planilha as $key => $value) {
+                    $dataven = $value['DATA_VENCTO'];
+                    $data_vencimento2 = str_replace('-', '/', $dataven);
+                    $dataven2 = date('d/m/Y', strtotime($data_vencimento2));
+                    $planilha[$key]['DATA_VENCTO'] = $dataven2;
+                    $planilha[$key]['VLR_RECEITA'] = $this->maskMoeda($value['VLR_RECEITA']);
+                    $planilha[$key]['JUROS_MORA'] = $this->maskMoeda($value['JUROS_MORA']);
+                    $planilha[$key]['MULTA_MORA_INFRA'] = $this->maskMoeda($value['MULTA_MORA_INFRA']);
+                    $planilha[$key]['ACRESC_FINANC'] = $this->maskMoeda($value['ACRESC_FINANC']);
+                    $planilha[$key]['HONORARIOS_ADV'] = $this->maskMoeda($value['HONORARIOS_ADV']);
+                    $planilha[$key]['MULTA_PENAL_FORMAL'] = $this->maskMoeda($value['MULTA_PENAL_FORMAL']);
+                    $planilha[$key]['VLR_TOTAL'] = $this->maskMoeda($value['VLR_TOTAL']);
+                }
+            }
+
+            return view('guiaicms.conferencia')->withUf($uf)->withEstabelecimentos($estabelecimentos)->with('planilha', $planilha)->with('data_inicio', $data_inicio)->with('data_fim', $data_fim)->with('mensagem', $mensagem)->withestabelecimentosselected($estabelecimentosselected)->withufselected($ufselected);
+        }
+
+    return view('guiaicms.conferencia')->withEstabelecimentos($estabelecimentos)->withUf($uf)->withestabelecimentosselected($estabelecimentosselected)->withufselected($estabelecimentosselected);
+    }
+
     private function maskMoeda($valor)
     {
         $string = '';
@@ -2976,14 +3254,13 @@ juros de mora
                                 if (empty($arrayNameFile[2])) {
                                     continue;
                                 }
-
                                 $files[] = $arquivos[2]['path'].$arquivo;
                             }
                         }
                     }
                 }
             }
-        }           
+        }              
         
         if (!empty($files)) {
             $this->savefiles($files);
@@ -3082,7 +3359,7 @@ juros de mora
                 if (isset($singlearray['atividade'])) {
                     unset($singlearray['atividade']);
                 }
-                
+
                 $date = time();
                 $path = $date.'.zip';
                 $this->createZipFile($singlearray, $path);    
@@ -3106,33 +3383,91 @@ juros de mora
 
     public function createZipFile($f = array(),$fileName){
         $zip = new \ZipArchive();
+
         touch($fileName);
         $arrayDelete = array();
         $res = $zip->open($fileName, \ZipArchive::CREATE);
         if($res === true){
             foreach ($f as $in => $name) {
-                if ($zip->addFile($name['path'] , $name['filename'])) {
-                    $destinoArray = explode('/', $name['path']);
-                    $destino = '';
-                    foreach ($destinoArray as $key => $value) {
-                        $destino .= $value.'/';
-                        if ($key == 2) {
-                            break;
+
+                if (!is_file($name['path'])) {
+                    $name['path'] = $name['path'].'/';
+                    $name['filename'] = $name['filename'].'/';
+                    
+                    $arrayExtra = scandir($name['path']);
+                    foreach ($arrayExtra as $M => $singlefile) {
+                        if (strlen($singlefile) > 2) {
+                            $extra_files[$M]['path'] = $name['path'].$singlefile;
+                            $extra_files[$M]['filename'] = $singlefile;
                         }
                     }
-                    $destino .= 'uploaded/';
-                    $arrayDelete[$in]['path'] = $name['path']; 
-                    $arrayDelete[$in]['filename'] = $name['filename']; 
-                    $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+
+                    foreach ($extra_files as $keyExtra => $extra_file) {
+                        if ($zip->addFile($extra_file['path'] , $extra_file['filename'])) {
+                            $destinoArray = explode('/', $extra_file['path']);
+                            $destino = '';
+                            foreach ($destinoArray as $key => $value) {
+                                $destino .= $value.'/';
+                                if ($key == 2) {
+                                    break;
+                                }
+                            }
+                            $destino .= 'uploaded/';
+                            $arrayDelete['pasta'][$keyExtra]['path'] = $extra_file['path']; 
+                            $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename']; 
+                            $arrayDelete['pasta'][$keyExtra]['pastaname'] = $name['filename']; 
+                            $arrayDelete['pasta'][$keyExtra]['destino'] = $destino;
+                            $arrayDelete['pasta'][$keyExtra]['raiz'] = $name['path'];
+                            $arrayDelete['pasta'][$keyExtra]['pasta'] = 1;
+                        }
+                    }
                 }
+
+                if (is_file($name['path'])) {
+                    if ($zip->addFile($name['path'] , $name['filename'])) {
+                        $destinoArray = explode('/', $name['path']);
+                        $destino = '';
+                        foreach ($destinoArray as $key => $value) {
+                            $destino .= $value.'/';
+                            if ($key == 2) {
+                                break;
+                            }
+                        }
+                        $destino .= 'uploaded/';
+                        $arrayDelete[$in]['path'] = $name['path']; 
+                        $arrayDelete[$in]['filename'] = $name['filename']; 
+                        $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+                    }
+                }
+
             }
         }
-        $zip->close();
 
+        $zip->close();
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
-                copy($single['path'], $single['destino']);
-                unlink($single['path']);
+                
+                if (is_array($single)) {
+                    foreach ($single as $p => $mostsingle) {
+                        $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
+                     
+                        if (!is_dir($creationpath)) {
+                            mkdir($creationpath, 0777);
+                        }
+                     
+                        $creationpath = $creationpath.'/';
+                        $currentFile = $creationpath.'/'.$mostsingle['filename'];
+                        copy($mostsingle['path'], $currentFile);
+                        unlink($mostsingle['path']);
+                    }
+                    
+                rmdir($mostsingle['raiz']);
+                }
+
+                if (!is_array($single)) {
+                    copy($single['path'], $single['destino']);
+                    unlink($single['path']);
+                }
             }
         }
 

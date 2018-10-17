@@ -3478,9 +3478,9 @@ juros de mora
         $zip->close();
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
-                
-                if (is_array($single)) {
-                    foreach ($single as $p => $mostsingle) {
+                        
+                if (is_array($single) && $chave === 'pasta') {
+                   foreach ($single as $p => $mostsingle) {
                         $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
                      
                         if (!is_dir($creationpath)) {
@@ -3495,10 +3495,17 @@ juros de mora
                     
                 rmdir($mostsingle['raiz']);
                 }
-
+                
                 if (!is_array($single)) {
                     copy($single['path'], $single['destino']);
                     unlink($single['path']);
+                }
+                
+                if(is_array($single) && $chave != 'pasta'){
+                    foreach ($single as $aa => $value) {
+                        copy($value['path'], $value['destino']);
+                        unlink($value['path']);
+                    }
                 }
             }
         }

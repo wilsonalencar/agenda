@@ -3466,9 +3466,9 @@ juros de mora
                             }
                         }
                         $destino .= 'uploaded/';
-                        $arrayDelete[$in]['path'] = $name['path']; 
-                        $arrayDelete[$in]['filename'] = $name['filename']; 
-                        $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+                        $arrayDelete['pasta'][$in]['path'] = $name['path']; 
+                        $arrayDelete['pasta'][$in]['filename'] = $name['filename']; 
+                        $arrayDelete['pasta'][$in]['destino'] = $destino.$name['filename'];
                     }
                 }
 

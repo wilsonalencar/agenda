@@ -81,7 +81,75 @@ class AtividadeanalistaController extends Controller
 
     public function job()
     {
-        echo "oi";exit;
+        $a = explode('/', $_SERVER['SCRIPT_FILENAME']);
+        $path = '';
+
+        $funcao = '';
+        if ($a[0] == 'C:' || $a[0] == 'F:') {
+            $path = 'W:';
+        }
+        $path .= '/storagebravobpo/';
+        $arquivos = scandir($path);
+
+        $path_name = $path.'BK_13574594/';
+        $data[1] = scandir($path_name.'/analista');
+        $data[2]['path'] = $path_name.'analista/';
+        foreach ($data[1] as $key => $file) {
+            if (strlen($file) > 2) {
+                $files[] = $file;
+            }
+        }  
+
+        if (!empty($files)) {
+            foreach ($files as $index => $singleFile) {
+                // $arquivo = fopen($data[2]['path'].$singleFile, 'r');
+                // $a = fgetcsv($arquivo);
+                // echo "<Pre>";
+                // print_r($a);exit;  
+                $row = 1;
+                $linha = array();
+                if (($arquivo = fopen($data[2]['path'].$singleFile, 'r')) !== FALSE) {
+                    while (($data = fgetcsv($arquivo, 1000, ",")) !== FALSE) {
+                    $num = count($data);
+                    $row++;
+                    for ($c=0; $c < $num; $c++) {
+                       $linha[$row] = $data; 
+                    }
+                 }
+                 fclose($arquivo);
+                }
+                $dados = $this->limpaArray($linha);            
+            }
+        }
+
+
+
+    }
+
+
+    private function limpaArray($array)
+    {
+        $formated = array();
+        foreach ($array as $key => $single) {
+            $a = 0;
+            foreach ($single as $index => $value) {
+                if (!empty($value)) {
+                    $a++;
+                }
+                if ($value == 'CNPJ Estabelecimento') {
+                    $a = 0;
+                }
+                if (empty($value)) {
+                    unset($single[$index]);
+                }
+            }
+            if ($a > 2) {
+                $formated[] = $single;
+            }
+        }
+        echo "<Pre>";
+        print_r($formated);exit;
+        return $formated;
     }
 
 

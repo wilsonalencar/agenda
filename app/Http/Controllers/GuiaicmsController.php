@@ -3619,9 +3619,9 @@ juros de mora
                             }
                         }
                         $destino .= 'uploaded/';
-                        $arrayDelete[$in]['path'] = $name['path']; 
-                        $arrayDelete[$in]['filename'] = $name['filename']; 
-                        $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+                        $arrayDelete['pasta'][$in]['path'] = $name['path']; 
+                        $arrayDelete['pasta'][$in]['filename'] = $name['filename']; 
+                        $arrayDelete['pasta'][$in]['destino'] = $destino.$name['filename'];
                     }
                 }
 
@@ -3631,9 +3631,9 @@ juros de mora
         $zip->close();
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
-                
-                if (is_array($single)) {
-                    foreach ($single as $p => $mostsingle) {
+                if (is_array($single) && $chave === 'pasta') {
+                   foreach ($single as $p => $mostsingle) {
+                        
                         $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
                      
                         if (!is_dir($creationpath)) {
@@ -3648,8 +3648,13 @@ juros de mora
                     
                 rmdir($mostsingle['raiz']);
                 }
-
+                
                 if (!is_array($single)) {
+                    copy($single['path'], $single['destino']);
+                    unlink($single['path']);
+                }
+                
+                if(is_array($single) && is_numeric($chave)){
                     copy($single['path'], $single['destino']);
                     unlink($single['path']);
                 }

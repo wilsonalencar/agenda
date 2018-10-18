@@ -75,6 +75,7 @@ class GuiaicmsController extends Controller
             $input['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $input['JUROS_MORA']));
             $input['TAXA'] = str_replace(',', '.', str_replace('.', '', $input['TAXA']));
             $input['ACRESC_FINANC'] = str_replace(',', '.', str_replace('.', '', $input['ACRESC_FINANC']));
+            $input['CODBARRAS'] = trim($this->numero($input['CODBARRAS']));
 
             Guiaicms::create($input);
             $this->msg = 'Guia criada com sucesso';            
@@ -91,10 +92,12 @@ class GuiaicmsController extends Controller
         }
         if (!empty($input['CNPJ'])) {
             $estabelecimento = Estabelecimento::where('cnpj', '=', $this->numero($input['CNPJ']))->where('ativo', 1)->where('empresa_id','=',$this->s_emp->id)->first();
-            $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+            if (!empty($estabelecimento)) {
+                $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
+            }
 
             if (empty($estabelecimento)) {
-                $this->msg = 'Estabelecimento não habilitado';
+                $this->msg = 'Estabelecimento não habilitado ou não existente';
                 return false;
             }
         }
@@ -326,6 +329,12 @@ class GuiaicmsController extends Controller
                 $estemp_id = $arrayEstempId[0]->id;
             }
 
+            $validateAtividade = DB::select("Select count(1) as countAtividade from atividades where id = ".$AtividadeID."");
+            if (!$validateAtividade[0]->countAtividade) {
+                $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'A Atividade não existe', 'N');
+                continue;
+            }
+
             $arqu = 'foo '.$value['arquivotxt'].' bar';    
             
             if (strpos($arqu, 'SP') && substr($arqu, -10) == 'SP.txt bar') {
@@ -448,9 +457,10 @@ class GuiaicmsController extends Controller
                         $this->createCritica(1, $estemp_id, 8, $value['arquivo'], 'Código SAP do Municipio não cadastrado', 'S');
                     } 
                     
-                    if (!$this->validateEx($icms)) {
-                        continue;
-                    }
+                    //if (!$this->validateEx($icms)) {
+                    //    continue;
+                    //}
+                    //Pedido de remoção da validação pois em alguns casos é necessário importar a validação de regisros iguais 
                      
 
                     if (!empty($icms['COD_RECEITA'])) {  
@@ -461,7 +471,9 @@ class GuiaicmsController extends Controller
                         $icms['UF'] = strtoupper($icms['UF']);
                     }
 
+                    $icms['DATA'] = date('Y-m-d H:i:s');
                     Guiaicms::create($icms);
+
                     $destino = str_replace('/imported', '', $value['path']);
                     if (file_exists($destino)) {
                         copy($destino, $value['path']);
@@ -1000,7 +1012,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['MULTA_MORA_INFRA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', trim($a[0]))));
         }
         
-        preg_match('~\*\*\* autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
             $codbarras = '';
@@ -1015,6 +1027,44 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             
             $icms['CODBARRAS'] = trim($codbarras);
         }
+
+        if (empty($this->numero($icms['VLR_RECEITA']))) {
+           preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 - correcao: 11 - acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
+           if (!empty($match)) {
+               $i = explode(' ', trim($match[1]));
+               $icms['REFERENCIA'] = $i[1];
+               $valorData = trim($i[3]);
+               $data_vencimento = str_replace('/', '-', $valorData);
+               $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+               $icms['VLR_RECEITA'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[8]))));
+               $icms['MULTA_MORA_INFRA'] =  str_replace(',', '.', str_replace('.', '', $i[13]));
+               $icms['VLR_TOTAL'] = trim(str_replace('nome:', '', str_replace(',', '.', str_replace('.', '', $i[17]))));
+               $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $i[9]));
+            
+               $p = explode('
+', $i[4]);
+               $icms['IE'] =  $p[0];
+               $icms['cod_receita'] =  $p[1];
+       }
+
+       preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $codbarras = '';
+            foreach ($i as $k => $x) {
+                if (strlen($x) > 6) {
+                    $codbarras .= $this->numero($x); 
+                }
+                if ($k == 4) {
+                    break;
+                }
+            }
+            
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+
+
+       }
         
         fclose($handle);
         $icmsarray = array();
@@ -2400,6 +2450,89 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $codbarras));
             $icms['CODBARRAS'] = trim($codbarras);
         }
+
+    if(!isset($icms['VLR_TOTAL']) || !isset($icms['VLR_RECEITA'])){
+      preg_match('~17 - valor principal 18 - atualizacao monetaria([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+          $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$i[0]));
+      }
+
+      preg_match('~19 - juros 20 - multa 21 - taxa([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+          $a = explode(' ', $i[0]);
+
+          $icms['JUROS_MORA'] = trim(str_replace(',', '.', str_replace('.', '',$a[0])));
+          $icms['MULTA_MORA_INFRA'] = trim(str_replace(',', '.', str_replace('.', '',$a[1])));
+      }
+
+      preg_match('~22 - total a recolher([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+
+          $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$i[0]));
+      }
+
+      preg_match('~12 - periodo de referencia([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+
+          $icms['REFERENCIA'] = $i[0];
+
+      }
+
+      preg_match('~13 - data de vencimento([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+
+          $valorData = trim($i[0]);
+          $data_vencimento = str_replace('/', '-', $valorData);
+          $icms['DATA_VENCTO'] = date ('Y-m-d', strtotime($data_vencimento));
+
+      }
+
+      preg_match('~14 - codigo da receita([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+
+          $icms['COD_RECEITA'] = $i[0];
+
+      }
+
+      preg_match('~02 - cnpj/cpf([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+
+          $icms['IE'] = $i[0];
+
+      }
+
+      preg_match('~11 - linha digitavel([^{]*)~i', $str, $match);
+      if (!empty($match)) {
+          $i = explode('
+', trim($match[1]));
+          $codbarras = '';
+          foreach ($i as $key => $value) {
+              if (is_numeric($this->numero($value))) {
+                  $codbarras .= $this->numero($value);
+              }
+              if ($key == 5) {
+                  break;
+              }
+          }
+          $codbarras = str_replace('-', '', str_replace(' ', '', $codbarras));
+          $icms['CODBARRAS'] = trim($codbarras);
+          }
+       }
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -2667,6 +2800,9 @@ valor total([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
             $icms['COD_RECEITA'] =substr(str_replace('/', '', str_replace('-', '', str_replace('.', '', trim($this->numero($i[0]))))), 0, -6);
+            if (empty($icms['COD_RECEITA'])) {
+                $icms['COD_RECEITA'] = trim($this->numero($i[0]));
+            }
         }
 
         preg_match('~referencia([^{]*)~i', $str, $match);
@@ -2676,6 +2812,9 @@ valor total([^{]*)~i', $str, $match);
 ', $i[0]);
             if(isset($a[2])){
                 $icms['REFERENCIA'] = trim($a[2]);          
+            }
+            if (!is_numeric($icms['REFERENCIA'])) {
+                $icms['REFERENCIA'] = substr($i[0], 0,7);
             }
         }
 
@@ -3007,13 +3146,20 @@ juros de mora
         $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
 
         if (empty($input['inicio']) || empty($input['fim'])) {
-            return redirect()->back()->with('status', 'É necessário informar as duas datas.');
+            return redirect()->back()->with('status', 'É necessário informar as datas de inicio e fim.');
         }
+
         $data_inicio = $input['inicio'].' 00:00:00';
         $data_fim = $input['fim'].' 23:59:59';
         
         $sql = "SELECT A.*, B.empresa_id, B.codigo, C.uf, D.centrocusto FROM guiaicms A LEFT JOIN estabelecimentos B on A.CNPJ = B.cnpj inner join municipios C on B.cod_municipio = C.codigo left join centrocustospagto D on B.id = D.estemp_id WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.CODBARRAS <> ''"; 
 
+        if (!empty($input['inicio_leitura']) && !empty($input['fim_leitura'])) {
+            $inicio_leitura = $input['inicio_leitura'];
+            $fim_leitura = $input['fim_leitura'];
+            
+            $sql .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
+        }
 
         if (!empty($input['multiple_select_estabelecimentos'])) {
             $sql .= " AND A.CNPJ IN (Select cnpj FROM estabelecimentos where id IN (".implode(',', $input['multiple_select_estabelecimentos'])."))";
@@ -3044,6 +3190,13 @@ juros de mora
             $sql_semcod .= " AND A.UF IN (".implode(',', array_map(function($value){
                 return "'$value'";
             }, $input['multiple_select_uf'])).")";
+        }
+
+        if (!empty($input['inicio_leitura']) && !empty($input['fim_leitura'])) {
+            $inicio_leitura = $input['inicio_leitura'];
+            $fim_leitura = $input['fim_leitura'];
+            
+            $sql .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
         }
         
         $dados_semcod = json_decode(json_encode(DB::Select($sql_semcod)),true);

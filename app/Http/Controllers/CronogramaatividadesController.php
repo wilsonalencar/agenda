@@ -875,7 +875,7 @@ class CronogramaatividadesController extends Controller
         ->setOptions([ //set fullcalendar options
                 'lang' => 'pt',
                 'firstDay' => 1,
-                'defaultDate' => '2018-10-01',
+                'defaultDate' => $dataAcima,
                 'aspectRatio' => 2.5,
                 'header' => ['left' => '', 'center'=>'title', 'right' => ''] //, 'right' => 'month,agendaWeek'
             ])

@@ -76,6 +76,16 @@ class AtividadeanalistaController extends Controller
     {
     	//
     }
+
+
+
+    public function job()
+    {
+        echo "oi";exit;
+    }
+
+
+
     /**
      * Show the form for creating a new resource.
      *

@@ -19,6 +19,7 @@ use App\Http\Requests;
 
 class AtividadeanalistaController extends Controller
 {
+    public $answerPath;
     protected $s_emp = null;
 
     public function __construct(Request $request = null)
@@ -94,36 +95,194 @@ class AtividadeanalistaController extends Controller
         $path_name = $path.'BK_13574594/';
         $data[1] = scandir($path_name.'/analista');
         $data[2]['path'] = $path_name.'analista/';
+        $this->answerPath = $path_name.'resposta_analista/log/';
+
         foreach ($data[1] as $key => $file) {
             if (strlen($file) > 2) {
                 $files[] = $file;
             }
         }  
 
+
+        $dados = array();
         if (!empty($files)) {
             foreach ($files as $index => $singleFile) {
-                // $arquivo = fopen($data[2]['path'].$singleFile, 'r');
-                // $a = fgetcsv($arquivo);
-                // echo "<Pre>";
-                // print_r($a);exit;  
                 $row = 1;
                 $linha = array();
                 if (($arquivo = fopen($data[2]['path'].$singleFile, 'r')) !== FALSE) {
-                    while (($data = fgetcsv($arquivo, 1000, ",")) !== FALSE) {
-                    $num = count($data);
+                    while (($content = fgetcsv($arquivo, 1000, ",")) !== FALSE) {
+                    $num = count($content);
                     $row++;
                     for ($c=0; $c < $num; $c++) {
-                       $linha[$row] = $data; 
+                       $linha[$row] = $content; 
                     }
                  }
                  fclose($arquivo);
                 }
-                $dados = $this->limpaArray($linha);            
+                $dados[] = $this->limpaArray($linha);            
             }
         }
 
+        if (!empty($dados)) {
+            foreach ($dados as $key => $singleDado) {
+                if ($this->saveFile($singleDado)) {
+                    foreach ($files as $someIndex => $someFile) {
+                        $origem = $data[2]['path'].$someFile;
+                        $destino =str_replace('analista', 'resposta_analista', $data[2]['path'].$someFile);
+                        if (is_file($origem)) {
+                            copy($origem, $destino);
+                            unlink($origem);
+                        }
+                    }
+                }
+            }
+            
+        } else {
+            echo "Não foram encontrados arquivos para realizar a leitura";exit;
+        }
+        
+        echo "Job rodado com sucesso";
+    }
+
+    private function saveFile($linhas)
+    {
+        $Nomearquivo = 'ERRO'.date('dmYHis').'.txt';
+        $file = fopen($Nomearquivo, "a");
+        $erro = 0;
 
 
+        foreach ($linhas as $index => $linha) {
+            if (!$this->checkData($linha)) {
+                fwrite($file, "O registro com tributo : ".$linha['tributo'].", da empresa ".$linha['empresa']." do estabelecimento ".$linha['cnpj']." do usuario ".$linha['analista']." falhou no carregamento dos dados;\n \n");
+
+                unset($linhas[$index]);
+                $erro = 1;
+            }
+        }
+        fclose($file);
+
+        if ($erro == 0) {
+            unlink($Nomearquivo);
+        }
+
+        if ($erro == 1) {
+            $destino = $this->answerPath.$Nomearquivo;
+            copy($Nomearquivo, $destino);
+            unlink($Nomearquivo);
+        }
+        return $this->saveAnalista($linhas);
+    }
+
+    private function saveAnalista($dados)
+    {
+        foreach ($dados as $key => $linha) {
+            
+            $atividadeanalista = $this->loadAnalista($linha);
+            
+            if ($atividadeanalista) {
+                $linha['id'] = $atividadeanalista;
+                $this->updateAnalista($linha);
+            } else {
+                $this->insertAnalista($linha);
+            }
+        }
+        return true;
+    }
+
+    private function updateAnalista($linha)
+    {   
+        $value = $this->formatArray($linha);
+        $Atividade = AtividadeAnalista::findOrFail($linha['id']);
+        $Atividade->fill($value)->save();
+
+        $this->saveAnalistaFilial($linha);
+    }
+
+    private function insertAnalista($linha)
+    {
+        $value = $this->formatArray($linha);
+        $Atividade = AtividadeAnalista::create($value);
+        
+        $linha['id'] = $Atividade->id;
+        $this->saveAnalistaFilial($linha);
+    }
+
+    private function loadAnalistaFilial($array)
+    {
+        $find = DB::table('atividadeanalistafilial')->select('id')->where('Id_estabelecimento', $array['estabelecimento_id'])->where('Id_atividadeanalista', $array['id'])->get();   
+
+        if (count($find) > 0) {
+            return true;
+        }
+        return false;
+
+    }
+
+    private function saveAnalistaFilial($linha)
+    {   
+        if (!$this->loadAnalistaFilial($linha)) {
+            $this->insertAnalistaFilial($linha);
+        }
+
+        return true;
+    }
+
+    private function insertAnalistaFilial($linha)
+    {   
+        $value = $this->formatArrayFilial($linha);
+        $Atividade = AtividadeAnalistaFilial::create($value);
+        return true;
+    }
+
+    private function formatArrayFilial($array){
+        $return = array();
+
+        $return['Id_estabelecimento'] = $array['estabelecimento_id'];
+        $return['Id_atividadeanalista'] = $array['id'];
+        
+        return $return;
+    }
+
+    private function formatArray($array){
+        $return = array();
+
+        $return['Emp_id'] = $array['empresa_id'];
+        $return['Tributo_id'] = $array['tributo_id'];
+        $return['Id_usuario_analista'] = $array['analista_id'];
+        $return['Regra_geral'] = 'N';
+        
+        return $return;
+    }
+
+    private function loadAnalista($campo)
+    {
+        $find = DB::table('atividadeanalista')->select('id')->where('Id_usuario_analista', $campo['analista_id'])->where('Tributo_id', $campo['tributo_id'])->where('Emp_id', $campo['empresa_id'])->get();   
+        
+        if (count($find) > 0) {
+            return $find[0]->id;
+        }
+        return 0;
+    }
+
+    private function checkData($data)
+    {
+        if (empty($data['estabelecimento_id'])) {
+            return false;
+        }
+
+        if (empty($data['analista_id'])) {
+            return false;
+        }
+
+        if (empty($data['empresa_id'])) {
+            return false;
+        }
+
+        if (empty($data['tributo_id'])) {
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -147,12 +306,70 @@ class AtividadeanalistaController extends Controller
                 $formated[] = $single;
             }
         }
-        echo "<Pre>";
-        print_r($formated);exit;
-        return $formated;
+        $data = $this->loadData($formated);
+        return $data;
     }
 
 
+    private function loadData($array){
+        $data = array();
+        foreach ($array as $key => $registro) {
+            $data[$key]['estabelecimento_id'] = $this->getEstabelecimento($registro[6], $registro[1]);
+            $data[$key]['analista_id'] = $this->getAnalista($registro[2]);
+            $data[$key]['empresa_id'] = $this->getEmpresa($registro[5]);
+            $data[$key]['tributo_id'] = $this->getTributo($registro[3]);
+            $data[$key]['cnpj'] = ($registro[6]);
+            $data[$key]['analista'] = ($registro[2]);
+            $data[$key]['empresa'] = ($registro[5]);
+            $data[$key]['tributo'] = ($registro[3]);
+        }
+
+    return $data;
+    }
+
+    private function getEstabelecimento($cnpj, $codigo)
+    {
+        $query = 'SELECT id FROM estabelecimentos WHERE cnpj = "'.$cnpj.'" AND codigo = "'.$codigo.'"';
+        $validate = DB::select($query);
+        
+        if (!empty($validate)) {
+            return $validate[0]->id;
+        }
+        return false;
+    }
+
+    private function getAnalista($nome)
+    {
+        $query = 'SELECT id FROM users WHERE name LIKE "%'.$nome.'%"';
+        $validate = DB::select($query);
+
+        if (!empty($validate)) {
+            return $validate[0]->id;
+        }
+        return false;
+    }
+
+    private function getEmpresa($empresa)
+    {
+        $query = 'SELECT id FROM empresas WHERE razao_social LIKE "%'.$empresa.'%"';
+        $validate = DB::select($query);
+
+        if (!empty($validate)) {
+            return $validate[0]->id;
+        }
+        return false;
+    }
+
+    private function getTributo($tributo)
+    {
+        $query = 'SELECT id FROM tributos WHERE nome = "'.$tributo.'"';
+        $validate = DB::select($query);
+
+        if (!empty($validate)) {
+            return $validate[0]->id;
+        }
+        return false;
+    }
 
     /**
      * Show the form for creating a new resource.

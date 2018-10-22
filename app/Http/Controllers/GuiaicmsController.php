@@ -3195,8 +3195,8 @@ juros de mora
         if (!empty($input['inicio_leitura']) && !empty($input['fim_leitura'])) {
             $inicio_leitura = $input['inicio_leitura'];
             $fim_leitura = $input['fim_leitura'];
-            
-            $sql .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
+                
+            $sql_semcod .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
         }
         
         $dados_semcod = json_decode(json_encode(DB::Select($sql_semcod)),true);

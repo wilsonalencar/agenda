@@ -1689,21 +1689,26 @@ valor do documento([^{]*)~i', $str, $match);
 
         preg_match('~
 valor do documento([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
+       if (!empty($match)) {
+           $i = explode('
 ', trim($match[1]));
-            $codbarras = '';
-            foreach ($i as $k => $x) {
-                if (strlen($x) == 13) {
-                    $codbarras .= $this->numero($x); 
-                }
-                if ($k == 14) {
-                    break;
-                }
-            }
-            
-            $icms['CODBARRAS'] = trim($codbarras);
-        }
+           $codbarras = '';
+           foreach ($i as $k => $x) {
+              if (strlen($x) == 13) {
+                  $codbarras .= $this->numero($x);
+              }
+              if (strlen($codbarras) != 36) {
+                  if ($k == 14) {
+                      break;
+                  }
+              }
+              if ($k == 16) {
+                  break;
+              }
+          }
+
+           $icms['CODBARRAS'] = trim($codbarras);
+       }
         
         if (isset($icms['COD_RECEITA']) && trim($icms['COD_RECEITA']) == 1245) {
             $icms['IMPOSTO'] = 'SEFAZ';
@@ -2735,8 +2740,51 @@ valor total([^{]*)~i', $str, $match);
                 $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$i[0]));
             }
         }
-    }
-        
+
+        if (empty($this->numero($icms['COD_RECEITA']))) {
+
+        preg_match('~12.res. sef ([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', trim($i[0]));
+            if (isset($a[1])) {
+                $icms['COD_RECEITA'] = $a[1];
+            }
+        }   
+        }
+
+        if (empty($this->numero($icms['REFERENCIA']))) {
+
+        preg_match('~12.res. sef ([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', trim($i[1]));
+            if (isset($a[0])) {
+                $icms['REFERENCIA'] = $a[0];
+            }
+        }  
+
+        if (strlen($icms['CODBARRAS']) < 20) {
+        preg_match('~aviso aos bancos : receber ate([^{]*)~i', $str, $match);
+            if(!empty($match)){
+                $i = explode(' ', $match[1]);
+                if (is_array($i)) {
+                    $codbarras = '';
+                    foreach ($i as $k => $v) {
+                        if (strlen($this->numero($v)) > :sunglasses: {
+                            $codbarras .= trim($v);
+                        }
+                        if ($k == 5) {
+                         break;
+                        }
+                    }
+            $icms['CODBARRAS'] = substr($codbarras, 0, -11);
+                }
+            }
+        }
+
     fclose($handle);
     $icmsarray = array();
     $icmsarray[0] = $icms;

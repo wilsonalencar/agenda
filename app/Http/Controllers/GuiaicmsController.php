@@ -2731,6 +2731,7 @@ valor total([^{]*)~i', $str, $match);
             }
         }
         }
+    }
 
         preg_match('~valor original: r\$([^{]*)~i', $str, $match);
         if (!empty($match)) {
@@ -2764,6 +2765,7 @@ valor total([^{]*)~i', $str, $match);
             if (isset($a[0])) {
                 $icms['REFERENCIA'] = $a[0];
             }
+        }
         }  
 
         if (strlen($icms['CODBARRAS']) < 20) {
@@ -2790,6 +2792,7 @@ valor total([^{]*)~i', $str, $match);
     $icmsarray[0] = $icms;
     return $icmsarray;
     }
+
 
     public function numero($str) {
         return preg_replace("/[^0-9]/", "", $str);

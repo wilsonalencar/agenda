@@ -291,21 +291,25 @@ class AtividadeanalistaController extends Controller
         $formated = array();
         foreach ($array as $key => $single) {
             $a = 0;
-            foreach ($single as $index => $value) {
+            $superArray = explode(';', $single[0]);
+            foreach ($superArray as $index => $value) {
+                
                 if (!empty($value)) {
                     $a++;
                 }
-                if ($value == 'CNPJ Estabelecimento') {
+                if ($value == 'CNPJ') {
                     $a = 0;
                 }
                 if (empty($value)) {
                     unset($single[$index]);
                 }
             }
+
             if ($a > 2) {
-                $formated[] = $single;
+                $formated[] = $superArray;
             }
         }
+
         $data = $this->loadData($formated);
         return $data;
     }
@@ -314,14 +318,14 @@ class AtividadeanalistaController extends Controller
     private function loadData($array){
         $data = array();
         foreach ($array as $key => $registro) {
-            $data[$key]['estabelecimento_id'] = $this->getEstabelecimento($registro[6], $registro[1]);
-            $data[$key]['analista_id'] = $this->getAnalista($registro[2]);
-            $data[$key]['empresa_id'] = $this->getEmpresa($registro[5]);
-            $data[$key]['tributo_id'] = $this->getTributo($registro[3]);
-            $data[$key]['cnpj'] = ($registro[6]);
-            $data[$key]['analista'] = ($registro[2]);
-            $data[$key]['empresa'] = ($registro[5]);
-            $data[$key]['tributo'] = ($registro[3]);
+            $data[$key]['estabelecimento_id'] = $this->getEstabelecimento($registro[5], $registro[0]);
+            $data[$key]['analista_id'] = $this->getAnalista($registro[1]);
+            $data[$key]['empresa_id'] = $this->getEmpresa($registro[4]);
+            $data[$key]['tributo_id'] = $this->getTributo($registro[2]);
+            $data[$key]['cnpj'] = ($registro[5]);
+            $data[$key]['analista'] = ($registro[1]);
+            $data[$key]['empresa'] = ($registro[4]);
+            $data[$key]['tributo'] = ($registro[2]);
         }
 
     return $data;

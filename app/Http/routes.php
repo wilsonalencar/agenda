@@ -218,6 +218,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('regra/job_envio_email', array('as'=>'regraslotes.Job', 'uses'=>'RegrasenviolotesController@Job'));
     Route::get('guiaicms/job', array('as'=>'guiaicms.Job', 'uses'=>'GuiaicmsController@Job'));
     Route::get('atividades/job', array('as'=>'guiaicms.jobAtividades', 'uses'=>'GuiaicmsController@jobAtividades'));
+    Route::get('atividadeanalista/job', array('as'=>'atividadeanalista.job', 'uses'=>'AtividadeanalistaController@job'));
 });
 
 // Just the Owner, Admin, Manager, MSAF, Supervisor and the Analyst
@@ -263,6 +264,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::post('mensal', array('as'=>'mensal', 'uses'=>'CronogramaatividadesController@mensal'));
 
     Route::get('Gerarsemanal', array('as'=>'cronogramaatividades.Gerarsemanal', 'uses'=>'CronogramaatividadesController@Gerarsemanal'));
+
     Route::post('semanal', array('as'=>'semanal', 'uses'=>'CronogramaatividadesController@semanal'));
 
     Route::get('GerarchecklistCron', array('as'=>'cronogramaatividades.GerarchecklistCron', 'uses'=>'CronogramaatividadesController@GerarchecklistCron'));

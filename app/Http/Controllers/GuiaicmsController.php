@@ -1044,7 +1044,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
                $p = explode('
 ', $i[4]);
                $icms['IE'] =  $p[0];
-               $icms['cod_receita'] =  $p[1];
+               $icms['COD_RECEITA'] =  $p[1];
        }
 
        preg_match('~\*\*\*autenticacao no verso \*\*\*([^{]*)~i', $str, $match);

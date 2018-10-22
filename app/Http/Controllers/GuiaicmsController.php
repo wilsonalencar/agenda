@@ -2773,7 +2773,7 @@ valor total([^{]*)~i', $str, $match);
                 if (is_array($i)) {
                     $codbarras = '';
                     foreach ($i as $k => $v) {
-                        if (strlen($this->numero($v)) > :sunglasses: {
+                        if (strlen($this->numero($v)) > 8) {
                             $codbarras .= trim($v);
                         }
                         if ($k == 5) {

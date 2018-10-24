@@ -152,7 +152,6 @@ class EntregaService {
                 }
             }
         } else if ($tipo_periodo == 'QS') {
-
             $addQ = 15*($valor_periodo-1); //var_dump($addQ); var_dump($tipo_dia); var_dump($val_sign);
             //Estamos na primeira quinzena
             if ($tipo_dia == 'F') {
@@ -167,14 +166,14 @@ class EntregaService {
                     } else {
                         Carbon::setTestNow(Carbon::parse('next monday'));
                     }
-                }
-            } else if ($tipo_dia == 'U') {
-                if ($val_sign == '+') {
-                    Carbon::setTestNow(Carbon::parse("first day of next month")->addDays($addQ)->addWeekDays($val_dia-1)->startOfDay()->addHours(18));
-                } else {
-                    Carbon::setTestNow(Carbon::parse('first day of next month')->addDays($addQ+15)->subWeekDays($val_dia)->startOfDay()->addHours(18));
-                }
+                } else if ($tipo_dia == 'U') {
+                    if ($val_sign == '+') {
+                        Carbon::setTestNow(Carbon::parse("first day of next month")->addDays($addQ)->addWeekDays($val_dia-1)->startOfDay()->addHours(18));
+                    } else {
+                        Carbon::setTestNow(Carbon::parse('first day of next month')->addDays($addQ+15)->subWeekDays($val_dia)->startOfDay()->addHours(18));
+                    }
 
+                }
             }
 
         } else if ($tipo_periodo == 'AS') {   //Somente para AS1DF+DDMM
@@ -593,12 +592,22 @@ class EntregaService {
                         $var['Tempo_geracao'] = $var['Qtd_dias'] * 480;
                         $var['Qtd_analista'] = $var['Tempo_total']/$var['Tempo_geracao'];
 
-                        CronogramaMensal::Create($var);
+                        $result_cronograma = CronogramaMensal::Create($var);
+                        $this->CronogramaAtividadeMensal($result_cronograma->id, $atividade);
                     }
                 }
             }
         }
         return true;
+    }
+
+    private function CronogramaAtividadeMensal($id, $atividade)
+    {
+        AtividadeCronograma::where('regra_id',$atividade['regra_id'])
+        ->where('emp_id',$atividade['emp_id'])
+        ->where('periodo_apuracao',$atividade['periodo_apuracao'])
+        ->where('estemp_id',$atividade['estemp_id'])
+        ->update(['cronograma_mensal' => $id]);
     }
 
     private function diffTempo($data1, $data2)

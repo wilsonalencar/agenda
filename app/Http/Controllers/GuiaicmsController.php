@@ -3874,17 +3874,28 @@ juros de mora
         copy($data['image'], $destinationPath.$data['image']);
         unlink($data['image']);
 
-        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$regra->tributo->id." and Emp_id = ".$atividade->emp_id.") limit 1";
-        $idanalistas = DB::select($query);
+        
+        $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B left join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$estemp->id. " AND B.Regra_geral = 'N') limit 1";
+
+        $retornodaquery = DB::select($query);
+
+        $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND B.Regra_geral = 'S') limit 1";
+        
+        $queryGeral = DB::select($sql);
+        
+        $idanalistas = $retornodaquery;
+        if (empty($retornodaquery)) {
+            $idanalistas = $queryGeral;   
+        }
+
         if (!empty($idanalistas)) {
             foreach ($idanalistas as $k => $analista) {
-                // $atividade->Usuario_aprovador = $analista->id;
                 $atividade->usuario_entregador = $analista->id;
             }
         }
+
         $atividade->arquivo_entrega = $data['image'];
         $atividade->data_entrega = date("Y-m-d H:i:s");
-        // $atividade->data_aprovacao = date("Y-m-d H:i:s");
         $atividade->status = 2;
         $atividade->save();
     }    

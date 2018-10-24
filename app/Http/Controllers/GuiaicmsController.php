@@ -1351,9 +1351,9 @@ receita
             $icms['COD_RECEITA'] = trim($k[0]);
         }
 
-	
-	if (empty($icms['COD_RECEITA'])) {
-        	preg_match('~
+    
+    if (empty($icms['COD_RECEITA'])) {
+            preg_match('~
 receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
@@ -1898,6 +1898,236 @@ r\$
         $nova = str_replace(array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'), '', $string);
         return $nova;
     }
+
+    public function icmsDF($value)
+    {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
+        $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['UF'] = 'DF';
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+        if ($this->letras($file_content[2]) == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+        if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+        preg_match('~12.res. sef([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $a = explode('
+', trim($match[1]));
+            $i = explode(' ', $a[0]);
+            $k = explode(' ', $a[1]);
+            
+            if (isset($i[1])) {
+                $icms['COD_RECEITA'] = $i[1];
+            }
+            
+            if(empty($icms['IE'])){
+                $icms['IE'] = $i[0];
+            }
+            
+            $icms['REFERENCIA'] = $k[0];
+            
+            if (isset($k[1])) {
+                $valorData = trim($k[1]);
+                $data_vencimento = str_replace('/', '-', $valorData);
+                $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            }
+        }
+        
+        preg_match('~13.principal - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $a = explode('
+', trim($match[1]));
+            
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$a[0]));
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$a[4]));
+            
+            $codbarras = '';
+            $cod_barras = explode(' ', $a[6]);
+            foreach($cod_barras as $single){
+                if($this->numero($single) > 8){
+                    $codbarras .= $this->numero($single);
+                }
+            }
+            $icms['CODBARRAS'] = $codbarras;
+        }
+        
+        preg_match('~15.juros - r\$ 16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $a = explode('
+', trim($match[1]));
+            $p = explode(' ', $a[0]);
+            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$p[1]));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$p[2]));
+        }
+        if (count($icms['CODBARRAS']) <= 8) {
+        if (empty($icms['IE']) || strlen($this->letras($icms['IE'])) > 4) {
+            preg_match('~df ([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $a = explode(' ', trim($match[1]));
+                $icms['IE'] = trim(substr($a[0], 0,8));
+            }
+        }
+        preg_match('~17.valor total - r\$
+([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['CODBARRAS'] = trim($this->numero($i[0]));
+            $a = explode(' ', $i[2]);
+            $k = explode(' ', $i[3]);
+            $custos = explode(' ', $i[5]);
+            $icms['COD_RECEITA'] = $a[1];
+            $icms['REFERENCIA'] = $k[0];
+            if (isset($k[1])) {
+                $valorData = trim($k[1]);
+                $data_vencimento = str_replace('/', '-', $valorData);
+                $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            }
+            
+            if(count($custos) == 2){    
+                $custos_pp = explode(' ', $i[6]);
+                if (isset($custos[1])) {
+                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+                }
+                if (isset($custos_pp[1])) {
+                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[1]));
+                }
+                if (isset($custos_pp[2])) {
+                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[2]));
+                }
+                
+                if (isset($custos_pp[3])) {
+                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos_pp[3]));
+                }
+            } else {
+                if (isset($custos[1])) {
+                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+                }
+                if (isset($custos[2])) {
+                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
+                }
+                if (isset($custos[3])) {
+                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+                }
+                if (isset($custos[5])) {
+                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
+                }           
+            }
+        }
+        }
+    
+    if (strlen($this->letras($icms['JUROS_MORA'])) > 5) {
+        preg_match('~16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $custos = explode(' ', $i[7]);
+            if (isset($custos[0])) {
+                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[0]));
+            }
+            if (isset($custos[1])) {
+                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+            }
+            if (isset($custos[3])) {
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+            }
+        } else {
+        preg_match('~17.valor total - r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $custos = explode(' ', $i[7]);
+            if (isset($custos[0])) {
+                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[0]));
+            }
+            if (isset($custos[1])) {
+                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
+            }
+            if (isset($custos[3])) {
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
+            }
+        }
+        }
+    }
+        preg_match('~valor original: r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            if (isset($i[0])) {
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$i[0]));
+            }
+        }
+        if (empty($this->numero($icms['COD_RECEITA']))) {
+        preg_match('~12.res. sef ([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', trim($i[0]));
+            if (isset($a[1])) {
+                $icms['COD_RECEITA'] = $a[1];
+            }
+        }   
+        }
+        if (empty($this->numero($icms['REFERENCIA']))) {
+        preg_match('~12.res. sef ([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $a = explode(' ', trim($i[1]));
+            if (isset($a[0])) {
+                $icms['REFERENCIA'] = $a[0];
+            }
+        }
+        }  
+        if (strlen($icms['CODBARRAS']) < 20) {
+        preg_match('~aviso aos bancos : receber ate([^{]*)~i', $str, $match);
+            if(!empty($match)){
+                $i = explode(' ', $match[1]);
+                if (is_array($i)) {
+                    $codbarras = '';
+                    foreach ($i as $k => $v) {
+                        if (strlen($this->numero($v)) > 8) {
+                            $codbarras .= trim($v);
+                        }
+                        if ($k == 5) {
+                         break;
+                        }
+                    }
+            $icms['CODBARRAS'] = substr($codbarras, 0, -11);
+                }
+            }
+        }
+
+    fclose($handle);
+    $icmsarray = array();
+    $icmsarray[0] = $icms;
+    return $icmsarray;
+    }
+
 
     public function icmsCE($value)
     {
@@ -2545,255 +2775,6 @@ valor total([^{]*)~i', $str, $match);
     }
 
 
-    public function icmsDF($value)
-    {
-        $icms = array();
-        if (!file_exists($value['pathtxt'])) {
-            return $icms;
-        }
-        $file_content = explode('_', $value['arquivo']);
-        $atividade = Atividade::findOrFail($file_content[0]);
-        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
-        $icms['IE'] = $estabelecimento->insc_estadual;
-        $icms['CNPJ'] = $estabelecimento->cnpj;
-        $icms['UF'] = 'DF';
-
-        $handle = fopen($value['pathtxt'], "r");
-        $contents = fread($handle, filesize($value['pathtxt']));
-        $str = 'foo '.$contents.' bar';
-        $str = utf8_encode($str);
-        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
-        $str = strtolower($str);
-        $icms['TRIBUTO_ID'] = 8;
-
-        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] == 'SP.pdf') {
-            $icms['IMPOSTO'] = 'GAREI';
-        }
-
-        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] != 'SP.pdf') {
-            $icms['IMPOSTO'] = 'SEFAZ';
-        }
-
-        if ($this->letras($file_content[2]) == 'DIFAL') {
-            $icms['IMPOSTO'] = 'SEFAZ';
-        }
-
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
-        }
-
-        if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
-            $icms['IMPOSTO'] = 'SEFAT';
-        }
-
-
-        preg_match('~12.res. sef([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $a = explode('
-', trim($match[1]));
-            $i = explode(' ', $a[0]);
-            $k = explode(' ', $a[1]);
-            
-            if (isset($i[1])) {
-                $icms['COD_RECEITA'] = $i[1];
-            }
-            
-            if(empty($icms['IE'])){
-                $icms['IE'] = $i[0];
-            }
-            
-            $icms['REFERENCIA'] = $k[0];
-            
-            if (isset($k[1])) {
-                $valorData = trim($k[1]);
-                $data_vencimento = str_replace('/', '-', $valorData);
-                $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-            }
-        }
-        
-        preg_match('~13.principal - r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $a = explode('
-', trim($match[1]));
-            
-            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$a[0]));
-            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$a[4]));
-            
-            $codbarras = '';
-            $cod_barras = explode(' ', $a[6]);
-            foreach($cod_barras as $single){
-                if($this->numero($single) > 8){
-                    $codbarras .= $this->numero($single);
-                }
-            }
-            $icms['CODBARRAS'] = $codbarras;
-        }
-        
-        preg_match('~15.juros - r\$ 16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $a = explode('
-', trim($match[1]));
-            $p = explode(' ', $a[0]);
-            $icms['TAXA'] = str_replace(',', '.', str_replace('.', '',$p[1]));
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$p[2]));
-        }
-
-        if (count($icms['CODBARRAS']) <= 8) {
-
-        if (empty($icms['IE']) || strlen($this->letras($icms['IE'])) > 4) {
-            preg_match('~df ([^{]*)~i', $str, $match);
-            if (!empty($match)) {
-                $a = explode(' ', trim($match[1]));
-                $icms['IE'] = trim(substr($a[0], 0,8));
-            }
-        }
-
-        preg_match('~17.valor total - r\$
-([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-
-            $icms['CODBARRAS'] = trim($this->numero($i[0]));
-            $a = explode(' ', $i[2]);
-            $k = explode(' ', $i[3]);
-            $custos = explode(' ', $i[5]);
-            $icms['COD_RECEITA'] = $a[1];
-            $icms['REFERENCIA'] = $k[0];
-
-            if (isset($k[1])) {
-                $valorData = trim($k[1]);
-                $data_vencimento = str_replace('/', '-', $valorData);
-                $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-            }
-            
-            if(count($custos) == 2){    
-                $custos_pp = explode(' ', $i[6]);
-                if (isset($custos[1])) {
-                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
-                }
-                if (isset($custos_pp[1])) {
-                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[1]));
-                }
-                if (isset($custos_pp[2])) {
-                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos_pp[2]));
-                }
-                
-                if (isset($custos_pp[3])) {
-                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos_pp[3]));
-                }
-            } else {
-                if (isset($custos[1])) {
-                    $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
-                }
-                if (isset($custos[2])) {
-                    $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[2]));
-                }
-                if (isset($custos[3])) {
-                    $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
-                }
-                if (isset($custos[5])) {
-                    $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[5]));
-                }           
-            }
-        }
-        }
-    
-    if (strlen($this->letras($icms['JUROS_MORA'])) > 5) {
-        preg_match('~16.outros - r\$ 17.valor total - r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $custos = explode(' ', $i[7]);
-            if (isset($custos[0])) {
-                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[0]));
-            }
-            if (isset($custos[1])) {
-                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
-            }
-            if (isset($custos[3])) {
-                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
-            }
-        } else {
-        preg_match('~17.valor total - r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $custos = explode(' ', $i[7]);
-            if (isset($custos[0])) {
-                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '',$custos[0]));
-            }
-            if (isset($custos[1])) {
-                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '',$custos[1]));
-            }
-            if (isset($custos[3])) {
-                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',$custos[3]));
-            }
-        }
-        }
-    }
-
-        preg_match('~valor original: r\$([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            if (isset($i[0])) {
-                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',$i[0]));
-            }
-        }
-
-        if (empty($this->numero($icms['COD_RECEITA']))) {
-
-        preg_match('~12.res. sef ([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $a = explode(' ', trim($i[0]));
-            if (isset($a[1])) {
-                $icms['COD_RECEITA'] = $a[1];
-            }
-        }   
-        }
-
-        if (empty($this->numero($icms['REFERENCIA']))) {
-
-        preg_match('~12.res. sef ([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
-            $a = explode(' ', trim($i[1]));
-            if (isset($a[0])) {
-                $icms['REFERENCIA'] = $a[0];
-            }
-        }
-        }  
-
-        if (strlen($icms['CODBARRAS']) < 20) {
-        preg_match('~aviso aos bancos : receber ate([^{]*)~i', $str, $match);
-            if(!empty($match)){
-                $i = explode(' ', $match[1]);
-                if (is_array($i)) {
-                    $codbarras = '';
-                    foreach ($i as $k => $v) {
-                        if (strlen($this->numero($v)) > 8) {
-                            $codbarras .= trim($v);
-                        }
-                        if ($k == 5) {
-                         break;
-                        }
-                    }
-            $icms['CODBARRAS'] = substr($codbarras, 0, -11);
-                }
-            }
-        }
-
-    fclose($handle);
-    $icmsarray = array();
-    $icmsarray[0] = $icms;
-    return $icmsarray;
-    }
-
-
     public function numero($str) {
         return preg_replace("/[^0-9]/", "", $str);
     }
@@ -3148,19 +3129,19 @@ juros de mora
 
     public function criticas_entrega(Request $request)
     {
-        $input = $request->all();
-        if (empty($input['inicio']) || empty($input['fim'])) {
-            return redirect()->back()->with('status', 'É necessário informar as duas datas.');
-        }
+       $input = $request->all();
+       if (empty($input['inicio']) || empty($input['fim'])) {
+           return redirect()->back()->with('status', 'É necessário informar as duas datas.');
+       }
 
-        $data_inicio = $input['inicio'].' 00:00:00';
-        $data_fim = $input['fim'].' 23:59:59';
+       $data_inicio = $input['inicio'].' 00:00:00';
+       $data_fim = $input['fim'].' 23:59:59';
 
-        $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasentrega A LEFT JOIN estabelecimentos B ON A.Estemp_id = B.id INNER JOIN tributos C ON A.Tributo_id = C.id WHERE    A.Data_critica BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.Empresa_id = ".$this->s_emp->id." ";
-    
-        $dados = json_decode(json_encode(DB::Select($sql)),true);
+       $sql = "Select DATE_FORMAT(A.Data_critica, '%d/%m/%Y') as Data_critica, B.codigo, C.nome, A.critica, A.arquivo, A.importado FROM criticasentrega A LEFT JOIN estabelecimentos B ON A.Estemp_id = B.id INNER JOIN tributos C ON A.Tributo_id = C.id WHERE A.Data_critica BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.Empresa_id = ".$this->s_emp->id." ";
 
-        return view('guiaicms.search_criticas_entrega')->withDados($dados);
+       $dados = json_decode(json_encode(DB::Select($sql)),true);
+
+       return view('guiaicms.search_criticas_entrega')->withDados($dados);
     }
 
     /**
@@ -3496,8 +3477,25 @@ juros de mora
                     }
                 }
             }
-        }              
-        
+        }
+
+        if (!empty($files)) {
+            foreach ($files as $pp => $file) {
+                if (is_dir($file)) {
+
+                    $extra_files = scandir($file);
+                    foreach ($extra_files as $lala => $extra_file) {
+                        if (strlen($extra_file) > 2) {
+                            $arrayNameFile = explode("_", $extra_file);
+                            if (is_dir($file.'/'.$extra_file)) {
+                                $files[] = $file.'/'.$extra_file;                            
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (!empty($files)) {
             $this->savefiles($files);
         } else {
@@ -3560,14 +3558,6 @@ juros de mora
                 break;
             }
 
-            // if ($this->checkTributo($NomeTributo)) {
-            //     $validateTributo = DB::select("Select count(1) as countTributo from regras where id = (select regra_id from atividades where id = ".$AtividadeID.") and tributo_id = 8");
-            //     if (!$validateTributo[0]->countTributo) {
-            //         $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'O Tributo ICMS não confere com o tributo da atividade', 'N');
-            //         break;
-            //     }
-            // }
-
             if (strlen($PeriodoApuracao) == 10) {
                 $PeriodoApuracao = substr($PeriodoApuracao, 0, -4);
             }
@@ -3598,7 +3588,7 @@ juros de mora
 
                 $date = time();
                 $path = $date.'.zip';
-                $this->createZipFile($singlearray, $path);    
+                $this->createZipFile($singlearray, $path);                        
             }
         }
     }   
@@ -3621,25 +3611,42 @@ juros de mora
         $zip = new \ZipArchive();
 
         touch($fileName);
+
         $arrayDelete = array();
         $res = $zip->open($fileName, \ZipArchive::CREATE);
         if($res === true){
             foreach ($f as $in => $name) {
 
-                if (!is_file($name['path'])) {
+                if (is_dir($name['path'])) {
                     $name['path'] = $name['path'].'/';
                     $name['filename'] = $name['filename'].'/';
-                    
                     $arrayExtra = scandir($name['path']);
                     foreach ($arrayExtra as $M => $singlefile) {
+                        if (isset($arrayDelete) && !empty($arrayDelete)) {
+                            break;
+                        }
                         if (strlen($singlefile) > 2) {
-                            $extra_files[$M]['path'] = $name['path'].$singlefile;
-                            $extra_files[$M]['filename'] = $singlefile;
+                            if (!is_dir($name['path'].$singlefile)) {
+                                $extra_files[$M]['path'] = $name['path'].$singlefile;
+                                $extra_files[$M]['filename'] = $singlefile;
+                            }
+
+                            if (is_dir($name['path'].$singlefile)) {
+                                $subpasta = scandir($name['path'].$singlefile);
+                                foreach ($subpasta as $P => $singlepasta) {
+                                    if (strlen($singlepasta > 2)) {
+                                        $extra_files[$M]['path'] = $name['path'].$singlefile.'/'.$singlepasta;
+                                        $extra_files[$M]['filename'] = $singlepasta;
+                                        $extra_files[$M]['subpasta'] = $singlefile;
+                                        $M++;                        
+                                    }
+                                }
+                            }
                         }
                     }
-
                     foreach ($extra_files as $keyExtra => $extra_file) {
-                        if ($zip->addFile($extra_file['path'] , $extra_file['filename'])) {
+
+                        if ($zip->addFile($extra_file['path'], $extra_file['filename'])) {
                             $destinoArray = explode('/', $extra_file['path']);
                             $destino = '';
                             foreach ($destinoArray as $key => $value) {
@@ -3650,16 +3657,29 @@ juros de mora
                             }
                             $destino .= 'uploaded/';
                             $arrayDelete['pasta'][$keyExtra]['path'] = $extra_file['path']; 
-                            $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename']; 
+                            $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename'];
+                            if (isset($extra_file['subpasta'])) {
+                                $arrayDelete['pasta'][$keyExtra]['subpasta'] = $extra_file['subpasta'];       
+                            }
                             $arrayDelete['pasta'][$keyExtra]['pastaname'] = $name['filename']; 
+                            
                             $arrayDelete['pasta'][$keyExtra]['destino'] = $destino;
+                            if (isset($extra_file['subpasta'])) {
+                                $p = explode('/', $extra_file['path']);
+                                foreach ($p as $LL => $VV) {
+                                    if ($VV == $extra_file['subpasta']) {
+                                        break;
+                                    }
+                                    $var = $VV;
+                                }
+                                $arrayDelete['pasta'][$keyExtra]['destino'] = $destino.$var;    
+                            }
                             $arrayDelete['pasta'][$keyExtra]['raiz'] = $name['path'];
                             $arrayDelete['pasta'][$keyExtra]['pasta'] = 1;
+                            }
                         }
                     }
-                }
-
-                if (is_file($name['path'])) {
+                if (!is_dir($name['path'])) {
                     if ($zip->addFile($name['path'] , $name['filename'])) {
                         $destinoArray = explode('/', $name['path']);
                         $destino = '';
@@ -3670,41 +3690,133 @@ juros de mora
                             }
                         }
                         $destino .= 'uploaded/';
-                        $arrayDelete['pasta'][$in]['path'] = $name['path']; 
-                        $arrayDelete['pasta'][$in]['filename'] = $name['filename']; 
-                        $arrayDelete['pasta'][$in]['destino'] = $destino.$name['filename'];
+                        $arrayDelete[$in]['path'] = $name['path']; 
+                        $arrayDelete[$in]['filename'] = $name['filename']; 
+                        $arrayDelete[$in]['destino'] = $destino.$name['filename'];
                     }
                 }
-
             }
         }
-
         $zip->close();
+
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
-                if (is_array($single) && $chave === 'pasta') {
-                   foreach ($single as $p => $mostsingle) {
-                        
-                        $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
-                     
+                if (is_array($single) && !isset($single['path']) && $chave === 'pasta') {
+                    foreach ($single as $p => $mostsingle) {
+                        if (substr($mostsingle['destino'], -1) != '/') {
+                            $mostsingle['destino'] .= '/';
+                        }
+
+                        if (!isset($mostsingle['subpasta'])) {
+                            $pp = explode('/', $mostsingle['path']);
+                            $ll = '';
+                            $dd = '';
+                            foreach ($pp as $kk => $VV) {
+                                $dd = $pp[4];
+                                if ($VV == substr($mostsingle['pastaname'], 0,-1)) {
+                                    break;
+                                }
+                                $ll = $VV;
+                            }
+                            $mostsingle['destino'] .= $ll;
+                            if (is_dir($mostsingle['path'])) {
+                                $scandirFinal = scandir($mostsingle['path']);
+                                foreach ($scandirFinal as $key => $value) {
+                                    if (strlen($value) > 2) {
+                                        copy($mostsingle['path'].'/'.$value, $mostsingle['destino']);
+                                        unlink($mostsingle['path'].'/'.$value);
+                                    }
+                                }
+                            } elseif (is_file($mostsingle['path'])) {
+                                $mm = explode('/', $mostsingle['destino']);
+                                $destinosubpasta = '';
+                                foreach ($mm as $jj => $xx) {
+                                    if (!empty($xx)) {
+                                        $destinosubpasta .= '/'.$xx;
+                                        if ($jj == 3) {
+                                            $destinosubpasta .= '/'.$dd;
+                                            $destinosubpasta = $destinosubpasta.'/'.$mostsingle['filename'];
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (file_exists($mostsingle['path'])) {
+                                    $pp = explode('/', $mostsingle['path']);
+                                    $way = '';
+                                    foreach ($pp as $kk => $VV) {
+                                        if (!empty($VV)) {
+                                            $way .= '/'.$VV;
+                                            if ($kk == 4) {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
+                                    $way = str_replace('entregar', 'uploaded', $way);
+                                    if (!is_dir($way)) {
+                                        mkdir($way, 0777); 
+                                    }
+                                    $mostsingle['path'] = str_replace('uploaded', 'entregar', $mostsingle['path']);
+                                    copy($mostsingle['path'], $destinosubpasta);
+                                    unlink($mostsingle['path']);
+                                    continue;
+                                }
+                            }
+                        }
+                        if (!is_dir($mostsingle['destino'])) {
+                            mkdir($mostsingle['destino'], 0777); 
+                        }
+
+                        $mostsingle['destino'] .= '/';
+                        $creationpath = $mostsingle['destino'].substr($mostsingle['pastaname'], 0,-1);
                         if (!is_dir($creationpath)) {
                             mkdir($creationpath, 0777);
                         }
-                     
+
+                        if(substr($creationpath, -1) == '/'){
+                            $creationpath = substr($creationpath, 0,-1);
+                        }
+
                         $creationpath = $creationpath.'/';
+                        if(substr($creationpath, -1) == '/'){
+                            $creationpath = substr($creationpath, 0,-1);
+                        }
+
                         $currentFile = $creationpath.'/'.$mostsingle['filename'];
-                        copy($mostsingle['path'], $currentFile);
-                        unlink($mostsingle['path']);
+                        if (!is_dir($mostsingle['path'])) {
+                            if (is_file($mostsingle['path'])) {
+                                copy($mostsingle['path'], $currentFile);
+                                unlink($mostsingle['path']);
+                            }
+                        } else {
+                            $a = scandir($mostsingle['path']);
+                            if (cout($a) > 2) {
+                                rmdir($mostsingle['path']);
+                            }
+                            
+                        }
                     }
-                    
+
+                $check = scandir($mostsingle['raiz']);
+                foreach ($check as $ke => $checkUnic) {
+                    if (strlen($checkUnic) > 2) {
+                        if (is_dir($mostsingle['raiz'].$checkUnic)) {
+                            rmdir($mostsingle['raiz'].$checkUnic);
+                        } 
+                        if(is_file($mostsingle['raiz'].$checkUnic)){
+                            unlink($mostsingle['raiz'].$checkUnic);
+                        }
+                    }
+                }
+
                 rmdir($mostsingle['raiz']);
                 }
-                
+
                 if (!is_array($single)) {
-                    copy($single['path'], $single['destino']);
-                    unlink($single['path']);
+                   copy($single['path'], $single['destino']);
+                   unlink($single['path']);
                 }
-                
+
                 if(is_array($single) && is_numeric($chave)){
                     copy($single['path'], $single['destino']);
                     unlink($single['path']);

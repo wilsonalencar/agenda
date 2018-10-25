@@ -157,20 +157,38 @@ class CronogramaatividadesController extends Controller
     }
 
 
+    public function AlterAnalistas(Request $request)
+    {
+        $input = $request->all();
+        if (empty($input['Id_usuario_analista'])) {
+            return redirect()->back()->with('status', 'É necessário selecionar um Analista');
+        }
+
+        $retorno = CronogramaAtividade::where('cronograma_mensal', $input['id_cronogramamensal'])->update(['Id_usuario_analista' => $input['Id_usuario_analista']]);
+      
+        $msg = 'Analistas alterados com sucesso';
+        if (!$retorno) {
+            $msg = 'Ocorreu um erro na alteração dos analistas';
+        }
+        return redirect()->back()->with('status', $msg);
+        
+    } 
+
     public function planejamento(Request $request)
     {
-
+        $ids = '4,6';
+        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
+        $user_ids = json_decode(json_encode($user_ids),true);
+        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $input = $request->all();
-        $dados = DB::table('cronogramamensal')->select('cronogramamensal.*');
+        $dados = DB::table('cronogramamensal')->leftjoin('cronogramaatividades', 'cronogramamensal.id', '=', 'cronogramaatividades.cronograma_mensal')->selectRaw('cronogramamensal.*, GROUP_CONCAT(cronogramaatividades.Id_usuario_analista SEPARATOR ", ") AS analistas');
         if (!empty($input)) {
             $periodo = str_replace('/', '', $input['periodo_apuracao']);
             $dados = $dados->where('cronogramamensal.periodo_apuracao', '=', $periodo);
         }
         // $dados = $dados->orderby('Empresa_id', '=', str_replace('/', '', $input['periodo_apuracao']));
-        $dados = $dados->get();
-
+        $dados = $dados->groupBy('cronogramamensal.id')->get();
         $array = array();
-
         if (!empty($dados)) {
             foreach ($dados as $key => $value) {
                 $Tributo = Tributo::find($value->Tributo_id);
@@ -191,11 +209,23 @@ class CronogramaatividadesController extends Controller
                 $data_vencimento = str_replace('-', '/', $value->DATA_SLA);
                 $value->DATA_SLA = date('d/m/Y', strtotime($data_vencimento));
                 
-                $array[] = $value;
+                $str = '';
+                if (!empty($value->analistas)) {
+                    $analistasArray = array();
+                    if (strlen($value->analistas > 4)) {
+                        $analistas_explode = explode(',', $value->analistas);
+                        foreach ($analistas_explode as $singlekey => $single) {
+                            $analistasArray[trim($single)] = User::Find($single)->name;
+                        }
+                    $str = implode("<br>", $analistasArray);
+                    }
+                }
+                $value->names = $str;
+                $dados[$key] = $value;
             }
         }
 
-        return view('cronogramaatividades.planejamento')->with('dados', $dados);
+        return view('cronogramaatividades.planejamento')->with('dados', $dados)->with('usuarios', $usuarios);
     }
 
     public function loadPlanejamento()

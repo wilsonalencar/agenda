@@ -31,6 +31,7 @@
                 <th>Qtd Analistas</th>
                 <th>Inicio</th>
                 <th>Termino</th>
+                <th>Analistas</th>
 
             </tr>
             </thead>
@@ -53,16 +54,60 @@
                     <td><?php echo $value->Qtd_analistas; ?></td>
                     <td><?php echo $value->Inicio; ?></td>
                     <td><?php echo $value->Termino; ?></td>
+                    <td align="center"><p onclick="openModal('<?php echo $value->names; ?>', '<?php echo $value->id; ?>')"><button class="btn btn-default btn-sm"><i class="fa fa-search"></i></button></a></p></td>
                 </tr>
                 <?php } }  ?>
             </tbody>
     </table>                                            
+
+
+<div class="modal fade" id="modalDetalhes" style="width: 100%;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Alteração em lote de Analistas do Cronograma Mensal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closemodal()" onclose="closemodal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="width: 100%; height: 100%;">
+        {!! Form::open([
+        'route' => 'cronograma.analistas'
+        ]) !!}
+        <div class="row">
+            <div class="col-sm-6">
+                {!! Form::label('Id_usuario_analista', 'Analista', ['class' => 'control-label'] )  !!}
+                {!!  Form::select('Id_usuario_analista', $usuarios, array(), ['class' => 'form-control']) !!}
+            </div>
+            <br />
+            <div class="col-sm-4"><input type="submit" class="form-control btn btn-success" value="Alteração em Lote"></div>
+        </div>
+            <input type="hidden" name="id_cronogramamensal" value="" id="id_cronogramamensal">
+
+        {!! Form::close() !!}
+        <hr />
+        <h5> Analistas do Cronograma mensal</h5>
+        <p class="analistasListagem"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closemodal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="text/javascript">
 
 jQuery(function($){
     $('#sidebarCollapse').click();
 });
+
+function openModal(data, id)
+{   
+    $("#id_cronogramamensal").val(id);
+    $(".analistasListagem").html(data);
+    $("#modalDetalhes").modal(); 
+}
 
 $(document).ready(function (){
     $('#myTableAprovacao').dataTable({
@@ -77,4 +122,6 @@ $(document).ready(function (){
 });
 
 </script>
+
+}
 @stop

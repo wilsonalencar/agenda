@@ -6,6 +6,7 @@ use App\Models\Atividade;
 use App\Models\Empresa;
 use App\Models\Estabelecimento;
 use App\Models\Tributo;
+use App\Models\Municipio;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -44,6 +45,137 @@ class ArquivosController extends Controller
     public function index()
     {
         return view('arquivos.index')->with('filter_cnpj',Input::get("vcn"))->with('filter_codigo',Input::get("vco"))->with('filter_tributo',Input::get("vct"));
+    }   
+
+    public function Downloads(Request $request)
+    {
+        $input = $request->all();
+        if (!empty($input)) {
+            $a = 0;
+            $k = 0;
+            
+            if (isset($input['estabelecimentos_selected'])) {
+                $a = 1;
+            }
+
+            if (isset($input['ufs'])) {
+                $a = 1;
+            }
+
+            if (!empty($input['data_entrega_inicio']) && !empty($input['data_entrega_fim'])) {
+                $a = 1;
+                if (strtotime($input['data_aprovacao_inicio']) > strtotime($input['data_aprovacao_fim'])) {
+                    $k = 1;
+                }
+            }
+
+            if (!empty($input['data_aprovacao_inicio']) && !empty($input['data_aprovacao_fim'])) {
+                $a = 1;
+                if (strtotime($input['data_entrega_inicio']) > strtotime($input['data_entrega_fim'])) {
+                    $k = 1;
+                }
+            }
+     
+            if (!empty($input['periodo_apuracao_inicio']) && !empty($input['periodo_apuracao_fim']) ) {
+                $a = 1;
+            }
+
+            if (!$a) {
+                return redirect()->back()->with('status', 'Favor informar ao menos um campo para busca.');
+            }
+            if ($k) {
+                return redirect()->back()->with('status', 'A data Inicial não pode ser maior que a data final.');
+            }
+
+            $periodo = $this->calcPeriodo($input['periodo_apuracao_inicio'], $input['periodo_apuracao_fim']);
+            $atividades = Atividade::whereNotNull('arquivo_entrega');
+
+            if (!empty($input['estabelecimentos_selected'])) {
+                $atividades = $atividades->whereIn('estemp_id', $input['estabelecimentos_selected']);
+            }
+            
+            if (!empty($input['periodo_apuracao_inicio'])) {
+                $atividades = $atividades->whereIn('periodo_apuracao', $periodo);
+            }
+
+            if (!empty($input['data_entrega_inicio'])) {
+                $atividades = $atividades->whereRaw('DATE_FORMAT(data_entrega, "%Y-%m-%d") between "'.$input['data_entrega_inicio'].'" AND "'.$input['data_entrega_fim'].'"');
+            }
+
+            if (!empty($input['data_aprovacao_inicio'])) {
+                $atividades = $atividades->whereRaw('DATE_FORMAT(data_aprovacao, "%Y-%m-%d") between "'.$input['data_aprovacao_inicio'].'" AND "'.$input['data_aprovacao_fim'].'"');
+            }
+            
+            $atividades = $atividades->limit('3')->get();
+            if (count($atividades) > 0) {
+                foreach ($atividades as $kk => $atividade) {
+                    $this->downloadById($atividade->id);
+                }
+            } else {
+                return redirect()->back()->with('status', 'Não foram encontradas atividades para essa busca.');
+            }
+        }
+
+        $estabelecimentos = Estabelecimento::selectRaw("codigo, id")->orderby('codigo')->groupBy('codigo')->lists('codigo','id');
+        $ufs = Municipio::selectRaw("uf, uf")->orderby('uf','asc')->lists('uf','uf');
+
+        return view('arquivos.downloads')->with('estabelecimentos', $estabelecimentos)->with('ufs', $ufs);
+    }
+
+    private function calcPeriodo($inicio, $fim){
+
+        $dataBusca['periodo_inicio'] = $inicio;
+        $dataBusca['periodo_fim'] = $fim ;
+        $dataExibe = array("periodo_inicio"=>$dataBusca['periodo_inicio'], "periodo_fim"=>$dataBusca['periodo_fim']);   
+        
+        $dataBusca['periodo_inicio'] = str_replace('/', '-', '01/'.$dataBusca['periodo_inicio']);
+        $dataBusca['periodo_fim'] = str_replace('/', '-', '01/'.$dataBusca['periodo_fim']);
+        list($dia, $mes, $ano) = explode( "-",$dataBusca['periodo_inicio']);
+        $dataBusca['periodo_inicio'] = getdate(strtotime($dataBusca['periodo_inicio']));
+        $dataBusca['periodo_fim'] = getdate(strtotime($dataBusca['periodo_fim']));
+        $dif = ( ($dataBusca['periodo_fim'][0] - $dataBusca['periodo_inicio'][0]) / 86400 );
+        $meses = round($dif/30)+1;  // +1 serve para adiconar a data fim no array
+
+        for($x = 0; $x < $meses; $x++){
+            $datas[] =  date("mY",strtotime("+".$x." month",mktime(0, 0, 0,$mes,$dia,$ano)));
+        }
+
+        return $datas;
+    }
+
+    public function downloadById($id) {
+
+        $atividade = Atividade::findOrFail($id);
+        $tipo = $atividade->regra->tributo->tipo;
+        $tipo_label = 'UNDEFINED';
+        switch($tipo) {
+            case 'F':
+                $tipo_label = 'FEDERAIS'; break;
+            case 'E':
+                $tipo_label = 'ESTADUAIS'; break;
+            case 'M':
+                $tipo_label = 'MUNICIPAIS'; break;
+        }
+        $destinationPath = substr($atividade->estemp->cnpj, 0, 8) . '/' . $atividade->estemp->cnpj .'/'.$tipo_label. '/' . $atividade->regra->tributo->nome . '/' . $atividade->periodo_apuracao . '/' . $atividade->arquivo_entrega; // upload path
+        $headers = array(
+            'Content-Type' => 'application/pdf',
+        );
+
+        $file_path = public_path('uploads/'.$destinationPath);
+        $this->ForceDown($file_path);
+    }
+
+    private function ForceDown($filepath)
+    {
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="'.basename($filepath).'"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filepath));
+        flush();
+        readfile($filepath);
     }
 
     public function anyData(Request $request)

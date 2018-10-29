@@ -9,6 +9,7 @@ use App\Models\Tributo;
 use App\Models\Regra;
 use App\Models\User;
 use App\Models\Empresa;
+use App\Models\Regraenviolote;
 
 use App\Services\EntregaService;
 use Illuminate\Database\Eloquent\Collection;
@@ -302,14 +303,16 @@ class AtividadesController extends Controller
         $atividade->data_aprovacao = date("Y-m-d H:i:s");
         $atividade->save();
 
-        $entregador = User::findOrFail($atividade->usuario_entregador);
-        $user = User::findOrFail(Auth::user()->id);
-        $subject = "BravoTaxCalendar - Entrega atividade --APROVADA--";
-        $data = array('subject'=>$subject,'messageLines'=>array());
-        $data['messageLines'][] = $atividade->descricao.' - COD.'.$atividade->estemp->codigo.' - Aprovada, atividade concluída.';
-        $data['messageLines'][] = 'Coordenador: '.$user->name;
-
-        //$this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
+        $exist = Regraenviolote::Where('id_tributo', $atividade->regra->tributo_id)->where('id_empresa', $atividade->emp_id)->where('envioaprovacao', 'S')->get();
+        if (!empty($exist)) {
+            $entregador = User::findOrFail($atividade->usuario_entregador);
+            $user = User::findOrFail(Auth::user()->id);
+            $subject = "BravoTaxCalendar - Entrega atividade --APROVADA--";
+            $data = array('subject'=>$subject,'messageLines'=>array());
+            $data['messageLines'][] = $atividade->descricao.' - COD.'.$atividade->estemp->codigo.' - Aprovada, atividade concluída.';
+            $data['messageLines'][] = 'Coordenador: '.$user->name;
+            $this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
+        }
 
         return redirect()->route('entregas.index')->with('status', 'Atividade aprovada com sucesso!');
     }

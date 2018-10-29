@@ -19,7 +19,8 @@ class Regraenviolote extends Model
         'email_1',
         'email_2',
         'email_3',
-        'regra_geral'
+        'regra_geral',
+        'envioaprovacao'
     ];
 
     /**

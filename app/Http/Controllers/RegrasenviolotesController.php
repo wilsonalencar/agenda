@@ -45,8 +45,8 @@ class RegrasenviolotesController extends Controller
 
     public function Job($envio_manual=false, $data_envio = '', $id= '')
     {
-        $regra_geral = Regraenviolote::all("id","regra_geral");
-
+        $regra_geral = Regraenviolote::select("id","regra_geral")->where('envioaprovacao', 'N')->get();
+        
         if ($envio_manual) {
            $regra_geral = Regraenviolote::select("id","regra_geral")->where("id", $id)->get();    
         }
@@ -242,7 +242,8 @@ class RegrasenviolotesController extends Controller
 
     private function validaExistencia($input) 
     {        
-        $dados = DB::SELECT("SELECT id FROM regraenviolote WHERE id_empresa = ".$input['select_empresas']." AND id_tributo = ".$input['select_tributos']." AND regra_geral = '".$input['regra_geral']."' AND id <> ".$input['id']."");
+        $dados = DB::SELECT("SELECT id FROM regraenviolote WHERE id_empresa = ".$input['select_empresas']." AND id_tributo = ".$input['select_tributos']." AND regra_geral = '".$input['regra_geral']."' AND id <> ".$input['id']." AND envioaprovacao ='".$input['envioaprovacao']."'");
+
         if (!empty($dados)) {
             $this->msg = 'Duplicidade detectada, favor verificar os dados informados';
             return false;
@@ -275,7 +276,7 @@ class RegrasenviolotesController extends Controller
     public function store(Request $request)
     {   
         $input = $request->all();
-        
+
         if ($input['envio_manual']) {
             if (empty($input['data_envio'])) {
                 return redirect()->back()->with('alert', 'A data é obrigatória para busca.');
@@ -286,7 +287,6 @@ class RegrasenviolotesController extends Controller
             return redirect()->back()->with('status', 'Envio manual efetuado com sucesso.');
         }
 
-        //se estiver adicionando CNPJ
         if ($input['add_cnpj']) {
             $this->validate($request, [
             'cnpj' => 'required'
@@ -308,10 +308,12 @@ class RegrasenviolotesController extends Controller
 
         //se não continua
         $this->validate($request, [
-            'email_1' => 'required'
+            'email_1' => 'required',
+            'envioaprovacao' => 'required'
         ],
         $messages = [
-            'email_1.required' => 'Informar o email obrigatório.'
+            'email_1.required' => 'Informar o email obrigatório.',
+            'envioaprovacao.required' => 'Informar se o envio de email por aprovação.'
 
         ]);
         
@@ -339,6 +341,7 @@ class RegrasenviolotesController extends Controller
         $value['email_2'] = $input['email_2'];
         $value['email_3'] = $input['email_3'];
         $value['regra_geral'] = $input['regra_geral'];
+        $value['envioaprovacao'] = $input['envioaprovacao'];
 
         //se Não, ele cria
         $create = Regraenviolote::create($value);

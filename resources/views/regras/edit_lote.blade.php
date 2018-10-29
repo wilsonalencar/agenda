@@ -46,6 +46,16 @@
 </div>
 
 <div class="form-group">
+    <div style="width:30%">
+        Envio de e-mail por aprovação:
+        {{ Form::label('Sim', 'SIM') }}
+        {!! Form::radio('envioaprovacao', 'S', ( $dados['envioaprovacao'] == "S" ? true : false ), ['id' => 'envioaprovacao_SIM']) !!}
+        {{ Form::label('Nao', 'NAO') }}
+        {!! Form::radio('envioaprovacao', 'N', ( $dados['envioaprovacao'] == "N" ? true : false ), ['id' => 'envioaprovacao_NAO']) !!}
+    </div>
+</div>
+
+<div class="form-group">
     <div style="width:50%">
     {!! Form::label('email_1', 'E-Mail obrigatório:', ['class' => 'control-label']) !!}
     {!! Form::text('email_1', $dados['email_1'], ['class' => 'form-control']) !!}

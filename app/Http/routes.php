@@ -86,6 +86,8 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
 
     Route::resource('arquivos', 'ArquivosController');
     Route::get('arquivo/data', array('as'=>'arquivos.data', 'uses'=>'ArquivosController@anyData'));
+    Route::get('arquivo/downloads', array('as'=>'arquivos.downloads', 'uses'=>'ArquivosController@Downloads'));
+    Route::post('arquivo/downloads', array('as'=>'arquivos.downloads', 'uses'=>'ArquivosController@Downloads'));
 
     Route::post('atividade/storeComentario', array('as'=>'atividades.storeComentario', 'uses'=>'AtividadesController@storeComentario'));
 

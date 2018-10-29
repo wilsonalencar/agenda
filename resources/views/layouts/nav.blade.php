@@ -71,6 +71,7 @@
                                                         <li><a href="{{ route('desempenho_entregas') }}" target="_blank">Desempenho das Entregas</a></li>
                                                     @endif
                                                     <li><a href="{{ route('arquivos.index') }}">Arquivos</a></li>
+                                                    <li><a href="{{ route('arquivos.downloads') }}">Download Arquivos</a></li>
                                                 </li>
                                         </ul>
                                     </div>

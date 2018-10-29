@@ -3516,6 +3516,7 @@ juros de mora
             
             $empresaraizid = 0;
             $empresaRaizBusca = DB::select('select id from empresas where LEFT(cnpj, 8)= "'.$empresacnpjini.'"');
+
             if (!empty($empresaRaizBusca[0]->id)) {
                 $empresaraizid = $empresaRaizBusca[0]->id;
             }
@@ -3538,7 +3539,7 @@ juros de mora
                 $PeriodoApuracao = $arrayExplode[3]; 
 
             $UF = '';
-            if (!empty($arrayExplode[4])) 
+/*            if (!empty($arrayExplode[4])) 
                 $UF = substr($arrayExplode[4], 0, 2); 
             $estemp_id = 0;
             $arrayEstempId = DB::select('select id FROM estabelecimentos where codigo = "'.$CodigoEstabelecimento.'" and ativo = 1 and empresa_id ='.$empresaraizid.'');
@@ -3573,6 +3574,12 @@ juros de mora
                     $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
                     break;
                 }
+            }*/
+
+            $usuario_entregador = $this->validateUsuarioEntregador($AtividadeID);
+            if (!$usuario_entregador) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Não existe um usuário entregador cadastrado para essa atividade.', 'N');
+                break;   
             }
 
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
@@ -3591,7 +3598,33 @@ juros de mora
                 $this->createZipFile($singlearray, $path);                        
             }
         }
-    }   
+    } 
+
+    public function validateUsuarioEntregador($atividadeID)
+    {
+        $atividade = Atividade::findOrFail($atividadeID);
+        $estemp = $atividade->estemp;
+        $regra = $atividade->regra;
+        $tipo = $regra->tributo->tipo;
+
+        $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$estemp->id. " AND B.Regra_geral = 'N') limit 1";
+
+        $retornodaquery = DB::select($query);
+
+        $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND B.Regra_geral = 'S') limit 1";
+
+        $queryGeral = DB::select($sql);        
+        
+        $idanalistas = $retornodaquery;
+        if (empty($retornodaquery)) {
+            $idanalistas = $queryGeral;
+        }
+
+        if (empty($idanalistas)) {
+            return false;
+        }
+            return true;
+    }  
 
     public function checkTributo($tributo)
     {

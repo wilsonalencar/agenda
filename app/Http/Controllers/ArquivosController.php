@@ -88,31 +88,38 @@ class ArquivosController extends Controller
             }
 
             $periodo = $this->calcPeriodo($input['periodo_apuracao_inicio'], $input['periodo_apuracao_fim']);
-            $atividades = Atividade::whereNotNull('arquivo_entrega');
+
+            $atividades = Atividade::select('atividades.*')
+                        ->join('estabelecimentos', 'atividades.estemp_id', '=', 'estabelecimentos.id')
+                        ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo');
 
             if (!empty($input['estabelecimentos_selected'])) {
-                $atividades = $atividades->whereIn('estemp_id', $input['estabelecimentos_selected']);
+                $atividades = $atividades->whereIn('atividades.estemp_id', $input['estabelecimentos_selected']);
+            }
+
+            if (!empty($input['ufs'])) {
+                $atividades = $atividades->whereIn('municipios.uf', $input['ufs']);
             }
             
             if (!empty($input['periodo_apuracao_inicio'])) {
-                $atividades = $atividades->whereIn('periodo_apuracao', $periodo);
+                $atividades = $atividades->whereIn('atividades.periodo_apuracao', $periodo);
             }
 
             if (!empty($input['data_entrega_inicio'])) {
-                $atividades = $atividades->whereRaw('DATE_FORMAT(data_entrega, "%Y-%m-%d") between "'.$input['data_entrega_inicio'].'" AND "'.$input['data_entrega_fim'].'"');
+                $atividades = $atividades->whereRaw('DATE_FORMAT(atividades.data_entrega, "%Y-%m-%d") between "'.$input['data_entrega_inicio'].'" AND "'.$input['data_entrega_fim'].'"');
             }
 
             if (!empty($input['data_aprovacao_inicio'])) {
-                $atividades = $atividades->whereRaw('DATE_FORMAT(data_aprovacao, "%Y-%m-%d") between "'.$input['data_aprovacao_inicio'].'" AND "'.$input['data_aprovacao_fim'].'"');
+                $atividades = $atividades->whereRaw('DATE_FORMAT(atividades.data_aprovacao, "%Y-%m-%d") between "'.$input['data_aprovacao_inicio'].'" AND "'.$input['data_aprovacao_fim'].'"');
             }
             $files = array();
-
             $atividades = $atividades->get();
+
             if (count($atividades) > 0) {
                 foreach ($atividades as $kk => $atividade) {
                     $files[] = $this->downloadById($atividade->id);
                 }
-            $this->zipDownload($files);
+                $this->zipDownload($files);
             } else {
                 return redirect()->back()->with('status', 'Não foram encontradas atividades para essa busca.');
             }
@@ -200,6 +207,7 @@ class ArquivosController extends Controller
         header('Content-Length: ' . filesize($filepath));
         flush();
         readfile($filepath);
+        unlink($filepath);
     }
 
     public function anyData(Request $request)

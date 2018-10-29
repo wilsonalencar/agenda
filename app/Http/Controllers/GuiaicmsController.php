@@ -1033,16 +1033,21 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
            if (!empty($match)) {
                $i = explode(' ', trim($match[1]));
                $icms['REFERENCIA'] = $i[1];
-               $valorData = trim($i[3]);
+               $a = explode("\n", $i[2]);
+               $valorData = trim($a[1]);
                $data_vencimento = str_replace('/', '-', $valorData);
                $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-               $icms['VLR_RECEITA'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[8]))));
-               $icms['MULTA_MORA_INFRA'] =  str_replace(',', '.', str_replace('.', '', $i[13]));
-               $icms['VLR_TOTAL'] = trim(str_replace('nome:', '', str_replace(',', '.', str_replace('.', '', $i[17]))));
-               $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $i[9]));
-            
+               $icms['VLR_RECEITA'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[7]))));
+               $icms['MULTA_MORA_INFRA'] =  str_replace(',', '.', str_replace('.', '', $i[14]));
+               $icms['VLR_TOTAL'] = trim(str_replace('nome:', '', str_replace(',', '.', str_replace('.', '', $i[16]))));
+               $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $i[5]));
                $p = explode('
 ', $i[4]);
+                if(strlen($i[4]) < 5){
+                    $p = explode('
+', $i[3]);
+                }
+                
                $icms['IE'] =  $p[0];
                $icms['COD_RECEITA'] =  $p[1];
        }
@@ -1065,6 +1070,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
 
        }
+       echo '<prE>';
+       print_r($icms);exit;
         
         fclose($handle);
         $icmsarray = array();

@@ -105,12 +105,14 @@ class ArquivosController extends Controller
             if (!empty($input['data_aprovacao_inicio'])) {
                 $atividades = $atividades->whereRaw('DATE_FORMAT(data_aprovacao, "%Y-%m-%d") between "'.$input['data_aprovacao_inicio'].'" AND "'.$input['data_aprovacao_fim'].'"');
             }
-            
-            $atividades = $atividades->limit('3')->get();
+            $files = array();
+
+            $atividades = $atividades->get();
             if (count($atividades) > 0) {
                 foreach ($atividades as $kk => $atividade) {
-                    $this->downloadById($atividade->id);
+                    $files[] = $this->downloadById($atividade->id);
                 }
+            $this->zipDownload($files);
             } else {
                 return redirect()->back()->with('status', 'Não foram encontradas atividades para essa busca.');
             }
@@ -120,6 +122,27 @@ class ArquivosController extends Controller
         $ufs = Municipio::selectRaw("uf, uf")->orderby('uf','asc')->lists('uf','uf');
 
         return view('arquivos.downloads')->with('estabelecimentos', $estabelecimentos)->with('ufs', $ufs);
+    }
+
+    private function zipDownload($files){
+        $fileName = date('dmYHis').'.zip';
+        $zip = new \ZipArchive();
+        touch($fileName);
+
+        $res = $zip->open($fileName, \ZipArchive::CREATE);
+        if($res === true){
+            foreach ($files as $index => $file) {
+                $singlefilename = explode('/', $file);
+                foreach ($singlefilename as $xx => $v) {
+                }
+                if (file_exists($file)) {
+                    $zip->addFile($file, $v);
+                }
+            }
+
+            $zip->close();
+            $this->ForceDown($fileName);
+        }
     }
 
     private function calcPeriodo($inicio, $fim){
@@ -156,13 +179,14 @@ class ArquivosController extends Controller
             case 'M':
                 $tipo_label = 'MUNICIPAIS'; break;
         }
-        $destinationPath = substr($atividade->estemp->cnpj, 0, 8) . '/' . $atividade->estemp->cnpj .'/'.$tipo_label. '/' . $atividade->regra->tributo->nome . '/' . $atividade->periodo_apuracao . '/' . $atividade->arquivo_entrega; // upload path
+
+        @$destinationPath = substr($atividade->estemp->cnpj, 0, 8) . '/' . $atividade->estemp->cnpj .'/'.$tipo_label. '/' . $atividade->regra->tributo->nome . '/' . $atividade->periodo_apuracao . '/' . $atividade->arquivo_entrega; // upload path
         $headers = array(
             'Content-Type' => 'application/pdf',
         );
 
         $file_path = public_path('uploads/'.$destinationPath);
-        $this->ForceDown($file_path);
+        return $file_path;
     }
 
     private function ForceDown($filepath)

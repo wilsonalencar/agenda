@@ -3446,7 +3446,6 @@ juros de mora
         return $string;
     }
 
-    // inicio job de atividades
     public function jobAtividades()
     {
         $a = explode('/', $_SERVER['SCRIPT_FILENAME']);
@@ -3454,7 +3453,7 @@ juros de mora
 
         $funcao = '';
         if ($a[0] == 'C:' || $a[0] == 'F:') {
-            $path = 'W:';
+            $path = 'F:';
         }
         $path .= '/storagebravobpo/';
         $arquivos = scandir($path);
@@ -3484,25 +3483,8 @@ juros de mora
                     }
                 }
             }
-        }
-
-        if (!empty($files)) {
-            foreach ($files as $pp => $file) {
-                if (is_dir($file)) {
-
-                    $extra_files = scandir($file);
-                    foreach ($extra_files as $lala => $extra_file) {
-                        if (strlen($extra_file) > 2) {
-                            $arrayNameFile = explode("_", $extra_file);
-                            if (is_dir($file.'/'.$extra_file)) {
-                                $files[] = $file.'/'.$extra_file;                            
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
+        }              
+        
         if (!empty($files)) {
             $this->savefiles($files);
         } else {
@@ -3595,7 +3577,7 @@ juros de mora
 
                 $date = time();
                 $path = $date.'.zip';
-                $this->createZipFile($singlearray, $path);                        
+                $this->createZipFile($singlearray, $path);    
             }
         }
     }   
@@ -3618,76 +3600,45 @@ juros de mora
         $zip = new \ZipArchive();
 
         touch($fileName);
-
         $arrayDelete = array();
         $res = $zip->open($fileName, \ZipArchive::CREATE);
         if($res === true){
             foreach ($f as $in => $name) {
 
-                if (is_dir($name['path'])) {
+                if (!is_file($name['path'])) {
                     $name['path'] = $name['path'].'/';
                     $name['filename'] = $name['filename'].'/';
+                    
                     $arrayExtra = scandir($name['path']);
                     foreach ($arrayExtra as $M => $singlefile) {
-                        if (isset($arrayDelete) && !empty($arrayDelete)) {
-                            break;
-                        }
                         if (strlen($singlefile) > 2) {
-                            if (!is_dir($name['path'].$singlefile)) {
-                                $extra_files[$M]['path'] = $name['path'].$singlefile;
-                                $extra_files[$M]['filename'] = $singlefile;
-                            }
+                            $extra_files[$M]['path'] = $name['path'].$singlefile;
+                            $extra_files[$M]['filename'] = $singlefile;
+                        }
+                    }
 
-                            if (is_dir($name['path'].$singlefile)) {
-                                $subpasta = scandir($name['path'].$singlefile);
-                                foreach ($subpasta as $P => $singlepasta) {
-                                    if (strlen($singlepasta > 2)) {
-                                        $extra_files[$M]['path'] = $name['path'].$singlefile.'/'.$singlepasta;
-                                        $extra_files[$M]['filename'] = $singlepasta;
-                                        $extra_files[$M]['subpasta'] = $singlefile;
-                                        $M++;                        
-                                    }
+                    foreach ($extra_files as $keyExtra => $extra_file) {
+                        if ($zip->addFile($extra_file['path'] , $extra_file['filename'])) {
+                            $destinoArray = explode('/', $extra_file['path']);
+                            $destino = '';
+                            foreach ($destinoArray as $key => $value) {
+                                $destino .= $value.'/';
+                                if ($key == 2) {
+                                    break;
                                 }
                             }
+                            $destino .= 'uploaded/';
+                            $arrayDelete['pasta'][$keyExtra]['path'] = $extra_file['path']; 
+                            $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename']; 
+                            $arrayDelete['pasta'][$keyExtra]['pastaname'] = $name['filename']; 
+                            $arrayDelete['pasta'][$keyExtra]['destino'] = $destino;
+                            $arrayDelete['pasta'][$keyExtra]['raiz'] = $name['path'];
+                            $arrayDelete['pasta'][$keyExtra]['pasta'] = 1;
                         }
                     }
-                    if(isset($extra_files)){
-                        foreach ($extra_files as $keyExtra => $extra_file) {
-                            if ($zip->addFile($extra_file['path'], $extra_file['filename'])) {
-                                $destinoArray = explode('/', $extra_file['path']);
-                                $destino = '';
-                                foreach ($destinoArray as $key => $value) {
-                                    $destino .= $value.'/';
-                                    if ($key == 2) {
-                                        break;
-                                    }
-                                }
-                                $destino .= 'uploaded/';
-                                $arrayDelete['pasta'][$keyExtra]['path'] = $extra_file['path']; 
-                                $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename'];
-                                if (isset($extra_file['subpasta'])) {
-                                    $arrayDelete['pasta'][$keyExtra]['subpasta'] = $extra_file['subpasta'];       
-                                }
-                                $arrayDelete['pasta'][$keyExtra]['pastaname'] = $name['filename']; 
-                                
-                                $arrayDelete['pasta'][$keyExtra]['destino'] = $destino;
-                                if (isset($extra_file['subpasta'])) {
-                                    $p = explode('/', $extra_file['path']);
-                                    foreach ($p as $LL => $VV) {
-                                        if ($VV == $extra_file['subpasta']) {
-                                            break;
-                                        }
-                                        $var = $VV;
-                                    }
-                                    $arrayDelete['pasta'][$keyExtra]['destino'] = $destino.$var;    
-                                }
-                                $arrayDelete['pasta'][$keyExtra]['raiz'] = $name['path'];
-                                $arrayDelete['pasta'][$keyExtra]['pasta'] = 1;
-                                }
-                            }
-                        }
-                    }
-                if (!is_dir($name['path'])) {
+                }
+
+                if (is_file($name['path'])) {
                     if ($zip->addFile($name['path'] , $name['filename'])) {
                         $destinoArray = explode('/', $name['path']);
                         $destino = '';
@@ -3698,141 +3649,41 @@ juros de mora
                             }
                         }
                         $destino .= 'uploaded/';
-                        $arrayDelete[$in]['path'] = $name['path']; 
-                        $arrayDelete[$in]['filename'] = $name['filename']; 
-                        $arrayDelete[$in]['destino'] = $destino.$name['filename'];
+                        $arrayDelete['pasta'][$in]['path'] = $name['path']; 
+                        $arrayDelete['pasta'][$in]['filename'] = $name['filename']; 
+                        $arrayDelete['pasta'][$in]['destino'] = $destino.$name['filename'];
                     }
                 }
+
             }
         }
-        $zip->close();
 
+        $zip->close();
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
-                if (is_array($single) && !isset($single['path']) && $chave === 'pasta') {
-                    foreach ($single as $p => $mostsingle) {
-                        if (substr($mostsingle['destino'], -1) != '/') {
-                            $mostsingle['destino'] .= '/';
-                        }
-
-                        if (!isset($mostsingle['subpasta'])) {
-                            $pp = explode('/', $mostsingle['path']);
-                            $ll = '';
-                            $dd = '';
-                            foreach ($pp as $kk => $VV) {
-                                $dd = $pp[4];
-                                if ($VV == substr($mostsingle['pastaname'], 0,-1)) {
-                                    break;
-                                }
-                                $ll = $VV;
-                            }
-                            $mostsingle['destino'] .= $ll;
-                            if (is_dir($mostsingle['path'])) {
-                                $scandirFinal = scandir($mostsingle['path']);
-                                foreach ($scandirFinal as $key => $value) {
-                                    if (strlen($value) > 2) {
-                                        copy($mostsingle['path'].'/'.$value, $mostsingle['destino']);
-                                        unlink($mostsingle['path'].'/'.$value);
-                                    }
-                                }
-                            } elseif (is_file($mostsingle['path'])) {
-                                $mm = explode('/', $mostsingle['destino']);
-                                $destinosubpasta = '';
-                                foreach ($mm as $jj => $xx) {
-                                    if (!empty($xx)) {
-                                        $destinosubpasta .= '/'.$xx;
-                                        if ($jj == 3) {
-                                            $destinosubpasta .= '/'.$dd;
-                                            $destinosubpasta = $destinosubpasta.'/'.$mostsingle['filename'];
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (file_exists($mostsingle['path'])) {
-                                    $pp = explode('/', $mostsingle['path']);
-                                    $way = '';
-                                    foreach ($pp as $kk => $VV) {
-                                        if (!empty($VV)) {
-                                            $way .= '/'.$VV;
-                                            if ($kk == 4) {
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    $way = str_replace('entregar', 'uploaded', $way);
-                                    $way = $this->limpaWay($way);
-                                    foreach($mostsingle as $la => $unic){
-                                        $mostsingle[$la] = $this->limpaWay($unic);
-                                    }
-                                    
-                                    if (!is_dir($way)) {
-                                        mkdir($way, 0777); 
-                                    }
-                                    $mostsingle['destiny'] = str_replace('entregar', 'uploaded', $mostsingle['path']);
-                                    $destinosubpasta = substr($this->limpaWay($destinosubpasta),0);
-                                    $destinosubpasta = substr($destinosubpasta,0, -1);
-                                    copy($mostsingle['path'], $destinosubpasta);
-                                    unlink($mostsingle['path']);
-                                    continue;
-                                }
-                            }
-                        }
-                        if (!is_dir($mostsingle['destino'])) {
-                            mkdir($mostsingle['destino'], 0777); 
-                        }
-
-                        $mostsingle['destino'] .= '/';
-                        $creationpath = $mostsingle['destino'].substr($mostsingle['pastaname'], 0,-1);
+                if (is_array($single) && $chave === 'pasta') {
+                   foreach ($single as $p => $mostsingle) {
+                        
+                        $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
+                     
                         if (!is_dir($creationpath)) {
                             mkdir($creationpath, 0777);
                         }
-
-                        if(substr($creationpath, -1) == '/'){
-                            $creationpath = substr($creationpath, 0,-1);
-                        }
-
+                     
                         $creationpath = $creationpath.'/';
-                        if(substr($creationpath, -1) == '/'){
-                            $creationpath = substr($creationpath, 0,-1);
-                        }
-                        
-                        $creationpath = $this->limpaWay($creationpath);
-                        $currentFile = $creationpath.$mostsingle['filename'];
+                        $currentFile = $creationpath.'/'.$mostsingle['filename'];
+                        copy($mostsingle['path'], $currentFile);
+                        unlink($mostsingle['path']);
+                    }
                     
-                        if (!is_dir($mostsingle['path'])) {
-                            if (is_file($mostsingle['path'])) {
-                                copy($mostsingle['path'], $currentFile);
-                                unlink($mostsingle['path']);
-                            }
-                        } else {
-                            $a = scandir($mostsingle['path']);
-                            if (cout($a) > 2) {
-                                rmdir($mostsingle['path']);
-                            }
-                            
-                        }
-                    }
-
-                $check = scandir($mostsingle['raiz']);
-                foreach ($check as $ke => $checkUnic) {
-                    if (strlen($checkUnic) > 2) {
-                        if (is_dir($mostsingle['raiz'].$checkUnic)) {
-                            rmdir($mostsingle['raiz'].$checkUnic);
-                        } 
-                        if(is_file($mostsingle['raiz'].$checkUnic)){
-                            unlink($mostsingle['raiz'].$checkUnic);
-                        }
-                    }
-                }
-
                 rmdir($mostsingle['raiz']);
                 }
-
+                
                 if (!is_array($single)) {
-                   copy($single['path'], $single['destino']);
-                   unlink($single['path']);
+                    copy($single['path'], $single['destino']);
+                    unlink($single['path']);
                 }
-
+                
                 if(is_array($single) && is_numeric($chave)){
                     copy($single['path'], $single['destino']);
                     unlink($single['path']);

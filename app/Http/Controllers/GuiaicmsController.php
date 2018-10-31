@@ -1067,11 +1067,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
-
        }
-       echo '<prE>';
-       print_r($icms);exit;
         
         fclose($handle);
         $icmsarray = array();

@@ -3536,6 +3536,11 @@ juros de mora
                 $estemp_id = $arrayEstempId[0]->id;
             }
 
+            if (!$this->validatePasta($AtividadeID, $CodigoEstabelecimento, $NomeTributo, $PeriodoApuracao, $UF)) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Nome do arquivo invalido', 'N');
+                continue;
+            }
+            
             $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
             if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código de atividade não existe', 'N');
@@ -3565,10 +3570,6 @@ juros de mora
                 }
             }
             
-            if (!$this->validatePasta($AtividadeID, $CodigoEstabelecimento, $NomeTributo, $PeriodoApuracao, $UF)) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Nome do arquivo invalido', 'N');
-                continue;
-            }
 
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;

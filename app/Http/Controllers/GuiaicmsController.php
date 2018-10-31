@@ -3510,6 +3510,7 @@ juros de mora
             }
 
             $arrayExplode = explode("_", $fileexploded);
+
             $AtividadeID = 0;
             if (!empty($arrayExplode[0])) 
                 $AtividadeID = $arrayExplode[0];
@@ -3563,6 +3564,11 @@ juros de mora
                     continue;
                 }
             }
+            
+            if (!$this->validatePasta($AtividadeID, $CodigoEstabelecimento, $NomeTributo, $PeriodoApuracao, $UF)) {
+                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Nome do arquivo invalido', 'N');
+                continue;
+            }
 
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
@@ -3594,6 +3600,32 @@ juros de mora
         }
     
     return true;
+    }
+
+    private function validatePasta($atividade_id, $codigo_estabelecimento, $nome_tributo, $periodo_apuracao, $uf)
+    {
+        if (!is_numeric($atividade_id)) {
+            return false;
+        }
+
+        if (!strlen($uf == 2) && is_numeric($uf)) {
+            return false;
+        }
+
+        if (!strlen($periodo_apuracao) == 6 && !is_numeric($periodo_apuracao)) {
+            return false;
+        }
+
+        if (strlen($cod_estabelecimento) > 5) {
+            return false;
+        }
+
+        $nm_tributo = $this->numero($nome_tributo);
+        if (!empty($nm_tributo)) {
+            return false;
+        }
+        
+        return true;
     }
 
     public function createZipFile($f = array(),$fileName){

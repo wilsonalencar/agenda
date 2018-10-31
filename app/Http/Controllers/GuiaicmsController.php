@@ -3538,13 +3538,13 @@ juros de mora
             $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
             if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código de atividade não existe', 'N');
-                break;
+                continue;
             }
 
             $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
             if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
-                break;
+                continue;
             }
 
             if (strlen($PeriodoApuracao) == 10) {
@@ -3553,14 +3553,14 @@ juros de mora
             $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = ".$PeriodoApuracao."");
             if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
                 $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Período de apuração diverente do período da atividade', 'N');
-                break;
+                continue;
             }
 
             if (count($arrayExplode) >= 4) {
                 $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
                 if (empty($UF) || !$validateUF[0]->countUF) {
                     $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
-                    break;
+                    continue;
                 }
             }
 
@@ -3609,31 +3609,40 @@ juros de mora
                     $name['path'] = $name['path'].'/';
                     $name['filename'] = $name['filename'].'/';
                     
-                    $arrayExtra = scandir($name['path']);
-                    foreach ($arrayExtra as $M => $singlefile) {
-                        if (strlen($singlefile) > 2) {
-                            $extra_files[$M]['path'] = $name['path'].$singlefile;
-                            $extra_files[$M]['filename'] = $singlefile;
-                        }
-                    }
-
-                    foreach ($extra_files as $keyExtra => $extra_file) {
-                        if ($zip->addFile($extra_file['path'] , $extra_file['filename'])) {
-                            $destinoArray = explode('/', $extra_file['path']);
-                            $destino = '';
-                            foreach ($destinoArray as $key => $value) {
-                                $destino .= $value.'/';
-                                if ($key == 2) {
-                                    break;
-                                }
+                    if(is_dir($name['path'])){
+                        $arrayExtra = scandir($name['path']);
+                        foreach ($arrayExtra as $M => $singlefile) {
+                            if (strlen($singlefile) > 2) {
+                                $extra_files[$M]['path'] = $name['path'].$singlefile;
+                                $extra_files[$M]['filename'] = $singlefile;
                             }
-                            $destino .= 'uploaded/';
-                            $arrayDelete['pasta'][$keyExtra]['path'] = $extra_file['path']; 
-                            $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename']; 
-                            $arrayDelete['pasta'][$keyExtra]['pastaname'] = $name['filename']; 
-                            $arrayDelete['pasta'][$keyExtra]['destino'] = $destino;
-                            $arrayDelete['pasta'][$keyExtra]['raiz'] = $name['path'];
-                            $arrayDelete['pasta'][$keyExtra]['pasta'] = 1;
+                        }
+                        
+                        if(isset($extra_files)){
+                            foreach ($extra_files as $keyExtra => $extra_file) {
+                                if ($zip->addFile($extra_file['path'] , $extra_file['filename'])) {
+                                    $destinoArray = explode('/', $extra_file['path']);
+                                    $destino = '';
+                                    foreach ($destinoArray as $key => $value) {
+                                        $destino .= $value.'/';
+                                        if ($key == 2) {
+                                            break;
+                                        }
+                                    }
+                                    $destino .= 'uploaded/';
+                                    $arrayDelete['pasta'][$keyExtra]['path'] = $extra_file['path']; 
+                                    $arrayDelete['pasta'][$keyExtra]['filename'] = $extra_file['filename']; 
+                                    $arrayDelete['pasta'][$keyExtra]['pastaname'] = $name['filename']; 
+                                    $arrayDelete['pasta'][$keyExtra]['destino'] = $destino;
+                                    $arrayDelete['pasta'][$keyExtra]['raiz'] = $name['path'];
+                                    $arrayDelete['pasta'][$keyExtra]['pasta'] = 1;
+                                }
+                            }                                                   
+                        } else {
+                            $name['path'] =substr($this->limpaWay($name['path']), 0, -1);
+                            if ($this->checkDiretorio($name['path'])) {
+                                @rmdir($name['path']);
+                            }
                         }
                     }
                 }
@@ -3675,8 +3684,10 @@ juros de mora
                         copy($mostsingle['path'], $currentFile);
                         unlink($mostsingle['path']);
                     }
-                    
-                rmdir($mostsingle['raiz']);
+
+                    if ($this->checkDiretorio($mostsingle['raiz'])) {
+                        @rmdir($mostsingle['raiz']);
+                    }
                 }
                 
                 if (!is_array($single)) {
@@ -3695,6 +3706,24 @@ juros de mora
             $data = ['image' => $fileName, 'atividade_id' => $name['atividade'], '_token' => csrf_token()];
             $this->upload($data);
         }
+    }
+
+    private function checkDiretorio($diretorio)
+    {
+       $verify = array();
+       if (!empty($diretorio) && is_dir($diretorio)) {
+           $scandir = scandir($diretorio);
+           foreach ($scandir as $index => $pasta) {
+               if (strlen($pasta) > 2) {
+                   $verify[] = $pasta;
+               }
+           }
+
+           if (!empty($verify)) {
+               return false;
+           }
+           return true;
+       }
     }
 
     private function limpaWay($way)

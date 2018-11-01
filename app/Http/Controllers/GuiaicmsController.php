@@ -3522,6 +3522,9 @@ juros de mora
             $NomeTributo = '';
             if (!empty($arrayExplode[2])) 
                 $NomeTributo = $arrayExplode[2];
+            if ($empresaraizid == 7) {
+                $NomeTributo = $this->letras($NomeTributo);
+            }
 
             $PeriodoApuracao = '';
             if (!empty($arrayExplode[3])) 
@@ -3537,19 +3540,31 @@ juros de mora
             }
 
             if (!$this->validatePasta($AtividadeID, $CodigoEstabelecimento, $NomeTributo, $PeriodoApuracao, $UF)) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Nome do arquivo invalido', 'N');
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, 8, $fileexploded, 'Nome do arquivo invalido', 'N');
                 continue;
             }
             
+            $NomeTributo = $this->LoadNomeTributo($NomeTributo);
+            if (!$this->checkTributo($NomeTributo)) {
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, 8, $fileexploded, 'Tributo não existente', 'N');
+                continue;
+            }
+
+            $IdTributo = $this->loadTributo($NomeTributo);
             $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
             if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Código de atividade não existe', 'N');
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Código de atividade não existe', 'N');
+                continue;
+            }
+
+            if (!$this->checkTribAtividade($AtividadeID, $IdTributo)) {
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Tributo divergente do tributo da atividade', 'N');
                 continue;
             }
 
             $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
             if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
                 continue;
             }
 
@@ -3558,14 +3573,14 @@ juros de mora
             }
             $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = ".$PeriodoApuracao."");
             if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
-                $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'Período de apuração diverente do período da atividade', 'N');
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período de apuração diferente do período da atividade', 'N');
                 continue;
             }
 
             if (count($arrayExplode) >= 4) {
                 $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
                 if (empty($UF) || !$validateUF[0]->countUF) {
-                    $this->createCriticaEntrega(1, $estemp_id, 8, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
+                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
                     continue;
                 }
             }
@@ -3584,10 +3599,49 @@ juros de mora
 
                 $date = time();
                 $path = $date.'.zip';
-                $this->createZipFile($singlearray, $path);    
+                // $this->createZipFile($singlearray, $path);    
             }
         }
     }   
+
+    private function loadTributo($tributo_nome)
+    {
+        $tributo = Tributo::where('nome', $tributo_nome)->first();
+        return $tributo->id;
+    }
+
+    private function LoadNomeTributo($nomeTributo)
+    {
+       if ($nomeTributo == "SPEDFISCAL") {
+           return "SPED FISCAL";
+       }
+       if ($nomeTributo == "EFD") {
+           return "EFD CONTRIBUIÇÕES";
+       }
+       if ($nomeTributo == "ICMSST") {
+          return "ICMS ST";
+       }
+       if ($nomeTributo == "GIAST") {
+          return "GIA ST";
+       }
+       if ($nomeTributo == "DCTFWEB") {
+          return "DCTF WEB";
+       }
+       if ($nomeTributo == "LIVROFISCAL") {
+          return "LIVRO FISCAL";
+       }
+
+       return $nomeTributo;
+    }
+
+    private function checkTribAtividade($id_atividade, $id_tributo)
+    {
+        $atividade = Atividade::where('id', $id_atividade)->first();
+        if ($atividade->regra->tributo_id == $id_tributo) {
+            return true;
+        }
+        return false;
+    }
 
     public function checkTributo($tributo)
     {
@@ -3617,7 +3671,7 @@ juros de mora
             return false;
         }
 
-        if (strlen($cod_estabelecimento) > 5) {
+        if (strlen($codigo_estabelecimento) > 5) {
             return false;
         }
 

@@ -2155,6 +2155,21 @@ r\$
             }
         }
 
+        
+        if (empty($this->numero($icms['COD_RECEITA']))) {
+           preg_match('~01.cf/df 02.cod receita 03.cota ou refer. 04.vencimento 05.exercicio([^{]*)~i', $str, $match);
+           if(!empty($match)){
+               $i = explode('
+', $match[1]);
+
+               $a = explode(' ', $i[2]);
+               $icms['COD_RECEITA'] = $a[1];
+               $c = explode(' ', $i[3]);
+               $icms['REFERENCIA'] = $c[0];
+
+               }
+       }
+
     fclose($handle);
     $icmsarray = array();
     $icmsarray[0] = $icms;

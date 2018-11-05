@@ -79,7 +79,9 @@ class ArquivosController extends Controller
 
             if (count($atividades) > 0) {
                 foreach ($atividades as $kk => $atividade) {
-                    $files[] = $this->downloadById($atividade->id);
+                    if ($atividade->arquivo_entrega != '-' && !empty($atividade->arquivo_entrega)) {
+                        $files[] = $this->downloadById($atividade->id);
+                    }
                 }
                 $this->zipDownload($files);
             } else {

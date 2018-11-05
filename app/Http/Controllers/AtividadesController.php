@@ -10,7 +10,6 @@ use App\Models\Regra;
 use App\Models\User;
 use App\Models\Regraenviolote;
 use App\Models\Empresa;
-use App\Models\Regraenviolote;
 
 use App\Services\EntregaService;
 use Illuminate\Database\Eloquent\Collection;

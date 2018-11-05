@@ -66,7 +66,7 @@ class GuiaicmsController extends Controller
             $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
             $input['UF'] = $municipio->uf;
             $input['USUARIO'] = Auth::user()->id;
-            $input['DATA'] = date('Y-m-d');
+            $input['DATA'] = date('Y-m-d H:i:s');
             $input['CNPJ'] = $this->numero($input['CNPJ']);
 
             $input['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', $input['VLR_RECEITA']));

@@ -73,7 +73,11 @@
             </thead>
                 <tbody>
                 <?php
-                      foreach ($planilha as $key => $value) {  
+                $valortotalgeral = 0;
+                $valorreceitatotal = 0;
+                    foreach ($planilha as $key => $value) {  
+                    $valortotalgeral += str_replace(',', '.', str_replace('.', '', $value['VLR_TOTAL']));
+                    $valorreceitatotal += str_replace(',', '.', str_replace('.', '', $value['VLR_RECEITA']));
                 ?>
                     <tr>
                         <td><?php echo $value['codigo']; ?></td>
@@ -89,6 +93,21 @@
                         <td><?php echo $value['IMPOSTO']; ?></td>
                     </tr>
                 <?php } ?>        
+                    <tr>
+                        <?php $valortotal = number_format($valortotalgeral, 2, ',', '.'); ?>
+                        <?php $valortotalreceita = number_format($valorreceitatotal, 2, ',', '.'); ?>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><td>
+                        <td></td>
+                        <td></td>
+                        <td><b><?php echo $valortotalreceita; ?></b></td>
+                        <td><b><?php echo $valortotal; ?></b></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
                 </tbody>
             </table>
             <?php } ?>

@@ -24,6 +24,14 @@
             </div>
         </div>
         <BR />
+
+        <div class="row">
+            <div class="col-md-5">
+            {!! Form::label('tributo_id', 'Selecionar Tributo', ['class' => 'control-label'] )  !!}
+                {!!  Form::select('tributo_id', $tributos, '', ['class' => 'form-control']) !!}
+            </div>
+        </div>
+        <BR />
         <div class="row">
             <div class="col-md-2">
                 {!! Form::label('data_entrega_inicio', 'Data Início Entrega', ['class' => 'control-label'] )  !!}         

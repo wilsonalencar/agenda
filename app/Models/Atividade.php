@@ -45,6 +45,14 @@ class Atividade extends Model
     }
 
     /**
+     * Get the empresa record
+     */
+    public function empresa()
+    {
+        return $this->belongsTo('App\Models\Empresa','emp_id');
+    }
+
+    /**
      * Get the usuario entregador
      */
     public function entregador()

@@ -51,58 +51,20 @@ class ArquivosController extends Controller
     {
         $input = $request->all();
         if (!empty($input)) {
-            $a = 0;
-            $k = 0;
-            
-            if (isset($input['estabelecimentos_selected'])) {
-                $a = 1;
-            }
-
-            if (isset($input['ufs'])) {
-                $a = 1;
-            }
-
-            if (!empty($input['data_entrega_inicio']) && !empty($input['data_entrega_fim'])) {
-                $a = 1;
-                if (strtotime($input['data_aprovacao_inicio']) > strtotime($input['data_aprovacao_fim'])) {
-                    $k = 1;
-                }
-            }
-
-            if (!empty($input['data_aprovacao_inicio']) && !empty($input['data_aprovacao_fim'])) {
-                $a = 1;
-                if (strtotime($input['data_entrega_inicio']) > strtotime($input['data_entrega_fim'])) {
-                    $k = 1;
-                }
-            }
-     
-            if (!empty($input['periodo_apuracao_inicio']) && !empty($input['periodo_apuracao_fim']) ) {
-                $a = 1;
-            }
-
-            if (!$a) {
-                return redirect()->back()->with('status', 'Favor informar ao menos um campo para busca.');
-            }
-            if ($k) {
-                return redirect()->back()->with('status', 'A data Inicial não pode ser maior que a data final.');
+            if (empty($input['ufs']) || empty($input['tributo_id']) || (empty($input['periodo_apuracao_inicio']) || empty($input['periodo_apuracao_fim']))) {
+                return redirect()->back()->with('status', 'Os campos Tributo, UF e Período de apuração são obrigatórios para essa busca.');
             }
 
             $periodo = $this->calcPeriodo($input['periodo_apuracao_inicio'], $input['periodo_apuracao_fim']);
-
             $atividades = Atividade::select('atividades.*')
                         ->join('estabelecimentos', 'atividades.estemp_id', '=', 'estabelecimentos.id')
-                        ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo');
-
+                        ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')
+                        ->join('regras', 'atividades.regra_id', '=', 'regras.id')
+                        ->whereIn('atividades.periodo_apuracao', $periodo)->whereIn('municipios.uf', $input['ufs'])
+                        ->where('regras.tributo_id', $input['tributo_id'])->where('atividades.emp_id', $this->s_emp->id);
+                
             if (!empty($input['estabelecimentos_selected'])) {
                 $atividades = $atividades->whereIn('atividades.estemp_id', $input['estabelecimentos_selected']);
-            }
-
-            if (!empty($input['ufs'])) {
-                $atividades = $atividades->whereIn('municipios.uf', $input['ufs']);
-            }
-            
-            if (!empty($input['periodo_apuracao_inicio'])) {
-                $atividades = $atividades->whereIn('atividades.periodo_apuracao', $periodo);
             }
 
             if (!empty($input['data_entrega_inicio'])) {
@@ -127,8 +89,9 @@ class ArquivosController extends Controller
 
         $estabelecimentos = Estabelecimento::selectRaw("codigo, id")->orderby('codigo')->groupBy('codigo')->lists('codigo','id');
         $ufs = Municipio::selectRaw("uf, uf")->orderby('uf','asc')->lists('uf','uf');
+        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
 
-        return view('arquivos.downloads')->with('estabelecimentos', $estabelecimentos)->with('ufs', $ufs);
+        return view('arquivos.downloads')->with('estabelecimentos', $estabelecimentos)->with('ufs', $ufs)->with('tributos', $tributos);
     }
 
     private function zipDownload($files){

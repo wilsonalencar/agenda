@@ -313,7 +313,7 @@ class RegrasenviolotesController extends Controller
         ],
         $messages = [
             'email_1.required' => 'Informar o email obrigatório.',
-            'envioaprovacao.required' => 'Informar se o envio de email por aprovação.'
+            'envioaprovacao.required' => 'Informar se será enviado um email na aprovação.'
 
         ]);
         

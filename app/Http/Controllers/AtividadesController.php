@@ -8,6 +8,7 @@ use App\Models\Municipio;
 use App\Models\Tributo;
 use App\Models\Regra;
 use App\Models\User;
+use App\Models\Regraenviolote;
 use App\Models\Empresa;
 use App\Models\Regraenviolote;
 
@@ -301,20 +302,95 @@ class AtividadesController extends Controller
         $atividade->status = 3;
         $atividade->usuario_aprovador = Auth::user()->id;
         $atividade->data_aprovacao = date("Y-m-d H:i:s");
-        $atividade->save();
 
-        $exist = Regraenviolote::Where('id_tributo', $atividade->regra->tributo_id)->where('id_empresa', $atividade->emp_id)->where('envioaprovacao', 'S')->get();
-        if (!empty($exist)) {
-            $entregador = User::findOrFail($atividade->usuario_entregador);
-            $user = User::findOrFail(Auth::user()->id);
-            $subject = "BravoTaxCalendar - Entrega atividade --APROVADA--";
-            $data = array('subject'=>$subject,'messageLines'=>array());
-            $data['messageLines'][] = $atividade->descricao.' - COD.'.$atividade->estemp->codigo.' - Aprovada, atividade concluída.';
-            $data['messageLines'][] = 'Coordenador: '.$user->name;
-            $this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
+        $regra = Regraenviolote::where('id_empresa', $atividade->emp_id)->where('id_tributo', $atividade->regra->tributo_id)->get();
+        if (!empty($regra) && $regra[0]->regra_geral == 'S') {
+            $this->sendMail($atividade);    
+        }
+        $atividade->save();
+        // $entregador = User::findOrFail($atividade->usuario_entregador);
+        // $user = User::findOrFail(Auth::user()->id);
+        // $subject = "BravoTaxCalendar - Entrega atividade --APROVADA--";
+        // $data = array('subject'=>$subject,'messageLines'=>array());
+        // $data['messageLines'][] = $atividade->descricao.' - COD.'.$atividade->estemp->codigo.' - Aprovada, atividade concluída.';
+        // $data['messageLines'][] = 'Coordenador: '.$user->name;
+        //$this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
+        return redirect()->route('entregas.index')->with('status', 'Atividade aprovada com sucesso!');
+    }
+
+
+    private function getTipo($tipo)
+    {
+        if ($tipo == 'E') {
+            return 'ESTADUAIS';
         }
 
-        return redirect()->route('entregas.index')->with('status', 'Atividade aprovada com sucesso!');
+        if($tipo == 'M'){
+            return 'MUNICIPAIS';
+        }
+
+        if ($tipo == 'F') {
+            return 'FEDERAIS';
+        }
+    }
+
+    private function sendMail($atividade)
+    {
+        $server_name    = $_SERVER['SERVER_NAME'];
+        $document_root  = $_SERVER['DOCUMENT_ROOT'];
+            
+        $termo = 'agenda';
+        $pattern = '/' . $termo . '/';
+        
+        if (!preg_match($pattern, $_SERVER['SERVER_NAME'])) {
+          $server_name    = $_SERVER['SERVER_NAME'].'/agenda/public';
+          $document_root  = $_SERVER['DOCUMENT_ROOT'].'/agenda/public';
+        }   
+
+        $path_link = "http://".$server_name."/uploads/".substr($atividade->empresa->cnpj, 0, 8)."/".$atividade->estemp->cnpj."";
+        $path = "".$document_root."/uploads/".substr($atividade->empresa->cnpj, 0, 8)."/".$atividade->estemp->cnpj."";
+        $tipo = $this->getTipo($atividade->regra->tributo->tipo);
+        $ult_periodo_apuracao = $atividade->periodo_apuracao;
+        $path .= '/'.$tipo.'/'.$atividade->regra->tributo->nome.'/'.$ult_periodo_apuracao.'/'.$atividade->arquivo_entrega;
+        $path_link .= '/'.$tipo.'/'.$atividade->regra->tributo->nome.'/'.$ult_periodo_apuracao.'/'.$atividade->arquivo_entrega;
+        
+        if (file_exists($path)) {
+            $download_link[$atividade->estemp->cnpj]['texto'] = $atividade->estemp->razao_social.' - '. $atividade->regra->tributo->nome;
+            $download_link[$atividade->estemp->cnpj]['link'] = $path_link;
+        }
+
+        $regra = Regraenviolote::where('id_empresa', $atividade->emp_id)->where('id_tributo', $atividade->regra->tributo_id)->first();   
+        if (!empty($download_link)) {    
+            $this->enviarEmailLote($download_link, $regra->email_1, $regra->email_2, $regra->email_3, $data_envio);
+        }
+    }
+
+
+    public function enviarEmailLote($array, $email_1, $email_2, $email_3, $data_envio = '')
+    {   
+        $key = 'AIzaSyBI3NnOJV5Zt-hNnUL4BUCaWIgGugDuTC8';
+        $Googl = new Googl($key);
+        foreach ($array as $L => $F) {
+            $arr[$L]['texto'] = $F['texto'];
+            $arr[$L]['link'] = $Googl->shorten($F['link']);
+        }
+
+        $dados = array('dados' => $arr, 'emails' => array($email_1, $email_2, $email_3));
+        $data['linkDownload'] = $dados['dados'];
+
+        $dataExibe = date('d/m/Y');
+
+        $subject = "TAX CALENDAR - Entrega das obrigações em ".$dataExibe.".";
+        $data['subject']      = $subject;
+        $data['data']         = $dataExibe;
+        foreach($dados['emails'] as $user)
+        {   
+            if (!empty($user)) {
+                $this->eService->sendMail($user, $data, 'emails.notification-envio-lote', true);
+            }
+            
+        }
+        return;
     }
 
     public function reprovar($id)

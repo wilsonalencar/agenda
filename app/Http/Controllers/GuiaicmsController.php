@@ -472,8 +472,13 @@ class GuiaicmsController extends Controller
                     }
 
                     $icms['DATA'] = date('Y-m-d H:i:s');
-                    Guiaicms::create($icms);
+                    if (!empty($_GET['getType'])) {
+                        $input['USUARIO'] = Auth::user()->id;
+                        echo "<pre>";
+                        print_r($Input);exit;
+                    }
 
+                    Guiaicms::create($icms);
                     $destino = str_replace('/imported', '', $value['path']);
                     if (file_exists($destino)) {
                         copy($destino, $value['path']);

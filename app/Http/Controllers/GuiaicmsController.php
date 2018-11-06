@@ -1957,20 +1957,13 @@ periodo ref.([^{]*)~i', $str, $match);
         }
 
         if (!empty($this->letras($icms[0]['VLR_RECEITA']))) {
-            preg_match('~valor ([^{]*)~i', $str, $match);
-        if (!empty($match)) {
-            $i = explode(" ", trim($match[1]));
-            $a = explode("\n", trim($i[0]));
-            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
-        }
-        }
+            preg_match('~total
 
-        if (!empty($this->letras($icms[0]['VLR_TOTAL']))) {
-            preg_match('~total ([^{]*)~i', $str, $match);
+r\$([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode(" ", trim($match[1]));
-            $a = explode("\n", trim($i[0]));
-            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
         }
         }
 

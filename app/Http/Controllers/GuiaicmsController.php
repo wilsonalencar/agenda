@@ -66,7 +66,7 @@ class GuiaicmsController extends Controller
             $municipio = Municipio::where('codigo','=',$estabelecimento->cod_municipio)->first();
             $input['UF'] = $municipio->uf;
             $input['USUARIO'] = Auth::user()->id;
-            $input['DATA'] = date('Y-m-d');
+            $input['DATA'] = date('Y-m-d H:i:s');
             $input['CNPJ'] = $this->numero($input['CNPJ']);
 
             $input['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', $input['VLR_RECEITA']));
@@ -1067,11 +1067,37 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
-
        }
-       echo '<prE>';
-       print_r($icms);exit;
+
+       if (strlen($icms['MULTA_MORA_INFRA'])  <= 2) {
+
+           preg_match('~receber ate :([^{]*)~i', $str, $match);
+           if (!empty($match)) {
+               $i = explode(' ', trim($match[1]));
+               $valorData = trim(substr($i[0], 0, 10));
+               $data_vencimento = str_replace('/', '-', $valorData);
+               $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+           }
+
+           preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 - correcao: 11 - acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
+               if (!empty($match)) {
+                  $i = explode('
+', trim($match[1]));
+                   $a = explode(' ', $i[2]);
+                   $icms['VLR_RECEITA'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[4]))));
+                   $icms['MULTA_MORA_INFRA'] =  str_replace(',', '.', str_replace('.', '', $a[2]));
+          }
+
+
+           preg_match('~01 - cod. receita: 02 - referencia: 03 - identificacao: 04 - doc. origem: 05 - vencimento: 06 - documento: 07 - cod. munic.: 08 - taxa: 09 - principal: 10 - correcao: 11 - acrescimo: 12 - multa: 13 - honorarios: 14 - total:([^{]*)~i', $str, $match);
+               if(!empty($match)){
+                   $i = explode('
+', trim($match[1]));
+                   $a = explode(' ', $i[3]);
+                   $icms['VLR_TOTAL'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[9]))));
+                   $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $a[5]));
+                }
+            }
         
         fclose($handle);
         $icmsarray = array();
@@ -2128,6 +2154,21 @@ r\$
                 }
             }
         }
+
+        
+        if (empty($this->numero($icms['COD_RECEITA']))) {
+           preg_match('~01.cf/df 02.cod receita 03.cota ou refer. 04.vencimento 05.exercicio([^{]*)~i', $str, $match);
+           if(!empty($match)){
+               $i = explode('
+', $match[1]);
+
+               $a = explode(' ', $i[2]);
+               $icms['COD_RECEITA'] = $a[1];
+               $c = explode(' ', $i[3]);
+               $icms['REFERENCIA'] = $c[0];
+
+               }
+       }
 
     fclose($handle);
     $icmsarray = array();

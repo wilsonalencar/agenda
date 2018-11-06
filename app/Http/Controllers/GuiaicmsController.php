@@ -1945,15 +1945,37 @@ r\$
                 $icms[1]['IE'] = trim($this->numero($a[1]));
             }
         }
-        echo "<PrE>";
-        print_r($icms[0]);
-        echo "<hr />";
-        echo "<pre>";
-        print_r($str);exit;
+
+        if (empty($imcs[0]['COD_RECEITA'])) {
+            preg_match('~receita
+
+periodo ref.([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(" ", trim($match[1]));
+            $icms[0]['COD_RECEITA'] = trim($i[0]);
+        }
+        }
+
+        if (!empty($this->letras($icms[0]['VLR_RECEITA']))) {
+            preg_match('~valor ([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(" ", trim($match[1]));
+            $a = explode("\n", trim($i[0]));
+            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+        }
+        }
+
+        if (!empty($this->letras($icms[0]['VLR_TOTAL']))) {
+            preg_match('~total ([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(" ", trim($match[1]));
+            $a = explode("\n", trim($i[0]));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+        }
+        }
 
         fclose($handle);
         $icmsarray = array();
-        
         $icmsarray[0] = $icms[0];
         return $icmsarray;
     }

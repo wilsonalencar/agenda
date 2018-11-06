@@ -1119,6 +1119,13 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
                 }
             }
 
+        preg_match('~6 - documento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode("\n", trim($i[0]));
+            $icms['IE'] = $a[0];
+        }
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

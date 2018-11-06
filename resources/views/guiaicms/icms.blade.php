@@ -36,22 +36,23 @@
                 {!!  Form::select('multiple_select_uf[]', $uf, $ufselected, ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
             </div>
         </div>
+        <br>
         <div class="row">
-            <div class="col-md-2">     
+            <div class="col-md-3">     
                 {!! Form::label('inicio', 'Data Inicial Vencimento', ['class' => 'control-label']) !!}    
                 {!! Form::date('inicio', '', ['class' => 'form-control']) !!}
             </div>
-            <div class="col-md-2">         
+            <div class="col-md-3">         
                 {!! Form::label('fim', 'Data Final Vencimento', ['class' => 'control-label']) !!}
                 {!! Form::date('fim', '', ['class' => 'form-control']) !!}
             </div>
         </div>
         <div class="row">
-             <div class="col-md-2">         
+             <div class="col-md-3">         
                 {!! Form::label('inicio_leitura', 'Data Inicial Leitura', ['class' => 'control-label']) !!}
                 {!! Form::date('inicio_leitura', '', ['class' => 'form-control']) !!}
             </div>
-            <div class="col-md-2">         
+            <div class="col-md-3">         
                 {!! Form::label('fim_leitura', 'Data Final Leitura', ['class' => 'control-label']) !!}
                 {!! Form::date('fim_leitura', '', ['class' => 'form-control']) !!}
             </div>

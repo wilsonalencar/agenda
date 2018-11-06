@@ -1069,6 +1069,26 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
         }
        }
 
+
+       if (strlen($icms['CODBARRAS']) <= 6) {
+           preg_match('~\*\*\* autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(' ', trim($match[1]));
+                $codbarras = '';
+                foreach ($i as $k => $x) {
+                    if (strlen($x) > 6) {
+                        $codbarras .= $this->numero($x); 
+                    }
+                    if ($k == 4) {
+                        break;
+                    }
+                }
+                
+                $icms['CODBARRAS'] = trim($codbarras);
+            }
+        }
+       
+
        if (strlen($icms['MULTA_MORA_INFRA'])  <= 2) {
 
            preg_match('~receber ate :([^{]*)~i', $str, $match);
@@ -1098,13 +1118,13 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
                    $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $a[5]));
                 }
             }
-        
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
         return $icmsarray;
     }
-
+    
     public function icmsPB($value)
     {
         $icms = array();

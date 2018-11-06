@@ -3262,8 +3262,8 @@ juros de mora
         $sql = "SELECT A.*, B.empresa_id, B.codigo, C.uf, D.centrocusto FROM guiaicms A LEFT JOIN estabelecimentos B on A.CNPJ = B.cnpj inner join municipios C on B.cod_municipio = C.codigo left join centrocustospagto D on B.id = D.estemp_id WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.CODBARRAS <> ''"; 
 
         if (!empty($input['inicio_leitura']) && !empty($input['fim_leitura'])) {
-            $inicio_leitura = $input['inicio_leitura'];
-            $fim_leitura = $input['fim_leitura'];
+            $inicio_leitura = $input['inicio_leitura'].' 00:00:00';
+            $fim_leitura = $input['fim_leitura'].' 23:59:59';
             
             $sql .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
         }
@@ -3300,8 +3300,8 @@ juros de mora
         }
 
         if (!empty($input['inicio_leitura']) && !empty($input['fim_leitura'])) {
-            $inicio_leitura = $input['inicio_leitura'];
-            $fim_leitura = $input['fim_leitura'];
+            $inicio_leitura = $input['inicio_leitura'].' 00:00:00';
+            $fim_leitura = $input['fim_leitura'].' 23:59:59';
                 
             $sql_semcod .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
         }

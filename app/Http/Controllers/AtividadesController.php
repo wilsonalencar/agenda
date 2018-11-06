@@ -357,15 +357,15 @@ class AtividadesController extends Controller
             $download_link[$atividade->estemp->cnpj]['texto'] = $atividade->estemp->razao_social.' - '. $atividade->regra->tributo->nome;
             $download_link[$atividade->estemp->cnpj]['link'] = $path_link;
         }
-
+        
         $regra = Regraenviolote::where('id_empresa', $atividade->emp_id)->where('id_tributo', $atividade->regra->tributo_id)->first();   
         if (!empty($download_link)) {    
-            $this->enviarEmailLote($download_link, $regra->email_1, $regra->email_2, $regra->email_3, $data_envio);
+            $this->enviarEmailLote($download_link, $regra->email_1, $regra->email_2, $regra->email_3);
         }
     }
 
 
-    public function enviarEmailLote($array, $email_1, $email_2, $email_3, $data_envio = '')
+    public function enviarEmailLote($array, $email_1, $email_2, $email_3)
     {   
         $key = 'AIzaSyBI3NnOJV5Zt-hNnUL4BUCaWIgGugDuTC8';
         $Googl = new Googl($key);

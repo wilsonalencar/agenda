@@ -1945,6 +1945,11 @@ r\$
                 $icms[1]['IE'] = trim($this->numero($a[1]));
             }
         }
+        echo "<PrE>";
+        print_r($icms[0]);
+        echo "<hr />";
+        echo "<pre>";
+        print_r($str);exit;
 
         fclose($handle);
         $icmsarray = array();

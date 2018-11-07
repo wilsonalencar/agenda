@@ -108,7 +108,7 @@ class ArquivosController extends Controller
                 foreach ($singlefilename as $xx => $v) {
                 }
 
-                $v = $v.'_'.$index;
+                $v = $index.'_'.$v;
                 if (file_exists($file)) {
                     $zip->addFile($file, $v);
                 }

@@ -474,8 +474,6 @@ class GuiaicmsController extends Controller
                     $icms['DATA'] = date('Y-m-d H:i:s');
                     if (!empty($_GET['getType'])) {
                         $input['USUARIO'] = Auth::user()->id;
-                        echo "<pre>";
-                        print_r($Input);exit;
                     }
 
                     Guiaicms::create($icms);

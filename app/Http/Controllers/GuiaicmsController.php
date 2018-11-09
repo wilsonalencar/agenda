@@ -1073,6 +1073,25 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['CODBARRAS'] = trim($codbarras);
         }
        }
+       
+       if (strlen($icms['CODBARRAS']) <= 6) {
+           preg_match('~\*\*\* autenticacao no verso \*\*\*([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(' ', trim($match[1]));
+                $codbarras = '';
+                foreach ($i as $k => $x) {
+                    if (strlen($x) > 6) {
+                        $codbarras .= $this->numero($x); 
+                    }
+                    if ($k == 4) {
+                        break;
+                    }
+                }
+                
+                $icms['CODBARRAS'] = trim($codbarras);
+            }
+        }
+       
 
        if (strlen($icms['MULTA_MORA_INFRA'])  <= 2) {
 
@@ -1103,13 +1122,20 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
                    $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $a[5]));
                 }
             }
-        
+
+        preg_match('~6 - documento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode("\n", trim($i[0]));
+            $icms['IE'] = $a[0];
+        }
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
         return $icmsarray;
     }
-
+    
     public function icmsPB($value)
     {
         $icms = array();
@@ -1924,9 +1950,29 @@ r\$
             }
         }
 
+        if (empty($imcs[0]['COD_RECEITA'])) {
+            preg_match('~receita
+
+periodo ref.([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(" ", trim($match[1]));
+            $icms[0]['COD_RECEITA'] = trim($i[0]);
+        }
+        }
+
+        if (!empty($this->letras($icms[0]['VLR_RECEITA']))) {
+            preg_match('~total
+
+r\$([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
+        }
+        }
+
         fclose($handle);
         $icmsarray = array();
-        
         $icmsarray[0] = $icms[0];
         return $icmsarray;
     }
@@ -3240,8 +3286,8 @@ juros de mora
         $sql = "SELECT A.*, B.empresa_id, B.codigo, C.uf, D.centrocusto FROM guiaicms A LEFT JOIN estabelecimentos B on A.CNPJ = B.cnpj inner join municipios C on B.cod_municipio = C.codigo left join centrocustospagto D on B.id = D.estemp_id WHERE A.DATA_VENCTO BETWEEN '".$data_inicio."' AND '".$data_fim."' AND A.CODBARRAS <> ''"; 
 
         if (!empty($input['inicio_leitura']) && !empty($input['fim_leitura'])) {
-            $inicio_leitura = $input['inicio_leitura'];
-            $fim_leitura = $input['fim_leitura'];
+            $inicio_leitura = $input['inicio_leitura'].' 00:00:00';
+            $fim_leitura = $input['fim_leitura'].' 23:59:59';
             
             $sql .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
         }
@@ -3278,8 +3324,8 @@ juros de mora
         }
 
         if (!empty($input['inicio_leitura']) && !empty($input['fim_leitura'])) {
-            $inicio_leitura = $input['inicio_leitura'];
-            $fim_leitura = $input['fim_leitura'];
+            $inicio_leitura = $input['inicio_leitura'].' 00:00:00';
+            $fim_leitura = $input['fim_leitura'].' 23:59:59';
                 
             $sql_semcod .= " AND A.DATA BETWEEN '".$inicio_leitura."' AND '".$fim_leitura."'";
         }

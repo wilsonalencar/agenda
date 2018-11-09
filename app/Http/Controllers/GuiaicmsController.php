@@ -1090,7 +1090,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 ', trim($match[1]));
                    $a = explode(' ', $i[2]);
                    $icms['VLR_RECEITA'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[4]))));
-                   $icms['MULTA_MORA_INFRA'] =  str_replace(',', '.', str_replace('.', '', $a[2]));
+                   $icms['TAXA'] =  str_replace(',', '.', str_replace('.', '', $a[2]));
           }
 
 
@@ -1100,10 +1100,18 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 ', trim($match[1]));
                    $a = explode(' ', $i[3]);
                    $icms['VLR_TOTAL'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[9]))));
-                   $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $a[5]));
+                   $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $a[5]));
                 }
             }
         
+           preg_match('~6 - documento([^{]*)~i', $str, $match);
+           if (!empty($match)) {
+               $i = explode(' ', trim($match[1]));
+               $a = explode("\n", trim($i[0]));
+            
+               $icms['IE'] = $a[0];
+           }
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

@@ -195,7 +195,11 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
     Route::get('consulta_conta_corrente', array('as' => 'consulta_conta_corrente', 'uses' => 'PagesController@consulta_conta_corrente'));
 
     Route::get('consulta_conta_corrente_rlt_1', array('as' => 'consulta_conta_corrente_rlt_1', 'uses' => 'PagesController@relatorio_1'));
-    
+
+    Route::get('sped_fiscal', array('as' => 'sped_fiscal', 'uses' => 'SpedFiscalController@index'));
+
+    Route::get('sped_fiscal/download/{id}', array('as' => 'download_sped', 'uses' => 'SpedFiscalController@DownloadPath'));
+
     Route::get('/download/{file}', 'DownloadsController@download');
 
     Route::resource('entregas', 'EntregasController');

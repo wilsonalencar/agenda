@@ -61,6 +61,8 @@
 
                                                     <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
 
+                                                    <li><a href="{{ route('sped_fiscal') }}">Consulta Sped Fiscal</a></li>
+
                                                     @if ( Auth::user()->hasRole('gbravo'))
                                                         <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
                                                     @endif

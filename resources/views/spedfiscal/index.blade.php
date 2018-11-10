@@ -13,7 +13,8 @@
 <h1>Consulta Status Sped Fiscal</h1>
 <p class="lead">Segue a lista de todas as consultas cadastradas.</p>
 <hr>
-   <table class="table table-bordered display" id="myTableAprovacao">   
+<div class="table-default table-responsive">
+   <table class="table display" id="myTableAprovacao">   
         <thead>
             <tr>
                 <th>ID</th>
@@ -39,7 +40,7 @@
         @endif 
         </tbody>
     </table>                                            
-
+</div>
 <script type="text/javascript">
     $(document).ready(function (){
         $('#myTableAprovacao').dataTable({

@@ -46,7 +46,7 @@ class GuiaicmsController extends Controller
     public function listar()
     {   
         $status = 'success';
-        $Registros = Guiaicms::all();
+        $Registros = DB::Select('SELECT A.*, B.codigo as CODIGO FROM guiaicms A LEFT JOIN estabelecimentos B ON A.cnpj = B.cnpj');
         return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
     }
 

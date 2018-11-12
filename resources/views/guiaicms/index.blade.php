@@ -31,8 +31,9 @@
                 <th>CNPJ </th>
                 <th>REFERENCIA </th>
                 <th>DATA_VENCTO </th>
-                <th>VLR_TOTAL </th>
+                <th>CÓDIGO ESTAB </th>
                 <th>UF </th>
+                <th>VLR_TOTAL </th>
                 <th></th>
             </tr>
         </thead>
@@ -41,18 +42,19 @@
             @foreach ($registros as $key => $registro)  
             <tr>
             <?php
-            $valorData = $registro['DATA_VENCTO'];
+            $valorData = $registro->DATA_VENCTO;
             $data_vencimento = str_replace('/', '-', $valorData);
-            $registro['DATA_VENCTO'] = date('d/m/Y', strtotime($data_vencimento));
+            $registro->DATA_VENCTO = date('d/m/Y', strtotime($data_vencimento));
             ?>
-                <td><?php if (strlen($registro['CNPJ']) == 14) {
-                    echo printMaskCnpj($registro['CNPJ']);
-                } else { echo $registro['CNPJ']; } ?> </td>
-                <td><?php echo $registro['REFERENCIA']; ?> </td>
-                <td><?php echo $registro['DATA_VENCTO']; ?> </td>
-                <td>R$ <?php echo $registro['VLR_TOTAL']; ?> </td>
-                <td><?php echo $registro['UF']; ?> </td>
-                <td align="center"><a href="{{ route('guiaicms.editar', $registro['ID']) }}" class="btn btn-default btn-sm"><i class="fa fa-edit"></i><a href="{{ route('guiaicms.excluir', $registro['ID']) }}" class="btn btn-default btn-sm"><i class="fa fa-trash"></i></a>
+                <td><?php if (strlen($registro->CNPJ) == 14) {
+                    echo printMaskCnpj($registro->CNPJ);
+                } else { echo $registro->CNPJ; } ?> </td>
+                <td><?php echo $registro->REFERENCIA; ?> </td>
+                <td><?php echo $registro->DATA_VENCTO; ?> </td>
+                <td><?php echo $registro->CODIGO; ?> </td>
+                <td><?php echo $registro->UF; ?> </td>
+                <td>R$ <?php echo $registro->VLR_TOTAL; ?> </td>
+                <td align="center"><a href="{{ route('guiaicms.editar', $registro->ID) }}" class="btn btn-default btn-sm"><i class="fa fa-edit"></i><a href="{{ route('guiaicms.excluir', $registro->ID) }}" class="btn btn-default btn-sm"><i class="fa fa-trash"></i></a>
                </td>
             </tr> 
             @endforeach

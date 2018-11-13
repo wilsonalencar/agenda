@@ -43,10 +43,16 @@ class GuiaicmsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function listar()
+    public function listar(Request $request)
     {   
         $status = 'success';
-        $Registros = DB::Select('SELECT A.*, B.codigo as CODIGO FROM guiaicms A LEFT JOIN estabelecimentos B ON A.cnpj = B.cnpj');
+        $sql = 'SELECT A.*, B.codigo as CODIGO FROM guiaicms A LEFT JOIN estabelecimentos B ON A.cnpj = B.cnpj';
+
+        if ($request->input('data_inicio') && $request->input('data_termino')) {
+            $sql .= ' WHERE DATE_FORMAT(A.DATA, "%Y-%m-%d") BETWEEN "'.$request->input("data_inicio").'" AND "'.$request->input("data_termino").'"';
+        }
+
+        $Registros = DB::Select($sql);
         return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
     }
 
@@ -1968,6 +1974,24 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
         }
         }
+
+        if (strlen($icms[0]['COD_RECEITA']) > 6) {
+            preg_match('~periodo ref.([^{]*)~i', $str, $match);
+            $i = explode("\n", trim($match[1]));
+            $arr = explode(' ', $i[0]);
+            $icms[0]['COD_RECEITA'] = trim($arr[1]);
+        }
+
+        if (strlen($icms[0]['VLR_RECEITA']) > 11 ) {
+            preg_match('~autenticacao
+
+total([^{]*)~i', $str, $match);
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($i[3])));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[3])));
+        }
+
+
 
         fclose($handle);
         $icmsarray = array();

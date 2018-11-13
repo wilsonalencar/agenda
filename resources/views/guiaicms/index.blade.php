@@ -8,6 +8,7 @@
     <div class="row">
         <div class="col-md-4">
             <h1 class="title">Guias Cadastradas</h1>
+            <p class="lead"><button href="#" id="filtros" class="btn btn-default" data-toggle="modal" data-target="#myModalFill">Filtros</button> </p>
         </div>
     </div>
 </div>
@@ -61,6 +62,45 @@
         @endif 
         </tbody>
     </table>                                            
+
+<div id="myModalFill" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Filtros de Data</h4>
+      </div>
+      <div class="modal-body">
+        {!! Form::open([
+            'route' => 'guiaicms.listar',
+            'method' => 'GET'
+        ]) !!}
+
+        <div class="form-group">
+            <div style="width:50%">
+                {!! Form::label('data_inicio', 'Data de busca Inicial', ['class' => 'control-label'] )  !!}
+                {!!  Form::date('data_inicio', NULL , NULL, ['class' => 'form-control s2']) !!}            
+            </div>
+        </div>
+        <div class="form-group">
+            <div style="width:50%">
+                {!! Form::label('data_termino', 'Data de Busca Final', ['class' => 'control-label'] )  !!}
+                {!!  Form::date('data_termino', NULL , NULL, ['class' => 'form-control s2']) !!}            
+            </div>
+        </div>
+
+        {!! Form::submit('Filtrar', ['class' => 'btn btn-success']) !!}
+        {!! Form::close() !!}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Voltar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script type="text/javascript">
 $(document).ready(function (){

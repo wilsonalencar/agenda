@@ -13,6 +13,7 @@ use App\Models\Estabelecimento;
 use App\Services\EntregaService;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\googl;
 use App\Models\Event;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -43,24 +44,37 @@ class SpedFiscalController extends Controller
         if (!empty($raizes)) {
             foreach ($raizes as $x => $raiz) {
                 $scandir = scandir($raiz);
+                $raiz_name = explode('/', $raiz);
                 foreach ($scandir as $x => $k) {
+                    foreach ($raiz_name as $ll => $singlePath) {}
                     if (strlen($k) > 2) {
-                        $files[] = $raiz.'/'.$k;
+                        $files[$singlePath][] = $raiz.'/'.$k;
                     }
                 }
             }
         }
-        
-        if (!empty($files)) {
-            foreach ($files as $x => $file) {
-                $explode = explode('/', $file);
-                foreach ($explode as $l => $filename) {}
-                $explode = explode('.', $filename);
 
-                foreach ($explode as $randon => $exploded) {
-                    if ($exploded == 'TXT-ERRO') {
-                        $this->createCritica($file);
+        if (!empty($files)) {
+
+            foreach ($files as $estab_id => $multiple_files) {
+                $create = false;
+                $errorFile = array();
+                foreach ($multiple_files as $key => $single_files) {
+                    $exploded_final = explode('/', $single_files);
+                    foreach ($exploded_final as $xx => $poped_final) {}
+                    $explode = explode('.', $poped_final);
+                    foreach ($explode as $randon => $exploded) {
+                        if ($exploded == 'TXT-ERRO') {
+                            $create = true;
+                            $errorFile = $single_files;
+                        }
                     }
+                }
+                if ($create) {
+                    $zipPath = $this->createZipWithFiles($multiple_files);
+                    $downloadPath = $this->getZipDownloadPath($zipPath);
+                    $this->createCritica($errorFile, $downloadPath);
+                    continue;
                 }
             }
         }
@@ -68,12 +82,49 @@ class SpedFiscalController extends Controller
         echo "Job rodado com sucesso";exit;
     }
 
-    public function createCritica($arquivo)
+    private function getZipDownloadPath($zipPath)
+    {
+        $exploded = explode('/', $zipPath);
+        $a = 0;
+        $download = $_SERVER['SERVER_NAME'];
+        foreach ($exploded as $key => $separated) {
+            if ($separated == 'spedfiscal' || $a) {
+                $a = 1;
+                $download .= '/'.$separated;
+            }
+        }
+        return $download;
+    }
+
+    private function createZipWithFiles($files){
+
+        $fileName = 'spedfiscal/'.date('dmYHis').'.zip';
+        $zip = new \ZipArchive();
+        touch($fileName);
+
+        $res = $zip->open($fileName, \ZipArchive::CREATE);
+        if($res === true){
+            foreach ($files as $index => $file) {
+                $singlefilename = explode('/', $file);
+                foreach ($singlefilename as $xx => $v) {
+                }
+                if (file_exists($file)) {
+                    $zip->addFile($file, $v);
+                }
+            }
+
+            $zip->close();
+        }
+
+        return public_path($fileName);
+    }
+
+    public function createCritica($arquivo, $zipPath)
     {
         $exploded = explode('/', $arquivo);
         $empresaraiz = explode('_', $exploded[2]);
         $empresacnpjini = $empresaraiz[1];
-        
+        foreach ($exploded as $key => $errorFile) { }
         $empresaraizid = 0;
         $empresaRaizBusca = DB::select('select id, razao_social, cnpj from empresas where LEFT(cnpj, 8)= "'.$empresacnpjini.'"');
         if (!empty($empresaRaizBusca[0]->id)) {
@@ -86,18 +137,18 @@ class SpedFiscalController extends Controller
         $filename = $exploded[6];
         $estemp = Estabelecimento::where('codigo', $filial)->where('empresa_id', $empresaraizid)->first();
 
-        //buscar email através de empresa e tributo
         $user_id = $this->loadResponsavel($empresaraizid, $estemp->id);
-        //enviando email
+        
+        $key = 'AIzaSyBI3NnOJV5Zt-hNnUL4BUCaWIgGugDuTC8';
+        $Googl = new Googl($key);
+
         $now = date('d/m/Y');
-        $subject = "CRÍTICAS SPED FISCAL ICMS-IPI FILIAL : ".$filial." - ".$empresa_razao;
-        $text = "Segue arquivo de críticas da empresa ".$empresa_cnpj.", código da filial ".$filial.", para análise e correção.";
-
-        $data = array('subject'=>$subject,'messageLines'=>$text);
-
+        $data['subject'] = "CRÍTICAS SPED FISCAL ICMS-IPI FILIAL : ".$filial." - ".$empresa_razao;
+        $data['messageLines'] = "Segue arquivo de críticas da empresa ".$empresa_cnpj.", código da filial ".$filial.", para análise e correção. \n \n <a href='".$Googl->shorten($zipPath)."'>Download</a> / Arquivo de Erro : ".$errorFile;
+        
         if (!empty($user_id)) {
             $user = User::findOrFail($user_id);
-            $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
+            $this->eService->sendMail($user, $data, 'emails.notification-spedfiscal-error', false);
         }
     }    
 
@@ -307,6 +358,18 @@ class SpedFiscalController extends Controller
         }
     }
 
+    private function ForceZipDownload($filepath)
+    {
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="'.basename($filepath).'"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filepath));
+        flush();
+        readfile($filepath);   
+    }
 
     private function ForceDown($filepath)
     {

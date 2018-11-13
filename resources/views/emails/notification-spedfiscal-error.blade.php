@@ -6,6 +6,14 @@
     <h1><font color="#B22222"><b>B</b></font>ravo - Tax Calendar</h1>
     <div>
     {{ $data['messageLines'] }}
+    <br><br></div>
+
+    <div>
+    {{ $data['messageLines_2'] }}
+    </div><br/>
+
+    <div>
+    <a href="{{ $data['downloadLink'] }}">Download File</a>
     </div>
 
     <br/>

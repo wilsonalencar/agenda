@@ -84,6 +84,7 @@ class SpedFiscalController extends Controller
 
     private function getZipDownloadPath($zipPath)
     {
+        $zipPath = str_replace("\\", '/', $zipPath);
         $exploded = explode('/', $zipPath);
         $a = 0;
         $download = $_SERVER['SERVER_NAME'];
@@ -144,7 +145,9 @@ class SpedFiscalController extends Controller
 
         $now = date('d/m/Y');
         $data['subject'] = "CRÍTICAS SPED FISCAL ICMS-IPI FILIAL : ".$filial." - ".$empresa_razao;
-        $data['messageLines'] = "Segue arquivo de críticas da empresa ".$empresa_cnpj.", código da filial ".$filial.", para análise e correção. \n \n <a href='".$Googl->shorten($zipPath)."'>Download</a> / Arquivo de Erro : ".$errorFile;
+        $data['messageLines'] = "Segue arquivo de críticas da empresa ".$empresa_cnpj.", código da filial ".$filial.", para análise e correção.";
+        $data['messageLines_2'] = " Arquivo de Erro : ".$errorFile;
+        $data['downloadLink'] = $Googl->shorten($zipPath);
         
         if (!empty($user_id)) {
             $user = User::findOrFail($user_id);

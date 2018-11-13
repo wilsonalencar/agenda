@@ -9,6 +9,7 @@ use App\Models\Atividade;
 use App\Models\Regra;
 use App\Models\Tributo;
 use App\Models\Empresa;
+use App\Models\Estabelecimento;
 use App\Services\EntregaService;
 use App\Models\User;
 use App\Models\Role;
@@ -28,16 +29,140 @@ class SpedFiscalController extends Controller
 
     public function __construct(EntregaService $service)
     {
-        if (!session()->get('seid')) {
-            echo "Nenhuma empresa Selecionada.<br/><br/><a href='home'>VOLTAR</a>";
-            exit;
-        }
-
         $this->eService = $service;
-
         if (!Auth::guest() && $this->s_emp == null && !empty(session()->get('seid'))) {
             $this->s_emp = Empresa::findOrFail(session()->get('seid')); 
         }
+    }
+
+    public function job()
+    {
+        $files = array();
+        $Emps = Empresa::All();
+        $raizes = $this->getPathNames($Emps);
+        if (!empty($raizes)) {
+            foreach ($raizes as $x => $raiz) {
+                $scandir = scandir($raiz);
+                foreach ($scandir as $x => $k) {
+                    if (strlen($k) > 2) {
+                        $files[] = $raiz.'/'.$k;
+                    }
+                }
+            }
+        }
+        
+        if (!empty($files)) {
+            foreach ($files as $x => $file) {
+                $explode = explode('/', $file);
+                foreach ($explode as $l => $filename) {}
+                $explode = explode('.', $filename);
+
+                foreach ($explode as $randon => $exploded) {
+                    if ($exploded == 'TXT-ERRO') {
+                        $this->createCritica($file);
+                    }
+                }
+            }
+        }
+
+        echo "Job rodado com sucesso";exit;
+    }
+
+    public function createCritica($arquivo)
+    {
+        $exploded = explode('/', $arquivo);
+        $empresaraiz = explode('_', $exploded[2]);
+        $empresacnpjini = $empresaraiz[1];
+        
+        $empresaraizid = 0;
+        $empresaRaizBusca = DB::select('select id, razao_social, cnpj from empresas where LEFT(cnpj, 8)= "'.$empresacnpjini.'"');
+        if (!empty($empresaRaizBusca[0]->id)) {
+            $empresaraizid = $empresaRaizBusca[0]->id;
+        }
+
+        $empresa_razao = $empresaRaizBusca[0]->razao_social;
+        $empresa_cnpj = $empresaRaizBusca[0]->cnpj;
+        $filial = $exploded[5];
+        $filename = $exploded[6];
+        $estemp = Estabelecimento::where('codigo', $filial)->where('empresa_id', $empresaraizid)->first();
+
+        //buscar email através de empresa e tributo
+        $user_id = $this->loadResponsavel($empresaraizid, $estemp->id);
+        //enviando email
+        $now = date('d/m/Y');
+        $subject = "CRÍTICAS SPED FISCAL ICMS-IPI FILIAL : ".$filial." - ".$empresa_razao;
+        $text = "Segue arquivo de críticas da empresa ".$empresa_cnpj.", código da filial ".$filial.", para análise e correção.";
+
+        $data = array('subject'=>$subject,'messageLines'=>$text);
+
+        if (!empty($user_id)) {
+            $user = User::findOrFail($user_id);
+            $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
+        }
+    }    
+
+    private function loadResponsavel($emp_id, $estemp_id)
+    {
+        $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = 1 and B.Emp_id = " .$emp_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$estemp_id. " AND B.Regra_geral = 'N') limit 1";
+
+        $retornodaquery = DB::select($query);
+
+        $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = 1 and B.Emp_id = " .$emp_id. " AND B.Regra_geral = 'S') limit 1";
+        
+        $queryGeral = DB::select($sql);
+        
+        $idanalistas = $retornodaquery;
+        if (empty($retornodaquery)) {
+            $idanalistas = $queryGeral;   
+        }
+
+        if (!empty($idanalistas)) {
+            foreach ($idanalistas as $k => $analista) {
+                return $analista->id;
+            }
+        }
+    }
+
+    private function getPathNames($empresas)
+    {
+        $raizes = array();
+        $path = '';
+        $server = explode('/', $_SERVER['SCRIPT_FILENAME']);
+        if ($server[0] == 'C:' || $server[0] == 'F:') {
+            $path = 'W:';
+        }
+
+        $path .= '/storagebravobpo/';
+        
+        if (!empty($empresas)) {
+            foreach ($empresas as $key => $empresa) {
+                $a = explode(' ', $empresa->razao_social);
+                foreach ($empresa->estabelecimentos as $x => $estabelecimento) {
+                    $raizes[] = $path.$a[0].'_'.substr($empresa->cnpj, 0,8).'/pvaspedfiscal/retornopva/'.$estabelecimento->codigo;
+                }
+            }
+        }
+
+        if (!empty($raizes)) {
+            foreach ($raizes as $anyValue => $raiz) {
+                if (!is_dir($raiz)) {
+                    unset($raizes[$anyValue]);
+                } else {
+                    $scandir = scandir($raiz);
+                    $files = array();
+                    foreach ($scandir as $chave => $file) {
+                        if (strlen($file) > 2) {
+                            $files[] = $file;
+                        }
+                    }
+                    if (empty($files)) {
+                        unset($raizes[$anyValue]);
+                    }
+                }
+            }
+        }
+
+        return $raizes;
     }
 
     public function index()

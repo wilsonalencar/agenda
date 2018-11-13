@@ -225,6 +225,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('guiaicms/job', array('as'=>'guiaicms.Job', 'uses'=>'GuiaicmsController@Job'));
     Route::get('atividades/job', array('as'=>'guiaicms.jobAtividades', 'uses'=>'GuiaicmsController@jobAtividades'));
     Route::get('atividadeanalista/job', array('as'=>'atividadeanalista.job', 'uses'=>'AtividadeanalistaController@job'));
+    Route::get('spedfiscal/job', array('as'=>'spedfiscal.job', 'uses'=>'SpedFiscalController@job'));
 });
 
 // Just the Owner, Admin, Manager, MSAF, Supervisor and the Analyst

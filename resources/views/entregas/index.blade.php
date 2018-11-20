@@ -87,8 +87,11 @@ $(function() {
                                                     var url = '';
                                                     switch(row['status']) {
                                                         case 1:
-                                                                // url = '<a href="{{ route('upload.entrega', ':id_atividade') }}" style="margin-left:10px" class="btn btn-default btn-sm">Entregar</a>';
-                                                                // url = url.replace(':id_atividade', data);
+                                                                if (row['tipo_geracao'] == 'R') {
+                                                                    url = '<a href="{{ route('upload.entrega', ':id_atividade') }}" style="margin-left:10px" class="btn btn-default btn-sm">Entregar</a>';
+                                                                    url = url.replace(':id_atividade', data);
+                                                                }
+
                                                                 break;
 
                                                         case 2:

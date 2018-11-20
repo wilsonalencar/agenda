@@ -173,6 +173,7 @@
                                             <li><a href="{{ route('aprovacao') }}"><i class="fa fa-btn fa-upload"></i>Aprovação</a></li>
                                             <li><a href="{{ route('entregas.index') }}"><i class="fa fa-btn fa-upload"></i>Entregas</a></li>
                                             <li><a href="{{ route('guiaicms.search_criticas_entrega') }}"><i class="fa fa-btn fa-trash"></i>Criticas Entrega</a></li>
+                                            <li><a href="{{ route('sped_fiscal.transmitirlistar') }}"><i class="fa fa-btn fa fa-rss-square"></i>Transmitir Sped Fiscal</a></li>
                                         </ul>
                                     </div>
                                 </div>

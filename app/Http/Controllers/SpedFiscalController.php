@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\AtividadeAnalista;
 use App\Models\AtividadeAnalistaFilial;
 use App\Models\Atividade;
+use App\Models\TransmitirSped;
 use App\Models\Regra;
 use App\Models\Tributo;
 use App\Models\Empresa;
@@ -329,8 +330,8 @@ class SpedFiscalController extends Controller
     private function getLastName($file)
     {
 		$exploded_arquivo = explode('/', $file);
-		foreach ($exploded_arquivo as $k => $namefile) {
-		}
+        foreach ($exploded_arquivo as $k => $namefile) {
+        }
     	return $namefile;
     }
 
@@ -386,5 +387,104 @@ class SpedFiscalController extends Controller
         flush();
         readfile($filepath);
         unlink($filepath);
+    }
+
+    public function TransmissionIndex()
+    {
+        $user = User::findOrFail(Auth::user()->id);
+
+        $query = 'SELECT 
+                        A.id,
+                        A.descricao,
+                        E.codigo,
+                        E.cnpj,
+                        A.periodo_apuracao
+                    FROM
+                        atividades A
+                    LEFT JOIN
+                        transmitirsped F ON A.id = F.id_atividade
+                    INNER JOIN
+                        regras B on A.regra_id = B.id
+                    INNER JOIN 
+                        tributos C on B.tributo_id = C.id
+                    INNER JOIN 
+                        estabelecimentos E on A.estemp_id = E.id 
+                    WHERE  C.id = 1 AND A.status = 1 AND F.id_atividade IS NULL AND A.emp_id = '.$this->s_emp->id;
+
+        $table = DB::select($query);
+   
+        if (!empty($table)) {
+            foreach ($table as $key => $activities) {
+                $table[$key]->color = $this->getFileContent($activities->id);
+                if ($table[$key]->color != 'Blue') {
+                    unset($table[$key]);
+                }
+            }
+        }
+
+        return view('spedfiscal.transmitir')->with('table',$table);
+    }
+
+    public function transmitir(Request $request)
+    {
+        $input = $request->all();
+        $activities = array();
+
+        if (!empty($input)) {
+            foreach ($input as $index => $xValue) {
+                if ($xValue == 'on') {
+                    $activities[] = $index;
+                }
+            }
+        }
+
+        $files = array();
+        if (!empty($activities)) {
+            foreach ($activities as $x => $id) {
+                $files[$id] = $this->getFileContent($id, true);
+            }
+        }
+
+        $arquivofinal = array(); 
+        foreach ($files as $key => $first) {
+            foreach ($first as $index => $value) {
+                $namefile = $this->getLastName($value);
+                $exploded_namefile = explode('.', $namefile);
+                foreach ($exploded_namefile as $x => $finalvalue) {
+                    if (count($exploded_namefile) == 2 && ($finalvalue == 'txt' || $finalvalue == 'TXT')) {
+                        $arquivofinal[$key] = $value;
+                    }
+                }        
+            }
+        }
+
+        if (!empty($arquivofinal)) {
+            foreach ($arquivofinal as $x => $single_path) {
+                $explodedWay = explode('/', $single_path);
+                $finalWay = '';
+                foreach ($explodedWay as $xx => $kk) {
+                    if ($kk == 'retornopva') {
+                        $name = $this->getLastName($single_path);
+                        $finalWay .= 'transmitir/'.$name;
+                        break;
+                    }                    
+                    $finalWay .= $kk.'/';
+                }
+
+                copy($single_path, $finalWay);
+                $this->createTransmissionHistoric($name, $x);
+            }
+        }
+    return redirect()->back()->with('status', 'Arquivos transmitidos com sucesso!');
+    }
+
+    private function createTransmissionHistoric($file, $id)
+    {
+        $array['id_atividade'] = $id;
+        $array['nome_arquivo'] = $file;
+        $array['data_copia'] = date('Y-m-d H:i:s');
+        $array['user'] = Auth::user()->id;
+
+        TransmitirSped::Create($array);
     }
 }

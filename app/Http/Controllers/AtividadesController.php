@@ -304,7 +304,7 @@ class AtividadesController extends Controller
         $atividade->data_aprovacao = date("Y-m-d H:i:s");
 
         $regra = Regraenviolote::where('id_empresa', $atividade->emp_id)->where('id_tributo', $atividade->regra->tributo_id)->get();
-        if (!empty($regra) && $regra[0]->envioaprovacao == 'S') {
+        if (count($regra) > 0 && $regra[0]->envioaprovacao == 'S') {
             $this->sendMail($atividade);    
         }
         $atividade->save();

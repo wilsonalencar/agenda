@@ -65,7 +65,7 @@
     chamadas++;
     setTimeout(function() {
         AjaxFunctionGrafico(key, array)
-    }, chamadas*15000);
+    }, chamadas*25000);
   }
 
   function AjaxFunctionGrafico(key, array)

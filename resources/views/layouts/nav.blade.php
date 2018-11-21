@@ -282,7 +282,23 @@
                             </div>
                         </div>
                     </li>
-                    @endif 
+                    @endif
+
+                    @if ( Auth::user()->hasRole('admin') || Auth::user()->hasRole('supervisor'))
+                        <li class="panel panel-default" id="dropdown">
+                            <a data-toggle="collapse" href="#documentacao"><i class="fa fa-file" aria-hidden="true"></i>Documentação</a>
+                            <div id="documentacao" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <ul class="nav navbar-nav">
+                                        <li class="panel panel-default" id="dropdown">
+                                            <li><a href="{{ route('documentacao.adicionar') }}"><i class="fa fa-btn fa-file-text-o"></i>Adicionar</a></li>
+                                            <li><a href="{{ route('documentacao.consultar') }}"><i class="fa fa-btn fa-file-text-o"></i>Consultar</a></li>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                         </li>
+                    @endif
                 @endif 
             </ul>
         </div><!-- /.navbar-collapse -->

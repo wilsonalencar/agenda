@@ -1,0 +1,66 @@
+@extends('layouts.master')
+
+@section('content')
+
+@include('partials.alerts.errors')
+<style type="text/css">
+    #container {
+        width: 100%;
+        text-align: center;
+    }
+
+    .box {
+        float: left;
+        width: 100px; height: 70px;
+        margin: 10px 20px;
+    }
+</style>
+<h1>Adicionar Novo Documento</h1>
+
+
+@if(Session::has('alert'))
+    <div class="alert alert-danger">
+         {!! Session::get('alert') !!}
+    </div>
+   
+@endif
+
+<hr>
+{!! Form::open([
+    'route' => 'documentacao.adicionar'
+]) !!}   
+
+    <div class="form-group">
+        <div style="width:100%, height:80%">
+        {!! Form::label('descricao', 'Descrição:', ['class' => 'control-label']) !!}
+        {!! Form::text('descricao', null, ['class' => 'form-control']) !!}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div style="width:50%,">
+        {!! Form::label('observacao', 'Observação:', ['class' => 'control-label']) !!}
+        {!! Form::textarea('observacao', null, ['class' => 'form-control']) !!}
+        </div>
+    </div>
+
+    <div class="form-group" style="width: 100%; height: 100%;">
+        {!! Form::open(array('url'=>'documentacao/upload','method'=>'POST', 'files'=>true)) !!}
+        <div class="control-group">
+            <div class="controls">
+                {!! Form::file('arquivo', array('class'=>'btn btn-default ')) !!}
+            </div>
+        </div>
+    </div>   
+        {!! Form::hidden('versao', '1.0', ['class' => 'form-control']) !!}
+        {!! Form::submit('Adicionar', ['class' => 'btn btn-default']) !!}
+        <div style="width: 100%" class="container" align="right">
+            {!! Form::label('versao', 'Versão: 1.0', ['class' => 'control-label']) !!}
+        </div>
+    </div>
+</div>
+
+{!! Form::close() !!}
+<hr/>
+
+@stop

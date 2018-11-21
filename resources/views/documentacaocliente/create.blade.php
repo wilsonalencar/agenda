@@ -27,7 +27,8 @@
 
 <hr>
 {!! Form::open([
-    'route' => 'documentacao.adicionar'
+    'route' => 'documentacao.adicionar',
+    'enctype' => 'multipart/form-data'
 ]) !!}   
 
     <div class="form-group">
@@ -45,10 +46,9 @@
     </div>
 
     <div class="form-group" style="width: 100%; height: 100%;">
-        {!! Form::open(array('url'=>'documentacao/upload','method'=>'POST', 'files'=>true)) !!}
         <div class="control-group">
             <div class="controls">
-                {!! Form::file('arquivo', array('class'=>'btn btn-default ')) !!}
+                <input type="file" name="image" class="form-control">
             </div>
         </div>
     </div>   

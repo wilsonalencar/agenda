@@ -2,9 +2,7 @@
 
 @section('content')
 
-@if (Session::has('message'))
-   <div class="alert alert-info">{{ Session::get('message') }}</div>
-@endif
+@include('partials.alerts.errors')
 
 <div class="content-top">
     <div class="row">
@@ -13,6 +11,14 @@
         </div>
     </div>
 </div>
+
+
+@if(Session::has('alert'))
+    <div class="alert alert-danger">
+         {!! Session::get('alert') !!}
+    </div>   
+@endif
+
 
 <div class="modal fade" id="myModalUpload" style="width: 100%;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -92,8 +98,8 @@
                         <td align="center">
                             <a href="{{ route('documentacao.editar', $value->id) }}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-edit"></i>
                             <a href="{{ route('documentacao.excluir', $value->id) }}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-trash"></i>
-                            <a href="{{}}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-upload"></i>
-                            <a href="" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-download"></i></a></td>
+                            <a href="" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-upload"></i>
+                            <a href="{{ route('documentacao.download', $value->id) }}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-download"></i></a></td>
                     </tr>
                     @endforeach
                 @endif 

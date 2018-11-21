@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estabelecimento;
-use Auth;
-use DB;
 use App\Models\Empresa;
 use App\Models\User;
 use App\Models\DocumentacaoCliente;
 use App\Services\EntregaService;
-use App\Http\Requests;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 use Yajra\Datatables\Datatables;
-use Illuminate\Http\Request;
+use App\Http\Requests;
+use Auth;
+use DB;
 
 
 class DocumentacaoClienteController extends Controller
@@ -30,8 +30,6 @@ class DocumentacaoClienteController extends Controller
 
     public function create(Request $request)
     {
-        $user = User::findOrFail(Auth::user()->id);
-
         $input = $request->all();
 
         if (!empty($input)) {
@@ -46,9 +44,11 @@ class DocumentacaoClienteController extends Controller
             $documento['id_user_autor'] = Auth::user()->id;
             $documento['versao'] = $input['versao'];
             $documento['observacao'] = $input['observacao'];
-            $documento['arquivo'] = $input['arquivo'];
 
-            $this->upload($input['arquivo']);
+            if ($request->hasFile('image')) {
+                $filename = $this->upload($request);
+                $documento['arquivo'] = $filename;
+            }
 
             DocumentacaoCliente::create($documento);
             return redirect()->back()->with('status', 'Documento adicionado com sucesso.');
@@ -63,12 +63,37 @@ class DocumentacaoClienteController extends Controller
             $this->msg = 'É necessário adicionar uma descrição.';
             return false;
         }
-        if (empty($input['arquivo'])) {
+
+        if (empty($input['image'])) {
             $this->msg = 'É necessário adicionar um documento.';
             return false;
         }
 
         return true;
+    }
+
+    public function download($id)
+    {
+        $documento = DocumentacaoCliente::findOrFail($id);
+        if (empty($documento->arquivo)) {
+            return redirect()->back()->with('alert', 'Não existe arquivo para o documento Cadastrado.');
+        }
+
+        $way = 'fiscal/'.$documento->arquivo;
+        if (!file_exists($way)) {
+            return redirect()->back()->with('alert', 'Arquivo cadastrado não existe na pasta.');
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="'.basename($way).'"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($way));
+        flush();
+        readfile($way);
+        return redirect()->back()->with('status', 'Arquivo baixado com sucesso.');
     }
 
     public function index()
@@ -82,7 +107,7 @@ class DocumentacaoClienteController extends Controller
         $user = User::findOrFail(Auth::user()->id);
 
         $input = $request->all();
-        $request = DocumentacaoCliente::findOrFail($id);
+        $documento = DocumentacaoCliente::findOrFail($id);
 
         if (!empty($input)) {
             
@@ -90,19 +115,23 @@ class DocumentacaoClienteController extends Controller
                 return redirect()->back()->with('alert', 'É necessário adicionar uma descrição.');
             }
 
-            $documento['descricao'] = $input['descricao'];
-            $documento['data_atualizacao'] = date('Y-m-d H:i:s');
-            $documento['id_user_atualiza'] = Auth::user()->id;
-            $documento['observacao'] = $input['observacao'];
+            $documento->descricao = $input['descricao'];
+            $documento->data_atualizacao = date('Y-m-d H:i:s');
+            $documento->id_user_atualiza = Auth::user()->id;
+            $documento->observacao = $input['observacao'];
+            
+            if ($request->hasFile('image')) {
+                $filename = $this->upload($request);
+                $documento->arquivo = $filename;
+                $documento->versao = $input['versao']+1;      
+            }
 
-            $request->fill($documento);
-            $request->save();
-
+            $documento->save();
             return redirect()->back()->with('status', 'Documento atualizado com sucesso.');
 
         }
 
-        return view ('documentacaocliente.editar')->with('request', $request);
+        return view ('documentacaocliente.editar')->with('request', $documento);
 
     }
 
@@ -120,35 +149,11 @@ class DocumentacaoClienteController extends Controller
 
     public function upload($image)
     {
-        // getting all of the post data
-        $file = Input::file('image');
-        echo "<pre>";
-        print_r($file);exit;
-        // checking file is valid.
-        if (Input::file('image')->isValid()) {
-            $atividade_id = Input::get('atividade_id');
+        $file = Input::file('image');    
+        $destinationPath = 'fiscal/'; 
+        $fileName = Input::file('image')->getClientOriginalName();
 
-            $atividade = Atividade::findOrFail($atividade_id);
-            
-            $destinationPath = 'uploads/'.$atividade_id; // upload path
-            $extension = Input::file('image')->getClientOriginalExtension(); // getting image extension
-            $fileName = time().'.'.$extension; // renameing image
-            $fileName = preg_replace('/\s+/', '', $fileName); //clear whitespaces
-
-            Input::file('image')->move($destinationPath, $fileName); // uploading file to given path
-
-            //Save status
-            $atividade->arquivo_comprovante = $fileName;
-            $atividade->save();
-
-            // sending back with message
-            Session::flash('success', 'Upload successfully');
-            return redirect()->route('arquivos.index')->with('status', 'Arquivo carregado com sucesso!');
-        }
-        else {
-            // sending back with error message.
-            Session::flash('error', 'Uploaded file is not valid');
-            return redirect()->route('arquivos.index')->with('status', 'Erro ao carregar o arquivo.');
-        }
+        Input::file('image')->move($destinationPath, $fileName); 
+        return $fileName;
     }
 }

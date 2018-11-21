@@ -27,7 +27,8 @@
 
 <hr>
 {!! Form::open([
-    'route' => ['documentacao.editar', $request->id]
+    'route' => ['documentacao.editar', $request->id],
+    'enctype' => 'multipart/form-data'
 ]) !!}
 
 <div class="col-md-8">
@@ -44,11 +45,25 @@
         {!! Form::textarea('observacao', $request->observacao, ['class' => 'form-control']) !!}
         </div>
     </div>
-        {!! Form::hidden('versao', $request->versao, ['class' => 'form-control']) !!}
-        {!! Form::submit('Atualizar', ['class' => 'btn btn-default']) !!}
-        <div style="width: 100%" class="container" align="right">
-            {!! Form::label('versao', 'Versão: '.$request->versao.'.0', ['class' => 'control-label']) !!}
+    
+    <?php  if (!empty($request->arquivo)) { ?>
+        {!! Form::label('versao', 'Arquivo Atual: '.$request->arquivo.'', ['class' => 'control-label']) !!} <br/>
+    <?php } else { ?>
+        {!! Form::label('versao', 'Arquivo Atual: -', ['class' => 'control-label']) !!} <br/>
+    <?php }?>
+    <div class="form-group" style="width: 100%; height: 100%;">
+        <div class="control-group">
+            <div class="controls">
+                <input type="file" name="image" class="form-control">
+            </div>
         </div>
+    </div>  
+
+    {!! Form::hidden('versao', $request->versao, ['class' => 'form-control']) !!}
+    {!! Form::submit('Atualizar', ['class' => 'btn btn-default']) !!}
+    <div style="width: 100%" class="container" align="right">
+        {!! Form::label('versao', 'Versão: '.$request->versao.'.0', ['class' => 'control-label']) !!}
+    </div>
 </div>
 
 {!! Form::close() !!}

@@ -2,7 +2,6 @@
 
 @section('content')
 
-@include('partials.alerts.errors')
 
 <div class="content-top">
     <div class="row">
@@ -12,6 +11,7 @@
     </div>
 </div>
 
+@include('partials.alerts.errors')
 
 @if(Session::has('alert'))
     <div class="alert alert-danger">
@@ -24,16 +24,21 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Upload de Comprovante</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Upload de Documento</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body" id="observacaoHTML" style="width: 100%; height: 100%;">
-        {!! Form::open(array('url'=>'documentacao/upload','method'=>'POST', 'files'=>true)) !!}
+        {!! Form::open([
+            'route' => 'documentacao.upload',
+            'enctype' => 'multipart/form-data'
+        ]) !!}   
+
          <div class="control-group">
           <div class="controls">
               {!! Form::file('image', array('class'=>'btn btn-default ')) !!}
+              <input type="hidden" name="id" id="documento_id">
           </div>
         </div>
         <div id="success"></div>
@@ -98,8 +103,9 @@
                         <td align="center">
                             <a href="{{ route('documentacao.editar', $value->id) }}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-edit"></i>
                             <a href="{{ route('documentacao.excluir', $value->id) }}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-trash"></i>
-                            <a href="" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-upload"></i>
-                            <a href="{{ route('documentacao.download', $value->id) }}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-download"></i></a></td>
+                            <a href="#" onclick="fileUpload(<?php echo $value->id;?>)" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-upload"></i></a>
+                            <a href="{{ route('documentacao.download', $value->id) }}" class="btn btn-default btn-sm" style="margin: 1px"><i class="fa fa-download"></i></a>
+                        </td>
                     </tr>
                     @endforeach
                 @endif 
@@ -137,7 +143,7 @@ $(document).ready(function (){
 
 function fileUpload(id)
 {   
-    $("#atividade_id").val(id);
+    $("#documento_id").val(id);
     $("#myModalUpload").modal(); 
 }
 

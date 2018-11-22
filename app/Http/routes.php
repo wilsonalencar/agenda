@@ -456,6 +456,8 @@ Route::group(['middleware' => ['web','auth','role:admin|supervisor']], function 
 
     Route::get('documentacao/editar/{id}', array('as'=>'documentacao.editar', 'uses'=>'DocumentacaoClienteController@update'));
     Route::post('documentacao/editar/{id}', array('as'=>'documentacao.editar', 'uses'=>'DocumentacaoClienteController@update'));
+    
+    Route::post('documentacao/upload', array('as'=>'documentacao.upload', 'uses'=>'DocumentacaoClienteController@uploadSingle'));
 
     Route::get('documentacao/excluir/{id}', array('as'=>'documentacao.excluir', 'uses'=>'DocumentacaoClienteController@destroy'));
     

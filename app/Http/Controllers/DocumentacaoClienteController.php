@@ -93,7 +93,6 @@ class DocumentacaoClienteController extends Controller
         header('Content-Length: ' . filesize($way));
         flush();
         readfile($way);
-        return redirect()->back()->with('status', 'Arquivo baixado com sucesso.');
     }
 
     public function index()
@@ -104,8 +103,6 @@ class DocumentacaoClienteController extends Controller
 
     public function update($id, Request $request)
     {
-        $user = User::findOrFail(Auth::user()->id);
-
         $input = $request->all();
         $documento = DocumentacaoCliente::findOrFail($id);
 
@@ -135,6 +132,28 @@ class DocumentacaoClienteController extends Controller
 
     }
 
+    public function uploadSingle(Request $request)
+    {
+        $input = $request->all();
+        $documento = DocumentacaoCliente::findOrFail($input['id']);
+
+        if (!empty($input)) {
+               
+            $documento->data_atualizacao = date('Y-m-d H:i:s');
+            $documento->id_user_atualiza = Auth::user()->id;
+            
+            if ($request->hasFile('image')) {
+                $filename = $this->upload($request);
+                $documento->arquivo = $filename;
+                $documento->versao = $documento->versao+1;      
+            }
+
+            $documento->save();
+            return redirect()->back()->with('status', 'Documento atualizado com sucesso.');
+        }
+
+    }
+
     public function destroy($id)
     {
         if (!empty($id)) {
@@ -151,7 +170,11 @@ class DocumentacaoClienteController extends Controller
     {
         $file = Input::file('image');    
         $destinationPath = 'fiscal/'; 
-        $fileName = Input::file('image')->getClientOriginalName();
+        
+        // $extension = Input::file('image')->getClientOriginalName();
+        $extension = Input::file('image')->getClientOriginalExtension(); // getting image extension
+        $fileName = time().'.'.$extension; // renameing image
+        $fileName = preg_replace('/\s+/', '', $fileName); //clear whitespaces
 
         Input::file('image')->move($destinationPath, $fileName); 
         return $fileName;

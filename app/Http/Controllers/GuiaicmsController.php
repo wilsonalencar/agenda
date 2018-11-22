@@ -409,6 +409,10 @@ class GuiaicmsController extends Controller
                $icmsarray = $this->icmsPR($value);
             }
 
+            if (strpos($arqu, 'MT') && substr($arqu, -10) == 'MT.txt bar') {
+               $icmsarray = $this->icmsMT($value);
+            }
+
             if (!empty($icmsarray)) {
                 foreach ($icmsarray as $key => $icms) {
                     if (empty($icms) || count($icms) < 6) {
@@ -621,6 +625,122 @@ class GuiaicmsController extends Controller
         }
 
         return true;
+    }
+
+    public function icmsMT($value)
+    {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['UF'] = 'MT';
+
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+
+        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($this->letras($file_content[2]) == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
+        preg_match('~05 - cnpj ou cpf([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['CNPJ'] = trim(preg_replace("/[^0-9]/", "", $i[0]));
+        }
+
+        preg_match('~06 - inscricao estadual([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['IE'] = trim($this->numero($i[0]));
+        }
+
+        preg_match('~25 - codigo([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['COD_RECEITA'] = trim($i[0]);
+        }
+
+        preg_match('~21 - periodo ref.([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['REFERENCIA'] = trim($i[4]);
+        }
+
+        preg_match('~22 - data vencto.([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $valorData = $i[0];
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($a[3])));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[1])));
+        }
+
+        preg_match('~33 - valor a recolher por extenso
+novecentos e quarenta e quatro reais e quinze centavos
+modelo aprovada pela portaria nº 085/2002([^{]*)~i', $str, $match);
+       if (!empty($match)) {
+           $i = explode("\n", trim($match[1]));
+           $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+           $icms['CODBARRAS'] = $codbarras;
+       }
+
+        fclose($handle);
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsRS($value)

@@ -3453,7 +3453,7 @@ juros de mora
 
         $funcao = '';
         if ($a[0] == 'C:' || $a[0] == 'F:') {
-            $path = 'F:';
+            $path = 'W:';
         }
         $path .= '/storagebravobpo/';
         $arquivos = scandir($path);
@@ -3599,7 +3599,7 @@ juros de mora
 
                 $date = time();
                 $path = $date.'.zip';
-                // $this->createZipFile($singlearray, $path);    
+                $this->createZipFile($singlearray, $path);    
             }
         }
     }   

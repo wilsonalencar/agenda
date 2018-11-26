@@ -3593,12 +3593,13 @@ juros de mora
 
         if (!empty($arr)) {
             foreach ($arr as $k => $singlearray) {
+                
+                $path = $singlearray['atividade'].'.zip';
+                
                 if (isset($singlearray['atividade'])) {
                     unset($singlearray['atividade']);
                 }
 
-                $date = time();
-                $path = $date.'.zip';
                 $this->createZipFile($singlearray, $path);    
             }
         }

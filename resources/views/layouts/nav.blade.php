@@ -284,6 +284,7 @@
                     </li>
                     @endif
 
+                    <?php if (!empty(session()->get('seid'))){ ?>
                     @if ( Auth::user()->hasRole('admin') || Auth::user()->hasRole('supervisor'))
                         <li class="panel panel-default" id="dropdown">
                             <a data-toggle="collapse" href="#documentacao"><i class="fa fa-file" aria-hidden="true"></i>Documentação</a>
@@ -299,6 +300,7 @@
                             </div>
                          </li>
                     @endif
+                    <?php } ?>
                 @endif 
             </ul>
         </div><!-- /.navbar-collapse -->

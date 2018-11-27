@@ -447,4 +447,19 @@ Route::group(['middleware' => ['web','auth','role:admin|owner']], function () {
 
 });
 
+// Just Admin and Supervisor
+Route::group(['middleware' => ['web','auth','role:admin|supervisor']], function () {
+    Route::get('documentacao/consultar', array('as'=>'documentacao.consultar', 'uses'=>'DocumentacaoClienteController@index'));
 
+    Route::get('documentacao/adicionar', array('as'=>'documentacao.adicionar', 'uses'=>'DocumentacaoClienteController@create'));
+    Route::post('documentacao/adicionar', array('as'=>'documentacao.adicionar', 'uses'=>'DocumentacaoClienteController@create'));
+
+    Route::get('documentacao/editar/{id}', array('as'=>'documentacao.editar', 'uses'=>'DocumentacaoClienteController@update'));
+    Route::post('documentacao/editar/{id}', array('as'=>'documentacao.editar', 'uses'=>'DocumentacaoClienteController@update'));
+    
+    Route::post('documentacao/upload', array('as'=>'documentacao.upload', 'uses'=>'DocumentacaoClienteController@uploadSingle'));
+
+    Route::get('documentacao/excluir/{id}', array('as'=>'documentacao.excluir', 'uses'=>'DocumentacaoClienteController@destroy'));
+    
+    Route::get('documentacao/download/{id}', array('as'=>'documentacao.download', 'uses'=>'DocumentacaoClienteController@download'));
+});

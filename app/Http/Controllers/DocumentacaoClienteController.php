@@ -57,14 +57,14 @@ class DocumentacaoClienteController extends Controller
         return view('documentacaocliente.create');
     }
 
-    public function validation($input)
+    public function validation($input, $edit = false)
     {
         if (empty($input['descricao'])) {
             $this->msg = 'É necessário adicionar uma descrição.';
             return false;
         }
 
-        if (empty($input['image'])) {
+        if (empty($input['image']) && !$edit) {
             $this->msg = 'É necessário adicionar um documento.';
             return false;
         }
@@ -97,7 +97,7 @@ class DocumentacaoClienteController extends Controller
 
     public function index()
     {
-        $table = DocumentacaoCliente::all();
+        $table = DocumentacaoCliente::where('emp_id', $this->s_emp->id)->get();
         return view('documentacaocliente.index')->with('table', $table);
     }
 
@@ -107,9 +107,8 @@ class DocumentacaoClienteController extends Controller
         $documento = DocumentacaoCliente::findOrFail($id);
 
         if (!empty($input)) {
-            
-            if (!$this->validation($input)) {
-                return redirect()->back()->with('alert', 'É necessário adicionar uma descrição.');
+            if (!$this->validation($input, true)) {
+                return redirect()->back()->with('alert', $this->msg);
             }
 
             $documento->descricao = $input['descricao'];
@@ -171,10 +170,10 @@ class DocumentacaoClienteController extends Controller
         $file = Input::file('image');    
         $destinationPath = 'fiscal/'; 
         
-        // $extension = Input::file('image')->getClientOriginalName();
-        $extension = Input::file('image')->getClientOriginalExtension(); // getting image extension
-        $fileName = time().'.'.$extension; // renameing image
-        $fileName = preg_replace('/\s+/', '', $fileName); //clear whitespaces
+        $fileName = Input::file('image')->getClientOriginalName();
+        // $extension = Input::file('image')->getClientOriginalExtension(); // getting image extension
+        // $fileName = time().'.'.$extension; // renameing image
+        // $fileName = preg_replace('/\s+/', '', $fileName); //clear whitespaces
 
         Input::file('image')->move($destinationPath, $fileName); 
         return $fileName;

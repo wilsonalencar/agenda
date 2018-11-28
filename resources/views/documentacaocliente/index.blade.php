@@ -140,6 +140,10 @@ $(document).ready(function (){
 });
 
 
+$('#sidebar').toggleClass('active');
+$('#sidebarCollapse').toggleClass('auto-left');
+$('#content').toggleClass('auto-left');
+
 
 function fileUpload(id)
 {   

@@ -58,7 +58,7 @@
             </div>
         </div>
     </div>  
-
+    <a href="{{ route('documentacao.consultar') }}" class="btn btn-default">Voltar</a>
     {!! Form::hidden('versao', $request->versao, ['class' => 'form-control']) !!}
     {!! Form::submit('Atualizar', ['class' => 'btn btn-default']) !!}
     <div style="width: 100%" class="container" align="right">

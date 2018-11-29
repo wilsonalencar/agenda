@@ -115,7 +115,7 @@ jQuery(document).ready(function($){
 function atualizar() {
   location.reload(true)
 }
-window.setInterval("atualizar()",60000);
+window.setInterval("atualizar()",600000);
 </script>
 
 @stop

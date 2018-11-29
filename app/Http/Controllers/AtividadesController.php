@@ -10,6 +10,7 @@ use App\Models\Regra;
 use App\Models\User;
 use App\Models\Regraenviolote;
 use App\Models\Empresa;
+use App\Models\googl;
 
 use App\Services\EntregaService;
 use Illuminate\Database\Eloquent\Collection;
@@ -303,17 +304,10 @@ class AtividadesController extends Controller
         $atividade->data_aprovacao = date("Y-m-d H:i:s");
 
         $regra = Regraenviolote::where('id_empresa', $atividade->emp_id)->where('id_tributo', $atividade->regra->tributo_id)->get();
-        if (!empty($regra) && $regra[0]->regra_geral == 'S') {
+        if (count($regra) > 0 && $regra[0]->envioaprovacao == 'S') {
             $this->sendMail($atividade);    
         }
         $atividade->save();
-        // $entregador = User::findOrFail($atividade->usuario_entregador);
-        // $user = User::findOrFail(Auth::user()->id);
-        // $subject = "BravoTaxCalendar - Entrega atividade --APROVADA--";
-        // $data = array('subject'=>$subject,'messageLines'=>array());
-        // $data['messageLines'][] = $atividade->descricao.' - COD.'.$atividade->estemp->codigo.' - Aprovada, atividade concluída.';
-        // $data['messageLines'][] = 'Coordenador: '.$user->name;
-        //$this->eService->sendMail($entregador, $data, 'emails.notification-aprovacao');
         return redirect()->route('entregas.index')->with('status', 'Atividade aprovada com sucesso!');
     }
 
@@ -357,15 +351,15 @@ class AtividadesController extends Controller
             $download_link[$atividade->estemp->cnpj]['texto'] = $atividade->estemp->razao_social.' - '. $atividade->regra->tributo->nome;
             $download_link[$atividade->estemp->cnpj]['link'] = $path_link;
         }
-
+        
         $regra = Regraenviolote::where('id_empresa', $atividade->emp_id)->where('id_tributo', $atividade->regra->tributo_id)->first();   
         if (!empty($download_link)) {    
-            $this->enviarEmailLote($download_link, $regra->email_1, $regra->email_2, $regra->email_3, $data_envio);
+            $this->enviarEmailLote($download_link, $regra->email_1, $regra->email_2, $regra->email_3);
         }
     }
 
 
-    public function enviarEmailLote($array, $email_1, $email_2, $email_3, $data_envio = '')
+    public function enviarEmailLote($array, $email_1, $email_2, $email_3)
     {   
         $key = 'AIzaSyBI3NnOJV5Zt-hNnUL4BUCaWIgGugDuTC8';
         $Googl = new Googl($key);

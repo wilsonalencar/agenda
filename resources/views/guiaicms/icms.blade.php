@@ -36,6 +36,7 @@
                 {!!  Form::select('multiple_select_uf[]', $uf, $ufselected, ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
             </div>
         </div>
+        <br>
         <div class="row">
             <div class="col-md-3">     
                 {!! Form::label('inicio', 'Data Inicial Vencimento', ['class' => 'control-label']) !!}    

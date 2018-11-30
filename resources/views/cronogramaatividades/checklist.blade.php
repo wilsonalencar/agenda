@@ -29,8 +29,10 @@ $data = date('d/m/Y H:i:s');
         <?php
         if (!empty($checklist)) {
             foreach ($checklist as $key => $value) {
-                foreach ($value as $val => $dados) {  
-                $periodo = $dados['periodo_apuracao'];                        
+                foreach ($value as $val => $dados) {
+                if (isset($dados['periodo_apuracao'])) {
+                  $periodo = $dados['periodo_apuracao'];                          
+                }  
         ?>          
         <tr>
             <td><?php echo $dados['razao_social']; ?></td>

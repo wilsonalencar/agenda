@@ -16,7 +16,7 @@ $data = date('d/m/Y H:i:s');
     <table class="table display" id="dataTables-example">
         <thead>
             <tr class="top-table">
-                <th>Prazo</th>
+                <th>Data Atividade</th>
                 <th>Filial</th>
                 <th>CNPJ</th>
                 <th>Tributo</th>

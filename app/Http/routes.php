@@ -95,6 +95,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::post('upload/sendUpload', 'UploadsController@upload');
 
     Route::get('uploadCron/{user}/entrega', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronograma'));
+    Route::get('uploadCron/{data_atividade}/entrega/data', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronogramaData'));
     Route::post('upload/sendUploadCron', 'UploadsController@uploadCron');
 
     Route::post('about', array('as'=>'about', 'uses'=>'PagesController@about'));
@@ -217,6 +218,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
     Route::post('upload/sendUpload', 'UploadsController@upload');
     
     Route::get('uploadCron/{user}/entrega', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronograma'));
+    Route::get('uploadCron/{data_atividade}/entrega/data', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronogramaData'));
     Route::post('upload/sendUploadCron', 'UploadsController@uploadCron');
 
 });
@@ -274,6 +276,10 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::post('mensal', array('as'=>'mensal', 'uses'=>'CronogramaatividadesController@mensal'));
 
     Route::get('Gerarsemanal', array('as'=>'cronogramaatividades.Gerarsemanal', 'uses'=>'CronogramaatividadesController@Gerarsemanal'));
+
+    Route::get('Planejamento', array('as'=>'cronogramaatividades.Loadplanejamento', 'uses'=>'CronogramaatividadesController@Loadplanejamento'));
+    Route::post('Planejamento', array('as'=>'cronogramaatividades.planejamento', 'uses'=>'CronogramaatividadesController@planejamento'));
+    Route::post('AlterAnalista', array('as'=>'cronogramaatividades.alterAnalista', 'uses'=>'CronogramaatividadesController@alterarAnalistas'));
 
     Route::post('semanal', array('as'=>'semanal', 'uses'=>'CronogramaatividadesController@semanal'));
 
@@ -337,6 +343,8 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::post('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
     Route::get('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
     Route::get('dashboardRLT', array('as'=>'dashboardRLT', 'uses'=>'PagesController@dashboardRLT'));
+    
+    Route::post('AnalistaCronograma', array('as'=>'cronograma.analistas', 'uses'=>'CronogramaatividadesController@AlterAnalistas'));
 
     Route::get('consulta_procadm', array('as'=>'consulta_procadm', 'uses'=>'ProcessosAdmsController@consulta_procadm'));
     Route::get('consulta_procadm/rpt', array('as'=>'consulta_procadm/rpt', 'uses'=>'ProcessosAdmsController@rlt_processos'));

@@ -7,18 +7,6 @@
 <div class="main" id="empresaMultipleSelectSelecionar" style="display:block;">
         <div class="row">
             <div class="col-md-12">
-                <h2 class="sub-title">{!! Form::label('empresas_selected[]', 'Selecionar empresas', ['class' => 'control-label'] )  !!} </h2>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-10">
-                {!!  Form::select('empresas_selected[]', $empresas, '', ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
-            </div>
-            
-        </div>
-        <BR>
-        <div class="row">
-            <div class="col-md-12">
                 <h2 class="sub-title">{!! Form::label('periodo_apuracao', 'Periodo de apuração', ['class' => 'control-label'] )  !!} </h2>
             </div>
         </div>
@@ -28,7 +16,7 @@
             </div>
             <div class="col-md-6"></div>
             <div class="col-md-2">
-                {!! Form::submit('Cronograma', ['class' => 'btn btn-success-block']) !!}
+                {!! Form::submit('Gerar Calendário', ['class' => 'btn btn-success-block']) !!}
                 {!! Form::close() !!}
             </div>
         </div>

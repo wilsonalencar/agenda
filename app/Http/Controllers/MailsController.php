@@ -42,6 +42,7 @@ class MailsController extends Controller
 
     public function UploadFiles()
     {
+        echo "222";exit;
         $registers = CriticasEntrega::where('Enviado', 0)->get();
         if (!empty($registers)) {
             $this->Processar($registers, 'upload');

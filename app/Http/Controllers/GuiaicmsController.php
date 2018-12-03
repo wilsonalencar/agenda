@@ -291,13 +291,11 @@ class GuiaicmsController extends Controller
             echo "Nenhum arquivo foi encontrado disponível para salvar";exit;
         }
 
-
-        // if (strpos(php_uname(), 'Windows') !== false) {
-        //     pclose(popen('start php54 jobs/job_operacao_fisco.php ' . $_SESSION['login']['usuario_id'] . ' '. $FrotaAtividade->OperacaoID, 'r'));
-        // } else {
-        //     exec('php54 jobs/job_operacao_fisco.php ' . $_SESSION['login']['usuario_id'] . ' '. $FrotaAtividade->OperacaoID . ' > /dev/null 2>&1 &');
-        // }
-
+        if (strpos(php_uname(), 'Windows') !== false) {
+            pclose(popen('start php54 Background/LeitorMails.php', 'r'));
+        } else {
+            exec('php Background/LeitorMails.php');
+        }
 
         $mensagem = 'Concluído com sucesso';
         return view('guiaicms.job_return')->withMensagem($mensagem);
@@ -3514,12 +3512,11 @@ juros de mora
             echo "Não foram encontrados arquivos para realizar o processo.";exit;
         }
 
-
-        // if (strpos(php_uname(), 'Windows') !== false) {
-        //     pclose(popen('start php54 jobs/job_operacao_fisco.php ' . $_SESSION['login']['usuario_id'] . ' '. $FrotaAtividade->OperacaoID, 'r'));
-        // } else {
-        //     exec('php54 jobs/job_operacao_fisco.php ' . $_SESSION['login']['usuario_id'] . ' '. $FrotaAtividade->OperacaoID . ' > /dev/null 2>&1 &');
-        // }
+        if (strpos(php_uname(), 'Windows') !== false) {
+            pclose(popen('start php54 Background/UploadMails.php', 'r'));
+        } else {
+            exec('php Background/UploadMails.php');
+        }
         
         echo "Job foi rodado com sucesso.";exit;
     }

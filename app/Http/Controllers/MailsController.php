@@ -30,7 +30,7 @@ class MailsController extends Controller
     function __construct(EntregaService $service)
     {
         $this->eService = $service;
-     }
+    }
 
     public function Guiaimcs()
     {
@@ -86,7 +86,7 @@ class MailsController extends Controller
 
             $data = array('subject'=>$subject,'messageLines'=>$text);
             
-
+            set_time_limit(0);
             if (!empty($emailsAnalista)) {
 
                 $critica = DB::table('criticasentrega')
@@ -131,6 +131,7 @@ class MailsController extends Controller
 
             $data = array('subject'=>$subject,'messageLines'=>$text);
             
+            set_time_limit(0);
             if (!empty($emailsAnalista)) {
                 
                 $critica = DB::table('criticasleitor')

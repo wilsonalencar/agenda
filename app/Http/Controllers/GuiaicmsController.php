@@ -291,11 +291,12 @@ class GuiaicmsController extends Controller
             echo "Nenhum arquivo foi encontrado disponível para salvar";exit;
         }
 
-        if (strpos(php_uname(), 'Windows') !== false) {
-            shell_exec('php Background/LeitorMails.php');
-        } else {
-            exec('php Background/LeitorMails.php');
-        }
+        $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\LeitorMails.php';
+        if (substr(php_uname(), 0, 7) == "Windows"){ 
+            pclose(popen("start /B " . $cmd, "r"));  
+        } else { 
+                exec($cmd . " > /dev/null &");   
+        } 
 
         $mensagem = 'Concluído com sucesso';
         return view('guiaicms.job_return')->withMensagem($mensagem);
@@ -3512,11 +3513,12 @@ juros de mora
             echo "Não foram encontrados arquivos para realizar o processo.";exit;
         }
 
-        if (strpos(php_uname(), 'Windows') !== false) {
-            shell_exec('php Background/UploadMails.php');
-        } else {
-            exec('php Background/UploadMails.php');
-        }
+        $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\UploadMails.php';
+        if (substr(php_uname(), 0, 7) == "Windows"){ 
+            pclose(popen("start /B " . $cmd, "r"));  
+        } else { 
+                exec($cmd . " > /dev/null &");   
+        } 
         
         echo "Job foi rodado com sucesso.";exit;
     }

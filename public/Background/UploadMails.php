@@ -1,9 +1,9 @@
 <?php
-echo "oi";exit;
+set_time_limit(0);
 file_get_contents("http://homo-innagenda/upload/job");
-// $urlprod = file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/mensageriaprocadms/jobprocadms");
-// $urlprod = file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/guiaicms/job");
 
+// file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/upload/job");
+// file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/upload/job");
 
 // $ch = curl_init();
 // $link = $_SERVER['HTTP_HOST'].'/upload/job';

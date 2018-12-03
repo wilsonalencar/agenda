@@ -61,8 +61,6 @@ class MailsController extends Controller
         foreach ($registros as $key => $register) {
             $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$register->Tributo_id." and Emp_id = ".$register->Empresa_id.")";
 
-
-            $query = 'select id from users where id = 68';
             $emailsAnalista = DB::select($query);
 
             $codigoEstabelecimento = '';

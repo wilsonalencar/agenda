@@ -25,8 +25,10 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(GateContract $gate)
     {
         if (strpos(php_uname(), 'Windows') !== false) {
-            echo "<Pre>";
-            print_r(shell_exec('php Background/UploadMails.php'));exit;
+            $ctrl = new \App\Http\Controllers\MailsController();
+            $ctrl->UploadFiles();
+            // echo "<Pre>";
+            // print_r(shell_exec('php Background/UploadMails.php'));exit;
             //teste
             // shell_exec('php Background/UploadMails.php');
         } else {

@@ -25,13 +25,13 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(GateContract $gate)
     {
         if (strpos(php_uname(), 'Windows') !== false) {
-            pclose(popen('start php54 Background/UploadMails.php', 'r'));
+            shell_exec('start php Background/UploadMails.php');
         } else {
             exec('php Background/UploadMails.php');
         }
 
         if (strpos(php_uname(), 'Windows') !== false) {
-            pclose(popen('start php54 Background/LeitorMails.php', 'r'));
+            shell_exec('start php Background/LeitorMails.php');
         } else {
             exec('php Background/LeitorMails.php');
         }

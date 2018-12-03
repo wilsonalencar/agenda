@@ -292,7 +292,7 @@ class GuiaicmsController extends Controller
         }
 
         if (strpos(php_uname(), 'Windows') !== false) {
-            pclose(popen('start php54 Background/LeitorMails.php', 'r'));
+            shell_exec('start php Background/LeitorMails.php');
         } else {
             exec('php Background/LeitorMails.php');
         }
@@ -3513,7 +3513,7 @@ juros de mora
         }
 
         if (strpos(php_uname(), 'Windows') !== false) {
-            pclose(popen('start php54 Background/UploadMails.php', 'r'));
+            shell_exec('start php Background/UploadMails.php');
         } else {
             exec('php Background/UploadMails.php');
         }

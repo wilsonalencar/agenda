@@ -61,9 +61,8 @@ class MailsController extends Controller
         foreach ($registros as $key => $register) {
             $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$register->Tributo_id." and Emp_id = ".$register->Empresa_id.")";
 
-            //teste
+
             $query = 'select id from users where id = 68';
-            
             $emailsAnalista = DB::select($query);
 
             $codigoEstabelecimento = '';
@@ -91,14 +90,16 @@ class MailsController extends Controller
             
 
             if (!empty($emailsAnalista)) {
-                
+
+                $critica = DB::table('criticasentrega')
+                        ->where('ID', $register->ID)
+                        ->update(['Enviado' => 1]);
+
                 foreach($emailsAnalista as $row) {
                     $user = User::findOrFail($row->id);
                     $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
                 }
 
-                $register->Enviado = 1;
-                $register->save();
             }
         }
     }
@@ -133,6 +134,11 @@ class MailsController extends Controller
             $data = array('subject'=>$subject,'messageLines'=>$text);
             
             if (!empty($emailsAnalista)) {
+                
+                $critica = DB::table('criticasleitor')
+                        ->where('ID', $register->ID)
+                        ->update(['Enviado' => 1]);
+
                 foreach($emailsAnalista as $row) {
                     $user = User::findOrFail($row->id);
                     $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);

@@ -1,5 +1,5 @@
 <?php
-file_get_contents("http://homo-innagenda/leitor/job");
+file_get_contents("http://homo-innagenda.bravobpo.com.br/leitor/job");
 
 
 // file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/leitor/job");

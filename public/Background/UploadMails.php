@@ -1,8 +1,7 @@
 <?php
-set_time_limit(0);
-file_get_contents("http://homo-innagenda/upload/job");
+// file_get_contents("http://homo-innagenda/upload/job");
 
-// file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/upload/job");
+
 // file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/upload/job");
 
 // $ch = curl_init();

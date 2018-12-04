@@ -1,8 +1,7 @@
 <?php
-set_time_limit(0);
-file_get_contents("http://homo-innagenda/leitor/job");
+// file_get_contents("http://homo-innagenda/leitor/job");
 
-// file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/leitor/job");
+
 // file_get_contents("http://taxcalendar.bravobpo.com.br/agenda/public/leitor/job");
 
 // $ch = curl_init();

@@ -24,20 +24,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(GateContract $gate)
     {        
-        // $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\UploadMails.php';
-        // if (substr(php_uname(), 0, 7) == "Windows"){ 
-        //     pclose(popen("start /B " . $cmd, "r"));  
-        // } else { 
-        //         exec($cmd . " > /dev/null &");   
-        // } 
-        
-        // $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\LeitorMails.php';
-        // if (substr(php_uname(), 0, 7) == "Windows"){ 
-        //     pclose(popen("start /B " . $cmd, "r"));  
-        // } else { 
-        //         exec($cmd . " > /dev/null &");   
-        // } 
-
         $this->registerPolicies($gate);
 
         //

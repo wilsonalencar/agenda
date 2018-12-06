@@ -2068,7 +2068,7 @@ r\$
             }
         }
 
-        if (empty($imcs[0]['COD_RECEITA'])) {
+        if (empty($icms[0]['COD_RECEITA'])) {
             preg_match('~receita
 
 periodo ref.([^{]*)~i', $str, $match);

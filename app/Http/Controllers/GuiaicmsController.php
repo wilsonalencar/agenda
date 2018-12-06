@@ -2089,6 +2089,15 @@ r\$([^{]*)~i', $str, $match);
         }
         }
 
+        if(strlen($icms[0]['VLR_TOTAL']) > 9){
+            preg_match('~autenticacao([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[4])));
+            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[4])));
+        }
+        }
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms[0];

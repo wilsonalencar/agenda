@@ -568,9 +568,8 @@ class EntregaService {
     {   
         $var = array();
         foreach ($array as $estab_id => $single) {
+        $generate = 0;
             foreach ($single as $tributo => $mostsingle) {
-                $generate = 0;
-                
                 foreach ($mostsingle as $key => $atividade) {
                     $var['Qtde_estab'] = count($array[$estab_id]);
                     $var['Tempo_estab'] = $atividade['tempo'];
@@ -604,6 +603,7 @@ class EntregaService {
         }
         return true;
     }
+                
 
     private function CronogramaAtividadeMensal($id, $atividade)
     {

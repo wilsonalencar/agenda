@@ -760,9 +760,10 @@ class EntregaService {
                     continue;
                 }
 
-                $nova_atividade = Atividade::create($val);
-                $count++;
-
+                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                    $nova_atividade = Atividade::create($val);
+                    $count++;
+                }
             }
 
         }
@@ -952,8 +953,11 @@ class EntregaService {
                             if (!$this->checkDuplicidade($val)) {
                                 continue;
                             }
-                            Atividade::create($val);
-                            $count++;
+
+                            if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                                Atividade::create($val);
+                                $count++;
+                            }
                         }
 
                     }
@@ -1009,8 +1013,11 @@ class EntregaService {
                                 if (!$this->checkDuplicidade($val)) {
                                     continue;
                                 }
-                                Atividade::create($val);
-                                $count++;
+                                
+                                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                                    Atividade::create($val);
+                                    $count++;
+                                }
                             }
                         }
                     }
@@ -1162,9 +1169,11 @@ class EntregaService {
                         if (!$this->checkDuplicidade($val)) {
                             continue;
                         }
-
-                        $nova_atividade = Atividade::create($val);
-                        $count++;
+                        
+                        if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                            $nova_atividade = Atividade::create($val);
+                            $count++;
+                        }
 
                         //Assignment usuario
                         //foreach($regra->tributo->users as $user) {
@@ -1484,6 +1493,33 @@ class EntregaService {
         }
         
     return $generate;
+    }
+
+    private function checkGeneration($data, $freq_entrega)
+    {
+        $mes = date('m/Y');
+        
+        $data1 = $data;
+        $data2 = str_replace('-', '/', $data1);
+        $data = date('m/Y', strtotime($data2));
+
+        if ($freq_entrega == 'M') {
+            return true;
+        }
+
+        if ($freq_entrega == 'A') {
+            if ($data == $mes) {
+                return true;
+            }
+        }  
+
+        if ($freq_entrega == 'S') {
+            if ($data == $mes) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function generateNotifications($user) {

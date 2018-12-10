@@ -33,6 +33,7 @@ class GuiaicmsController extends Controller
 
     function __construct(EntregaService $service)
     {
+        date_default_timezone_set('America/Sao_Paulo');
         $this->eService = $service;
         if (!Auth::guest() && !empty(session()->get('seid')))
         $this->s_emp = Empresa::findOrFail(session('seid'));

@@ -29,6 +29,7 @@ class MailsController extends Controller
 
     function __construct(EntregaService $service)
     {
+        date_default_timezone_set('America/Sao_Paulo');
         $this->eService = $service;
     }
 

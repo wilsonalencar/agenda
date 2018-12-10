@@ -569,6 +569,8 @@ class EntregaService {
         $var = array();
         foreach ($array as $estab_id => $single) {
             foreach ($single as $tributo => $mostsingle) {
+                $generate = 0;
+                
                 foreach ($mostsingle as $key => $atividade) {
                     $var['Qtde_estab'] = count($array[$estab_id]);
                     $var['Tempo_estab'] = $atividade['tempo'];
@@ -587,7 +589,9 @@ class EntregaService {
 
                     $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$atividade['periodo_apuracao'].'" AND A.Tributo_id = '.$var['Tributo_id']);
 
-                    if (!empty($data_carga)) {
+                    if (!empty($data_carga) && !$generate) {
+                        
+                        $generate = 1;
                         $var['Qtd_dias'] = $this->diffTempo(substr($atividade['limite'], 0,10), $data_carga[0]->Data_prev_carga);
                         $var['Tempo_geracao'] = $var['Qtd_dias'] * 480;
                         $var['Qtd_analista'] = $var['Tempo_total']/$var['Tempo_geracao'];

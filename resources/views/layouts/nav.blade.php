@@ -328,10 +328,13 @@
         </a>
         <ul class="dropdown-menu" aria-labelledby="dLabel">
         <li>
-                <a href="{{ url('/logout') }}">
+                <a href="http://dev.platform/login.php">
                     <img style="height:16px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/img/{{ Auth::user()->roles()->first()->name }}-icon.png" title="{{ Auth::user()->roles()->first()->display_name }}" /> ({{ Auth::user()->name.' ' }})
                     <br>
                     <i class="fa fa-btn fa-sign-out"></i>Logout
+                </a>
+                <a href="http://dev.platform">
+                    <i class="fa fa-btn fa-sign-out"></i> Plataforma
                 </a>
             </li>
         </ul>    

@@ -388,7 +388,9 @@ class CronogramaatividadesController extends Controller
     return redirect()->back()->with('status', 'Atividades geradas com sucesso');
     }
 
-    public function cronogramageracaoEstab($id_tributo,$id_estab,$periodo_ini,$periodo_fin) {
+    public function cronogramageracaoEstab($id_tributo,$id_estab,$periodo_ini,$periodo_fin) 
+    {
+        set_time_limit(0);
         $estabelecimento = Estabelecimento::findOrFail($id_estab);
         if ($periodo_ini==$periodo_fin) {
             Artisan::call('generatecronograma:single', [
@@ -400,6 +402,7 @@ class CronogramaatividadesController extends Controller
 
     public function storeEmpresa(Request $request)
     {
+        set_time_limit(0);
         $input = $request->all();
         if (empty($input['periodo_apuracao_emps']) || empty($input['multiple_select_empresas_frm'])) {
             return redirect()->back()->with('status', 'Favor informar quais empresas e qual o período');

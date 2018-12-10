@@ -2068,7 +2068,7 @@ r\$
             }
         }
 
-        if (empty($imcs[0]['COD_RECEITA'])) {
+        if (empty($icms[0]['COD_RECEITA'])) {
             preg_match('~receita
 
 periodo ref.([^{]*)~i', $str, $match);
@@ -2086,6 +2086,15 @@ r\$([^{]*)~i', $str, $match);
             $i = explode("\n", trim($match[1]));
             $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
+        }
+        }
+
+        if(strlen($icms[0]['VLR_TOTAL']) > 9){
+            preg_match('~autenticacao([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[4])));
+            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[4])));
         }
         }
 

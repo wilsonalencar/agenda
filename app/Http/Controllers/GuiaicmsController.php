@@ -43,11 +43,44 @@ class GuiaicmsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function listar()
+    public function listar(Request $request)
     {   
         $status = 'success';
-        $Registros = Guiaicms::all();
+
+        $input_inicio = $request->input('inicio_leitura');
+        $input_fim = $request->input('fim_leitura');
+
+
+        $Registros = Guiaicms::where('ID', '>', '0');
+        if (!empty($request->input('inicio_leitura')) && !empty($request->input('fim_leitura'))) {
+            $Registros = $Registros->whereBetween('DATA', [$input_inicio, $input_fim]);
+        }
+        
+        $Registros = $Registros->get();
+
+        if (!empty($Registros)) {
+            foreach ($Registros as $k => $Registro) {
+                $Registros[$k]['codigo'] = $this->findEstabelecimento($Registro->CNPJ); 
+            }
+        }
+
         return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
+    }
+
+    private function findEstabelecimento($cnpj)
+    {
+        if (!empty($cnpj)) {
+
+            $query = "SELECT codigo FROM estabelecimentos WHERE cnpj = '".$cnpj."'";
+            $filial = DB::select($query);
+
+            if (!empty($filial)) {
+                return $filial[0]->codigo;
+            }else {
+                return 'Filial não encontrada';
+            }
+        }
+        return 'Sem Cnpj';
     }
 
     public function create(Request $request)

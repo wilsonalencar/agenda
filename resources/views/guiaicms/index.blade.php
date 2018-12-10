@@ -24,6 +24,32 @@
     </div>
 <?php } ?>
 
+    
+<div class="row">
+    <div>
+        {!! Form::open([
+            'route' => 'guiaicms.listar'
+        ]) !!}
+        <div class="col-md-10" align="right">
+             <div class="col-md-3" align="left">         
+                {!! Form::label('inicio_leitura', 'Data Inicial Leitura', ['class' => 'control-label']) !!}
+                {!! Form::date('inicio_leitura', '', ['class' => 'form-control']) !!}
+            </div>
+            <div class="col-md-3" align="left">         
+                {!! Form::label('fim_leitura', 'Data Final Leitura', ['class' => 'control-label']) !!}
+                {!! Form::date('fim_leitura', '', ['class' => 'form-control']) !!}
+            </div>
+            <div class="col-md-3">
+                {!! Form::label('filtro', '  ', ['class' => 'control-label']) !!}
+                {!! Form::submit('Filtrar', ['class' => 'btn btn-success-block']) !!}
+                {!! Form::close() !!}
+            </div>
+        </div>         
+    </div>
+</div>
+<br>
+
+
 
    <table class="table table-bordered" id="myTableAprovacao" style="font-size: 13px">   
         <thead>
@@ -33,6 +59,7 @@
                 <th>DATA_VENCTO </th>
                 <th>VLR_TOTAL </th>
                 <th>UF </th>
+                <th>FILIAL</th>
                 <th></th>
             </tr>
         </thead>
@@ -52,6 +79,7 @@
                 <td><?php echo $registro['DATA_VENCTO']; ?> </td>
                 <td>R$ <?php echo $registro['VLR_TOTAL']; ?> </td>
                 <td><?php echo $registro['UF']; ?> </td>
+                <td><?php echo $registro['codigo']; ?></td>
                 <td align="center"><a href="{{ route('guiaicms.editar', $registro['ID']) }}" class="btn btn-default btn-sm"><i class="fa fa-edit"></i><a href="{{ route('guiaicms.excluir', $registro['ID']) }}" class="btn btn-default btn-sm"><i class="fa fa-trash"></i></a>
                </td>
             </tr> 
@@ -71,8 +99,8 @@ $(document).ready(function (){
         processing: true,
         stateSave: true,
         lengthMenu: [[25, 50, 75, -1], [25, 50, 75, "100"]]
-    });        
-});
+    });    
+});     
 
 </script>
 

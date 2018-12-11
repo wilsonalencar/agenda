@@ -608,7 +608,8 @@ class EntregaService {
     private function checkduplicidadeMensal($value)
     {
         $mensal = CronogramaMensal::where('Qtde_estab', $value['Qtde_estab'])->where('Tempo_estab', $value['Tempo_estab'])->where('DATA_SLA', $value['DATA_SLA'])->where('periodo_apuracao', $value['periodo_apuracao'])->where('Empresa_id', $value['Empresa_id'])->where('Tributo_id', $value['Tributo_id'])->where('uf', $value['uf'])->where('Tempo_total', $value['Tempo_total'])->where('Qtd_dias', $value['Qtd_dias'])->where('Tempo_geracao', $value['Tempo_geracao'])->where('Qtd_analistas', $value['Qtd_analistas'])->get();
-
+        echo "<Pre>";
+        print_r($mensal);exit;
         if (count($mensal) > 0) {
             return false;
         }

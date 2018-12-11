@@ -594,8 +594,6 @@ class EntregaService {
                         $var['Qtd_dias'] = $this->diffTempo(substr($atividade['limite'], 0,10), $data_carga[0]->Data_prev_carga);
                         $var['Tempo_geracao'] = $var['Qtd_dias'] * 480;
                         $var['Qtd_analista'] = $var['Tempo_total']/$var['Tempo_geracao'];
-                        echo "<Pre>";
-                        print_r($var);exit;
                         $result_cronograma = CronogramaMensal::Create($var);
                         $this->CronogramaAtividadeMensal($result_cronograma->id, $atividade);
                     }

@@ -548,7 +548,7 @@ class EntregaService {
                 if (!$this->checkDuplicidadeCronograma($val)) {
                     continue;
                 }
-                // $nova_atividade = CronogramaAtividade::create($val);
+                $nova_atividade = CronogramaAtividade::create($val);
                 if (!empty($val)) {
                     $this->array[$val['estemp_id']][$tributo_id][] = $val;
                 }
@@ -1386,7 +1386,7 @@ class EntregaService {
 
                         //Verifica blacklist dos estabelecimentos para esta regra
                         if (!in_array($ae->id,$blacklist)) {
-                            // CronogramaAtividade::create($val);
+                            CronogramaAtividade::create($val);
                             $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
                             $count++;
                         }
@@ -1478,7 +1478,7 @@ class EntregaService {
 
                             //Verifica blacklist dos estabelecimentos para esta regra
                             if (!in_array($el->id,$blacklist)) {
-                                // CronogramaAtividade::create($val);
+                                CronogramaAtividade::create($val);
                                 $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
                                 $count++;
                             }

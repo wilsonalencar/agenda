@@ -548,7 +548,7 @@ class EntregaService {
                 if (!$this->checkDuplicidadeCronograma($val)) {
                     continue;
                 }
-                $nova_atividade = CronogramaAtividade::create($val);
+                // $nova_atividade = CronogramaAtividade::create($val);
                 if (!empty($val)) {
                     $this->array[$val['estemp_id']][$tributo_id][] = $val;
                 }
@@ -567,9 +567,11 @@ class EntregaService {
     public function generateMensal($array)
     {   
         $var = array();
+                echo "<Pre>";
+                print_r($array);exit;
         foreach ($array as $estab_id => $single) {
-        $generate = 0;
             foreach ($single as $tributo => $mostsingle) {
+            $generate = 0;
                 foreach ($mostsingle as $key => $atividade) {
                     $var['Qtde_estab'] = count($array[$estab_id]);
                     $var['Tempo_estab'] = $atividade['tempo'];
@@ -1385,7 +1387,7 @@ class EntregaService {
 
                         //Verifica blacklist dos estabelecimentos para esta regra
                         if (!in_array($ae->id,$blacklist)) {
-                            CronogramaAtividade::create($val);
+                            // CronogramaAtividade::create($val);
                             $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
                             $count++;
                         }
@@ -1477,7 +1479,7 @@ class EntregaService {
 
                             //Verifica blacklist dos estabelecimentos para esta regra
                             if (!in_array($el->id,$blacklist)) {
-                                CronogramaAtividade::create($val);
+                                // CronogramaAtividade::create($val);
                                 $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
                                 $count++;
                             }

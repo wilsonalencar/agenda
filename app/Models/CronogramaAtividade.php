@@ -31,7 +31,8 @@ class CronogramaAtividade extends Model
         'Resp_cronograma',
         'Data_cronograma',
         'data_atividade',
-        'tempo'
+        'tempo',
+        'cronograma_mensal'
     ];
 
     /**

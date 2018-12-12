@@ -227,7 +227,6 @@ class CronogramaatividadesController extends Controller
                 $dados[$key] = $value;
             }
         }
-        }
 
         return view('cronogramaatividades.planejamento')->with('dados', $dados)->with('usuarios', $usuarios);
     }

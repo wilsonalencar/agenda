@@ -164,12 +164,9 @@ class CronogramaatividadesController extends Controller
             return redirect()->back()->with('status', 'É necessário selecionar um Analista');
         }
 
-        $retorno = CronogramaAtividade::where('cronograma_mensal', $input['id_cronogramamensal'])->update(['Id_usuario_analista' => $input['Id_usuario_analista']]);
-      
+        CronogramaAtividade::where('cronograma_mensal', $input['id_cronogramamensal'])->update(['Id_usuario_analista' => $input['Id_usuario_analista']]);
         $msg = 'Analistas alterados com sucesso';
-        if (!$retorno) {
-            $msg = 'Ocorreu um erro na alteração dos analistas';
-        }
+        
         return redirect()->back()->with('status', $msg);
         
     } 

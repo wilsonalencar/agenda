@@ -622,7 +622,6 @@ class EntregaService {
         CronogramaAtividade::where('regra_id',$atividade['regra_id'])
         ->where('emp_id',$atividade['emp_id'])
         ->where('periodo_apuracao',$atividade['periodo_apuracao'])
-        ->where('estemp_id',$atividade['estemp_id'])
         ->update(['cronograma_mensal' => $id]);
     }
 

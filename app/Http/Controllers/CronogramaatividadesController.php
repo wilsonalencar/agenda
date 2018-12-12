@@ -212,14 +212,21 @@ class CronogramaatividadesController extends Controller
                     if (strlen($value->analistas > 4)) {
                         $analistas_explode = explode(',', $value->analistas);
                         foreach ($analistas_explode as $singlekey => $single) {
-                            $analistasArray[trim($single)] = User::Find($single)->name;
+                            $usuario = User::Find($single);
+                            if (!empty($usuario)) {
+                                $analistasArray[trim($single)] = $usuario->name;
+                            }else {
+                                $analistasArray[trim($single)] = '';
+                            }
                         }
+
                     $str = implode("<br>", $analistasArray);
                     }
                 }
                 $value->names = $str;
                 $dados[$key] = $value;
             }
+        }
         }
 
         return view('cronogramaatividades.planejamento')->with('dados', $dados)->with('usuarios', $usuarios);

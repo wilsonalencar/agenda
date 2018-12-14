@@ -2126,13 +2126,30 @@ r\$([^{]*)~i', $str, $match);
         }
         }
 
-        if(strlen($icms[0]['VLR_TOTAL']) > 9){
-            preg_match('~autenticacao([^{]*)~i', $str, $match);
+        if (empty($icms[0]['IE'])) {
+            preg_match('~numero([^{]*)~i', $str, $match);
             if (!empty($match)) {
-            $i = explode("\n", trim($match[1]));
-            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[4])));
-            $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[4])));
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[0]);
+                $icms[0]['IE'] = trim($this->numero($a[1]));
+            }
         }
+
+        if (strlen($icms[0]['VLR_RECEITA'] > 11)) {
+            preg_match('~valor([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(" ", trim($match[1]));
+                $a = explode("\n", trim($i[0]));
+                $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+                $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+            }
+        }
+
+
+        preg_match('~mes ano de referencia([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['REFERENCIA'] = str_replace(' ', '',trim($i[0]));
         }
 
         fclose($handle);

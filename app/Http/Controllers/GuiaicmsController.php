@@ -48,12 +48,15 @@ class GuiaicmsController extends Controller
     {   
         $status = 'success';
 
-        $input_inicio = $request->input('inicio_leitura');
-        $input_fim = $request->input('fim_leitura');
-
+        $input_inicio = $request->input('inicio_leitura').' 00:00:00';
+        $input_fim = $request->input('fim_leitura').' 23:59:59';
 
         $Registros = Guiaicms::where('ID', '>', '0');
         if (!empty($request->input('inicio_leitura')) && !empty($request->input('fim_leitura'))) {
+            
+            $input_inicio = $input_inicio.' 00:00:00';
+            $input_fim = $input_fim.' 23:59:59';
+
             $Registros = $Registros->whereBetween('DATA', [$input_inicio, $input_fim]);
         }
         
@@ -64,7 +67,7 @@ class GuiaicmsController extends Controller
                 $Registros[$k]['codigo'] = $this->findEstabelecimento($Registro->CNPJ); 
             }
         }
-
+        
         return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
     }
 

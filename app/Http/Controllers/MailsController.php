@@ -53,8 +53,10 @@ class MailsController extends Controller
     {
         if ($processo == 'upload') {
             $this->uploadMails($registros);
+        } 
+        if ($processo == 'leitorpdf') {
+            $this->leitorMails($registros);
         }
-        $this->leitorMails($registros);
     }
 
     private function uploadMails($registros)

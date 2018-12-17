@@ -16,10 +16,10 @@
 	}
 	.fc-day
 	{
-		border-color: #0984e3;
+		border-color: #0984e3 !important;
 	}
 	.fc-state-highlight{
-		background-color: #0984e3;
+		background-color: #0984e3 !important;
 	}
 	.fc-sun{
 		background-color: #f1f1f1 !important;

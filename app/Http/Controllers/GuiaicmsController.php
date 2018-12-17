@@ -2040,6 +2040,17 @@ periodo ref.([^{]*)~i', $str, $match);
             }
         }
 
+        preg_match('~numero identificacao([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            if (isset($i[0])) {
+                $a = explode(" ", trim($i[0]));
+                if (isset($a[1])) {
+                    $icms[0]['IE'] = $this->numero($a[1]);
+                }
+            }
+        }
+
         preg_match('~multa([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
@@ -2151,6 +2162,10 @@ r\$([^{]*)~i', $str, $match);
             $i = explode("\n", trim($match[1]));
             $icms[0]['REFERENCIA'] = str_replace(' ', '',trim($i[0]));
         }
+        
+        //teste
+        echo "<PRe>";
+        print_r($icms[0]);exit;
 
         fclose($handle);
         $icmsarray = array();

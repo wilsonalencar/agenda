@@ -1522,7 +1522,7 @@ class EntregaService {
         $priority = array();
         foreach ($array as $tributo_id => $atividades) {
             $ordem = OrdemApuracao::where('Tributo_id', $tributo_id)->first();
-            $priority[$ordem->Prioridade][] = $atividades;
+            $priority[$ordem->Prioridade] = $atividades;
         }
 
         $data = $this->loadData($atividades);

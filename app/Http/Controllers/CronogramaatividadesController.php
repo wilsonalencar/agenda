@@ -766,12 +766,12 @@ class CronogramaatividadesController extends Controller
             }
 
             $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades (clique para detalhes)', 
+                'Atividades', 
                 true, 
                 substr($atividade->data_atividade, 0,10), 
                 substr($atividade->data_atividade, 0,10), 
                 $atividade->id, 
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
             );
         }
 
@@ -797,12 +797,12 @@ class CronogramaatividadesController extends Controller
             }
 
             $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades (clique para detalhes)',
+                'Atividades',
                 true, 
                 substr($atividade->data_atividade, 0,10),
                 substr($atividade->data_atividade, 0,10),
                 $atividade->id,
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
             );
         }
 
@@ -871,12 +871,12 @@ class CronogramaatividadesController extends Controller
             }
 
             $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades (clique para detalhes)',
+                'Atividades',
                 true, 
                 substr($atividade->data_atividade, 0,10), 
                 substr($atividade->data_atividade, 0,10), 
                 $atividade->id, 
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
             );
         }
         
@@ -903,12 +903,12 @@ class CronogramaatividadesController extends Controller
             }
 
             $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades (clique para detalhes)',
+                'Atividades',
                 true, 
                 substr($atividade->data_atividade, 0,10),
                 substr($atividade->data_atividade, 0,10),
                 $atividade->id,
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor, 'textColor'=>'white']
+                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
             );
         }  
         //Geração do calendario

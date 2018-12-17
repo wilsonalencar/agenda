@@ -128,7 +128,7 @@ if (strlen($icms['REFERENCIA']) == 6) {
         {!! Form::hidden('TRIBUTO_ID', 8, ['class' => 'form-control']) !!}
         </div>
     </div>
-    '<a href="{{ route('guiaicms.listar') }}" class="btn btn-default">Voltar</a>
+    '<a href="{{ URL::previous() }}" class="btn btn-default">Voltar</a>
     {!! Form::submit('Atualizar', ['class' => 'btn btn-default']) !!}
 </div>
 

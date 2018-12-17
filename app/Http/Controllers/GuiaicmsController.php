@@ -48,20 +48,27 @@ class GuiaicmsController extends Controller
     {   
         $status = 'success';
 
-        $input_inicio = $request->input('inicio_leitura').' 00:00:00';
-        $input_fim = $request->input('fim_leitura').' 23:59:59';
+        $input_inicio = $request->input('inicio_leitura');
+        $input_fim = $request->input('fim_leitura');
 
         $Registros = Guiaicms::where('ID', '>', '0');
-        if (!empty($request->input('inicio_leitura')) && !empty($request->input('fim_leitura'))) {
+        if ((!empty($request->input('inicio_leitura')) && !empty($request->input('fim_leitura'))) || (!empty(Session::get('inicio_leitura')) && !empty(Session::get('fim_leitura'))) ) {
             
-            $input_inicio = $input_inicio.' 00:00:00';
-            $input_fim = $input_fim.' 23:59:59';
+            if (!empty($input_inicio) && !empty($input_fim)) {
+             
+                $input_inicio = $input_inicio.' 00:00:00';
+                $input_fim = $input_fim.' 23:59:59';
+                
+                Session::put('inicio_leitura', $input_inicio);
+                Session::put('fim_leitura', $input_fim);
+            
+            }
 
-            $Registros = $Registros->whereBetween('DATA', [$input_inicio, $input_fim]);
+            $Registros = $Registros->whereBetween('DATA', [Session::get('inicio_leitura'), Session::get('fim_leitura')]);
         }
         
         $Registros = $Registros->get();
-
+        
         if (!empty($Registros)) {
             foreach ($Registros as $k => $Registro) {
                 $Registros[$k]['codigo'] = $this->findEstabelecimento($Registro->CNPJ); 

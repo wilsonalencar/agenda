@@ -924,7 +924,7 @@ class CronogramaatividadesController extends Controller
                 'firstDay' => 1,
                 'defaultDate' => $dataAcima,
                 'aspectRatio' => 2.5,
-                'header' => ['left' => '', 'center'=>'title', 'right' => ''] //, 'right' => 'month,agendaWeek'
+                'header' => ['left' => 'prev.next', 'center'=>'title'] //, 'right' => 'month,agendaWeek'
             ])
         ->setCallbacks([ //set fullcalendar callback options (will not be JSON encoded)
             'viewRender' => 'function() { }'

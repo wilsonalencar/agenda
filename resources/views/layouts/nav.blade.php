@@ -26,13 +26,14 @@
                 </button>
 
                 <div class="brand-name-wrapper">
-                    <a class="" href="#">
-                        <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
-                        <span>Tax Calendar</span><p>
+                    <p>
+                        <a href="http://dev.platform">
+                            <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
+                        <span>Tax Calendar</span></a><p>
                         @if (session('seidLogo') && !Auth::guest())
                         <div><img src="{{ URL::to('/') }}/assets/logo/Logo-{{ session('seidLogo') }}.png" style="position: absolute; width: 30%; margin-left: 33%; margin-top: 5px; height: 8%;"><br><br><br></div>
                         @endif
-                    </a>
+                    </p>
                 </div>
         </div>
 

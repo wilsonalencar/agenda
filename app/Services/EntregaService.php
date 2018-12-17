@@ -1530,6 +1530,8 @@ class EntregaService {
 
         if (!empty($priority)) {
             foreach ($priority as $x => $non_single) {
+                echo "<PrE>";
+                print_r($priority);exit;
                 foreach ($non_single as $unicKey => $single_priority) {
                     $cronograma = CronogramaAtividade::where('regra_id',$single_priority['regra_id'])
                     ->where('emp_id',$single_priority['emp_id'])
@@ -1539,10 +1541,10 @@ class EntregaService {
                     if (!empty($cronograma)) {
                         foreach ($cronograma as $kk => $k) {
                             $time += $k->tempo;
-                            if ($time > 480) {
+                            if ($time => 480) {
                                 $k->data_atividade = date('Y-m-d H:i:s', strtotime("+1 days",strtotime($k->data_atividade)));
                                 $k->save();
-                                $time = 0;
+                                $time -= 480;
                             }       
                         }
                     }          

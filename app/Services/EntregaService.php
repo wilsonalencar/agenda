@@ -1529,23 +1529,24 @@ class EntregaService {
         $time = 0;
 
         if (!empty($priority)) {
-            foreach ($priority as $x => $single_priority) {
-                
-                $cronograma = CronogramaAtividade::where('regra_id',$atividade['regra_id'])
-                ->where('emp_id',$atividade['emp_id'])
-                ->where('periodo_apuracao',$atividade['periodo_apuracao'])
-                ->get();    
+            foreach ($priority as $x => $non_single) {
+                foreach ($non_single as $unicKey => $single_priority) {
+                    $cronograma = CronogramaAtividade::where('regra_id',$single_priority['regra_id'])
+                    ->where('emp_id',$single_priority['emp_id'])
+                    ->where('periodo_apuracao',$single_priority['periodo_apuracao'])
+                    ->get();    
 
-                if (!empty($cronograma)) {
-                    foreach ($cronograma as $kk => $k) {
-                        $time += $k->tempo;
-                        if ($time > 480) {
-                            $k->data_atividade = date('Y-m-d H:i:s', strtotime("+1 days",strtotime($k->data_atividade)));
-                            $k->save();
-                            $time = 0;
-                        }       
-                    }
-                }
+                    if (!empty($cronograma)) {
+                        foreach ($cronograma as $kk => $k) {
+                            $time += $k->tempo;
+                            if ($time > 480) {
+                                $k->data_atividade = date('Y-m-d H:i:s', strtotime("+1 days",strtotime($k->data_atividade)));
+                                $k->save();
+                                $time = 0;
+                            }       
+                        }
+                    }          
+                }           
             }
         }
     }

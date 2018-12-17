@@ -3656,6 +3656,9 @@ juros de mora
        if ($nomeTributo == "LIVROFISCAL") {
           return "LIVRO FISCAL";
        }
+       if ($nomeTributo == "DESONERACAO") {
+          return "DESONERAÇÃO FOLHA";
+       }
 
        return $nomeTributo;
     }

@@ -12,6 +12,7 @@ use App\Models\Atividade;
 use App\Models\CronogramaAtividade;
 use App\Models\Cron;
 use App\Models\CronogramaStatus;
+use App\Models\OrdemApuracao;
 use App\Models\Municipio;
 use App\Models\CronogramaMensal;
 use App\Models\Regra;
@@ -34,6 +35,7 @@ class EntregaService {
 
     protected $notification_system;
     public $array = array();
+    public $prioridade = array();
 
     function __construct()
     {
@@ -551,6 +553,7 @@ class EntregaService {
                 $nova_atividade = CronogramaAtividade::create($val);
                 if (!empty($val)) {
                     $this->array[$val['estemp_id']][$tributo_id][] = $val;
+                    $this->prioridade[$tributo_id][] = $val;
                 }
                 $count++;
             }
@@ -558,6 +561,7 @@ class EntregaService {
 
         if (!empty($this->array)) {
             $this->generateMensal($this->array);
+            $this->setPriority($this->prioridade);
         }
 
         return $generate;
@@ -1398,6 +1402,7 @@ class EntregaService {
                         if (!in_array($ae->id,$blacklist)) {
                             CronogramaAtividade::create($val);
                             $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
+                            $this->prioridade[$regra->tributo->id][] = $val;
                             $count++;
                         }
 
@@ -1490,6 +1495,7 @@ class EntregaService {
                             if (!in_array($el->id,$blacklist)) {
                                 CronogramaAtividade::create($val);
                                 $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
+                                $this->prioridade[$regra->tributo->id][] = $val; 
                                 $count++;
                             }
                         }
@@ -1499,6 +1505,7 @@ class EntregaService {
 
             if (!empty($this->array)) {
                 $this->generateMensal($this->array);
+                $this->setPriority($this->prioridade);
             }
             
             DB::table('cronogramastatus')->insert(
@@ -1508,6 +1515,53 @@ class EntregaService {
         }
         
     return $generate;
+    }
+
+    private function setPriority($array)
+    {
+        $priority = array();
+        foreach ($array as $tributo_id => $atividades) {
+            $ordem = OrdemApuracao::where('Tributo_id', $tributo_id)->first();
+            $priority[$ordem->Prioridade][] = $atividades;
+        }
+
+        $data = $this->loadData($atividades);
+        $time = 0;
+
+        if (!empty($priority)) {
+            foreach ($priority as $x => $single_priority) {
+                
+                $cronograma = CronogramaAtividade::where('regra_id',$atividade['regra_id'])
+                ->where('emp_id',$atividade['emp_id'])
+                ->where('periodo_apuracao',$atividade['periodo_apuracao'])
+                ->get();    
+
+                if (!empty($cronograma)) {
+                    foreach ($cronograma as $kk => $k) {
+                        $time += $k->tempo;
+                        if ($time > 480) {
+                            $k->data_atividade = date('Y-m-d H:i:s', strtotime("+1 days",strtotime($k->data_atividade)));
+                            $k->save();
+                            $time = 0;
+                        }       
+                    }
+                }
+            }
+        }
+    }
+
+    private function loadData($array)
+    {
+        foreach ($array as $key => $one) {
+            $data = CronogramaAtividade::where('regra_id',$atividade['regra_id'])
+            ->where('emp_id',$atividade['emp_id'])
+            ->where('periodo_apuracao',$atividade['periodo_apuracao'])
+            ->fisrt();
+        }
+
+        if (!empty($data)) {
+            return $data->data_atividade;
+        }
     }
 
     private function checkGeneration($data, $freq_entrega)

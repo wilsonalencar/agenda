@@ -75,6 +75,8 @@
                 <?php } ?>
             </tfoot>
         </table>
+        <br/>
+        <a href="{{ URL::previous() }}" class="btn btn-default">Voltar </a>
    </div>
 </div>
 

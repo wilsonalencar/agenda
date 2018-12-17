@@ -272,16 +272,16 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
      Route::resource('cronogramaatividades', 'CronogramaatividadesController');
 
     Route::get('cronogramaatividades', array('as'=>'cronogramaatividades.index', 'uses'=>'CronogramaatividadesController@anyData'));
-    Route::get('Gerarmensal', array('as'=>'cronogramaatividades.Gerarmensal', 'uses'=>'CronogramaatividadesController@Gerarmensal'));
+    Route::get('mensal', array('as'=>'cronogramaatividades.mensal', 'uses'=>'CronogramaatividadesController@Gerarmensal'));
     Route::post('mensal', array('as'=>'mensal', 'uses'=>'CronogramaatividadesController@mensal'));
 
-    Route::get('Gerarsemanal', array('as'=>'cronogramaatividades.Gerarsemanal', 'uses'=>'CronogramaatividadesController@Gerarsemanal'));
+    Route::get('semanal', array('as'=>'cronogramaatividades.semanal', 'uses'=>'CronogramaatividadesController@Gerarsemanal'));
+    Route::post('semanal', array('as'=>'semanal', 'uses'=>'CronogramaatividadesController@semanal'));
 
     Route::get('Planejamento', array('as'=>'cronogramaatividades.Loadplanejamento', 'uses'=>'CronogramaatividadesController@Loadplanejamento'));
     Route::post('Planejamento', array('as'=>'cronogramaatividades.planejamento', 'uses'=>'CronogramaatividadesController@planejamento'));
     Route::post('AlterAnalista', array('as'=>'cronogramaatividades.alterAnalista', 'uses'=>'CronogramaatividadesController@alterarAnalistas'));
 
-    Route::post('semanal', array('as'=>'semanal', 'uses'=>'CronogramaatividadesController@semanal'));
 
     Route::get('GerarchecklistCron', array('as'=>'cronogramaatividades.GerarchecklistCron', 'uses'=>'CronogramaatividadesController@GerarchecklistCron'));
     Route::post('ChecklistCron', array('as'=>'ChecklistCron', 'uses'=>'CronogramaatividadesController@ChecklistCron'));

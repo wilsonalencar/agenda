@@ -1554,9 +1554,9 @@ class EntregaService {
     private function loadData($array)
     {
         foreach ($array as $key => $one) {
-            $data = CronogramaAtividade::where('regra_id',$atividade['regra_id'])
-            ->where('emp_id',$atividade['emp_id'])
-            ->where('periodo_apuracao',$atividade['periodo_apuracao'])
+            $data = CronogramaAtividade::where('regra_id',$one['regra_id'])
+            ->where('emp_id',$one['emp_id'])
+            ->where('periodo_apuracao',$one['periodo_apuracao'])
             ->fisrt();
         }
 

@@ -25,6 +25,11 @@ class Tributo extends Model
         return $this->belongsTo('App\Models\Categoria','categoria_id');
     }
 
+    public function prioridade()
+    {
+        return $this->belongsTo('App\Models\OrdemApuracao','Tributo_id');
+    }
+
     /**
      * Get the regras for the tributo.
      */

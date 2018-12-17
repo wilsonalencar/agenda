@@ -12,6 +12,7 @@ use App\Models\Atividade;
 use App\Models\CronogramaAtividade;
 use App\Models\Cron;
 use App\Models\CronogramaStatus;
+use App\Models\OrdemApuracao;
 use App\Models\Municipio;
 use App\Models\CronogramaMensal;
 use App\Models\Regra;
@@ -34,6 +35,7 @@ class EntregaService {
 
     protected $notification_system;
     public $array = array();
+    public $prioridade = array();
 
     function __construct()
     {
@@ -537,12 +539,12 @@ class EntregaService {
                 $val['Data_cronograma'] = date('Y-m-d H:i:s');
                 $val['data_atividade'] = date('Y-m-d H:i:s');
                 
-               	if ($val['estemp_id'] > 0) {
+                if ($val['estemp_id'] > 0) {
                     $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
                         if (!empty($estabelecimento_tempo)) {
-	                        $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-	                        $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
-                	}
+                            $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
+                            $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                    }
                 }
 
                 if (!$this->checkDuplicidadeCronograma($val)) {
@@ -551,6 +553,7 @@ class EntregaService {
                 $nova_atividade = CronogramaAtividade::create($val);
                 if (!empty($val)) {
                     $this->array[$val['estemp_id']][$tributo_id][] = $val;
+                    $this->prioridade[$tributo_id][] = $val;
                 }
                 $count++;
             }
@@ -558,6 +561,7 @@ class EntregaService {
 
         if (!empty($this->array)) {
             $this->generateMensal($this->array);
+            $this->setPriority($this->prioridade);
         }
 
         return $generate;
@@ -1398,6 +1402,7 @@ class EntregaService {
                         if (!in_array($ae->id,$blacklist)) {
                             CronogramaAtividade::create($val);
                             $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
+                            $this->prioridade[$regra->tributo->id][] = $val;
                             $count++;
                         }
 
@@ -1480,7 +1485,7 @@ class EntregaService {
                                     $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
                                     $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
                                 }
-                        	}
+                            }
 
                             if (!$this->checkDuplicidadeCronograma($val)) {
                                 continue;
@@ -1490,6 +1495,7 @@ class EntregaService {
                             if (!in_array($el->id,$blacklist)) {
                                 CronogramaAtividade::create($val);
                                 $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
+                                $this->prioridade[$regra->tributo->id][] = $val; 
                                 $count++;
                             }
                         }
@@ -1499,6 +1505,7 @@ class EntregaService {
 
             if (!empty($this->array)) {
                 $this->generateMensal($this->array);
+                $this->setPriority($this->prioridade);
             }
             
             DB::table('cronogramastatus')->insert(
@@ -1508,6 +1515,74 @@ class EntregaService {
         }
         
     return $generate;
+    }
+
+    private function setPriority($array)
+    {
+        $priority = array();
+        $Oldpriority = array();
+        foreach ($array as $tributo_id => $atividades) {
+            $ordem = OrdemApuracao::where('Tributo_id', $tributo_id)->first();
+            $Oldpriority[$ordem->Prioridade] = $atividades;
+        }
+
+        $data = $this->loadData($atividades);
+        $time = 0;
+        $a = 0;
+
+        if (!empty($Oldpriority)) {
+            foreach ($Oldpriority as $x => $ordering) {
+                $a++;
+                if (isset($Oldpriority[$a])) {
+                    $priority[$a] = $Oldpriority[$a];
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        if (!empty($priority)) {
+            foreach ($priority as $x => $non_single) {
+                foreach ($non_single as $unicKey => $single_priority) {
+                    
+                    $cronograma = CronogramaAtividade::where('regra_id',$single_priority['regra_id'])
+                    ->where('emp_id',$single_priority['emp_id'])
+                    ->where('periodo_apuracao',$single_priority['periodo_apuracao'])
+                    ->where('descricao',$single_priority['descricao'])
+                    ->where('estemp_id',$single_priority['estemp_id'])
+                    ->get();
+                    
+                    if (!empty($cronograma)) {
+                        foreach ($cronograma as $kk => $k) {
+                            $time += $k->tempo;
+                            if ($time > 480) {
+                                $data = date('Y-m-d', strtotime("+1 days",strtotime($data)));
+                                $time -= 480;
+                                $k->data_atividade = $data;
+                                $k->save();
+                            } else {
+                                $k->data_atividade = $data;
+                                $k->save();   
+                            }
+                        }
+                    }          
+                }           
+            }
+        }
+    }
+
+    private function loadData($array)
+    {
+        foreach ($array as $key => $one) {
+
+            $Regra = Regra::findorFail($one['regra_id']);
+
+            $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$one['periodo_apuracao'].'" AND A.Tributo_id = '.$Regra->tributo_id);
+        }
+
+        if (!empty($data_carga)) {
+            return $data_carga[0]->Data_prev_carga;
+        }
     }
 
     private function checkGeneration($data, $freq_entrega)

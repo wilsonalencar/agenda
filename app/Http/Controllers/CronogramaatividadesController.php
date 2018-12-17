@@ -202,7 +202,10 @@ class CronogramaatividadesController extends Controller
                 $value->Qtd_analistas = round($value->Qtd_analistas);
                 $value->Inicio = date('d/m/Y', strtotime("+1 days",strtotime($data_carga[0]->Data_prev_carga))); 
                 $value->carga = date('d/m/Y', strtotime($data_carga[0]->Data_prev_carga)); 
-                $value->Termino = date('d/m/Y', strtotime("+".$value->Qtd_dias." days",strtotime($value->Inicio)));
+                    
+                $inicio = $this->formatData($value->Inicio);
+                $value->Termino = date('d/m/Y', strtotime("+".$value->Qtd_dias." days",strtotime($inicio)));
+
                 $data_vencimento = str_replace('-', '/', $value->DATA_SLA);
                 $value->DATA_SLA = date('d/m/Y', strtotime($data_vencimento));
                 
@@ -229,6 +232,14 @@ class CronogramaatividadesController extends Controller
         }
 
         return view('cronogramaatividades.planejamento')->with('dados', $dados)->with('usuarios', $usuarios);
+    }
+
+    private function formatData($date)
+    {
+        $valorData = trim($date);
+        $data = str_replace('/', '-', $valorData);
+        $formated = date('Y-m-d', strtotime($data));
+        return $formated;
     }
 
     public function loadPlanejamento()

@@ -1555,15 +1555,15 @@ class EntregaService {
                     $cronograma = CronogramaAtividade::where('id',$single_priority['id'])->get();
                     
                     if (!empty($cronograma)) {
-                        $time += $k->tempo;
+                        $time += $cronograma->tempo;
                         if ($time > 480) {
                             $data = date('Y-m-d', strtotime("+1 days",strtotime($data)));
                             $time -= 480;
-                            $k->data_atividade = $data;
-                            $k->save();
+                            $cronograma->data_atividade = $data;
+                            $cronograma->save();
                         } else {
-                            $k->data_atividade = $data;
-                            $k->save();   
+                            $cronograma->data_atividade = $data;
+                            $cronograma->save();   
                         }
                     }          
                 }           

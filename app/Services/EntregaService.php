@@ -1552,8 +1552,7 @@ class EntregaService {
             foreach ($priority as $x => $non_single) {
                 foreach ($non_single as $unicKey => $single_priority) {
                     
-                    $cronograma = CronogramaAtividade::where('id',$single_priority['id'])->get();
-                    
+                    $cronograma = CronogramaAtividade::where('id',$single_priority['id'])->first();
                     if (!empty($cronograma)) {
                         $time += $cronograma->tempo;
                         if ($time > 480) {

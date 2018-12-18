@@ -2167,10 +2167,6 @@ r\$([^{]*)~i', $str, $match);
             $i = explode("\n", trim($match[1]));
             $icms[0]['REFERENCIA'] = str_replace(' ', '',trim($i[0]));
         }
-        
-        //teste
-        echo "<PRe>";
-        print_r($icms[0]);exit;
 
         fclose($handle);
         $icmsarray = array();

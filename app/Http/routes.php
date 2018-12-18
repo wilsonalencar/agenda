@@ -305,8 +305,8 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::post('guiaicms/conferencia', array('as'=>'guiaicms.conferencia', 'uses'=>'GuiaicmsController@conferencia'));
     
     //icms inicio crud
-    Route::get('guiaicms/icms', array('as'=>'guiaicms.listar', 'uses'=>'GuiaicmsController@listar'));
-    Route::post('guiaicms/icms', array('as'=>'guiaicms.listar', 'uses'=>'GuiaicmsController@listar'));
+    Route::get('guiaicms/listar', array('as'=>'guiaicms.listar', 'uses'=>'GuiaicmsController@listar'));
+    Route::get('guiaicms/anyData', array('as'=>'guiaicms.anyData', 'uses'=>'GuiaicmsController@anyData'));
 
     Route::post('guiaicms/novo', array('as'=>'guiaicms.create', 'uses'=>'GuiaicmsController@create'));
     Route::get('guiaicms/novo', array('as'=>'guiaicms.cadastrar', 'uses'=>'GuiaicmsController@create'));

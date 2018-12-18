@@ -44,27 +44,23 @@ class GuiaicmsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function listar(Request $request)
+    public function AnyData(Request $request)
     {   
         $status = 'success';
 
-        $input_inicio = $request->input('inicio_leitura');
-        $input_fim = $request->input('fim_leitura');
-
+        $src_inicio = $request->get('src_inicio');
+        $src_fim = $request->get('src_fim');
+        
         $Registros = Guiaicms::where('ID', '>', '0');
-        if ((!empty($request->input('inicio_leitura')) && !empty($request->input('fim_leitura'))) || (!empty(Session::get('inicio_leitura')) && !empty(Session::get('fim_leitura'))) ) {
+        
+        if ((!empty($src_inicio) && !empty($src_fim)) || (!empty(Session::get('src_inicio')) && !empty(Session::get('src_fim')))) {
             
-            if (!empty($input_inicio) && !empty($input_fim)) {
-             
-                $input_inicio = $input_inicio.' 00:00:00';
-                $input_fim = $input_fim.' 23:59:59';
-                
-                Session::put('inicio_leitura', $input_inicio);
-                Session::put('fim_leitura', $input_fim);
-            
+            if (!empty($src_inicio) && !empty($src_fim)) {
+                Session::put('src_inicio', $src_inicio);
+                Session::put('src_fim', $src_fim);
             }
-
-            $Registros = $Registros->whereBetween('DATA', [Session::get('inicio_leitura'), Session::get('fim_leitura')]);
+            
+            $Registros = $Registros->whereBetween('DATA', [Session::get('src_inicio').' 00:00:00', Session::get('src_fim').' 23:59:59']);
         }
         
         $Registros = $Registros->get();
@@ -74,8 +70,12 @@ class GuiaicmsController extends Controller
                 $Registros[$k]['codigo'] = $this->findEstabelecimento($Registro->CNPJ); 
             }
         }
-        
-        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
+        return Datatables::of($Registros)->make(true);
+    }
+
+    public function listar()
+    {   
+        return view('guiaicms.index')->with('src_inicio',Input::get("src_inicio"))->with('src_fim',Input::get("src_fim"));
     }
 
     private function findEstabelecimento($cnpj)
@@ -250,10 +250,8 @@ class GuiaicmsController extends Controller
         if (!empty($id)) {
             Guiaicms::destroy($id);
             $this->msg = 'Registro excluído com sucesso';
+            return redirect()->back()->with('status', 'Registro Excluido com sucesso.');
         }
-
-        $Registros = Guiaicms::all();
-        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
     }
 
     public function Job()

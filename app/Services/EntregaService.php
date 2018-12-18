@@ -624,7 +624,9 @@ class EntregaService {
 
     private function CronogramaAtividadeMensal($id, $atividade)
     {
-        CronogramaAtividade::where('id',$atividade['id'])
+        CronogramaAtividade::where('regra_id',$atividade['regra_id'])
+        ->where('emp_id',$atividade['emp_id'])
+        ->where('periodo_apuracao',$atividade['periodo_apuracao'])
         ->update(['cronograma_mensal' => $id]);
     }
 

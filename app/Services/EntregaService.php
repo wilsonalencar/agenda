@@ -552,6 +552,7 @@ class EntregaService {
                 }
                 $nova_atividade = CronogramaAtividade::create($val);
                 if (!empty($val)) {
+                    $val['id'] = $nova_atividade->id;
                     $this->array[$val['estemp_id']][$tributo_id][] = $val;
                     $this->prioridade[$tributo_id][] = $val;
                 }
@@ -623,9 +624,7 @@ class EntregaService {
 
     private function CronogramaAtividadeMensal($id, $atividade)
     {
-        CronogramaAtividade::where('regra_id',$atividade['regra_id'])
-        ->where('emp_id',$atividade['emp_id'])
-        ->where('periodo_apuracao',$atividade['periodo_apuracao'])
+        CronogramaAtividade::where('id',$atividade['id'])
         ->update(['cronograma_mensal' => $id]);
     }
 
@@ -1400,10 +1399,13 @@ class EntregaService {
 
                         //Verifica blacklist dos estabelecimentos para esta regra
                         if (!in_array($ae->id,$blacklist)) {
-                            CronogramaAtividade::create($val);
-                            $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
-                            $this->prioridade[$regra->tributo->id][] = $val;
-                            $count++;
+                            $nova_atividade = CronogramaAtividade::create($val);
+                            if (!empty($val)) {
+                                $val['id'] = $nova_atividade->id;
+                                $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
+                                $this->prioridade[$regra->tributo->id][] = $val;
+                                $count++;
+                            }
                         }
 
                     }
@@ -1493,10 +1495,13 @@ class EntregaService {
 
                             //Verifica blacklist dos estabelecimentos para esta regra
                             if (!in_array($el->id,$blacklist)) {
-                                CronogramaAtividade::create($val);
-                                $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
-                                $this->prioridade[$regra->tributo->id][] = $val; 
-                                $count++;
+                                $nova_atividade = CronogramaAtividade::create($val);
+                                if (!empty($val)) {
+                                    $val['id'] = $nova_atividade->id;
+                                    $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
+                                    $this->prioridade[$regra->tributo->id][] = $val; 
+                                    $count++;
+                                }
                             }
                         }
                     }
@@ -1545,25 +1550,18 @@ class EntregaService {
             foreach ($priority as $x => $non_single) {
                 foreach ($non_single as $unicKey => $single_priority) {
                     
-                    $cronograma = CronogramaAtividade::where('regra_id',$single_priority['regra_id'])
-                    ->where('emp_id',$single_priority['emp_id'])
-                    ->where('periodo_apuracao',$single_priority['periodo_apuracao'])
-                    ->where('descricao',$single_priority['descricao'])
-                    ->where('estemp_id',$single_priority['estemp_id'])
-                    ->get();
+                    $cronograma = CronogramaAtividade::where('id',$single_priority['id'])->get();
                     
                     if (!empty($cronograma)) {
-                        foreach ($cronograma as $kk => $k) {
-                            $time += $k->tempo;
-                            if ($time > 480) {
-                                $data = date('Y-m-d', strtotime("+1 days",strtotime($data)));
-                                $time -= 480;
-                                $k->data_atividade = $data;
-                                $k->save();
-                            } else {
-                                $k->data_atividade = $data;
-                                $k->save();   
-                            }
+                        $time += $k->tempo;
+                        if ($time > 480) {
+                            $data = date('Y-m-d', strtotime("+1 days",strtotime($data)));
+                            $time -= 480;
+                            $k->data_atividade = $data;
+                            $k->save();
+                        } else {
+                            $k->data_atividade = $data;
+                            $k->save();   
                         }
                     }          
                 }           

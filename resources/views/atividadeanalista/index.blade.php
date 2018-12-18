@@ -53,9 +53,6 @@ $(document).ready(function (){
         lengthMenu: [[25, 50, 75, -1], [25, 50, 75, "100"]]
     });        
 });
-            {data: 'cnpj', name: 'cnpj',render: function ( data ) {
-                                                      return printMaskCnpj(data);
-                                                    }},
 
 </script>
 @stop

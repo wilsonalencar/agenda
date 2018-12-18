@@ -51,8 +51,6 @@ class UploadsController extends Controller
         if ($usuario->hasRole('analyst')){
             $query .= ' AND A.Id_usuario_analista ='.$user->id;
         }   
-        echo "<pre>";
-        print_r($query);exit;
 
         $atividades = DB::select($query);
         

@@ -776,10 +776,9 @@ class CronogramaatividadesController extends Controller
         }
 
         $atividades_emp = DB::table('cronogramaatividades')
-            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
+            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.emp_id')
             ->select('cronogramaatividades.id','cronogramaatividades.data_atividade', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-            ->whereRaw('DATE_FORMAT(cronogramaatividades.data_atividade, "%Y-%m-%d") in ('.$datasB.')')
-            ->where('cronogramaatividades.estemp_type','emp');
+            ->whereRaw('DATE_FORMAT(cronogramaatividades.data_atividade, "%Y-%m-%d") in ('.$datasB.')');
      
             if ($user->hasRole('analyst')){
                 $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);
@@ -882,10 +881,9 @@ class CronogramaatividadesController extends Controller
         
         //MATRIZ
         $atividades_emp = DB::table('cronogramaatividades')
-            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
+            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.emp_id')
             ->select('cronogramaatividades.id','cronogramaatividades.data_atividade', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-            ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
-            ->where('cronogramaatividades.estemp_type','emp');
+            ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao);
 
             if ($user->hasRole('analyst')){
                 $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);

@@ -760,7 +760,7 @@ class CronogramaatividadesController extends Controller
         $b = 0;
         foreach($atividades_estab as $atividade) {
             $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,1)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
+            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
                 $cor = 'red';
                 $b = 1;
             }
@@ -791,7 +791,7 @@ class CronogramaatividadesController extends Controller
         foreach($atividades_emp as $atividade) {
 
             $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,1)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
+            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
                 $cor = 'red';
                 $a = 1;
             }
@@ -865,7 +865,7 @@ class CronogramaatividadesController extends Controller
         $b = 0;
         foreach($atividades_estab as $atividade) {
             $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,1)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
+            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
                 $cor = 'red';
                 $b = 1;
             }
@@ -897,7 +897,7 @@ class CronogramaatividadesController extends Controller
         foreach($atividades_emp as $atividade) {
 
             $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,1)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
+            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
                 $cor = 'red';
                 $a = 1;
             }

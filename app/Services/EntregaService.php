@@ -578,7 +578,7 @@ class EntregaService {
             foreach ($single as $tributo => $mostsingle) {
             $generate = 1;
                 foreach ($mostsingle as $key => $atividade) {
-                    $var['Qtde_estab'] = count($this->qtd_estabs[$tributo_id][$estab_id]);
+                    $var['Qtde_estab'] = count($this->qtd_estabs[$tributo][$estab_id]);
                     $var['Tempo_estab'] = $atividade['tempo'];
                     $var['DATA_SLA'] = $atividade['limite'];
                     $var['periodo_apuracao'] = $atividade['periodo_apuracao'];

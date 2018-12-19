@@ -635,9 +635,9 @@ class EntregaService {
                 ->get();
 
         if (!empty($atividades)) {
-            foreach ($atividades as $key => $atividade) {
-                $atividade->cronograma_mensal = $id;
-                $atividade->save();
+            foreach ($atividades as $key => $single) {
+                $single->cronograma_mensal = $id;
+                $single->save();
             }
         }
 

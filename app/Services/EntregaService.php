@@ -555,7 +555,7 @@ class EntregaService {
                 if (!empty($val)) {
                     $val['id'] = $nova_atividade->id;
                     $this->array[$val['estemp_id']][$tributo_id][] = $val;
-                    $this->qtd_estabs[$regra->tributo->id][$val['uf'][$val['estemp_id']]][] = $val;
+                    $this->qtd_estabs[$regra->tributo->id][$uf_cron->uf][$val['estemp_id']][] = $val;
                     $this->prioridade[$tributo_id][] = $val;
                 }
                 $count++;
@@ -1427,7 +1427,7 @@ class EntregaService {
                             if (!empty($val)) {
                                 $val['id'] = $nova_atividade->id;
                                 $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
-                                $this->qtd_estabs[$regra->tributo->id][$val['uf'][$val['estemp_id']]][] = $val;
+                                $this->qtd_estabs[$regra->tributo->id][$uf_cron->uf][$val['estemp_id']][] = $val;
                                 $this->prioridade[$regra->tributo->id][] = $val;
                                 $count++;
                             }
@@ -1524,7 +1524,7 @@ class EntregaService {
                                 if (!empty($val)) {
                                     $val['id'] = $nova_atividade->id;
                                     $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
-                                    $this->qtd_estabs[$regra->tributo->id][$val['uf'][$val['estemp_id']]][] = $val;
+                                    $this->qtd_estabs[$regra->tributo->id][$uf_cron->uf][$val['estemp_id']][] = $val;
                                     $this->prioridade[$regra->tributo->id][] = $val; 
                                     $count++;
                                 }

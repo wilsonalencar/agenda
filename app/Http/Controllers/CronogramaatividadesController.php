@@ -199,7 +199,7 @@ class CronogramaatividadesController extends Controller
                 $value->Tempo_total = $value->Tempo_total/60;
                 $value->Tempo_geracao = $value->Tempo_geracao/60;
                 
-                $value->Qtd_analistas = round($value->Qtd_analistas);
+                $value->Qtd_analistas = $value->Qtd_analistas;
                 $value->Inicio = date('d/m/Y', strtotime("+1 days",strtotime($data_carga[0]->Data_prev_carga))); 
                 $value->carga = date('d/m/Y', strtotime($data_carga[0]->Data_prev_carga)); 
                     

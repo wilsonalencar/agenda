@@ -35,6 +35,7 @@ class EntregaService {
 
     protected $notification_system;
     public $array = array();
+    public $qtd_estabs = array();
     public $prioridade = array();
 
     function __construct()
@@ -554,6 +555,7 @@ class EntregaService {
                 if (!empty($val)) {
                     $val['id'] = $nova_atividade->id;
                     $this->array[$val['estemp_id']][$tributo_id][] = $val;
+                    $this->qtd_estabs[$tributo_id][$val['estemp_id']][] = $val;
                     $this->prioridade[$tributo_id][] = $val;
                 }
                 $count++;
@@ -576,7 +578,7 @@ class EntregaService {
             foreach ($single as $tributo => $mostsingle) {
             $generate = 1;
                 foreach ($mostsingle as $key => $atividade) {
-                    $var['Qtde_estab'] = count($array[$estab_id][$tributo]);
+                    $var['Qtde_estab'] = count($this->qtd_estabs[$tributo_id][$estab_id]);
                     $var['Tempo_estab'] = $atividade['tempo'];
                     $var['DATA_SLA'] = $atividade['limite'];
                     $var['periodo_apuracao'] = $atividade['periodo_apuracao'];
@@ -1424,6 +1426,7 @@ class EntregaService {
                             if (!empty($val)) {
                                 $val['id'] = $nova_atividade->id;
                                 $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
+                                $this->qtd_estabs[$regra->tributo->id][$val['estemp_id']][] = $val;
                                 $this->prioridade[$regra->tributo->id][] = $val;
                                 $count++;
                             }
@@ -1520,6 +1523,7 @@ class EntregaService {
                                 if (!empty($val)) {
                                     $val['id'] = $nova_atividade->id;
                                     $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
+                                    $this->qtd_estabs[$regra->tributo->id][$val['estemp_id']][] = $val;
                                     $this->prioridade[$regra->tributo->id][] = $val; 
                                     $count++;
                                 }

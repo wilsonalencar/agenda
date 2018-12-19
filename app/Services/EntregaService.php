@@ -624,10 +624,28 @@ class EntregaService {
 
     private function CronogramaAtividadeMensal($id, $atividade)
     {
-        CronogramaAtividade::where('regra_id',$atividade['regra_id'])
-        ->where('emp_id',$atividade['emp_id'])
-        ->where('periodo_apuracao',$atividade['periodo_apuracao'])
-        ->update(['cronograma_mensal' => $id]);
+        $tributo = Regra::findorFail($atividade['regra_id']);
+
+        $atividades = DB::table('cronogramaatividades')
+                ->join('regras', 'cronogramaatividades.regra_id', '=', 'regras.id')
+                ->select('cronogramaatividades.*')
+                ->where('regras.tributo_id', $tributo->id)
+                ->where('cronogramaatividades.emp_id',$atividade['emp_id'])
+                ->where('cronogramaatividades.periodo_apuracao',$atividade['periodo_apuracao'])
+                ->get();
+
+        if (!empty($atividades)) {
+            foreach ($atividades as $key => $atividade) {
+                $atividade->cronograma_mensal = $id;
+                $atividade->save();
+            }
+        }
+
+        // CronogramaAtividade::where('regra_id',$atividade['regra_id'])
+        // ->where('emp_id',$atividade['emp_id'])
+        // ->where('emp_id',$atividade['emp_id'])
+        // ->where('periodo_apuracao',$atividade['periodo_apuracao'])
+        // ->update(['cronograma_mensal' => $id]);
     }
 
     private function diffTempo($data1, $data2)

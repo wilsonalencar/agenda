@@ -759,8 +759,8 @@ class CronogramaatividadesController extends Controller
             $atividades_get = $atividades_estab->get();
 
         $atividades_estab = array();
-        foreach ($atividades_get as $index => $atividade) {
-            $atividades_estab[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        foreach ($atividades_get as $index => $atividade_estab) {
+            $atividades_estab[substr($atividade_estab->data_atividade, 0,10)][] = $atividade_estab;
         }
 
         $b = 0;
@@ -793,8 +793,8 @@ class CronogramaatividadesController extends Controller
             $atividades_get_emp = $atividades_emp->get();
 
         $atividades_emp = array();
-        foreach ($atividades_get_emp as $index => $atividade) {
-            $atividades_emp[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        foreach ($atividades_get_emp as $index => $atividade_emp) {
+            $atividades_emp[substr($atividade_emp->data_atividade, 0,10)][] = $atividade_emp;
         }
 
         $a = 0;
@@ -874,8 +874,8 @@ class CronogramaatividadesController extends Controller
                 $atividades_get = $atividades_estab->get();
 
         $atividades_estab = array();
-        foreach ($atividades_get as $index => $atividade) {
-            $atividades_estab[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        foreach ($atividades_get as $index => $atividade_estab) {
+            $atividades_estab[substr($atividade_estab->data_atividade, 0,10)][] = $atividade_estab;
         }
 
         $b = 0;
@@ -909,8 +909,8 @@ class CronogramaatividadesController extends Controller
             $atividades_get_emp = $atividades_emp->get();
 
         $atividades_emp = array();
-        foreach ($atividades_get_emp as $index => $atividade) {
-            $atividades_emp[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        foreach ($atividades_get_emp as $index => $atividade_emp) {
+            $atividades_emp[substr($atividade_emp->data_atividade, 0,10)][] = $atividade_emp;
         }
 
         $a = 0;

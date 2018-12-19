@@ -56,7 +56,7 @@ class UploadsController extends Controller
         
         if (!empty($atividades)) {
             foreach ($atividades as $key => $atividade) {
-                if (strtotime($atividade->limite) < strtotime($atividade->data_atividade)) {
+                if (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) {
                     $atividadesFiltered[$atividade->tributo][$atividade->uf][$atividade->status]['PrazoEstourado'][] = $atividade;
                 } else {
                     $atividadesFiltered[$atividade->tributo][$atividade->uf][$atividade->status]['Prazo'][] = $atividade;

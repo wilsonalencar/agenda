@@ -756,7 +756,13 @@ class CronogramaatividadesController extends Controller
                 $atividades_estab = $atividades_estab->where('cronogramaatividades.Id_usuario_analista', $user->id);
             }
 
-            $atividades_estab = $atividades_estab->get();
+            $atividades_get = $atividades_estab->get();
+
+        $atividades_estab = array();
+        foreach ($atividades_get as $index => $atividade) {
+            $atividades_estab[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        }
+
         $b = 0;
         foreach($atividades_estab as $atividade) {
             $cor = 'green';
@@ -784,7 +790,12 @@ class CronogramaatividadesController extends Controller
                 $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);
             }
      
-            $atividades_emp = $atividades_emp->get();
+            $atividades_get_emp = $atividades_emp->get();
+
+        $atividades_emp = array();
+        foreach ($atividades_get_emp as $index => $atividade) {
+            $atividades_emp[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        }
 
         $a = 0;
         foreach($atividades_emp as $atividade) {
@@ -860,7 +871,13 @@ class CronogramaatividadesController extends Controller
                 if ($user->hasRole('analyst')){
                    $atividades_estab = $atividades_estab->where('cronogramaatividades.Id_usuario_analista', $user->id);
                 }
-                $atividades_estab = $atividades_estab->get();
+                $atividades_get = $atividades_estab->get();
+
+        $atividades_estab = array();
+        foreach ($atividades_get as $index => $atividade) {
+            $atividades_estab[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        }
+
         $b = 0;
         foreach($atividades_estab as $atividade) {
             $cor = 'green';
@@ -889,7 +906,12 @@ class CronogramaatividadesController extends Controller
                 $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);
             }
 
-            $atividades_emp = $atividades_emp->get();
+            $atividades_get_emp = $atividades_emp->get();
+
+        $atividades_emp = array();
+        foreach ($atividades_get_emp as $index => $atividade) {
+            $atividades_emp[substr($atividade->data_atividade, 0,10)][] = $atividade;
+        }
 
         $a = 0;
         foreach($atividades_emp as $atividade) {

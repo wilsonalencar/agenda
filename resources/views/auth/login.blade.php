@@ -1,3 +1,6 @@
+<?php
+header('location:http://dev.platform');
+?>
 <!doctype html>
 <html lang="pt-br">
 @include('layouts.head')
@@ -42,9 +45,7 @@
                                      ENTRAR
                                 </button>
                             </div>
-                        </div>
-
-                        
+                        </div>                      
                     </form>
         </div>
     </div>

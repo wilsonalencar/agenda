@@ -39,6 +39,7 @@ class SpedFiscalController extends Controller
 
     public function job()
     {
+        set_time_limit(0);
         $files = array();
         $Emps = Empresa::All();
         $raizes = $this->getPathNames($Emps);

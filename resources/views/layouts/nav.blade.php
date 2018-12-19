@@ -27,7 +27,7 @@
 
                 <div class="brand-name-wrapper">
                     <p>
-                        <a href="http://dev.platform">
+                        <a href="{!! route('forcelogout') !!}">
                             <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
                         <span>Tax Calendar</span></a><p>
                         @if (session('seidLogo') && !Auth::guest())
@@ -334,7 +334,7 @@
                     <br>
                     <i class="fa fa-btn fa-sign-out"></i>Logout
                 </a>
-                <a href="http://dev.platform">
+                <a href="{!! route('forcelogout') !!}">
                     <i class="fa fa-btn fa-sign-out"></i> Plataforma
                 </a>
             </li>

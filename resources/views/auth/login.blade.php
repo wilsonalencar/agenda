@@ -1,5 +1,5 @@
 <?php
-header('location:http://dev.platform');
+header('location:http://dev.platform/login.php');
 ?>
 <!doctype html>
 <html lang="pt-br">

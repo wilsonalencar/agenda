@@ -24,7 +24,7 @@ class TableCronogramamensal extends Migration
             $table->integer('Tempo_total');
             $table->integer('Qtd_dias');
             $table->integer('Tempo_geracao');
-            $table->integer('Qtd_analistas');
+            $table->string('Qtd_analistas', 255);
         });
     }
 

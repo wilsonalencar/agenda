@@ -34,7 +34,7 @@ class PagesController extends Controller
     {
         Session::forget('seid');
         Session::forget('seidLogo');
-        header('location:http://dev.platform');
+        return response()->redirectTo('http://dev.platform');
     }
 
     public function aprovacao (Request $request = null)

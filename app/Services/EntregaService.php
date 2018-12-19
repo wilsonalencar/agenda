@@ -636,8 +636,9 @@ class EntregaService {
 
         if (!empty($atividades)) {
             foreach ($atividades as $key => $single) {
-                $single->cronograma_mensal = $id;
-                $single->save();
+                $single_activity = CronogramaAtividade::findorFail($single->id);
+                $single_activity->cronograma_mensal = $id;
+                $single_activity->save();
             }
         }
 

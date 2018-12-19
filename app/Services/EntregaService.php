@@ -624,12 +624,12 @@ class EntregaService {
 
     private function CronogramaAtividadeMensal($id, $atividade)
     {
-        $tributo = Regra::findorFail($atividade['regra_id']);
+        $regra = Regra::findorFail($atividade['regra_id']);
 
         $atividades = DB::table('cronogramaatividades')
                 ->join('regras', 'cronogramaatividades.regra_id', '=', 'regras.id')
                 ->select('cronogramaatividades.*')
-                ->where('regras.tributo_id', $tributo->id)
+                ->where('regras.tributo_id', $regra->tributo->id)
                 ->where('cronogramaatividades.emp_id',$atividade['emp_id'])
                 ->where('cronogramaatividades.periodo_apuracao',$atividade['periodo_apuracao'])
                 ->get();

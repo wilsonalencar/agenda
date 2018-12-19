@@ -1,5 +1,6 @@
 <?php
 header('location:http://dev.platform/login.php');
+exit();
 ?>
 <!doctype html>
 <html lang="pt-br">

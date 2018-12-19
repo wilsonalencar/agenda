@@ -763,22 +763,24 @@ class CronogramaatividadesController extends Controller
             $atividades_estab[substr($atividade_estab->data_atividade, 0,10)][] = $atividade_estab;
         }
 
-        $b = 0;
-        foreach($atividades_estab as $atividade) {
-            $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
-                $cor = 'red';
-                $b = 1;
-            }
+        foreach($atividades_estab as $atividades_singulares_estab) {
+            $b = 0;
+            foreach ($atividades_singulares_estab as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
+                    $cor = 'red';
+                    $b = 1;
+                }
 
-            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades', 
-                true, 
-                substr($atividade->data_atividade, 0,10), 
-                substr($atividade->data_atividade, 0,10), 
-                $atividade->id, 
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
-            );
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades', 
+                    true, 
+                    substr($atividade->data_atividade, 0,10), 
+                    substr($atividade->data_atividade, 0,10), 
+                    $atividade->id, 
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
+                );
+            }
         }
 
         $atividades_emp = DB::table('cronogramaatividades')
@@ -797,23 +799,24 @@ class CronogramaatividadesController extends Controller
             $atividades_emp[substr($atividade_emp->data_atividade, 0,10)][] = $atividade_emp;
         }
 
-        $a = 0;
-        foreach($atividades_emp as $atividade) {
+        foreach($atividades_emp as $atividades_singulares) {
+            $a = 0;
+            foreach ($atividades_singulares as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
+                    $cor = 'red';
+                    $a = 1;
+                }
 
-            $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
-                $cor = 'red';
-                $a = 1;
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades',
+                    true, 
+                    substr($atividade->data_atividade, 0,10),
+                    substr($atividade->data_atividade, 0,10),
+                    $atividade->id,
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
+                );
             }
-
-            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades',
-                true, 
-                substr($atividade->data_atividade, 0,10),
-                substr($atividade->data_atividade, 0,10),
-                $atividade->id,
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
-            );
         }
 
         $day = 0;
@@ -878,22 +881,24 @@ class CronogramaatividadesController extends Controller
             $atividades_estab[substr($atividade_estab->data_atividade, 0,10)][] = $atividade_estab;
         }
 
-        $b = 0;
-        foreach($atividades_estab as $atividade) {
-            $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
-                $cor = 'red';
-                $b = 1;
-            }
+        foreach($atividades_estab as $atividades_singulares_estab) {
+            $b = 0;
+            foreach ($atividades_singulares_estab as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
+                    $cor = 'red';
+                    $b = 1;
+                }
 
-            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades',
-                true, 
-                substr($atividade->data_atividade, 0,10), 
-                substr($atividade->data_atividade, 0,10), 
-                $atividade->id, 
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
-            );
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades', 
+                    true, 
+                    substr($atividade->data_atividade, 0,10), 
+                    substr($atividade->data_atividade, 0,10), 
+                    $atividade->id, 
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
+                );
+            }
         }
         
         //MATRIZ
@@ -913,24 +918,27 @@ class CronogramaatividadesController extends Controller
             $atividades_emp[substr($atividade_emp->data_atividade, 0,10)][] = $atividade_emp;
         }
 
-        $a = 0;
-        foreach($atividades_emp as $atividade) {
+        
+        foreach($atividades_emp as $atividades_singulares) {
+            $a = 0;
+            foreach ($atividades_singulares as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
+                    $cor = 'red';
+                    $a = 1;
+                }
 
-            $cor = 'green';
-            if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
-                $cor = 'red';
-                $a = 1;
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades',
+                    true, 
+                    substr($atividade->data_atividade, 0,10),
+                    substr($atividade->data_atividade, 0,10),
+                    $atividade->id,
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
+                );
             }
-
-            $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
-                'Atividades',
-                true, 
-                substr($atividade->data_atividade, 0,10),
-                substr($atividade->data_atividade, 0,10),
-                $atividade->id,
-                ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
-            );
-        }  
+        }
+  
         //Geração do calendario
         $mes = substr($periodo_apuracao, 0, -4)+1;
         $ano = substr($periodo_apuracao, 2);

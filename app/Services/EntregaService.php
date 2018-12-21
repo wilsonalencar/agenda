@@ -650,12 +650,16 @@ class EntregaService {
     private function CronogramaAtividadeMensal($id, $atividade)
     {
         $regra = Regra::findorFail($atividade['regra_id']);
+        $estabelecimento = Estabelecimento::findorFail($atividade['estemp_id']);
 
         $atividades = DB::table('cronogramaatividades')
                 ->join('regras', 'cronogramaatividades.regra_id', '=', 'regras.id')
+                ->join('estabelecimentos', 'cronogramaatividades.estemp_id', '=', 'estabelecimentos.id')
+                ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')
                 ->select('cronogramaatividades.*')
                 ->where('regras.tributo_id', $regra->tributo->id)
                 ->where('cronogramaatividades.emp_id',$atividade['emp_id'])
+                ->where('municipios.uf',$estabelecimento->municipio->uf)
                 ->where('cronogramaatividades.periodo_apuracao',$atividade['periodo_apuracao'])
                 ->get();
 

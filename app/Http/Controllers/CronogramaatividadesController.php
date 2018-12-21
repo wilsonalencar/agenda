@@ -647,7 +647,7 @@ class CronogramaatividadesController extends Controller
     
     $queryCron = "SELECT 
                     A.descricao,
-                    DATE_FORMAT(A.limite, '%d/%m/%Y %H:%i:%s') AS limite,
+                    DATE_FORMAT(A.limite, '%d/%m/%Y') AS limite,
                     B.razao_social,
                     C.codigo,
                     C.cnpj,

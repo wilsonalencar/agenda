@@ -529,11 +529,9 @@ class EntregaService {
                 $val['estemp_id'] = $estab->id;
                 $val['emp_id'] = $estab->empresa_id;
 
-                $anali = DB::select('SELECT a.* from atividadeanalista a left join regras b on a.Tributo_id = b.tributo_id where b.id = '.$val['regra_id'].' and a.Emp_id ='.$val['emp_id']);
-
-                if (!empty($anali)) {
-                    $anali = json_decode(json_encode($anali),true);
-                    $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                $analista = $this->loadAnalista($val);
+                if (!empty($analista)) {
+                    $val['Id_usuario_analista'] = $analista;
                 } 
 
                 $val['Resp_cronograma'] =$id_user;
@@ -569,6 +567,30 @@ class EntregaService {
 
         return $generate;
 
+    }
+
+    private function loadAnalista($val)
+    {
+        $regra = Regra::findorFail($val['regra_id']);
+        $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$val['emp_id']. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$val['estemp_id']. " AND B.Regra_geral = 'N') limit 1";
+
+        $retornodaquery = DB::select($query);
+
+        $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$val['emp_id']. " AND B.Regra_geral = 'S') limit 1";
+        
+        $queryGeral = DB::select($sql);
+        
+        $idanalistas = $retornodaquery;
+        if (empty($retornodaquery)) {
+            $idanalistas = $queryGeral;   
+        }
+        $analistafinal = 0;
+        if (!empty($idanalistas)) {
+            foreach ($idanalistas as $k => $analista) {
+                $analistafinal = $analista->id;
+            }
+        }
+        return $analistafinal;
     }
 
     public function generateMensal($array)
@@ -1397,16 +1419,10 @@ class EntregaService {
                             $val['estemp_type'] = 'estab';
                         }
 
-                        $anali = DB::table('atividadeanalista')
-                            ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
-                            ->select('atividadeanalista.Id_usuario_analista')
-                            ->where('regras.id',$val['regra_id'])
-                            ->where('atividadeanalista.Emp_id', $val['emp_id'])
-                            ->get();
+                        $analista = $this->loadAnalista($val);
 
-                        if (!empty($anali)) {
-                            $anali = json_decode(json_encode($anali),true);
-                            $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                        if (!empty($analista)) {
+                            $val['Id_usuario_analista'] = $analista;
                         } 
 
                         if ($val['estemp_id'] > 0) {
@@ -1491,15 +1507,9 @@ class EntregaService {
                             $val['estemp_id'] = $id_estab;
                             $val['estemp_type'] = 'estab';
                             }
-                            $anali = DB::table('atividadeanalista')
-                            ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
-                            ->select('atividadeanalista.Id_usuario_analista')
-                            ->where('regras.id',$val['regra_id'])
-                            ->where('atividadeanalista.Emp_id', $empresa_id)
-                            ->get();
-                            if (!empty($anali)) {
-                                $anali = json_decode(json_encode($anali),true);
-                                $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                            $analista = $this->loadAnalista($val);
+                            if (!empty($analista)) {
+                                $val['Id_usuario_analista'] = $analista;
                             }
 
                             $val['Resp_cronograma'] = $id_user;

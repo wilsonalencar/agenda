@@ -333,6 +333,13 @@ class GuiaicmsController extends Controller
             echo "Nenhum arquivo foi encontrado disponível para salvar";exit;
         }
 
+        $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\LeitorMails.php';
+        if (substr(php_uname(), 0, 7) == "Windows"){ 
+            pclose(popen("start /B " . $cmd, "r"));  
+        } else { 
+                exec($cmd . " > /dev/null &");   
+        } 
+
         $mensagem = 'Concluído com sucesso';
         return view('guiaicms.job_return')->withMensagem($mensagem);
     }
@@ -550,45 +557,7 @@ class GuiaicmsController extends Controller
         $array['Estemp_id']     = $estemp_id;
         $array['Empresa_id']    = $empresa_id;
         $array['Data_critica']  = date('Y-m-d h:i:s');
-        
-        //criando registro na tabela
-        CriticasLeitor::create($array);
-        
-        //buscar email através de empresa e tributo
-        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$tributo_id." and Emp_id = ".$empresa_id.")";
-        $emailsAnalista = DB::select($query);
-
-        $codigoEstabelecimento = '';
-        if ($estemp_id > 0) {
-            $codigoEstabelecimentoArray = DB::select('select codigo FROM estabelecimentos where id = '.$estemp_id.' LIMIT 1 ');
-            
-            if (!empty($codigoEstabelecimentoArray[0])) {
-                $codigoEstabelecimento = $codigoEstabelecimentoArray[0]->codigo;
-            }
-        }
-
-        $tributo_nome = '';
-        if ($tributo_id > 0) {
-            $nomeTributoArray = DB::select('select nome FROM tributos where id = '.$tributo_id.' LIMIT 1 ');
-            
-            if (!empty($nomeTributoArray[0])) {
-                $tributo_nome = $nomeTributoArray[0]->nome;
-            }
-        }
-        
-        //enviando email
-        $now = date('d/m/Y');
-        $subject = "Críticas e Alertas Leitor PDF em ".$now;
-        $text = 'Empresa => '.$empresa_id.' Estabelecimento.Codigo => '.$codigoEstabelecimento.' Tributo => '.$tributo_nome.' Arquivo => '.$arquivo.' Critica => '.$critica.' importado => '.$importado;
-
-        $data = array('subject'=>$subject,'messageLines'=>$text);
-        
-        if (!empty($emailsAnalista)) {
-            foreach($emailsAnalista as $row) {
-                $user = User::findOrFail($row->id);
-                $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
-            }
-        }     
+        CriticasLeitor::create($array); 
     }    
 
     public function createCriticaEntrega($empresa_id=1, $estemp_id=0, $tributo_id=8, $arquivo, $critica, $importado)
@@ -600,44 +569,7 @@ class GuiaicmsController extends Controller
         $array['Estemp_id']     = $estemp_id;
         $array['Empresa_id']    = $empresa_id;
         $array['Data_critica']  = date('Y-m-d h:i:s');
-        
-        //criando registro na tabela
         CriticasEntrega::create($array);
-        //buscar email através de empresa e tributo
-        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$tributo_id." and Emp_id = ".$empresa_id.")";
-        $emailsAnalista = DB::select($query);
-
-        $codigoEstabelecimento = '';
-        if ($estemp_id > 0) {
-            $codigoEstabelecimentoArray = DB::select('select codigo FROM estabelecimentos where id = '.$estemp_id.' LIMIT 1 ');
-            
-            if (!empty($codigoEstabelecimentoArray[0])) {
-                $codigoEstabelecimento = $codigoEstabelecimentoArray[0]->codigo;
-            }
-        }
-
-        $tributo_nome = '';
-        if ($tributo_id > 0) {
-            $nomeTributoArray = DB::select('select nome FROM tributos where id = '.$tributo_id.' LIMIT 1 ');
-            
-            if (!empty($nomeTributoArray[0])) {
-                $tributo_nome = $nomeTributoArray[0]->nome;
-            }
-        }
-        
-        //enviando email
-        $now = date('d/m/Y');
-        $subject = "Críticas e Alertas Entrega de arquivos em ".$now;
-        $text = 'Empresa => '.$empresa_id.' Estabelecimento.Codigo => '.$codigoEstabelecimento.' Tributo => '.$tributo_nome.' Arquivo => '.$arquivo.' Critica => '.$critica.' importado => '.$importado;
-
-        $data = array('subject'=>$subject,'messageLines'=>$text);
-        
-        if (!empty($emailsAnalista)) {
-            foreach($emailsAnalista as $row) {
-                $user = User::findOrFail($row->id);
-                $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
-            }
-        }     
     }
 
     public function validateEx($icms)
@@ -3779,6 +3711,14 @@ juros de mora
         } else {
             echo "Não foram encontrados arquivos para realizar o processo.";exit;
         }
+
+        $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\UploadMails.php';
+        if (substr(php_uname(), 0, 7) == "Windows"){ 
+            pclose(popen("start /B " . $cmd, "r"));  
+        } else { 
+                exec($cmd . " > /dev/null &");   
+        } 
+        
         echo "Job foi rodado com sucesso.";exit;
     }
 
@@ -3913,6 +3853,9 @@ juros de mora
        }
        if ($nomeTributo == "LIVROFISCAL") {
           return "LIVRO FISCAL";
+       }
+       if ($nomeTributo == "DESONERACAO") {
+          return "DESONERAÇÃO FOLHA";
        }
 
        return $nomeTributo;

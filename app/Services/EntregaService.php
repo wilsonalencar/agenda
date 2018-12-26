@@ -1625,8 +1625,7 @@ class EntregaService {
     }
 
     private function checkGeneration($data, $freq_entrega)
-    {   
-        return true;
+    {
         $mes = date('m/Y');
         
         $data1 = $data;

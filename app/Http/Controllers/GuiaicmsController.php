@@ -639,6 +639,8 @@ class GuiaicmsController extends Controller
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
         $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['UF'] = 'MS';
 
         $handle = fopen($value['pathtxt'], "r");
         $contents = fread($handle, filesize($value['pathtxt']));
@@ -698,7 +700,7 @@ class GuiaicmsController extends Controller
         if (!empty($match)) {
             $i = explode("\n", trim($match[1]));
             $a = explode(' ', $i[0]);
-            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($a[1])));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[1])));
         }
 
         preg_match('~07-multa 08-juros 09-correcao monetaria 10-total([^{]*)~i', $str, $match);

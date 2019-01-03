@@ -2218,6 +2218,35 @@ r\$([^{]*)~i', $str, $match);
             $i = explode("\n", trim($match[1]));
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[21])));
         }
+
+        if (!strlen($icms[0]['REFERENCIA'] == 7)) {
+            preg_match('~validade([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(' ', trim($match[1]));
+                $valorData = substr($i[0], 0,12);
+                $data_vencimento = str_replace('/', '-', $valorData);
+                $icms[0]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                $icms[1]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                $referencia = date('m/Y', strtotime($data_vencimento));
+                $k = explode('/', $referencia);
+                $k[0] = $k[0]-1;
+                if ($k[0] == 0) {
+                    $k[1] = $k[1] - 1;
+                }
+                if (strlen($k[0]) == 1) {
+                    $k[0] = '0'.$k[0];
+                }
+                $icms[0]['REFERENCIA'] = $k[0].'/'.$k[1];
+            }
+        }
+
+        if (empty($icms[0]['VLR_TOTAL'])) {
+            preg_match('~numero do documento([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[20])));
+            }
+        }
         
         fclose($handle);
         $icmsarray = array();

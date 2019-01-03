@@ -3265,7 +3265,6 @@ data de emissao
         $file_content = explode('_', $value['arquivo']);
         $atividade = Atividade::findOrFail($file_content[0]);
         $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
-        $icms['IE'] = $estabelecimento->insc_estadual;
         $icms['UF'] = 'SP';
 
         $handle = fopen($value['pathtxt'], "r");
@@ -3295,6 +3294,14 @@ data de emissao
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
             $icms['IMPOSTO'] = 'SEFAT';
+        }
+
+        //inscricao estadual
+        preg_match('~inscricao estadual([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $a = explode("\n", trim($match[1]));
+            $i = explode(' ', trim($a[0]));
+            $icms['IE'] = trim(str_replace(".", "", $i[1]));
         }
 
         //razão social

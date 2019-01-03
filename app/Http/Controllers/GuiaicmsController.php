@@ -2207,13 +2207,18 @@ r\$([^{]*)~i', $str, $match);
             }
         }
 
-
         preg_match('~mes ano de referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode("\n", trim($match[1]));
             $icms[0]['REFERENCIA'] = str_replace(' ', '',trim($i[0]));
         }
 
+        preg_match('~numero do documento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[21])));
+        }
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms[0];

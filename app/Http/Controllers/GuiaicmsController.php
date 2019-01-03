@@ -2248,6 +2248,11 @@ r\$([^{]*)~i', $str, $match);
             }
         }
         
+        if(!empty($this->letras($icms[0]['REFERENCIA'])))
+        {
+            $icms[0]['REFERENCIA'] = $icms[1]['REFERENCIA'];
+        }
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms[0];

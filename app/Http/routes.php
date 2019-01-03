@@ -95,6 +95,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::post('upload/sendUpload', 'UploadsController@upload');
 
     Route::get('uploadCron/{user}/entrega', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronograma'));
+    Route::get('uploadCron/{data_atividade}/entrega/data', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronogramaData'));
     Route::post('upload/sendUploadCron', 'UploadsController@uploadCron');
 
     Route::post('about', array('as'=>'about', 'uses'=>'PagesController@about'));
@@ -192,10 +193,17 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
     Route::post('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
     Route::get('dashboard_analista', array('as'=>'dashboard_analista', 'uses'=>'PagesController@dashboard_analista'));
 
+    Route::get('forcelogout', array('as'=>'forcelogout', 'uses'=>'PagesController@forcelogout'));
     Route::get('consulta_conta_corrente', array('as' => 'consulta_conta_corrente', 'uses' => 'PagesController@consulta_conta_corrente'));
 
     Route::get('consulta_conta_corrente_rlt_1', array('as' => 'consulta_conta_corrente_rlt_1', 'uses' => 'PagesController@relatorio_1'));
-    
+
+    Route::get('sped_fiscal', array('as' => 'sped_fiscal', 'uses' => 'SpedFiscalController@index'));
+    Route::get('sped_fiscal/transmitir', array('as' => 'sped_fiscal.transmitirlistar', 'uses' => 'SpedFiscalController@TransmissionIndex'));
+    Route::post('sped_fiscal/transmitir', array('as' => 'spedfiscal.transmitir', 'uses' => 'SpedFiscalController@transmitir'));
+
+    Route::get('sped_fiscal/download/{id}', array('as' => 'download_sped', 'uses' => 'SpedFiscalController@DownloadPath'));
+
     Route::get('/download/{file}', 'DownloadsController@download');
 
     Route::resource('entregas', 'EntregasController');
@@ -211,6 +219,7 @@ Route::group(['middleware' => ['web','auth','role:analyst|supervisor|manager|adm
     Route::post('upload/sendUpload', 'UploadsController@upload');
     
     Route::get('uploadCron/{user}/entrega', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronograma'));
+    Route::get('uploadCron/{data_atividade}/entrega/data', array('as'=>'upload.entregaCron', 'uses'=>'UploadsController@entregaCronogramaData'));
     Route::post('upload/sendUploadCron', 'UploadsController@uploadCron');
 
 });
@@ -221,6 +230,12 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('guiaicms/job', array('as'=>'guiaicms.Job', 'uses'=>'GuiaicmsController@Job'));
     Route::get('atividades/job', array('as'=>'guiaicms.jobAtividades', 'uses'=>'GuiaicmsController@jobAtividades'));
     Route::get('atividadeanalista/job', array('as'=>'atividadeanalista.job', 'uses'=>'AtividadeanalistaController@job'));
+
+    Route::get('spedfiscal/job', array('as'=>'spedfiscal.job', 'uses'=>'SpedFiscalController@job'));
+    Route::get('spedfiscal/{file}', array('as'=>'spedfiscal.download', 'uses'=>'SpedFiscalController@ForceZipDownload'));    
+    Route::get('upload/job', array('as'=>'upload.job', 'uses'=>'MailsController@UploadFiles'));
+    Route::get('leitor/job', array('as'=>'leitor.job', 'uses'=>'MailsController@Guiaimcs'));
+
 });
 
 // Just the Owner, Admin, Manager, MSAF, Supervisor and the Analyst
@@ -262,12 +277,16 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
      Route::resource('cronogramaatividades', 'CronogramaatividadesController');
 
     Route::get('cronogramaatividades', array('as'=>'cronogramaatividades.index', 'uses'=>'CronogramaatividadesController@anyData'));
-    Route::get('Gerarmensal', array('as'=>'cronogramaatividades.Gerarmensal', 'uses'=>'CronogramaatividadesController@Gerarmensal'));
+    Route::get('mensal', array('as'=>'cronogramaatividades.mensal', 'uses'=>'CronogramaatividadesController@Gerarmensal'));
     Route::post('mensal', array('as'=>'mensal', 'uses'=>'CronogramaatividadesController@mensal'));
 
-    Route::get('Gerarsemanal', array('as'=>'cronogramaatividades.Gerarsemanal', 'uses'=>'CronogramaatividadesController@Gerarsemanal'));
-
+    Route::get('semanal', array('as'=>'cronogramaatividades.semanal', 'uses'=>'CronogramaatividadesController@Gerarsemanal'));
     Route::post('semanal', array('as'=>'semanal', 'uses'=>'CronogramaatividadesController@semanal'));
+
+    Route::get('Planejamento', array('as'=>'cronogramaatividades.Loadplanejamento', 'uses'=>'CronogramaatividadesController@Loadplanejamento'));
+    Route::post('Planejamento', array('as'=>'cronogramaatividades.planejamento', 'uses'=>'CronogramaatividadesController@planejamento'));
+    Route::post('AlterAnalista', array('as'=>'cronogramaatividades.alterAnalista', 'uses'=>'CronogramaatividadesController@alterarAnalistas'));
+
 
     Route::get('GerarchecklistCron', array('as'=>'cronogramaatividades.GerarchecklistCron', 'uses'=>'CronogramaatividadesController@GerarchecklistCron'));
     Route::post('ChecklistCron', array('as'=>'ChecklistCron', 'uses'=>'CronogramaatividadesController@ChecklistCron'));
@@ -291,7 +310,8 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::post('guiaicms/conferencia', array('as'=>'guiaicms.conferencia', 'uses'=>'GuiaicmsController@conferencia'));
     
     //icms inicio crud
-    Route::get('guiaicms/icms', array('as'=>'guiaicms.listar', 'uses'=>'GuiaicmsController@listar'));
+    Route::get('guiaicms/listar', array('as'=>'guiaicms.listar', 'uses'=>'GuiaicmsController@listar'));
+    Route::get('guiaicms/anyData', array('as'=>'guiaicms.anyData', 'uses'=>'GuiaicmsController@anyData'));
 
     Route::post('guiaicms/novo', array('as'=>'guiaicms.create', 'uses'=>'GuiaicmsController@create'));
     Route::get('guiaicms/novo', array('as'=>'guiaicms.cadastrar', 'uses'=>'GuiaicmsController@create'));
@@ -329,6 +349,8 @@ Route::group(['middleware' => ['web','auth','role:supervisor|manager|admin|owner
     Route::post('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
     Route::get('dashboard', array('as'=>'dashboard', 'uses'=>'PagesController@dashboard'));
     Route::get('dashboardRLT', array('as'=>'dashboardRLT', 'uses'=>'PagesController@dashboardRLT'));
+    
+    Route::post('AnalistaCronograma', array('as'=>'cronograma.analistas', 'uses'=>'CronogramaatividadesController@AlterAnalistas'));
 
     Route::get('consulta_procadm', array('as'=>'consulta_procadm', 'uses'=>'ProcessosAdmsController@consulta_procadm'));
     Route::get('consulta_procadm/rpt', array('as'=>'consulta_procadm/rpt', 'uses'=>'ProcessosAdmsController@rlt_processos'));

@@ -1,3 +1,7 @@
+<?php
+header('location:http://dev.platform/login.php');
+exit();
+?>
 <!doctype html>
 <html lang="pt-br">
 @include('layouts.head')
@@ -42,9 +46,7 @@
                                      ENTRAR
                                 </button>
                             </div>
-                        </div>
-
-                        
+                        </div>                      
                     </form>
         </div>
     </div>

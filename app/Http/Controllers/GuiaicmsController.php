@@ -33,6 +33,7 @@ class GuiaicmsController extends Controller
 
     function __construct(EntregaService $service)
     {
+        date_default_timezone_set('America/Sao_Paulo');
         $this->eService = $service;
         if (!Auth::guest() && !empty(session()->get('seid')))
         $this->s_emp = Empresa::findOrFail(session('seid'));
@@ -43,11 +44,54 @@ class GuiaicmsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function listar()
+    public function AnyData(Request $request)
     {   
         $status = 'success';
-        $Registros = Guiaicms::all();
-        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
+
+        $src_inicio = $request->get('src_inicio');
+        $src_fim = $request->get('src_fim');
+        
+        $Registros = Guiaicms::where('ID', '>', '0');
+        
+        if ((!empty($src_inicio) && !empty($src_fim)) || (!empty(Session::get('src_inicio')) && !empty(Session::get('src_fim')))) {
+            
+            if (!empty($src_inicio) && !empty($src_fim)) {
+                Session::put('src_inicio', $src_inicio);
+                Session::put('src_fim', $src_fim);
+            }
+            
+            $Registros = $Registros->whereBetween('DATA', [Session::get('src_inicio').' 00:00:00', Session::get('src_fim').' 23:59:59']);
+        }
+        
+        $Registros = $Registros->get();
+        
+        if (!empty($Registros)) {
+            foreach ($Registros as $k => $Registro) {
+                $Registros[$k]['codigo'] = $this->findEstabelecimento($Registro->CNPJ); 
+            }
+        }
+        return Datatables::of($Registros)->make(true);
+    }
+
+    public function listar()
+    {   
+        return view('guiaicms.index')->with('src_inicio',Input::get("src_inicio"))->with('src_fim',Input::get("src_fim"));
+    }
+
+    private function findEstabelecimento($cnpj)
+    {
+        if (!empty($cnpj)) {
+
+            $query = "SELECT codigo FROM estabelecimentos WHERE cnpj = '".$cnpj."'";
+            $filial = DB::select($query);
+
+            if (!empty($filial)) {
+                return $filial[0]->codigo;
+            }else {
+                return 'Filial não encontrada';
+            }
+        }
+        return 'Sem Cnpj';
     }
 
     public function create(Request $request)
@@ -206,10 +250,8 @@ class GuiaicmsController extends Controller
         if (!empty($id)) {
             Guiaicms::destroy($id);
             $this->msg = 'Registro excluído com sucesso';
+            return redirect()->back()->with('status', 'Registro Excluido com sucesso.');
         }
-
-        $Registros = Guiaicms::all();
-        return view('guiaicms.index')->withRegistros($Registros)->with('msg', $this->msg)->with('status', $status);
     }
 
     public function Job()
@@ -290,6 +332,13 @@ class GuiaicmsController extends Controller
         if (empty($_GET['getType'])) {  
             echo "Nenhum arquivo foi encontrado disponível para salvar";exit;
         }
+
+        $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\LeitorMails.php';
+        if (substr(php_uname(), 0, 7) == "Windows"){ 
+            pclose(popen("start /B " . $cmd, "r"));  
+        } else { 
+                exec($cmd . " > /dev/null &");   
+        } 
 
         $mensagem = 'Concluído com sucesso';
         return view('guiaicms.job_return')->withMensagem($mensagem);
@@ -413,6 +462,10 @@ class GuiaicmsController extends Controller
                 $icmsarray = $this->icmsMS($value);
             }
 
+            if (strpos($arqu, 'MT') && substr($arqu, -10) == 'MT.txt bar') {
+               $icmsarray = $this->icmsMT($value);
+            }
+
             if (!empty($icmsarray)) {
                 foreach ($icmsarray as $key => $icms) {
                     if (empty($icms) || count($icms) < 6) {
@@ -508,45 +561,7 @@ class GuiaicmsController extends Controller
         $array['Estemp_id']     = $estemp_id;
         $array['Empresa_id']    = $empresa_id;
         $array['Data_critica']  = date('Y-m-d h:i:s');
-        
-        //criando registro na tabela
-        CriticasLeitor::create($array);
-        
-        //buscar email através de empresa e tributo
-        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$tributo_id." and Emp_id = ".$empresa_id.")";
-        $emailsAnalista = DB::select($query);
-
-        $codigoEstabelecimento = '';
-        if ($estemp_id > 0) {
-            $codigoEstabelecimentoArray = DB::select('select codigo FROM estabelecimentos where id = '.$estemp_id.' LIMIT 1 ');
-            
-            if (!empty($codigoEstabelecimentoArray[0])) {
-                $codigoEstabelecimento = $codigoEstabelecimentoArray[0]->codigo;
-            }
-        }
-
-        $tributo_nome = '';
-        if ($tributo_id > 0) {
-            $nomeTributoArray = DB::select('select nome FROM tributos where id = '.$tributo_id.' LIMIT 1 ');
-            
-            if (!empty($nomeTributoArray[0])) {
-                $tributo_nome = $nomeTributoArray[0]->nome;
-            }
-        }
-        
-        //enviando email
-        $now = date('d/m/Y');
-        $subject = "Críticas e Alertas Leitor PDF em ".$now;
-        $text = 'Empresa => '.$empresa_id.' Estabelecimento.Codigo => '.$codigoEstabelecimento.' Tributo => '.$tributo_nome.' Arquivo => '.$arquivo.' Critica => '.$critica.' importado => '.$importado;
-
-        $data = array('subject'=>$subject,'messageLines'=>$text);
-        
-        if (!empty($emailsAnalista)) {
-            foreach($emailsAnalista as $row) {
-                $user = User::findOrFail($row->id);
-                $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
-            }
-        }     
+        CriticasLeitor::create($array); 
     }    
 
     public function createCriticaEntrega($empresa_id=1, $estemp_id=0, $tributo_id=8, $arquivo, $critica, $importado)
@@ -558,44 +573,7 @@ class GuiaicmsController extends Controller
         $array['Estemp_id']     = $estemp_id;
         $array['Empresa_id']    = $empresa_id;
         $array['Data_critica']  = date('Y-m-d h:i:s');
-        
-        //criando registro na tabela
         CriticasEntrega::create($array);
-        //buscar email através de empresa e tributo
-        $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$tributo_id." and Emp_id = ".$empresa_id.")";
-        $emailsAnalista = DB::select($query);
-
-        $codigoEstabelecimento = '';
-        if ($estemp_id > 0) {
-            $codigoEstabelecimentoArray = DB::select('select codigo FROM estabelecimentos where id = '.$estemp_id.' LIMIT 1 ');
-            
-            if (!empty($codigoEstabelecimentoArray[0])) {
-                $codigoEstabelecimento = $codigoEstabelecimentoArray[0]->codigo;
-            }
-        }
-
-        $tributo_nome = '';
-        if ($tributo_id > 0) {
-            $nomeTributoArray = DB::select('select nome FROM tributos where id = '.$tributo_id.' LIMIT 1 ');
-            
-            if (!empty($nomeTributoArray[0])) {
-                $tributo_nome = $nomeTributoArray[0]->nome;
-            }
-        }
-        
-        //enviando email
-        $now = date('d/m/Y');
-        $subject = "Críticas e Alertas Entrega de arquivos em ".$now;
-        $text = 'Empresa => '.$empresa_id.' Estabelecimento.Codigo => '.$codigoEstabelecimento.' Tributo => '.$tributo_nome.' Arquivo => '.$arquivo.' Critica => '.$critica.' importado => '.$importado;
-
-        $data = array('subject'=>$subject,'messageLines'=>$text);
-        
-        if (!empty($emailsAnalista)) {
-            foreach($emailsAnalista as $row) {
-                $user = User::findOrFail($row->id);
-                $this->eService->sendMail($user, $data, 'emails.notification-leitor-criticas', false);
-            }
-        }     
     }
 
     public function validateEx($icms)
@@ -625,6 +603,122 @@ class GuiaicmsController extends Controller
         }
 
         return true;
+    }
+
+    public function icmsMT($value)
+    {
+        $icms = array();
+        if (!file_exists($value['pathtxt'])) {
+            return $icms;
+        }
+
+        $file_content = explode('_', $value['arquivo']);
+        $atividade = Atividade::findOrFail($file_content[0]);
+        $estabelecimento = Estabelecimento::where('id', '=', $atividade->estemp_id)->where('ativo', '=', 1)->first();
+        $icms['CNPJ'] = $estabelecimento->cnpj;
+        $icms['IE'] = $estabelecimento->insc_estadual;
+        $icms['UF'] = 'MT';
+
+        $handle = fopen($value['pathtxt'], "r");
+        $contents = fread($handle, filesize($value['pathtxt']));
+        $str = 'foo '.$contents.' bar';
+        $str = utf8_encode($str);
+        $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
+        $str = strtolower($str);
+        $icms['TRIBUTO_ID'] = 8;
+
+        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] == 'SP.pdf') {
+            $icms['IMPOSTO'] = 'GAREI';
+        }
+
+        if ($this->letras($file_content[2]) == 'ICMS' && $file_content[4] != 'SP.pdf') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($this->letras($file_content[2]) == 'DIFAL') {
+            $icms['IMPOSTO'] = 'SEFAZ';
+        }
+
+        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
+            $icms['IMPOSTO'] = 'SEFAC';
+        }
+
+        if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
+            $icms['IMPOSTO'] = 'SEFAT';
+        }
+
+        preg_match('~05 - cnpj ou cpf([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['CNPJ'] = trim(preg_replace("/[^0-9]/", "", $i[0]));
+        }
+
+        preg_match('~06 - inscricao estadual([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['IE'] = trim($this->numero($i[0]));
+        }
+
+        preg_match('~25 - codigo([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['COD_RECEITA'] = trim($i[0]);
+        }
+
+        preg_match('~21 - periodo ref.([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['REFERENCIA'] = trim($i[4]);
+        }
+
+        preg_match('~22 - data vencto.([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $valorData = $i[0];
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($a[3])));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $a = explode(' ', $i[0]);
+            $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
+        }
+
+        preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[1])));
+        }
+
+        preg_match('~33 - valor a recolher por extenso
+novecentos e quarenta e quatro reais e quinze centavos
+modelo aprovada pela portaria nº 085/2002([^{]*)~i', $str, $match);
+       if (!empty($match)) {
+           $i = explode("\n", trim($match[1]));
+           $codbarras = str_replace('-', '', str_replace(' ', '', $i[0]));
+           $icms['CODBARRAS'] = $codbarras;
+       }
+
+        fclose($handle);
+        $icmsarray = array();
+        $icmsarray[0] = $icms;
+        return $icmsarray;
     }
 
     public function icmsMS($value)
@@ -735,6 +829,7 @@ class GuiaicmsController extends Controller
         $icmsarray[0] = $icms;
         return $icmsarray;
     }
+
 
     public function icmsRS($value)
     {
@@ -1220,7 +1315,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 ', trim($match[1]));
                    $a = explode(' ', $i[2]);
                    $icms['VLR_RECEITA'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[4]))));
-                   $icms['MULTA_MORA_INFRA'] =  str_replace(',', '.', str_replace('.', '', $a[2]));
+                   $icms['TAXA'] =  str_replace(',', '.', str_replace('.', '', $a[2]));
           }
 
 
@@ -1230,7 +1325,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 ', trim($match[1]));
                    $a = explode(' ', $i[3]);
                    $icms['VLR_TOTAL'] = trim(str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[9]))));
-                   $icms['TAXA'] = str_replace(',', '.', str_replace('.', '', $a[5]));
+                   $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', $a[5]));
                 }
             }
 
@@ -1996,6 +2091,17 @@ periodo ref.([^{]*)~i', $str, $match);
             }
         }
 
+        preg_match('~numero identificacao([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            if (isset($i[0])) {
+                $a = explode(" ", trim($i[0]));
+                if (isset($a[1])) {
+                    $icms[0]['IE'] = $this->numero($a[1]);
+                }
+            }
+        }
+
         preg_match('~multa([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode(' ', trim($match[1]));
@@ -2061,7 +2167,7 @@ r\$
             }
         }
 
-        if (empty($imcs[0]['COD_RECEITA'])) {
+        if (empty($icms[0]['COD_RECEITA'])) {
             preg_match('~receita
 
 periodo ref.([^{]*)~i', $str, $match);
@@ -2080,6 +2186,32 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
         }
+        }
+
+        if (empty($icms[0]['IE'])) {
+            preg_match('~numero([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[0]);
+                $icms[0]['IE'] = trim($this->numero($a[1]));
+            }
+        }
+
+        if (strlen($icms[0]['VLR_RECEITA'] > 11)) {
+            preg_match('~valor([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(" ", trim($match[1]));
+                $a = explode("\n", trim($i[0]));
+                $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+                $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+            }
+        }
+
+
+        preg_match('~mes ano de referencia([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['REFERENCIA'] = str_replace(' ', '',trim($i[0]));
         }
 
         fclose($handle);
@@ -3693,6 +3825,14 @@ juros de mora
         } else {
             echo "Não foram encontrados arquivos para realizar o processo.";exit;
         }
+
+        $cmd = 'C:\wamp\bin\php\php7.0.10\php.exe C:\wamp\www\agenda\public\Background\UploadMails.php';
+        if (substr(php_uname(), 0, 7) == "Windows"){ 
+            pclose(popen("start /B " . $cmd, "r"));  
+        } else { 
+                exec($cmd . " > /dev/null &");   
+        } 
+        
         echo "Job foi rodado com sucesso.";exit;
     }
 
@@ -3827,6 +3967,9 @@ juros de mora
        }
        if ($nomeTributo == "LIVROFISCAL") {
           return "LIVRO FISCAL";
+       }
+       if ($nomeTributo == "DESONERACAO") {
+          return "DESONERAÇÃO FOLHA";
        }
 
        return $nomeTributo;

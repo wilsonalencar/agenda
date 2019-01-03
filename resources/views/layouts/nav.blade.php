@@ -26,13 +26,14 @@
                 </button>
 
                 <div class="brand-name-wrapper">
-                    <a class="" href="#">
-                        <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
-                        <span>Tax Calendar</span><p>
+                    <p>
+                        <a href="{!! route('forcelogout') !!}">
+                            <img class="logo" src="{{ URL::to('/') }}/assets/logo/logo.png">
+                        <span>Tax Calendar</span></a><p>
                         @if (session('seidLogo') && !Auth::guest())
                         <div><img src="{{ URL::to('/') }}/assets/logo/Logo-{{ session('seidLogo') }}.png" style="position: absolute; width: 30%; margin-left: 33%; margin-top: 5px; height: 8%;"><br><br><br></div>
                         @endif
-                    </a>
+                    </p>
                 </div>
         </div>
 
@@ -60,6 +61,8 @@
                                                     <li><a href="{{ route('consulta_procadm') }}">Consulta Processos Administrativos</a></li>
 
                                                     <li><a href="{{ route('consulta_conta_corrente') }}">Consulta Conta Corrente</a></li>
+
+                                                    <li><a href="{{ route('sped_fiscal') }}">Consulta Sped Fiscal</a></li>
 
                                                     @if ( Auth::user()->hasRole('gbravo'))
                                                         <li><a href="{{ route('status_empresas') }}">Status por Empresa</a></li>
@@ -171,6 +174,7 @@
                                             <li><a href="{{ route('aprovacao') }}"><i class="fa fa-btn fa-upload"></i>Aprovação</a></li>
                                             <li><a href="{{ route('entregas.index') }}"><i class="fa fa-btn fa-upload"></i>Entregas</a></li>
                                             <li><a href="{{ route('guiaicms.search_criticas_entrega') }}"><i class="fa fa-btn fa-trash"></i>Criticas Entrega</a></li>
+                                            <li><a href="{{ route('sped_fiscal.transmitirlistar') }}"><i class="fa fa-btn fa fa-rss-square"></i>Transmitir Sped Fiscal</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -272,10 +276,11 @@
                                     </div>
                                 </li>
                                 <li><a href="{{ route('cronogramaatividades.create') }}">Gerar</a></li>
+                                <li><a href="{{ route('cronogramaatividades.Loadplanejamento') }}">Planejamento</a></li>
                                 <li><a href="{{ route('cronogramaatividades.index') }}">Manipular</a></li>
                                 <li><a href="{{ route('cronogramaatividades.GerarConsulta') }}">Consulta</a></li>
-                                <li><a href="{{ route('cronogramaatividades.Gerarmensal') }}">Mensal</a></li>
-                                <li><a href="{{ route('cronogramaatividades.Gerarsemanal') }}">Semanal</a></li>
+                                <li><a href="{{ route('cronogramaatividades.mensal') }}">Mensal</a></li>
+                                <li><a href="{{ route('cronogramaatividades.semanal') }}">Semanal</a></li>
                                 <li><a href="{{ route('cronogramaatividades.GerarchecklistCron') }}">Checklist</a></li>
                                 </li>
                             </ul>
@@ -324,10 +329,13 @@
         </a>
         <ul class="dropdown-menu" aria-labelledby="dLabel">
         <li>
-                <a href="{{ url('/logout') }}">
+                <a href="{{ URL('/logout') }}">
                     <img style="height:16px;padding-bottom: 2px" src="{{ URL::to('/') }}/assets/img/{{ Auth::user()->roles()->first()->name }}-icon.png" title="{{ Auth::user()->roles()->first()->display_name }}" /> ({{ Auth::user()->name.' ' }})
                     <br>
                     <i class="fa fa-btn fa-sign-out"></i>Logout
+                </a>
+                <a href="{!! route('forcelogout') !!}">
+                    <i class="fa fa-btn fa-sign-out"></i> Plataforma
                 </a>
             </li>
         </ul>    

@@ -4,14 +4,29 @@
 
 <h1>Cronograma de Atividades</h1>
 <p class="lead">Segue a lista de todas as atividades em aberto. </p>
-<p class="lead"><button href="#" id="excl_per" class="btn btn-default" data-toggle="modal" data-target="#myModal">Excluir por período/Empresa</button><button href="#" id="excl_per" class="btn btn-default" data-toggle="modal" data-target="#myModalFill">Filtros</button> </p>
+<p class="lead"><button href="#" id="excl_per" class="btn btn-default" data-toggle="modal" data-target="#myModal">Excluir por período/Empresa</button> <button href="#" id="excl_per" class="btn btn-default" data-toggle="modal" data-target="#myModalFill">Filtros</button> </p>
 <hr>
 <div class="table-default table-responsive">
+{!! Form::open([
+    'route' => 'cronogramaatividades.alterAnalista'
+]) !!}
+
+<div class="col-md-8">
+    <div class="form-group">
+        <div style="width:30%">
+        {!! Form::label('Analista_id', 'Analista', ['class' => 'control-label'] )  !!}
+        {!!  Form::select('Analista_id', $analistas, array(), ['class' => 'form-control s2']) !!}
+        </div>
+    </div>
+    {!! Form::submit('Alterar', ['class' => 'btn btn-success']) !!}
+</div>
+
+<br /> 
+<br /> 
 <table class="table display" id="atividades-table">
     <thead>
     <tr>
-        <th>Início</th>
-        <th>Término</th>
+        <th>Data Atividade</th>
         <th>Filial</th>
         <th>Atividade</th>
         <th>UF</th>
@@ -21,6 +36,7 @@
         <th>CNPJ</th>
         <th>IE</th>
         <th></th>
+        <th>Alterar Analista</th>
 
     </tr>
     </thead>
@@ -29,8 +45,7 @@
             foreach ($tabela as $chave => $value) {
         ?>  
         <tr>
-            <td><?php echo $value['inicio_aviso']; ?></td>
-            <td><?php echo $value['limite']; ?></td>
+            <td><?php echo $value['data_atividade']; ?></td>
             <td><?php echo $value['codigo']; ?></td>
             <td><?php echo $value['descricao']; ?></td>
             <td><?php echo $value['uf']; ?></td>
@@ -40,11 +55,14 @@
             <td><?php echo mask($value['cnpj'], "##.###.###/####-##"); ?></td>
             <td><?php echo $value['insc_estadual']; ?></td>
             <td><a class="btn btn-default btn-sm" onclick="mymodalAlt(<?php echo $value['id']; ?>, <?php echo $value['Id_usuario_analista']; ?> )" data-toggle="modal" data-target="#myModalAlt"><i class="fa fa-edit"></i></a><a class="btn btn-default btn-sm" onclick="confirmaDelete(<?php echo $value['id']; ?>)"><i class="fa fa-trash"></i></a></td>
+            <td align="center"><input type="checkbox" name="alterar[]" value="<?php echo $value['id']; ?>"></td>
         </tr>
         <?php } }  ?>
     </tbody>
 </table>
 </div>
+
+{!! Form::close() !!}
 
 
 {!! Form::open([
@@ -174,6 +192,13 @@ function mymodalAlt(id, id_analista){
             <div style="width:50%">
         {!! Form::label('limite', 'Novo Término Aviso', ['class' => 'control-label'] )  !!}<br>
         {!!  Form::date('limite', NULL, NULL, ['class' => 'form-control s2', 'id' => 'limiteAviso']) !!}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div style="width:50%">
+        {!! Form::label('data_atividade', 'Nova Data de atividade', ['class' => 'control-label'] )  !!}<br>
+        {!!  Form::date('data_atividade', NULL, NULL, ['class' => 'form-control s2']) !!}
             </div>
         </div>
 

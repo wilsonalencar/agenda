@@ -22,7 +22,8 @@ class CriticasLeitor extends Model
         'arquivo',
         'Data_critica',
         'critica',
-        'importado'
+        'importado',
+        'Enviado'
     ];
 
 }

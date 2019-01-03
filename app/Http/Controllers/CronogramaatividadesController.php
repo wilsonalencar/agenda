@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Models\CronogramaAtividade;
 use App\Models\Atividade;
+use App\Models\CronogramaMensal;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
@@ -102,7 +103,7 @@ class CronogramaatividadesController extends Controller
             $data_termino = $input['data_termino'];
         }
 
-        $query = 'SELECT A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.limite, "%d/%m/%Y") as limite, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual, A.Id_usuario_analista from cronogramaatividades A inner join estabelecimentos B on A.estemp_id = B.id inner join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id where 1 ';
+        $query = 'SELECT A.id, DATE_FORMAT(A.inicio_aviso, "%d/%m/%Y") as inicio_aviso , DATE_FORMAT(A.data_atividade, "%d/%m/%Y") as data_atividade, B.codigo, A.descricao, C.uf, E.Tipo, F.name, C.nome, B.cnpj, B.insc_estadual, A.Id_usuario_analista from cronogramaatividades A inner join estabelecimentos B on A.estemp_id = B.id inner join municipios C on B.cod_municipio = C.codigo left join regras D on A.regra_id = D.id inner join tributos E on D.tributo_id = E.id left join users F on A.Id_usuario_analista = F.id where 1 ';
         
         if (!empty($empresa_busca) && $permite_empresa) {
             $query .= 'AND A.emp_id = '.$empresa_busca.'';
@@ -141,6 +142,110 @@ class CronogramaatividadesController extends Controller
 
         return view('cronogramaatividades.index')->with('tabela', $atividades)->with('empresas', $empresas)->with('analistas', $analistas)->with('estabelecimentos', $estabelecimentos)->with('municipios', $municipios);
     }
+
+    public function alterarAnalistas(Request $request)
+    {
+        $input = $request->all();   
+
+        if (!empty($input['alterar']) && !empty($input['Analista_id'])) {
+            DB::table('cronogramaatividades')
+                ->wherein('id', $input['alterar'])
+                ->update(['Id_usuario_analista' => $input['Analista_id']]);
+        }
+
+        return redirect()->back()->with('status', 'Analistas Alterados com sucesso');
+    }
+
+
+    public function AlterAnalistas(Request $request)
+    {
+        $input = $request->all();
+        if (empty($input['Id_usuario_analista'])) {
+            return redirect()->back()->with('status', 'É necessário selecionar um Analista');
+        }
+
+        CronogramaAtividade::where('cronograma_mensal', $input['id_cronogramamensal'])->update(['Id_usuario_analista' => $input['Id_usuario_analista']]);
+        $msg = 'Analistas alterados com sucesso';
+        
+        return redirect()->back()->with('status', $msg);
+        
+    } 
+
+    public function planejamento(Request $request)
+    {
+        $ids = '4,6';
+        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
+        $user_ids = json_decode(json_encode($user_ids),true);
+        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
+        $input = $request->all();
+        $dados = DB::table('cronogramamensal')->leftjoin('cronogramaatividades', 'cronogramamensal.id', '=', 'cronogramaatividades.cronograma_mensal')->selectRaw('cronogramamensal.*, GROUP_CONCAT(cronogramaatividades.Id_usuario_analista SEPARATOR ", ") AS analistas');
+        if (!empty($input)) {
+            $periodo = str_replace('/', '', $input['periodo_apuracao']);
+            $dados = $dados->where('cronogramamensal.periodo_apuracao', '=', $periodo);
+        }
+        // $dados = $dados->orderby('Empresa_id', '=', str_replace('/', '', $input['periodo_apuracao']));
+        $dados = $dados->groupBy('cronogramamensal.id')->get();
+        $array = array();
+        if (!empty($dados)) {
+            foreach ($dados as $key => $value) {
+                $Tributo = Tributo::find($value->Tributo_id);
+                $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$value->periodo_apuracao.'" AND A.Tributo_id = '.$value->Tributo_id);
+
+                $empresa = Empresa::findOrFail($value->Empresa_id);
+
+                $value->cnpj = $empresa->cnpj;
+                $value->Tributo_nome = $Tributo->nome;
+                $value->Tempo_estab = $value->Tempo_estab/60;
+                $value->Tempo_total = $value->Tempo_total/60;
+                $value->Tempo_geracao = $value->Tempo_geracao/60;
+                
+                $value->Qtd_analistas = ceil($value->Qtd_analistas);
+                $value->Inicio = date('d/m/Y', strtotime("+1 days",strtotime($data_carga[0]->Data_prev_carga))); 
+                $value->carga = date('d/m/Y', strtotime($data_carga[0]->Data_prev_carga)); 
+                    
+                $inicio = $this->formatData($value->Inicio);
+                $value->Termino = date('d/m/Y', strtotime("+".$value->Qtd_dias." days",strtotime($inicio)));
+
+                $data_vencimento = str_replace('-', '/', $value->DATA_SLA);
+                $value->DATA_SLA = date('d/m/Y', strtotime($data_vencimento));
+                
+                $str = '';
+                if (!empty($value->analistas)) {
+                    $analistasArray = array();
+                    if (strlen($value->analistas > 4)) {
+                        $analistas_explode = explode(',', $value->analistas);
+                        foreach ($analistas_explode as $singlekey => $single) {
+                            $usuario = User::Find($single);
+                            if (!empty($usuario)) {
+                                $analistasArray[trim($single)] = $usuario->name;
+                            }else {
+                                $analistasArray[trim($single)] = '';
+                            }
+                        }
+
+                    $str = implode("<br>", $analistasArray);
+                    }
+                }
+                $value->names = $str;
+                $dados[$key] = $value;
+            }
+        }
+
+        return view('cronogramaatividades.planejamento')->with('dados', $dados)->with('usuarios', $usuarios);
+    }
+
+    private function formatData($date)
+    {
+        $valorData = trim($date);
+        $data = str_replace('/', '-', $valorData);
+        $formated = date('Y-m-d', strtotime($data));
+        return $formated;
+    }
+
+    public function loadPlanejamento()
+    {
+        return view('cronogramaatividades.Loadplanejamento');
+    }
     
     public function alterar(Request $request)
     {
@@ -163,6 +268,10 @@ class CronogramaatividadesController extends Controller
 
             if (array_key_exists('Id_usuario_analista', $input) && !empty($input['Id_usuario_analista'])) {
                 $obj->Id_usuario_analista = $input['Id_usuario_analista'];
+            }
+
+            if (array_key_exists('data_atividade', $input) && !empty($input['data_atividade'])) {
+                $obj->data_atividade = $input['data_atividade'];
             }
 
         $obj->save();
@@ -190,6 +299,10 @@ class CronogramaatividadesController extends Controller
 
                 if (array_key_exists('Id_usuario_analista', $input) && !empty($input['Id_usuario_analista'])) {
                     $obj->Id_usuario_analista = $input['Id_usuario_analista'];
+                }
+
+                if (array_key_exists('data_atividade', $input) && !empty($input['data_atividade'])) {
+                    $obj->data_atividade = $input['data_atividade'];
                 }
 
             $obj->save();
@@ -289,7 +402,9 @@ class CronogramaatividadesController extends Controller
     return redirect()->back()->with('status', 'Atividades geradas com sucesso');
     }
 
-    public function cronogramageracaoEstab($id_tributo,$id_estab,$periodo_ini,$periodo_fin) {
+    public function cronogramageracaoEstab($id_tributo,$id_estab,$periodo_ini,$periodo_fin) 
+    {
+        set_time_limit(0);
         $estabelecimento = Estabelecimento::findOrFail($id_estab);
         if ($periodo_ini==$periodo_fin) {
             Artisan::call('generatecronograma:single', [
@@ -301,6 +416,7 @@ class CronogramaatividadesController extends Controller
 
     public function storeEmpresa(Request $request)
     {
+        set_time_limit(0);
         $input = $request->all();
         if (empty($input['periodo_apuracao_emps']) || empty($input['multiple_select_empresas_frm'])) {
             return redirect()->back()->with('status', 'Favor informar quais empresas e qual o período');
@@ -354,9 +470,7 @@ class CronogramaatividadesController extends Controller
 
     public function Gerarsemanal()
     {
-        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
-
-        return view('cronogramaatividades.generateCalendarSemanal')->with('empresas',$empresas);
+        return view('cronogramaatividades.generateCalendarSemanal');
     }
 
     public function GerarchecklistCron()
@@ -464,7 +578,7 @@ class CronogramaatividadesController extends Controller
         }
         $user = User::findOrFail(Auth::user()->id);
         $query = "SELECT 
-                    DATE_FORMAT(A.limite, '%d/%m/%Y %H:%i:%s') as limite,
+                    DATE_FORMAT(A.data_atividade, '%d/%m/%Y %H:%i:%s') as limite,
                     B.codigo as codigo,
                     B.cnpj as CNPJ,
                     D.nome as Tributo,
@@ -482,7 +596,7 @@ class CronogramaatividadesController extends Controller
                 LEFT JOIN 
                     users E on A.Id_usuario_analista = E.id ";
         
-        $query .= " WHERE DATE_FORMAT(A.limite, '%Y-%m-%d') in (".$string['Datas'].") ";
+        $query .= " WHERE DATE_FORMAT(A.data_atividade, '%Y-%m-%d') in (".$string['Datas'].") ";
         $query .= " AND A.emp_id in (".$string['emps'].") ";
 
         if (!empty($string['analista_selected']) && !$user->hasRole('analyst')) {
@@ -582,10 +696,6 @@ class CronogramaatividadesController extends Controller
     {
         $input = $request->all();
 
-        if (!isset($input['empresas_selected']) || empty($input['empresas_selected'])) {
-            return redirect()->back()->with('status', 'Favor informar a(s) empresa(s)');
-        }
-
         if (!isset($input['data_inicio']) || empty($input['data_inicio'])) {
             return redirect()->back()->with('status', 'Favor informar ambas as datas');
         }
@@ -627,115 +737,86 @@ class CronogramaatividadesController extends Controller
 
         $user_id = Auth::user()->id;
         $events = [];
-        $empresas = array();
-
-        foreach ($input['empresas_selected'] as $key => $value) {
-            $empresas[] = $value;
-        }
         
         $vall = count($datas);
-
+        $datasB = '"';
         foreach ($datas as $key => $dataSing) {
-            $datas[$key] = $dataSing.' 00:00:00';
-            $datas[$vall] = $dataSing.' 23:59:59';
-            $vall += 1;
+            $datasB .= $dataSing.'","';
         }
-            
+        $datasB = substr($datasB, 0,-2);
+        
         $user = User::findOrFail(Auth::user()->id);
             $atividades_estab = DB::table('cronogramaatividades')
                 ->join('estabelecimentos', 'estabelecimentos.id', '=', 'cronogramaatividades.estemp_id')
-                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-                ->whereIN('cronogramaatividades.emp_id', $empresas)
-                ->whereIN('cronogramaatividades.limite', $datas)
+                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite','cronogramaatividades.data_atividade', 'cronogramaatividades.status')
+                ->whereRaw('DATE_FORMAT(cronogramaatividades.data_atividade, "%Y-%m-%d") in ('.$datasB.')')
                 ->where('cronogramaatividades.estemp_type','estab');
             
             if ($user->hasRole('analyst')){
                 $atividades_estab = $atividades_estab->where('cronogramaatividades.Id_usuario_analista', $user->id);
             }
 
-            $atividades_estab = $atividades_estab->get();
+            $atividades_get = $atividades_estab->get();
 
-        foreach($atividades_estab as $atividade) {
-            $cor[1] = 'red';
-            $cor[2] = 'yellow';
-            $cor[3] = 'green';
-            $events[] = \Calendar::event(
-                str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')', 
-                true, 
-                $atividade->limite, 
-                $atividade->limite, 
-                $atividade->id, 
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
-            );
+        $atividades_estab = array();
+        foreach ($atividades_get as $index => $atividade_estab) {
+            $atividades_estab[substr($atividade_estab->data_atividade, 0,10)][] = $atividade_estab;
         }
-        //MATRIZ
+
+        foreach($atividades_estab as $atividades_singulares_estab) {
+            $b = 0;
+            foreach ($atividades_singulares_estab as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
+                    $cor = 'red';
+                    $b = 1;
+                }
+
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades', 
+                    true, 
+                    substr($atividade->data_atividade, 0,10), 
+                    substr($atividade->data_atividade, 0,10), 
+                    $atividade->id, 
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
+                );
+            }
+        }
+
         $atividades_emp = DB::table('cronogramaatividades')
-            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
-            ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-            ->whereIN('cronogramaatividades.emp_id', $empresas)
-            ->whereIN('cronogramaatividades.limite', $datas)
-            ->where('cronogramaatividades.estemp_type','emp');
+            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.emp_id')
+            ->select('cronogramaatividades.id','cronogramaatividades.data_atividade', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
+            ->whereRaw('DATE_FORMAT(cronogramaatividades.data_atividade, "%Y-%m-%d") in ('.$datasB.')');
      
             if ($user->hasRole('analyst')){
                 $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);
             }
      
-            $atividades_emp = $atividades_emp->get();
+            $atividades_get_emp = $atividades_emp->get();
 
-        foreach($atividades_emp as $atividade) {
-            $cor[1] = 'red';
-            $cor[2] = 'yellow';
-            $cor[3] = 'green';
-            $events[] = \Calendar::event(
-                str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')',
-                true, 
-                $atividade->limite,
-                $atividade->limite,
-                $atividade->id,
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
-            );
+        $atividades_emp = array();
+        foreach ($atividades_get_emp as $index => $atividade_emp) {
+            $atividades_emp[substr($atividade_emp->data_atividade, 0,10)][] = $atividade_emp;
         }
-        $feriados = $this->eService->getFeriadosNacionais();
-        $feriados_estaduais = $this->eService->getFeriadosEstaduais();
 
-        foreach ($feriados_estaduais as $val) {
+        foreach($atividades_emp as $atividades_singulares) {
+            $a = 0;
+            foreach ($atividades_singulares as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
+                    $cor = 'red';
+                    $a = 1;
+                }
 
-            $feriados_estaduais_uf = explode(';', $val->datas);
-
-            foreach ($feriados_estaduais_uf as $el) {
-                $key = $val->uf;
-                $fer_exploded = explode('-',$el);
-                $day = $fer_exploded[0];
-                $month = $fer_exploded[1];
-
-                $events[] = \Calendar::event(
-                    "FERIADO ESTAD. em $key",
-                    true,
-                    date('Y')."-{$month}-{$day}T0800",
-                    date('Y')."-{$month}-{$day}T0800",
-                    null,
-                    ['url' => url('/feriados'),'textColor'=>'white']
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades',
+                    true, 
+                    substr($atividade->data_atividade, 0,10),
+                    substr($atividade->data_atividade, 0,10),
+                    $atividade->id,
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
                 );
             }
-
-        }
-
-        //Carregando os feriados nacionais
-
-        foreach ($feriados as $key=>$feriado) {
-            //Add feriado to events
-            $fer_exploded = explode('-',$feriado);
-            $day = $fer_exploded[0];
-            $month = $fer_exploded[1];
-
-            $events[] = \Calendar::event(
-                "FERIADO - $key", //event title
-                true, //full day event?
-                date('Y')."-{$month}-{$day}T0800", //start time (you can also use Carbon instead of DateTime)
-                date('Y')."-{$month}-{$day}T0800", //end time (you can also use Carbon instead of DateTime)
-                null,
-                ['url' => url('/feriados'),'textColor'=>'white']
-            );
         }
 
         $day = 0;
@@ -762,138 +843,116 @@ class CronogramaatividadesController extends Controller
 
     public function Gerarmensal()
     {
-        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        // $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        // return view('cronogramaatividades.generateCalendar')->with('empresas',$empresas);
 
-        return view('cronogramaatividades.generateCalendar')->with('empresas',$empresas);
+        return view('cronogramaatividades.generateCalendar');
     }
 
     public function mensal(Request $request)
     {
         $input = $request->all();
-
-        if (!isset($input['empresas_selected']) || empty($input['empresas_selected'])) {
-            return redirect()->back()->with('status', 'Favor informar a(s) empresa(s)');
-        }
-
         if (!isset($input['periodo_apuracao']) || empty($input['periodo_apuracao'])) {
             return redirect()->back()->with('status', 'Favor informar o período corretamente');
         }
+
         $user_id = Auth::user()->id;
         $events = [];
         $empresas = array();
 
-        foreach ($input['empresas_selected'] as $key => $value) {
-            $empresas[] = $value;
-        }
         $periodo_apuracao = str_replace('/', '', $input['periodo_apuracao']);
         $feriados = $this->eService->getFeriadosNacionais();
         $feriados_estaduais = $this->eService->getFeriadosEstaduais();
         $user = User::findOrFail(Auth::user()->id);
             $atividades_estab = DB::table('cronogramaatividades')
                 ->join('estabelecimentos', 'estabelecimentos.id', '=', 'cronogramaatividades.estemp_id')
-                ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-                ->whereIN('cronogramaatividades.emp_id', $empresas)
+                ->select('cronogramaatividades.id','cronogramaatividades.data_atividade', 'cronogramaatividades.descricao', 'estabelecimentos.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
+                // ->whereIN('cronogramaatividades.emp_id', $empresas)
                 ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
                 ->where('cronogramaatividades.estemp_type','estab');
-                
+
                 if ($user->hasRole('analyst')){
                    $atividades_estab = $atividades_estab->where('cronogramaatividades.Id_usuario_analista', $user->id);
                 }
+                $atividades_get = $atividades_estab->get();
 
-                $atividades_estab = $atividades_estab->get();
-
-        foreach($atividades_estab as $atividade) {
-            $cor[1] = 'red';
-            $cor[2] = 'yellow';
-            $cor[3] = 'green';
-            $events[] = \Calendar::event(
-                str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')', 
-                true, 
-                $atividade->limite, 
-                $atividade->limite, 
-                $atividade->id, 
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
-            );
+        $atividades_estab = array();
+        foreach ($atividades_get as $index => $atividade_estab) {
+            $atividades_estab[substr($atividade_estab->data_atividade, 0,10)][] = $atividade_estab;
         }
+
+        foreach($atividades_estab as $atividades_singulares_estab) {
+            $b = 0;
+            foreach ($atividades_singulares_estab as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $b) {
+                    $cor = 'red';
+                    $b = 1;
+                }
+
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades', 
+                    true, 
+                    substr($atividade->data_atividade, 0,10), 
+                    substr($atividade->data_atividade, 0,10), 
+                    $atividade->id, 
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
+                );
+            }
+        }
+        
         //MATRIZ
         $atividades_emp = DB::table('cronogramaatividades')
-            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.estemp_id')
-            ->select('cronogramaatividades.id', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
-            ->whereIN('cronogramaatividades.emp_id', $empresas)
-            ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao)
-            ->where('cronogramaatividades.estemp_type','emp');
+            ->join('empresas', 'empresas.id', '=', 'cronogramaatividades.emp_id')
+            ->select('cronogramaatividades.id','cronogramaatividades.data_atividade', 'cronogramaatividades.descricao', 'empresas.codigo','cronogramaatividades.limite', 'cronogramaatividades.status')
+            ->where('cronogramaatividades.periodo_apuracao', $periodo_apuracao);
 
             if ($user->hasRole('analyst')){
                 $atividades_emp = $atividades_emp->where('cronogramaatividades.Id_usuario_analista', $user->id);
             }
 
-            $atividades_emp = $atividades_emp->get();
+            $atividades_get_emp = $atividades_emp->get();
 
-        foreach($atividades_emp as $atividade) {
-            $cor[1] = 'red';
-            $cor[2] = 'yellow';
-            $cor[3] = 'green';
-            $events[] = \Calendar::event(
-                str_replace('Entrega ','',$atividade->descricao).' ('.$atividade->codigo.')',
-                true, 
-                $atividade->limite,
-                $atividade->limite,
-                $atividade->id,
-                ['url' => url('/uploadCron/'.$atividade->id.'/entrega'),'color'=> $cor[$atividade->status], 'textColor'=>'white']
-            );
+        $atividades_emp = array();
+        foreach ($atividades_get_emp as $index => $atividade_emp) {
+            $atividades_emp[substr($atividade_emp->data_atividade, 0,10)][] = $atividade_emp;
         }
 
-        foreach ($feriados_estaduais as $val) {
+        
+        foreach($atividades_emp as $atividades_singulares) {
+            $a = 0;
+            foreach ($atividades_singulares as $atividade) {
+                $cor = 'green';
+                if (!empty($atividade->data_atividade) && (strtotime(substr($atividade->limite, 0,10)) < strtotime(substr($atividade->data_atividade, 0,10))) || $a) {
+                    $cor = 'red';
+                    $a = 1;
+                }
 
-            $feriados_estaduais_uf = explode(';', $val->datas);
-
-            foreach ($feriados_estaduais_uf as $el) {
-                $key = $val->uf;
-                $fer_exploded = explode('-',$el);
-                $day = $fer_exploded[0];
-                $month = $fer_exploded[1];
-
-                $events[] = \Calendar::event(
-                    "FERIADO ESTAD. em $key",
-                    true,
-                    date('Y')."-{$month}-{$day}T0800",
-                    date('Y')."-{$month}-{$day}T0800",
-                    null,
-                    ['url' => url('/feriados'),'textColor'=>'white']
+                $events[substr($atividade->data_atividade, 0,10)] = \Calendar::event(
+                    'Atividades',
+                    true, 
+                    substr($atividade->data_atividade, 0,10),
+                    substr($atividade->data_atividade, 0,10),
+                    $atividade->id,
+                    ['url' => url('/uploadCron/'.substr($atividade->data_atividade, 0,10).'/entrega/data'),'color'=> $cor,'background-color'=>$cor, 'textColor'=>'white']
                 );
             }
-
         }
-
-        //Carregando os feriados nacionais
-
-        foreach ($feriados as $key=>$feriado) {
-            //Add feriado to events
-            $fer_exploded = explode('-',$feriado);
-            $day = $fer_exploded[0];
-            $month = $fer_exploded[1];
-
-            $events[] = \Calendar::event(
-                "FERIADO - $key", //event title
-                true, //full day event?
-                date('Y')."-{$month}-{$day}T0800", //start time (you can also use Carbon instead of DateTime)
-                date('Y')."-{$month}-{$day}T0800", //end time (you can also use Carbon instead of DateTime)
-                null,
-                ['url' => url('/feriados'),'textColor'=>'white']
-            );
-        }
-
+  
         //Geração do calendario
         $mes = substr($periodo_apuracao, 0, -4)+1;
         $ano = substr($periodo_apuracao, 2);
-        $dataAcima = $ano.'-'.$mes.'-01';
+        if (strlen($mes) == 1) {
+            $mes = '0'.$mes;
+        }
+        $dataAcima = $ano.'-'.$mes.'';
         $calendar = \Calendar::addEvents($events) //add an array with addEvents
         ->setOptions([ //set fullcalendar options
                 'lang' => 'pt',
                 'firstDay' => 1,
                 'defaultDate' => $dataAcima,
-                'aspectRatio' => 2.3,
-                'header' => [ 'left' => 'prev,next', 'center'=>'title'] //, 'right' => 'month,agendaWeek'
+                'aspectRatio' => 2.5,
+                'header' => ['left' => 'prev.next', 'center'=>'title'] //, 'right' => 'month,agendaWeek'
             ])
         ->setCallbacks([ //set fullcalendar callback options (will not be JSON encoded)
             'viewRender' => 'function() { }'

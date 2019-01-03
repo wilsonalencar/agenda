@@ -8,6 +8,7 @@ use App\Models\Atividade;
 use App\Models\CronogramaAtividade;
 use App\Http\Requests;
 use Auth;
+use DB;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
@@ -38,6 +39,35 @@ class UploadsController extends Controller
         $atividade = CronogramaAtividade::findOrFail($atividade_id);
 
         return view('entregas.upload-cronograma')->withUser($usuario)->withAtividade($atividade);
+    }
+
+    public function entregaCronogramaData($data_atividade) {
+        $usuario = User::findOrFail(Auth::user()->id);
+        $atividadesFiltered = array();
+
+        $query = 'Select A.*, C.nome as tributo, E.uf, F.name from cronogramaatividades A left join regras B on A.regra_id = B.id left join tributos C on B.tributo_id = C.id left join estabelecimentos D on A.estemp_id = D.id left join municipios E on D.cod_municipio = E.codigo left join users F on A.Id_usuario_analista = F.id where DATE_FORMAT(A.data_atividade, "%Y-%m-%d") = "'.$data_atividade.'"';
+
+
+        if ($usuario->hasRole('analyst')){
+            $query .= ' AND A.Id_usuario_analista ='.$usuario->id;
+        }   
+
+        $atividades = DB::select($query);
+        
+        if (!empty($atividades)) {
+            foreach ($atividades as $key => $atividade) {
+                $a = strtotime(substr($atividade->limite, 0,10));
+                $b = strtotime(substr($atividade->data_atividade, 0,10));
+                $c = $a-$b;
+                if ($c < 0) {
+                    $atividadesFiltered[$atividade->tributo][$atividade->uf][$atividade->status]['PrazoEstourado'][] = $atividade;
+                } else {
+                    $atividadesFiltered[$atividade->tributo][$atividade->uf][$atividade->status]['Prazo'][] = $atividade;
+                }
+            }
+        }
+
+    return view('entregas.upload-cronograma-data')->withUser($usuario)->with('atividades', $atividadesFiltered);
     }
 
     public function upload() {

@@ -12,7 +12,9 @@ use App\Models\Atividade;
 use App\Models\CronogramaAtividade;
 use App\Models\Cron;
 use App\Models\CronogramaStatus;
+use App\Models\OrdemApuracao;
 use App\Models\Municipio;
+use App\Models\CronogramaMensal;
 use App\Models\Regra;
 use App\Models\Tributo;
 use App\Models\User;
@@ -32,6 +34,9 @@ use Illuminate\Support\Facades\Session;
 class EntregaService {
 
     protected $notification_system;
+    public $array = array();
+    public $qtd_estabs = array();
+    public $prioridade = array();
 
     function __construct()
     {
@@ -150,7 +155,6 @@ class EntregaService {
                 }
             }
         } else if ($tipo_periodo == 'QS') {
-
             $addQ = 15*($valor_periodo-1); //var_dump($addQ); var_dump($tipo_dia); var_dump($val_sign);
             //Estamos na primeira quinzena
             if ($tipo_dia == 'F') {
@@ -165,14 +169,14 @@ class EntregaService {
                     } else {
                         Carbon::setTestNow(Carbon::parse('next monday'));
                     }
-                }
-            } else if ($tipo_dia == 'U') {
-                if ($val_sign == '+') {
-                    Carbon::setTestNow(Carbon::parse("first day of next month")->addDays($addQ)->addWeekDays($val_dia-1)->startOfDay()->addHours(18));
-                } else {
-                    Carbon::setTestNow(Carbon::parse('first day of next month')->addDays($addQ+15)->subWeekDays($val_dia)->startOfDay()->addHours(18));
-                }
+                } else if ($tipo_dia == 'U') {
+                    if ($val_sign == '+') {
+                        Carbon::setTestNow(Carbon::parse("first day of next month")->addDays($addQ)->addWeekDays($val_dia-1)->startOfDay()->addHours(18));
+                    } else {
+                        Carbon::setTestNow(Carbon::parse('first day of next month')->addDays($addQ+15)->subWeekDays($val_dia)->startOfDay()->addHours(18));
+                    }
 
+                }
             }
 
         } else if ($tipo_periodo == 'AS') {   //Somente para AS1DF+DDMM
@@ -475,7 +479,8 @@ class EntregaService {
                             'limite' => $data_limite,
                             'tipo_geracao' => 'A',
                             'regra_id' => $regra->id,
-                            'Data_cronograma' => date('d-m-Y'),
+                            'Data_cronograma' => date('Y-m-d H:i:s'),
+                            'data_atividade' => date('Y-m-d H:i:s'),
                             'Resp_cronograma' => $id_user
                         );
                     }
@@ -517,30 +522,181 @@ class EntregaService {
                     );
 
                 }
+                $uf_cron = Municipio::find($estab->cod_municipio);
 
                 //CRIA ATIVIDADE
                 $val['estemp_type'] = 'estab';
                 $val['estemp_id'] = $estab->id;
                 $val['emp_id'] = $estab->empresa_id;
 
-                $anali = DB::select('SELECT a.* from atividadeanalista a left join regras b on a.Tributo_id = b.tributo_id where b.id = '.$val['regra_id'].' and a.Emp_id ='.$val['emp_id']);
-
-                if (!empty($anali)) {
-                    $anali = json_decode(json_encode($anali),true);
-                    $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                $analista = $this->loadAnalista($val);
+                if (!empty($analista)) {
+                    $val['Id_usuario_analista'] = $analista;
                 } 
 
                 $val['Resp_cronograma'] =$id_user;
-                $val['Data_cronograma'] = date('d-m-Y');
+                $val['Data_cronograma'] = date('Y-m-d H:i:s');
+                $val['data_atividade'] = date('Y-m-d H:i:s');
                 
+                if ($val['estemp_id'] > 0) {
+                    $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
+                        if (!empty($estabelecimento_tempo)) {
+                            $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
+                            $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                    }
+                }
+
+                if (!$this->checkDuplicidadeCronograma($val)) {
+                    continue;
+                }
                 $nova_atividade = CronogramaAtividade::create($val);
+                if (!empty($val)) {
+                    $val['id'] = $nova_atividade->id;
+                    $this->array[$val['estemp_id']][$tributo_id][] = $val;
+                    $this->qtd_estabs[$regra->tributo->id][$uf_cron->uf][$val['estemp_id']][] = $val;
+                    $this->prioridade[$tributo_id][] = $val;
+                }
                 $count++;
-
             }
-
         }
+
+        if (!empty($this->array)) {
+            $this->generateMensal($this->array);
+            $this->setPriority($this->prioridade);
+        }
+
         return $generate;
 
+    }
+
+    private function loadAnalista($val)
+    {
+        $regra = Regra::findorFail($val['regra_id']);
+        $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$val['emp_id']. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$val['estemp_id']. " AND B.Regra_geral = 'N') limit 1";
+
+        $retornodaquery = DB::select($query);
+
+        $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$val['emp_id']. " AND B.Regra_geral = 'S') limit 1";
+        
+        $queryGeral = DB::select($sql);
+        
+        $idanalistas = $retornodaquery;
+        if (empty($retornodaquery)) {
+            $idanalistas = $queryGeral;   
+        }
+        $analistafinal = 0;
+        if (!empty($idanalistas)) {
+            foreach ($idanalistas as $k => $analista) {
+                $analistafinal = $analista->id;
+            }
+        }
+        return $analistafinal;
+    }
+
+    public function generateMensal($array)
+    {   
+        $var = array();
+        foreach ($array as $estab_id => $single) {
+            foreach ($single as $tributo => $mostsingle) {
+            $generate = 1;
+                foreach ($mostsingle as $key => $atividade) {
+                    $var['Tempo_estab'] = $atividade['tempo'];
+                    $var['DATA_SLA'] = $atividade['limite'];
+                    $var['periodo_apuracao'] = $atividade['periodo_apuracao'];
+                    $var['Empresa_id'] = $atividade['emp_id'];
+
+                    $Regra = Regra::find($atividade['regra_id']);
+                    $Estabelecimento = Estabelecimento::find($atividade['estemp_id']);
+                    $Municipio = Municipio::find($Estabelecimento->cod_municipio);
+                    $var['Tributo_id'] = $tributo;
+                    $var['uf'] = $Municipio->uf;
+
+                    $var['Qtde_estab'] = count($this->qtd_estabs[$tributo][$Municipio->uf]);
+
+                    $tempo = $this->getTempo($tributo, $Municipio->uf);
+                    $var['Tempo_total'] = $tempo * $var['Qtde_estab'];
+
+                    $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$atividade['periodo_apuracao'].'" AND A.Tributo_id = '.$var['Tributo_id']);
+
+                    if (!empty($data_carga) && $generate) {
+                        
+                        $generate = 0;
+                        $var['Qtd_dias'] = $this->diffTempo(substr($atividade['limite'], 0,10), $data_carga[0]->Data_prev_carga);
+                        $var['Tempo_geracao'] = $var['Qtd_dias'] * 480;
+                        $var['Qtd_analistas'] = $var['Tempo_total']/$var['Tempo_geracao'];
+                        if ($this->checkduplicidadeMensal($var)) {
+                            $result_cronograma = CronogramaMensal::Create($var);
+                            $this->CronogramaAtividadeMensal($result_cronograma->id, $atividade);
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private function checkduplicidadeMensal($value)
+    {
+        $mensal = CronogramaMensal::where('periodo_apuracao', $value['periodo_apuracao'])->where('Empresa_id', $value['Empresa_id'])->where('Tributo_id', $value['Tributo_id'])->where('uf', $value['uf'])->get();
+     
+        if (count($mensal) > 0) {
+            return false;
+        }
+    
+        return true;
+    }
+                
+
+    private function CronogramaAtividadeMensal($id, $atividade)
+    {
+        $regra = Regra::findorFail($atividade['regra_id']);
+        $estabelecimento = Estabelecimento::findorFail($atividade['estemp_id']);
+
+        $atividades = DB::table('cronogramaatividades')
+                ->join('regras', 'cronogramaatividades.regra_id', '=', 'regras.id')
+                ->join('estabelecimentos', 'cronogramaatividades.estemp_id', '=', 'estabelecimentos.id')
+                ->join('municipios', 'estabelecimentos.cod_municipio', '=', 'municipios.codigo')
+                ->select('cronogramaatividades.*')
+                ->where('regras.tributo_id', $regra->tributo->id)
+                ->where('cronogramaatividades.emp_id',$atividade['emp_id'])
+                ->where('municipios.uf',$estabelecimento->municipio->uf)
+                ->where('cronogramaatividades.periodo_apuracao',$atividade['periodo_apuracao'])
+                ->get();
+
+        if (!empty($atividades)) {
+            foreach ($atividades as $key => $single) {
+                $single_activity = CronogramaAtividade::findorFail($single->id);
+                $single_activity->cronograma_mensal = $id;
+                $single_activity->save();
+            }
+        }
+
+        // CronogramaAtividade::where('regra_id',$atividade['regra_id'])
+        // ->where('emp_id',$atividade['emp_id'])
+        // ->where('emp_id',$atividade['emp_id'])
+        // ->where('periodo_apuracao',$atividade['periodo_apuracao'])
+        // ->update(['cronograma_mensal' => $id]);
+    }
+
+    private function diffTempo($data1, $data2)
+    {
+        $data_inicio = new \DateTime($data1);
+        $data_fim = new \DateTime($data2);
+
+        $dateInterval = $data_inicio->diff($data_fim);
+        return $dateInterval->days;
+    }
+
+    public function getTempo($tributo, $uf)
+    {
+        $tempo = 0;
+        $tributo_tempo = DB::select('SELECT A.Qtd_minutos FROM tempoatividade A where A.Tributo_id ='.$tributo.' AND A.UF ="'.$uf.'"');
+        
+        if (!empty($tributo_tempo)) {
+            $tempo = $tributo_tempo[0]->Qtd_minutos;
+        }
+
+    return $tempo;
     }
 
 
@@ -613,6 +769,7 @@ class EntregaService {
                     $param = array('cnpj'=>$estab->cnpj,'IE'=>$estab->insc_estadual);
                     $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega,$param,$periodo_apuracao,$offset,$adiant_fds);
 
+
                     foreach ($retval_array as $el) {
                         $data_limite = $el['data']->toDateTimeString();
                         $alerta = intval($regra->tributo->alerta);
@@ -671,9 +828,10 @@ class EntregaService {
                     continue;
                 }
 
-                $nova_atividade = Atividade::create($val);
-                $count++;
-
+                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                    $nova_atividade = Atividade::create($val);
+                    $count++;
+                }
             }
 
         }
@@ -829,6 +987,7 @@ class EntregaService {
                         $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
                         $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
 
+
                         $data_limite = $retval_array[0]['data']->toDateTimeString();
                         $alerta = intval($regra->tributo->alerta);
                         $inicio_aviso = $retval_array[0]['data']->subDays($alerta)->toDateTimeString();
@@ -862,8 +1021,11 @@ class EntregaService {
                             if (!$this->checkDuplicidade($val)) {
                                 continue;
                             }
-                            Atividade::create($val);
-                            $count++;
+
+                            if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                                Atividade::create($val);
+                                $count++;
+                            }
                         }
 
                     }
@@ -919,8 +1081,11 @@ class EntregaService {
                                 if (!$this->checkDuplicidade($val)) {
                                     continue;
                                 }
-                                Atividade::create($val);
-                                $count++;
+                                
+                                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                                    Atividade::create($val);
+                                    $count++;
+                                }
                             }
                         }
                     }
@@ -1072,9 +1237,11 @@ class EntregaService {
                         if (!$this->checkDuplicidade($val)) {
                             continue;
                         }
-
-                        $nova_atividade = Atividade::create($val);
-                        $count++;
+                        
+                        if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                            $nova_atividade = Atividade::create($val);
+                            $count++;
+                        }
 
                         //Assignment usuario
                         //foreach($regra->tributo->users as $user) {
@@ -1217,6 +1384,7 @@ class EntregaService {
                         $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
                         $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
 
+
                         $data_limite = $retval_array[0]['data']->toDateTimeString();
                         $alerta = intval($regra->tributo->alerta);
                         $inicio_aviso = $retval_array[0]['data']->subDays($alerta)->toDateTimeString();
@@ -1237,7 +1405,8 @@ class EntregaService {
                             'limite' => $data_limite,
                             'tipo_geracao' => 'A',
                             'regra_id' => $regra->id,
-                            'Data_cronograma' => date('d-m-Y'),
+                            'Data_cronograma' => date('Y-m-d H:i:s'),
+                            'data_atividade' => date('Y-m-d H:i:s'),
                             'Resp_cronograma' => $id_user
                         );
 
@@ -1254,23 +1423,34 @@ class EntregaService {
                             $val['estemp_type'] = 'estab';
                         }
 
+                        $analista = $this->loadAnalista($val);
 
-
-                        $anali = DB::table('atividadeanalista')
-                            ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
-                            ->select('atividadeanalista.Id_usuario_analista')
-                            ->where('regras.id',$val['regra_id'])
-                            ->where('atividadeanalista.Emp_id', $val['emp_id'])
-                            ->get();
-
-                        if (!empty($anali)) {
-                            $anali = json_decode(json_encode($anali),true);
-                            $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                        if (!empty($analista)) {
+                            $val['Id_usuario_analista'] = $analista;
                         } 
+
+                        if ($val['estemp_id'] > 0) {
+                            $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
+                            if (!empty($estabelecimento_tempo)) {
+                                $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
+                                $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                            }
+                        }
+
+                        if (!$this->checkDuplicidadeCronograma($val)) {
+                            continue;
+                        }
+
                         //Verifica blacklist dos estabelecimentos para esta regra
                         if (!in_array($ae->id,$blacklist)) {
-                            CronogramaAtividade::create($val);
-                            $count++;
+                            $nova_atividade = CronogramaAtividade::create($val);
+                            if (!empty($val)) {
+                                $val['id'] = $nova_atividade->id;
+                                $this->array[$val['estemp_id']][$regra->tributo->id][] = $val;
+                                $this->qtd_estabs[$regra->tributo->id][$uf_cron->uf][$val['estemp_id']][] = $val;
+                                $this->prioridade[$regra->tributo->id][] = $val;
+                                $count++;
+                            }
                         }
 
                     }
@@ -1331,28 +1511,46 @@ class EntregaService {
                             $val['estemp_id'] = $id_estab;
                             $val['estemp_type'] = 'estab';
                             }
-                            $anali = DB::table('atividadeanalista')
-                            ->join('regras', 'regras.tributo_id', '=', 'atividadeanalista.Tributo_id')
-                            ->select('atividadeanalista.Id_usuario_analista')
-                            ->where('regras.id',$val['regra_id'])
-                            ->where('atividadeanalista.Emp_id', $empresa_id)
-                            ->get();
-                            if (!empty($anali)) {
-                                $anali = json_decode(json_encode($anali),true);
-                                $val['Id_usuario_analista'] = $anali[0]['Id_usuario_analista'];
+                            $analista = $this->loadAnalista($val);
+                            if (!empty($analista)) {
+                                $val['Id_usuario_analista'] = $analista;
                             }
 
                             $val['Resp_cronograma'] = $id_user;
-                            $val['Data_cronograma'] = date('d-m-Y');
+                            $val['Data_cronograma'] = date('Y-m-d H:i:s');
+                            $val['data_atividade'] = date('Y-m-d H:i:s');
+                            
+                            if ($val['estemp_id'] > 0) {
+                            $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
+                                if (!empty($estabelecimento_tempo)) {
+                                    $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
+                                    $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                                }
+                            }
+
+                            if (!$this->checkDuplicidadeCronograma($val)) {
+                                continue;
+                            }
 
                             //Verifica blacklist dos estabelecimentos para esta regra
                             if (!in_array($el->id,$blacklist)) {
-                                CronogramaAtividade::create($val);
-                                $count++;
+                                $nova_atividade = CronogramaAtividade::create($val);
+                                if (!empty($val)) {
+                                    $val['id'] = $nova_atividade->id;
+                                    $this->array[$val['estemp_id']][$regra->tributo->id][] = $val; 
+                                    $this->qtd_estabs[$regra->tributo->id][$uf_cron->uf][$val['estemp_id']][] = $val;
+                                    $this->prioridade[$regra->tributo->id][] = $val; 
+                                    $count++;
+                                }
                             }
                         }
                     }
                 }
+            }
+
+            if (!empty($this->array)) {
+                $this->generateMensal($this->array);
+                $this->setPriority($this->prioridade);
             }
             
             DB::table('cronogramastatus')->insert(
@@ -1362,6 +1560,95 @@ class EntregaService {
         }
         
     return $generate;
+    }
+
+    private function setPriority($array)
+    {
+        $priority = array();
+        $Oldpriority = array();
+        foreach ($array as $tributo_id => $atividades) {
+            $ordem = OrdemApuracao::where('Tributo_id', $tributo_id)->first();
+            if (!empty($ordem)) {
+                $Oldpriority[$ordem->Prioridade] = $atividades;
+            }
+        }
+
+        $data = $this->loadData($atividades);
+        $time = 0;
+        $a = 0;
+
+        if (!empty($Oldpriority)) {
+            foreach ($Oldpriority as $x => $ordering) {
+                $a++;
+                if (isset($Oldpriority[$a])) {
+                    $priority[$a] = $Oldpriority[$a];
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        if (!empty($priority)) {
+            foreach ($priority as $x => $non_single) {
+                foreach ($non_single as $unicKey => $single_priority) {
+                    
+                    $cronograma = CronogramaAtividade::where('id',$single_priority['id'])->first();
+                    if (!empty($cronograma)) {
+                        $time += $cronograma->tempo;
+                        if ($time > 480) {
+                            $data = date('Y-m-d', strtotime("+1 days",strtotime($data)));
+                            $time -= 480;
+                            $cronograma->data_atividade = $data;
+                            $cronograma->save();
+                        } else {
+                            $cronograma->data_atividade = $data;
+                            $cronograma->save();   
+                        }
+                    }          
+                }           
+            }
+        }
+    }
+
+    private function loadData($array)
+    {
+        foreach ($array as $key => $one) {
+
+            $Regra = Regra::findorFail($one['regra_id']);
+
+            $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$one['periodo_apuracao'].'" AND A.Tributo_id = '.$Regra->tributo_id);
+        }
+
+        if (!empty($data_carga)) {
+            return $data_carga[0]->Data_prev_carga;
+        }
+    }
+
+    private function checkGeneration($data, $freq_entrega)
+    {
+        $mes = date('m/Y');
+        
+        $data1 = $data;
+        $data2 = str_replace('-', '/', $data1);
+        $data = date('m/Y', strtotime($data2));
+
+        if ($freq_entrega == 'M') {
+            return true;
+        }
+
+        if ($freq_entrega == 'A') {
+            if ($data == $mes) {
+                return true;
+            }
+        }  
+
+        if ($freq_entrega == 'S') {
+            if ($data == $mes) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function generateNotifications($user) {
@@ -1406,6 +1693,34 @@ class EntregaService {
     {
         $atividades = DB::table('atividades')
                 ->select('atividades.id');
+
+        if (isset($atividade['estemp_id'])) {
+            $atividades = $atividades->where('estemp_id', $atividade['estemp_id']);
+        }
+
+        if (isset($atividade['emp_id'])) {
+            $atividades = $atividades->where('emp_id', $atividade['emp_id']);
+        }
+
+        if (isset($atividade['periodo_apuracao'])) {
+            $atividades = $atividades->where('periodo_apuracao', $atividade['periodo_apuracao']);
+        }
+        
+        if (isset($atividade['regra_id'])) {
+            $atividades = $atividades->where('regra_id', $atividade['regra_id']);
+        }
+     
+        $atividades = $atividades->get();
+        if (!empty($atividades)) {
+            return false;
+        }
+        return true;
+    }
+
+    private function checkDuplicidadeCronograma($atividade) 
+    {
+        $atividades = DB::table('cronogramaatividades')
+                ->select('cronogramaatividades.id');
 
         if (isset($atividade['estemp_id'])) {
             $atividades = $atividades->where('estemp_id', $atividade['estemp_id']);

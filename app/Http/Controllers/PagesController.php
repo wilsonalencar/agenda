@@ -30,6 +30,13 @@ class PagesController extends Controller
             $this->s_emp = Empresa::findOrFail(session('seid'));
     }
 
+    public function forcelogout()
+    {
+        Session::forget('seid');
+        Session::forget('seidLogo');
+        return response()->redirectTo('http://dev.platform');
+    }
+
     public function aprovacao (Request $request = null)
     {
         

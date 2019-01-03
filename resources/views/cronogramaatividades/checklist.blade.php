@@ -29,8 +29,10 @@ $data = date('d/m/Y H:i:s');
         <?php
         if (!empty($checklist)) {
             foreach ($checklist as $key => $value) {
-                foreach ($value as $val => $dados) {  
-                $periodo = $dados['periodo_apuracao'];                        
+                foreach ($value as $val => $dados) {
+                if (isset($dados['periodo_apuracao'])) {
+                  $periodo = $dados['periodo_apuracao'];                          
+                }  
         ?>          
         <tr>
             <td><?php echo $dados['razao_social']; ?></td>
@@ -71,51 +73,7 @@ $('#dataTables-example').dataTable({
                 exportOptions: {
                    columns: [ 0, 1, 2, 3, 4, 5]
                 }
-             },
-             {
-                extend: 'pdfHtml5',
-                exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5]
-                },
-                "autoWidth": true,
-                customize: function ( doc ) {
-                  doc.pageMargins = [90,60,20,30];
-                  doc.defaultStyle.fontSize = 10;
-                  doc.styles.tableHeader.fontSize = 12;
-                      doc['header']=(function() {
-                      return {
-                        columns: [
-                          {
-                            alignment: 'left',
-                            image: logo,
-                            width: 60
-                          },
-                          {
-                            alignment: 'right',
-                            text: '<?php echo $data; ?>',
-                            fontSize: 10
-                          }
-                        ],
-                        margin: 20  
-                      }
-                    });
-                    doc['footer']=(function(currentPage, pageCount) {
-                      return {
-                        columns: [
-                          {
-                            alignment: 'right',
-                            text:'Página : ' + currentPage.toString() + ' de ' + pageCount,
-                            fontSize: 10
-                          }
-                        ]
-                      }
-                    });
-                },
-
-                title:'Checklist - <?php echo $periodo; ?>',
-                orientation: 'landscape',
-                pageSize: 'A4'
-             },
+             }
          ]
     });  
 </script>

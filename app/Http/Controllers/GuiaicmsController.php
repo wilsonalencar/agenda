@@ -2213,6 +2213,7 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['REFERENCIA'] = str_replace(' ', '',trim($i[0]));
         }
 
+<<<<<<< Updated upstream
         preg_match('~numero do documento([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode("\n", trim($match[1]));
@@ -2252,6 +2253,21 @@ r\$([^{]*)~i', $str, $match);
         $mes = substr($file_content[3], 0,2);
         $icms[0]['REFERENCIA'] = $mes.'/'.$ano;
         
+=======
+        if (substr($icms[0]['REFERENCIA'], 0,2) == '00') {
+            preg_match('~periodo ref.([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                if (!empty($i[0])) {
+                    $a = explode(' ', $i[0]);
+                    foreach ($a as $x => $data) {
+                    }
+                    $icms[0]['REFERENCIA'] = substr($data, -8);
+                }
+            }
+        }
+
+>>>>>>> Stashed changes
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms[0];

@@ -2219,7 +2219,7 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[21])));
         }
 
-        if (strlen($icms[0]['REFERENCIA'] != 7)) {
+        if (strlen($icms[0]['REFERENCIA']) != 7) {
             preg_match('~validade([^{]*)~i', $str, $match);
             if (!empty($match)) {
                 $i = explode(' ', trim($match[1]));
@@ -2247,6 +2247,10 @@ r\$([^{]*)~i', $str, $match);
                 $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[20])));
             }
         }
+
+        $ano = substr($file_content[3], -4);
+        $mes = substr($file_content[3], 0,2);
+        $icms[0]['REFERENCIA'] = $mes.'/'.$ano;
         
         fclose($handle);
         $icmsarray = array();

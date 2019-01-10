@@ -21,6 +21,7 @@ class CargasController extends Controller
 
     public function __construct(EntregaService $service)
     {
+        date_default_timezone_set('America/Sao_Paulo');
         if (!session()->get('seid')) {
             echo "Nenhuma empresa Selecionada.<br/><br/><a href='home'>VOLTAR</a>";
             exit;

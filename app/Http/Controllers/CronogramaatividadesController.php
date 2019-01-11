@@ -945,6 +945,12 @@ class CronogramaatividadesController extends Controller
         if (strlen($mes) == 1) {
             $mes = '0'.$mes;
         }
+
+        if ($mes == 13) {
+            $mes = 1;
+            $ano++;
+        }
+        
         $dataAcima = $ano.'-'.$mes.'';
         $calendar = \Calendar::addEvents($events) //add an array with addEvents
         ->setOptions([ //set fullcalendar options

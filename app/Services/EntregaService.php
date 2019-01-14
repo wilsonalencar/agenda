@@ -828,7 +828,7 @@ class EntregaService {
                     continue;
                 }
 
-                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega, $val)) {
                     $nova_atividade = Atividade::create($val);
                     $count++;
                 }
@@ -1022,7 +1022,7 @@ class EntregaService {
                                 continue;
                             }
 
-                            if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                            if ($this->checkGeneration($regra->created_at, $regra->freq_entrega, $val)) {
                                 Atividade::create($val);
                                 $count++;
                             }
@@ -1082,7 +1082,7 @@ class EntregaService {
                                     continue;
                                 }
                                 
-                                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                                if ($this->checkGeneration($regra->created_at, $regra->freq_entrega, $val)) {
                                     Atividade::create($val);
                                     $count++;
                                 }
@@ -1238,7 +1238,7 @@ class EntregaService {
                             continue;
                         }
                         
-                        if ($this->checkGeneration($regra->created_at, $regra->freq_entrega)) {
+                        if ($this->checkGeneration($regra->created_at, $regra->freq_entrega, $val)) {
                             $nova_atividade = Atividade::create($val);
                             $count++;
                         }
@@ -1624,30 +1624,54 @@ class EntregaService {
         }
     }
 
-    private function checkGeneration($data, $freq_entrega)
+    private function checkGeneration($data, $freq_entrega, $atividade)
     {
-        $mes = date('m/Y');
-        
         $data1 = $data;
         $data2 = str_replace('-', '/', $data1);
-        $data = date('m/Y', strtotime($data2));
+        $data = date('Y', strtotime($data2));
 
         if ($freq_entrega == 'M') {
             return true;
         }
 
         if ($freq_entrega == 'A') {
-            if ($data == $mes) {
+            if (!$this->findAnual($atividade, $data)) {
                 return true;
             }
         }  
 
         if ($freq_entrega == 'S') {
-            if ($data == $mes) {
+            if (!$this->findSemestral($atividade, $data)) {
                 return true;
             }
         }
 
+        return false;
+    }
+
+    private function findSemestral($atividade, $ano){
+        $atividades = Atividade::Where('regra_id', $atividade['regra_id'])->where('estemp_id', $atividade['estemp_id'])->whereRaw('DATE_FORMAT(created_at, "%Y") = "'.$ano.'"')->get();
+
+        if (count($atividades) < 2) {
+            
+            $data_atividade = substr($atividades[0]->created_at, 0,10);
+            $data_atividade = str_replace('-', '/', $data_atividade);
+            $mes_atividade = date('m', strtotime($data_atividade));
+
+            $mes_atual = date('m');
+            if (($mes_atividade <= 6 && $mes_atual > 6) || ($mes_atividade > 6 && $mes_atual <= 6))  {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function findAnual($atividade, $ano){
+        $atividades = Atividade::Where('regra_id', $atividade['regra_id'])->where('estemp_id', $atividade['estemp_id'])->whereRaw('DATE_FORMAT(created_at, "%Y") = "'.$ano.'"')->get();
+
+        if (count($atividades) < 1) {
+            return true;
+        }
         return false;
     }
 

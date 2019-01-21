@@ -2207,13 +2207,68 @@ r\$([^{]*)~i', $str, $match);
             }
         }
 
-
         preg_match('~mes ano de referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode("\n", trim($match[1]));
             $icms[0]['REFERENCIA'] = str_replace(' ', '',trim($i[0]));
         }
 
+        preg_match('~numero do documento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[21])));
+        }
+
+        if (strlen($icms[0]['REFERENCIA']) != 7) {
+            preg_match('~validade([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode(' ', trim($match[1]));
+                $valorData = substr($i[0], 0,12);
+                $data_vencimento = str_replace('/', '-', $valorData);
+                $icms[0]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                $icms[1]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                $referencia = date('m/Y', strtotime($data_vencimento));
+                $k = explode('/', $referencia);
+                $k[0] = $k[0]-1;
+                if ($k[0] == 0) {
+                    $k[1] = $k[1] - 1;
+                }
+                if (strlen($k[0]) == 1) {
+                    $k[0] = '0'.$k[0];
+                }
+                $icms[0]['REFERENCIA'] = $k[0].'/'.$k[1];
+            }
+        }
+    
+        $vlr_total = 'a';
+
+        preg_match('~numero do documento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $vlr_total = str_replace(',', '.', str_replace('.', '',trim($i[20])));
+        }
+
+        if (empty($icms[0]['VLR_TOTAL']) || is_numeric($vlr_total)) {
+            $icms[0]['VLR_TOTAL'] = $vlr_total;
+        }
+
+        $ano = substr($file_content[3], -4);
+        $mes = substr($file_content[3], 0,2);
+        $icms[0]['REFERENCIA'] = $mes.'/'.$ano;
+        
+        if (substr($icms[0]['REFERENCIA'], 0,2) == '00') {
+            preg_match('~periodo ref.([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                if (!empty($i[0])) {
+                    $a = explode(' ', $i[0]);
+                    foreach ($a as $x => $data) {
+                    }
+                    $icms[0]['REFERENCIA'] = substr($data, -8);
+                }
+            }
+        }
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms[0];

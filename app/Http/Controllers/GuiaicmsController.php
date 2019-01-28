@@ -13,6 +13,7 @@ use App\Models\Guiaicms;
 use App\Models\CriticasLeitor;
 use App\Models\CriticasEntrega;
 use App\Models\Atividade;
+use App\Models\EntregaExtensao;
 use App\Models\User;
 use App\Http\Requests;
 use App\Services\EntregaService;
@@ -3989,13 +3990,54 @@ juros de mora
                     continue;
                 }
             }
-            
+
+            $return = $this->validateGeral($file, $AtividadeID);
+            if (!is_numeric($return)) {
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Está faltando o arquivo com extensão '.$return, 'N');
+                continue;
+            }
+
+            $existsTXT = $this->validateGeral($file, $AtividadeID, true);
+            if ($existsTXT) {
+                $checkTXTvalue = $this->checkTXTvalue($file, $AtividadeID);
+                if (!is_numeric($checkTXTvalue)) {
+                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do TXT '.$checkTXTvalue.' não confere com CNPJ da filial da atividade.', 'N');
+                    continue;
+                }
+
+                $checkTXTvalue_2 = $this->checkTXTvalue($file, $AtividadeID, true);
+                if (!is_numeric($checkTXTvalue_2)) {
+                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'PERÍODO do TXT '.$checkTXTvalue_2.' não confere com Período da atividade.', 'N');
+                    continue;
+                }
+            }
+
+            $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
+            if ($existsPDF) {
+                $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
+                if (!is_numeric($checkPDFvalue)) {
+                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Aprovação: Existem mais de um arquivo PDF, não é possível identificar qual dos arquivos é o recibo.', 'N');
+                    continue;
+                }
+
+                $checkPDFvalue_2 = $this->checkPDFvalue($file, $AtividadeID, true);
+                if (!is_numeric($checkPDFvalue_2)) {
+                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do Recibo não confere com CNPJ da filial da atividade.', 'N');
+                    continue;
+                }
+
+                $checkPDFvalue_3 = $this->checkPDFvalue($file, $AtividadeID, false, true);
+                if (!is_numeric($checkPDFvalue_3)) {
+                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período do Recibo não confere com o período da atividade.', 'N');
+                    continue;
+                }
+            }
 
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
-            $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;
+            $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;   
         }
-
+       
         if (!empty($arr)) {
             foreach ($arr as $k => $singlearray) {
                 $path = $k.'.zip';
@@ -4003,6 +4045,181 @@ juros de mora
             }
         }
     }   
+
+    private function checkTXTvalue($file, $id, $periodo = false)
+    {
+        if (is_dir($file)) {
+            $formated = array();
+            $files = scandir($file);
+            $counter = 0;
+            foreach ($files as $x => $k) {
+                if (strlen($k) > 2) {
+                    $exp = explode('.',$k);
+                    if (strtolower($exp[1]) == 'txt') {
+                        $formated[$counter]['path'] = $file.'/'.$k;
+                        $formated[$counter]['file'] = $k;
+                        $counter++;
+                    }
+                }
+            }
+        }
+
+        $atividade = Atividade::findOrFail($id);
+        if (!empty($formated)) {
+            foreach ($formated as $single_key => $single_formated) {
+
+                $handle = fopen($single_formated['path'], "r");
+                $contents = fread($handle, filesize($single_formated['path']));
+                
+                $exploded_rows = explode("\n", $contents);
+                $exploded_column = explode("|", $exploded_rows[0]);
+
+                if ($periodo) {
+                    if (substr($exploded_column[5], -6) != $this->numero($atividade->periodo_apuracao)) {
+                        return $single_formated['file'];
+                    }
+                } else {
+                    if ($exploded_column[7] != $atividade->estemp->cnpj) {
+                        return $single_formated['file'];
+                    }
+                }
+
+                fclose($handle);
+            }
+        }
+
+        return '1';
+        
+    }
+
+    private function checkPDFvalue($file, $id, $cnpj = false, $periodo = false)
+    {
+        if (is_dir($file)) {
+            $formated = array();
+            $files = scandir($file);
+            $counter = 0;
+            foreach ($files as $x => $k) {
+                if (strlen($k) > 2) {
+                    $exp = explode('.',$k);
+                    if (strtolower($exp[1]) == 'pdf') {
+                        $formated[$counter]['path'] = $file.'/'.$k;
+                        $formated[$counter]['file'] = $k;
+                        $counter++;
+                    }
+                }
+            }
+
+            $atividade = Atividade::findOrFail($id);
+            if ($periodo) {
+                if (!$this->readRecibo($formated[0]['path'], $atividade->periodo_apuracao, 'periodo')) {
+                    return 'error';
+                }
+            }
+
+            if ($cnpj) {
+                if (!$this->readRecibo($formated[0]['path'], $atividade->estemp->cnpj, 'cnpj')) {
+                    return 'error';
+                }
+            }
+
+            if (count($formated) > 1) {
+                return 'error';
+            }
+
+        }
+
+        return '1';
+    }
+
+    private function readRecibo($path, $param, $param_recibo)
+    {
+        $funcao = 'pdftotext.exe ';
+        
+        $filetxt = str_replace('.pdf', '.txt', $path);
+        
+        $caminho1 = explode('/', $filetxt);
+        $caminho1_result = '';
+        foreach ($caminho1 as $key => $value) {
+            $arquivonome = $value;
+            $key++;
+            if (isset($caminho1[$key])) {
+                $caminho1_result .= $value.'/';
+            }
+        }
+        $caminho1_result = substr($caminho1_result, 0, -1);
+        shell_exec($funcao.$arquivonome.' '.$caminho1_result);
+        
+        $arr[$arquivonome]['arquivotxt'] = $arquivonome; 
+        $arr[$arquivonome]['pathtxt'] = $caminho1_result;
+        
+        echo "<Pre>";
+        print_r($arr);exit;        
+
+    }
+
+    private function validateGeral($file, $id, $checkTXT = false, $checkPDF = false)
+    {
+        $validations = array();
+        if (is_dir($file)) {
+           
+            $validations = array();
+            $atividade = Atividade::findOrFail($id);
+            $loadExtensoes = EntregaExtensao::Where('tributo_id', $atividade->regra->tributo->id)->get()->toarray();
+           
+            if (!empty($loadExtensoes)) {
+                foreach ($loadExtensoes as $x => $k) {
+                    $validations[strtolower($k['extensao'])] = false;
+                }    
+            }
+
+            //inicia validação de pasta
+            $file_extensions = array();                 
+            $validation = scandir($file);
+            if (!empty($validation)) {
+                foreach ($validation as $kk => $value_value) {
+                    if (strlen($value_value) > 2) {
+                        $exp = explode('.',$value_value);
+                        $file_extensions[] = strtolower($exp[1]);
+                    }        
+                }    
+            }
+
+            if (!empty($file_extensions)) {
+                foreach ($file_extensions as $x => $valid) {
+
+                    if ($checkTXT) {
+                        if ($valid == 'txt') {
+                            return true;
+                        }
+                    }
+                    if ($checkPDF) {
+                        if ($valid == 'pdf') {
+                            return true;
+                        }
+                    }
+
+                    if (isset($validations[$valid]) && empty($validations[$valid])) {
+                        $validations[$valid] = true;
+                    }
+                }
+            }
+        }
+
+        if ($checkPDF || $checkTXT) {
+            return false;
+        }
+
+        $retorno = 1;
+        if (!empty($validations)) {
+            foreach ($validations as $x => $index_true) {
+                if (!$index_true) {
+                    $retorno = $x;
+                }
+            }
+        }
+
+        return $retorno;
+    }
 
     private function loadTributo($tributo_nome)
     {

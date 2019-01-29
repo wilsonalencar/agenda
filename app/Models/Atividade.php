@@ -25,7 +25,12 @@ class Atividade extends Model
         'emp_id',
         'estemp_id',
         'estemp_type',
-        'retificacao_id'
+        'retificacao_id',
+        'vlr_recibo_1',
+        'vlr_recibo_2',
+        'vlr_recibo_3',
+        'vlr_recibo_4',
+        'vlr_recibo_5'
     ];
 
     /**

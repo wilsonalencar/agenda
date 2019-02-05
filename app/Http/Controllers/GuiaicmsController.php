@@ -3882,7 +3882,7 @@ juros de mora
                 }
             }
         }              
-        
+
         if (!empty($files)) {
             $this->savefiles($files);
         } else {
@@ -3895,8 +3895,28 @@ juros de mora
         } else { 
                 exec($cmd . " > /dev/null &");   
         } 
-        
+        $this->clearEmptyPaths($files);
         echo "Job foi rodado com sucesso.";exit;
+    }
+    private function clearEmptyPaths($paths)
+    {
+        $clear = array();
+        if (!empty($paths)) {
+            foreach ($paths as $k => $path) {
+                if (is_dir($path) && !is_file($path)) {
+                    $a = scandir($path);
+                    if (count($a) == 2) {
+                        $clear[] = $path;
+                    }
+                }
+            }
+        }
+
+        if (!empty($clear)) {
+            foreach ($clear as $key => $valuetoclear) {
+                @rmdir($valuetoclear);
+            }
+        }
     }
 
     private function savefiles($files){
@@ -3962,7 +3982,7 @@ juros de mora
                 $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Código de atividade não existe', 'N');
                 continue;
             }
-            
+
             if (!$this->checkTribAtividade($AtividadeID, $IdTributo)) {
                 $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Tributo divergente do tributo da atividade', 'N');
                 continue;
@@ -3991,6 +4011,7 @@ juros de mora
                 }
             }
 
+            
             $return = $this->validateGeral($file, $AtividadeID);
             if (!is_numeric($return)) {
                 $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Está faltando o arquivo com extensão '.$return, 'N');
@@ -4009,8 +4030,7 @@ juros de mora
                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'PERÍODO do TXT '.$checkTXTvalue_2.' não confere com Período da atividade.', 'N');
                    continue;
                 }
-            }
-
+            
             $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
             if ($existsPDF) {
                 $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
@@ -4034,7 +4054,7 @@ juros de mora
                 if ($IdTributo == 1) {
                     $this->checkPDFvalue($file, $AtividadeID, false, false, true);
                 }
-            }
+            } 
 
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
@@ -4388,7 +4408,6 @@ juros de mora
         $res = $zip->open($fileName, \ZipArchive::CREATE);
         if($res === true){
             foreach ($f as $in => $name) {
-
                 if (!is_file($name['path'])) {
                     $name['path'] = $name['path'].'/';
                     $name['filename'] = $name['filename'].'/';
@@ -4444,7 +4463,8 @@ juros de mora
                         $destino .= 'uploaded/';
                         $arrayDelete['pasta'][$in]['path'] = $name['path']; 
                         $arrayDelete['pasta'][$in]['filename'] = $name['filename']; 
-                        $arrayDelete['pasta'][$in]['destino'] = $destino.$name['filename'];
+                        $arrayDelete['pasta'][$in]['destino'] = $destino;
+                        $arrayDelete['pasta'][$in]['pastaname'] = $name['filename'];
                     }
                 }
 
@@ -4452,28 +4472,34 @@ juros de mora
         }
 
         $zip->close();
+
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
                 if (is_array($single) && $chave === 'pasta') {
                    foreach ($single as $p => $mostsingle) {
                         
                         $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
-                     
-                        if (!is_dir($creationpath)) {
+                        $verifypath = str_replace('uploaded', 'entregar', $creationpath);
+                        
+                        if (!is_dir($creationpath) && !is_file($verifypath)) {
                             mkdir($creationpath, 0777);
                         }
-                     
-                        $creationpath = $creationpath.'/';
-                        $currentFile = $creationpath.'/'.$mostsingle['filename'];
+                        
+                        $currentFile = $creationpath;
+                        if (!is_file($verifypath)) {
+                            $creationpath = $creationpath.'/';
+                            $currentFile = $creationpath.'/'.$mostsingle['filename'];
+                        }
                         copy($mostsingle['path'], $currentFile);
                         unlink($mostsingle['path']);
                     }
 
-                    if ($this->checkDiretorio($mostsingle['raiz'])) {
-                        @rmdir($mostsingle['raiz']);
+                    if (isset($mostsingle['raiz'])) {
+                        if ($this->checkDiretorio($mostsingle['raiz'])) {
+                            @rmdir($mostsingle['raiz']);
+                        }
                     }
                 }
-                
                 if (!is_array($single)) {
                     copy($single['path'], $single['destino']);
                     unlink($single['path']);

@@ -46,23 +46,26 @@ class Generate_Activities_Single extends Command
 
             $period_array = $this->_createPeriodArray($periodo_ini,$periodo_fin);
             if (sizeof($period_array)==0) {
-                $this->error('Parameter error!');
+                $this->error('Não foi possível gerar o array de período!');
             } else {
                 for ($i = 0; $i<sizeof($period_array); $i++) {
 
                     $periodo = $period_array[$i];
                     $is_valid = preg_match('/^[0-9]*$/', $periodo);
 
-                    if (strlen($periodo) == 6 && substr($cnpj, -6, 4) != '0001' && $is_valid && is_numeric($tributo_id) && $tributo_id<20) {
-                        $this->info('Pedido de geracao em andamento...');
-                        if ($tributo_id>0) $this->info('Tributo '.$tributo_id);
-                        $this->info('Periodo '.$periodo);
+                    if (strlen($periodo) == 6 && $is_valid && is_numeric($tributo_id)) {
+
                         $retval = $this->eService->generateSingleCnpjActivities($periodo, $cnpj, $codigo, $tributo_id);
-                        if (!$retval) $this->info('WARNING: Estab. inativo ou existem atividades geradas para o periodo '.$periodo);
-                        $this->info('Geracao concluida');
+                        if (!$retval){
+                            $this->info('WARNING: Estab. inativo ou existem atividades geradas para o periodo '.$periodo);
+                        } else {
+                            $this->info('Geracao concluida para o');
+                            $this->info('Periodo '.$periodo);        
+                            $this->info('E Tributo '.$tributo_id);
+                        }
 
                     } else {
-                        $this->error('Parameter error!');
+                        $this->error('Período não é valido ou tributo não está sendo encontrado!');
                     }
                 }
             }
@@ -73,15 +76,18 @@ class Generate_Activities_Single extends Command
             //need to improve validation, now is just numeric
             $is_valid = preg_match('/^[0-9]*$/', $periodo);
 
-            if (strlen($periodo) == 6 && substr($cnpj, -6, 4) != '0001' && $is_valid && is_numeric($tributo_id) && $tributo_id<20) {
-                $this->info('Pedido de geracao em andamento...');
-                if ($tributo_id>0) $this->info('Tributo '.$tributo_id);
-                $this->info('Periodo '.$periodo);
+            if (strlen($periodo) == 6 && $is_valid && is_numeric($tributo_id)) {
+
                 $retval = $this->eService->generateSingleCnpjActivities($periodo, $cnpj, $codigo, $tributo_id);
-                if (!$retval) $this->info('WARNING: Estab. inativo ou existem atividades geradas para o periodo '.$periodo);
-                $this->info('Geracao concluida');
+                if (!$retval){
+                    $this->info('WARNING: Estab. inativo ou existem atividades geradas para o periodo '.$periodo);
+                } else {
+                    $this->info('Geracao concluida para o');
+                    $this->info('Periodo '.$periodo);
+                    $this->info('E Tributo '.$tributo_id);
+                }
             } else {
-                $this->error('Parameter error!');
+                $this->error('Período não é valido ou tributo não está sendo encontrado!');
             }
         }
     }

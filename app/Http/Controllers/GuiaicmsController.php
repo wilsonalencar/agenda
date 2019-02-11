@@ -468,7 +468,7 @@ class GuiaicmsController extends Controller
 
             if (!empty($icmsarray)) {
                 foreach ($icmsarray as $key => $icms) {
-                    if (empty($icms) || count($icms) =< 7) {
+                    if (empty($icms) || count($icms) <= 7) {
                         $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
                         continue;
                     }
@@ -2207,6 +2207,7 @@ periodo ref.([^{]*)~i', $str, $match);
         }
         }
 
+        if (isset($icms[0]['VLR_RECEITA'])) {
         $check = $this->letras($icms[0]['VLR_RECEITA']);
         if (!empty($check)) {
             preg_match('~total
@@ -2217,6 +2218,7 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
         }
+        }   
         }
 
         if (isset($icms[0]['IE'])) {

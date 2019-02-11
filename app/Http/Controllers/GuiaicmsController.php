@@ -468,7 +468,7 @@ class GuiaicmsController extends Controller
 
             if (!empty($icmsarray)) {
                 foreach ($icmsarray as $key => $icms) {
-                    if (empty($icms) || count($icms) < 6) {
+                    if (empty($icms) || count($icms) =< 7) {
                         $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
                         continue;
                     }
@@ -2207,7 +2207,8 @@ periodo ref.([^{]*)~i', $str, $match);
         }
         }
 
-        if (!empty($this->letras($icms[0]['VLR_RECEITA']))) {
+        $check = $this->letras($icms[0]['VLR_RECEITA']);
+        if (!empty($check)) {
             preg_match('~total
 
 r\$([^{]*)~i', $str, $match);
@@ -2218,25 +2219,29 @@ r\$([^{]*)~i', $str, $match);
         }
         }
 
-        if (empty($icms[0]['IE'])) {
-            preg_match('~numero([^{]*)~i', $str, $match);
-            if (!empty($match)) {
-                $i = explode("\n", trim($match[1]));
-                $a = explode(' ', $i[0]);
-                $icms[0]['IE'] = trim($this->numero($a[1]));
+        if (isset($icms[0]['IE'])) {
+            if (empty($icms[0]['IE'])) {
+                preg_match('~numero([^{]*)~i', $str, $match);
+                if (!empty($match)) {
+                    $i = explode("\n", trim($match[1]));
+                    $a = explode(' ', $i[0]);
+                    $icms[0]['IE'] = trim($this->numero($a[1]));
+                }
             }
         }
 
-        if (strlen($icms[0]['VLR_RECEITA'] > 11)) {
-            preg_match('~valor([^{]*)~i', $str, $match);
-            if (!empty($match)) {
-                $i = explode(" ", trim($match[1]));
-                $a = explode("\n", trim($i[0]));
-                $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
-                $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+        if (isset($icms[0]['VLR_RECEITA'])) {
+            if (strlen($icms[0]['VLR_RECEITA'] > 11)) {
+                preg_match('~valor([^{]*)~i', $str, $match);
+                if (!empty($match)) {
+                    $i = explode(" ", trim($match[1]));
+                    $a = explode("\n", trim($i[0]));
+                    $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+                    $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+                }
             }
         }
-
+        
         preg_match('~mes ano de referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode("\n", trim($match[1]));
@@ -2249,24 +2254,26 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[21])));
         }
 
-        if (strlen($icms[0]['REFERENCIA']) != 7) {
-            preg_match('~validade([^{]*)~i', $str, $match);
-            if (!empty($match)) {
-                $i = explode(' ', trim($match[1]));
-                $valorData = substr($i[0], 0,12);
-                $data_vencimento = str_replace('/', '-', $valorData);
-                $icms[0]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-                $icms[1]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-                $referencia = date('m/Y', strtotime($data_vencimento));
-                $k = explode('/', $referencia);
-                $k[0] = $k[0]-1;
-                if ($k[0] == 0) {
-                    $k[1] = $k[1] - 1;
+        if (isset($icms[0]['REFERENCIA'])) {
+            if (strlen($icms[0]['REFERENCIA']) != 7) {
+                preg_match('~validade([^{]*)~i', $str, $match);
+                if (!empty($match)) {
+                    $i = explode(' ', trim($match[1]));
+                    $valorData = substr($i[0], 0,12);
+                    $data_vencimento = str_replace('/', '-', $valorData);
+                    $icms[0]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                    $icms[1]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                    $referencia = date('m/Y', strtotime($data_vencimento));
+                    $k = explode('/', $referencia);
+                    $k[0] = $k[0]-1;
+                    if ($k[0] == 0) {
+                        $k[1] = $k[1] - 1;
+                    }
+                    if (strlen($k[0]) == 1) {
+                        $k[0] = '0'.$k[0];
+                    }
+                    $icms[0]['REFERENCIA'] = $k[0].'/'.$k[1];
                 }
-                if (strlen($k[0]) == 1) {
-                    $k[0] = '0'.$k[0];
-                }
-                $icms[0]['REFERENCIA'] = $k[0].'/'.$k[1];
             }
         }
     

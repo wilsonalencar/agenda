@@ -3945,53 +3945,53 @@ juros de mora
                 $estemp_id = $arrayEstempId[0]->id;
             }
 
-            if (!$this->validatePasta($AtividadeID, $CodigoEstabelecimento, $NomeTributo, $PeriodoApuracao, $UF)) {
-                $this->createCriticaEntrega($empresaraizid, $estemp_id, 8, $fileexploded, 'Nome do arquivo invalido', 'N');
-                continue;
-            }
+            // if (!$this->validatePasta($AtividadeID, $CodigoEstabelecimento, $NomeTributo, $PeriodoApuracao, $UF)) {
+            //     $this->createCriticaEntrega($empresaraizid, $estemp_id, 8, $fileexploded, 'Nome do arquivo invalido', 'N');
+            //     continue;
+            // }
             
-            $NomeTributo = $this->LoadNomeTributo($NomeTributo);
-            if (!$this->checkTributo($NomeTributo)) {
-                $this->createCriticaEntrega($empresaraizid, $estemp_id, 8, $fileexploded, 'Tributo não existente', 'N');
-                continue;
-            }
+            // $NomeTributo = $this->LoadNomeTributo($NomeTributo);
+            // if (!$this->checkTributo($NomeTributo)) {
+            //     $this->createCriticaEntrega($empresaraizid, $estemp_id, 8, $fileexploded, 'Tributo não existente', 'N');
+            //     continue;
+            // }
 
-            $IdTributo = $this->loadTributo($NomeTributo);
-            $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
-            if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
-                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Código de atividade não existe', 'N');
-                continue;
-            }
+            // $IdTributo = $this->loadTributo($NomeTributo);
+            // $validateAtividade = DB::select("Select COUNT(1) as countAtividade FROM atividades where id = ".$AtividadeID); 
+            // if (empty($AtividadeID) || !$validateAtividade[0]->countAtividade) {
+            //     $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Código de atividade não existe', 'N');
+            //     continue;
+            // }
             
-            if (!$this->checkTribAtividade($AtividadeID, $IdTributo)) {
-                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Tributo divergente do tributo da atividade', 'N');
-                continue;
-            }
+            // if (!$this->checkTribAtividade($AtividadeID, $IdTributo)) {
+            //     $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Tributo divergente do tributo da atividade', 'N');
+            //     continue;
+            // }
 
-            $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
-            if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
-                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
-                continue;
-            }
+            // $validateCodigo = DB::select("Select COUNT(1) as countCodigo FROM atividades where id = ".$AtividadeID. " AND estemp_id = ".$estemp_id);
+            // if (!$estemp_id || !$validateCodigo[0]->countCodigo) {
+            //     $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Filial divergente com a filial da atividade', 'N');
+            //     continue;
+            // }
 
-            if (strlen($PeriodoApuracao) == 10) {
-                $PeriodoApuracao = substr($PeriodoApuracao, 0, -4);
-            }
-            $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = ".$PeriodoApuracao."");
-            if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
-                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período de apuração diferente do período da atividade', 'N');
-                continue;
-            }
+            // if (strlen($PeriodoApuracao) == 10) {
+            //     $PeriodoApuracao = substr($PeriodoApuracao, 0, -4);
+            // }
+            // $validatePeriodoApuracao = DB::select("Select COUNT(1) as countPeriodoApuracao FROM atividades where id = ".$AtividadeID. " AND periodo_apuracao = ".$PeriodoApuracao."");
+            // if (empty($PeriodoApuracao) || !$validatePeriodoApuracao[0]->countPeriodoApuracao) {
+            //     $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período de apuração diferente do período da atividade', 'N');
+            //     continue;
+            // }
 
-            if (count($arrayExplode) >= 4) {
-                $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
-                if (empty($UF) || !$validateUF[0]->countUF) {
-                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
-                    continue;
-                }
-            }
-
+            // if (count($arrayExplode) >= 4) {
+            //     $validateUF = DB::select("select count(1) as countUF FROM municipios where codigo = (select cod_municipio from estabelecimentos where id = ".$estemp_id.") AND uf = '".$UF."'");
+            //     if (empty($UF) || !$validateUF[0]->countUF) {
+            //         $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'UF divergente da UF da filial da atividade', 'N');
+            //         continue;
+            //     }
+            // }
             $return = $this->validateGeral($file, $AtividadeID);
+            echo $return;exit;
             if (!is_numeric($return)) {
                 $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Está faltando o arquivo com extensão '.$return, 'N');
                 continue;
@@ -4236,19 +4236,17 @@ juros de mora
 
     private function validateGeral($file, $id, $checkTXT = false, $checkPDF = false)
     {
+        echo $id;exit;
         $validations = array();
+        $atividade = Atividade::findOrFail($id);
+        $loadExtensoes = EntregaExtensao::Where('tributo_id', $atividade->regra->tributo->id)->get()->toarray();
+       
+        if (!empty($loadExtensoes)) {
+            foreach ($loadExtensoes as $x => $k) {
+                $validations[strtolower($k['extensao'])] = false;
+            }    
+        }
         if (is_dir($file)) {
-           
-            $validations = array();
-            $atividade = Atividade::findOrFail($id);
-            $loadExtensoes = EntregaExtensao::Where('tributo_id', $atividade->regra->tributo->id)->get()->toarray();
-           
-            if (!empty($loadExtensoes)) {
-                foreach ($loadExtensoes as $x => $k) {
-                    $validations[strtolower($k['extensao'])] = false;
-                }    
-            }
-
             //inicia validação de pasta
             $file_extensions = array();                 
             $validation = scandir($file);
@@ -4281,6 +4279,9 @@ juros de mora
                 }
             }
         }
+
+        echo "<prE>";
+        print_r($file);exit;
 
         if ($checkPDF || $checkTXT) {
             return false;

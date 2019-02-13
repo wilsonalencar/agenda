@@ -62,9 +62,20 @@ class MailsController extends Controller
     private function uploadMails($registros)
     {
         foreach ($registros as $key => $register) {
-            $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$register->Tributo_id." and Emp_id = ".$register->Empresa_id.")";
+            
+            $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$register->Tributo_id. " and B.Emp_id = " .$register->Empresa_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$register->Estemp_id. " AND B.Regra_geral = 'N') limit 1";
 
-            $emailsAnalista = DB::select($query);
+            $retornodaquery = DB::select($query);
+
+            $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = " .$register->Tributo_id. " and B.Emp_id = " .$register->Empresa_id. " AND B.Regra_geral = 'S') limit 1";
+            
+            $queryGeral = DB::select($sql);
+            
+            $emailsAnalista = $retornodaquery;
+            if (empty($retornodaquery)) {
+                $emailsAnalista = $queryGeral;   
+            }
+
 
             $codigoEstabelecimento = '';
             if ($register->Estemp_id > 0) {
@@ -108,8 +119,19 @@ class MailsController extends Controller
     private function leitorMails($registros)
     {
         foreach ($registros as $x => $register) {
-            $query = "select id FROM users where id IN (select id_usuario_analista FROM atividadeanalista where Tributo_id = ".$register->Tributo_id." and Emp_id = ".$register->Empresa_id.")";
-            $emailsAnalista = DB::select($query);
+            
+            $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$register->Tributo_id. " and B.Emp_id = " .$register->Empresa_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$register->Estemp_id. " AND B.Regra_geral = 'N') limit 1";
+
+            $retornodaquery = DB::select($query);
+
+            $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = " .$register->Tributo_id. " and B.Emp_id = " .$register->Empresa_id. " AND B.Regra_geral = 'S') limit 1";
+            
+            $queryGeral = DB::select($sql);
+            
+            $emailsAnalista = $retornodaquery;
+            if (empty($retornodaquery)) {
+                $emailsAnalista = $queryGeral;   
+            }
 
             $codigoEstabelecimento = '';
             if ($register->Estemp_id > 0) {

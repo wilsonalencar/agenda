@@ -987,6 +987,9 @@ class EntregaService {
                         $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
                         $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
 
+                        if (empty($retval_array[0])) {
+                            continue;
+                        }
 
                         $data_limite = $retval_array[0]['data']->toDateTimeString();
                         $alerta = intval($regra->tributo->alerta);
@@ -1384,6 +1387,9 @@ class EntregaService {
                         $param = array('cnpj' => $ae->cnpj, 'IE' => $ae->insc_estadual);
                         $retval_array = $this->calculaProximaDataRegrasEspeciais($regra->regra_entrega, $param, $periodo_apuracao, $offset, $adiant_fds);
 
+                        if (empty($retval_array[0])) {
+                            continue;
+                        }
 
                         $data_limite = $retval_array[0]['data']->toDateTimeString();
                         $alerta = intval($regra->tributo->alerta);

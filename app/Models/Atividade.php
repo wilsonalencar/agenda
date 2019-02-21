@@ -26,6 +26,8 @@ class Atividade extends Model
         'estemp_id',
         'estemp_type',
         'retificacao_id',
+        'data_aprovacao',
+        'usuario_aprovador',
         'vlr_recibo_1',
         'vlr_recibo_2',
         'vlr_recibo_3',

@@ -3865,6 +3865,7 @@ juros de mora
             }
         }
 
+        CriticasEntrega::NoDuplicity();
         foreach ($data as $X => $FILENAME) {
             foreach ($FILENAME as $L => $pastas) {
                 foreach ($pastas as $key => $arquivos) {
@@ -4291,14 +4292,14 @@ juros de mora
             if (empty($retornodaquery)) {
                 $idanalistas = $queryGeral;   
             }
-
+            $fill['usuario_aprovador'] = '';
             if (!empty($idanalistas)) {
                 foreach ($idanalistas as $k => $analista) {
                     $fill['usuario_aprovador'] = $analista->id;
                 }
             }
 
-            if (!isset($fill['usuario_aprovador']) || empty($fill['usuario_aprovador'])) {
+            if (empty($fill['usuario_aprovador'])) {
                 $fill['usuario_aprovador'] = 112;
             }
 
@@ -4733,16 +4734,27 @@ juros de mora
             $idanalistas = $queryGeral;   
         }
 
+        $user_aprovador = '';
         if (!empty($idanalistas)) {
             foreach ($idanalistas as $k => $analista) {
                 $atividade->usuario_entregador = $analista->id;
+                $user_aprovador = $analista->id;
             }
         }
-        
+
+        if (empty($user_aprovador)) {
+            $user_aprovador = 112;
+        }
+
         $atividade->arquivo_entrega = $data['image'];
+
         if ($atividade->regra->tributo->id != 1) {
             $atividade->data_entrega = date("Y-m-d H:i:s");
             $atividade->status = 2;
+        } else {
+            $atividade->usuario_aprovador = $user_aprovador;
+            $atividade->data_aprovacao = date('Y-m-d H:i:s');
+            $atividade->status = 3;
         }
         $atividade->save();
     }    

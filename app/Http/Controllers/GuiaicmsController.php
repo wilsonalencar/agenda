@@ -4011,50 +4011,71 @@ juros de mora
                 }
             }
             
+            if (!$this->checkSubPath($file)) {
+                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Erro existe subpasta, eliminar a subpasta para a entrega', 'N');
+                continue;
+            }
+
             $return = $this->validateGeral($file, $AtividadeID);
             if (!is_numeric($return)) {
                 $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Está faltando o arquivo com extensão '.$return, 'N');
                 continue;
             }
-            $existsTXT = $this->validateGeral($file, $AtividadeID, true);
-            if ($existsTXT) {
-                $checkTXTvalue = $this->checkTXTvalue($file, $AtividadeID);
-                if (!is_numeric($checkTXTvalue)) {
-                    $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do TXT '.$checkTXTvalue.' não confere com CNPJ da filial da atividade.', 'N');
-                    continue;
-                }
 
-                $checkTXTvalue_2 = $this->checkTXTvalue($file, $AtividadeID, true);
-                if (!is_numeric($checkTXTvalue_2)) {
-                   $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'PERÍODO do TXT '.$checkTXTvalue_2.' não confere com Período da atividade.', 'N');
-                   continue;
-                }
-            
-                $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
-                if ($existsPDF) {
-                    $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
-                    if (!is_numeric($checkPDFvalue)) {
-                        $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Aprovação: Existem mais de um arquivo PDF, não é possível identificar qual dos arquivos é o recibo.', 'N');
+            if (!$this->validateGeral($file, $AtividadeID, false, false, true)) {
+                $existsTXT = $this->validateGeral($file, $AtividadeID, true);
+                if ($existsTXT) {
+                    $checkTXTvalue_read = $this->checkTXTvalue($file, $AtividadeID);
+                    if ($checkTXTvalue_read == 'error-read') {
+                        $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Contém arquivos TXT ou PDF que não atende o lay-out de leitura.', 'N');
                         continue;
                     }
 
-                    $checkPDFvalue_2 = $this->checkPDFvalue($file, $AtividadeID, true);
-                    if (!is_numeric($checkPDFvalue_2)) {
-                        $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do Recibo não confere com CNPJ da filial da atividade.', 'N');
+                    $checkTXTvalue = $this->checkTXTvalue($file, $AtividadeID);
+                    if (!is_numeric($checkTXTvalue)) {
+                        $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do TXT '.$checkTXTvalue.' não confere com CNPJ da filial da atividade.', 'N');
                         continue;
                     }
 
-                    $checkPDFvalue_3 = $this->checkPDFvalue($file, $AtividadeID, false, true);
-                    if (!is_numeric($checkPDFvalue_3)) {
-                        $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período do Recibo não confere com o período da atividade.', 'N');
-                        continue;
+                    $checkTXTvalue_2 = $this->checkTXTvalue($file, $AtividadeID, true);
+                    if (!is_numeric($checkTXTvalue_2)) {
+                       $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'PERÍODO do TXT '.$checkTXTvalue_2.' não confere com Período da atividade.', 'N');
+                       continue;
                     }
 
-                    if ($IdTributo == 1) {
-                        $this->checkPDFvalue($file, $AtividadeID, false, false, true);
-                    }
-                } 
-            }     
+                    $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
+                    if ($existsPDF) {
+
+                        $checkPDFvalue_read = $this->checkPDFvalue($file, $AtividadeID);
+                        if ($checkPDFvalue_read == 'error-read') {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível ler o arquivo '.$fileexploded, 'N');
+                            continue;
+                        }
+
+                        $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
+                        if (!is_numeric($checkPDFvalue)) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Aprovação: Existem mais de um arquivo PDF, não é possível identificar qual dos arquivos é o recibo.', 'N');
+                            continue;
+                        }
+
+                        $checkPDFvalue_2 = $this->checkPDFvalue($file, $AtividadeID, true);
+                        if (!is_numeric($checkPDFvalue_2)) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do Recibo não confere com CNPJ da filial da atividade.', 'N');
+                            continue;
+                        }
+
+                        $checkPDFvalue_3 = $this->checkPDFvalue($file, $AtividadeID, false, true);
+                        if (!is_numeric($checkPDFvalue_3)) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período do Recibo não confere com o período da atividade.', 'N');
+                            continue;
+                        }
+
+                        if ($IdTributo == 1) {
+                            $this->checkPDFvalue($file, $AtividadeID, false, false, true);
+                        }
+                    } 
+                }     
+            }
             
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
@@ -4068,6 +4089,25 @@ juros de mora
             }
         }
     }   
+
+    private function checkSubPath($file)
+    {
+        if (!is_dir($file)) {
+            return true;
+        }
+        
+        $scandir = scandir($file);
+        foreach ($scandir as $x => $filename) {
+            if (strlen($filename) > 2) {
+                if (!is_dir($file.'/'.$filename)) {
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     private function checkTXTvalue($file, $id, $periodo = false)
     {
@@ -4102,28 +4142,79 @@ juros de mora
                 }
             }
         }
-
+        
         $atividade = Atividade::findOrFail($id);
         if (!empty($formated)) {
             foreach ($formated as $single_key => $single_formated) {
-
                 $handle = fopen($single_formated['path'], "r");
-                $contents = fread($handle, filesize($single_formated['path']));
-                
-                $exploded_rows = explode("\n", $contents);
-                $exploded_column = explode("|", $exploded_rows[0]);
-                if ($atividade->regra->tributo->id == 1) {
-                    if ($periodo) {
-                        if (substr($exploded_column[5], -6) != $this->numero($atividade->periodo_apuracao)) {
-                            return $single_formated['file'];
-                        }
-                    } else {
-                        if ($exploded_column[7] != $atividade->estemp->cnpj) {
-                            return $single_formated['file'];
-                        }
-                    }
+                if (filesize($single_formated['path']) == 0) {
+                    return 'error-read';    
                 }
 
+                $contents = fread($handle, filesize($single_formated['path']));
+                if (empty($contents)) {
+                    return 'error-read';    
+                }
+
+                $exploded_rows = explode("\n", utf8_encode($contents));
+                if (count($exploded_rows) < 10) {
+                    return 'error-read';
+                }
+
+                //debug1
+                //echo "<Pre>";
+                //print_r($exploded_rows);exit;
+
+                if ($atividade->regra->tributo->id == 1) {
+
+                    //Modelo 1 - TXT
+                    $exploded_column = explode("|", $exploded_rows[0]);
+                    if (count($exploded_column) > 1) {
+                        if ($periodo) {
+                            if (substr($exploded_column[5], -6) != $this->numero($atividade->periodo_apuracao)) {
+                                return $single_formated['file'];
+                            }
+                        } else {
+                            if ($exploded_column[7] != $atividade->estemp->cnpj) {
+                                return $single_formated['file'];
+                            }
+                        }
+                    } 
+
+                    //Modelo 2 - TXT
+                    if (isset($exploded_rows[12]) && substr($exploded_rows[12], 0,8) == 'CNPJ/CPF') {
+                        $exp_1 = explode(' ', $exploded_rows[12]);
+                        $cnpj_v = $this->numero($exp_1[1]); 
+                        $exp_2 = explode(' ', $exploded_rows[18]);
+                        $periodo_v = substr($exp_2[1], 3); 
+                        if ($periodo) {
+                            if ($this->numero($periodo_v) != $this->numero($atividade->periodo_apuracao)) {
+                                return $single_formated['file'];
+                            }
+                        } else {
+                            if ($cnpj_v != $atividade->estemp->cnpj) {
+                                return $single_formated['file'];
+                            }
+                        }
+                    }
+
+                    //Modelo 3 - TXT
+                    if (isset($exploded_rows[10]) && substr($exploded_rows[10], 0,8) == 'CNPJ/CPF') {
+                        $exp_1 = explode(' ', $exploded_rows[10]);
+                        $cnpj_v = $this->numero($exp_1[1]); 
+                        $exp_2 = explode(' ', $exploded_rows[16]);
+                        $periodo_v = substr($exp_2[1], 3);
+                        if ($periodo) {
+                            if ($this->numero($periodo_v) != $this->numero($atividade->periodo_apuracao)) {
+                                return $single_formated['file'];
+                            }
+                        } else {
+                            if ($cnpj_v != $atividade->estemp->cnpj) {
+                                return $single_formated['file'];
+                            }
+                        }
+                    }
+                }   
                 fclose($handle);
             }
         }
@@ -4151,6 +4242,9 @@ juros de mora
 
             $atividade = Atividade::findOrFail($id);
             $pdf = $this->readRecibo($formated[0]['path'], $save, $id);
+            if (!$pdf) {
+                return 'error-read';
+            }
 
             if ($atividade->regra->tributo->id == 1) {
                 if ($periodo) {
@@ -4188,6 +4282,9 @@ juros de mora
 
             $atividade = Atividade::findOrFail($id);
             $pdf = $this->readRecibo($formated[0]['path'], $save, $id);
+            if (!$pdf) {
+                return 'error-read';
+            }
 
             if ($atividade->regra->tributo->id == 1) {
                 if ($periodo) {
@@ -4242,6 +4339,7 @@ juros de mora
         $dados = array();
         $fill = array();
 
+        $atividade = Atividade::FindOrFail($idAtividade);
 
         preg_match('~cnpj/cpf:([^{]*)~i', $str, $match);        
         if (!empty($match)) {
@@ -4256,28 +4354,132 @@ juros de mora
             $dados['periodo_apuracao'] = substr($this->numero($a[0]), -6);
         }
 
+        if (empty($dados)) {
+            return false;
+        }
+        
+        //Debug2 de recibo
+        //echo "<PrE>";
+        //print_r($dados);exit;
+
         preg_match('~periodo de apuracao valor total dos debitos por saidas e prestacoes com debito do imposto valor total dos creditos por entradas e aquisicoes com credito do imposto valor total do icms a recolher valor total do saldo credor a transportar para o periodo seguinte valor recolhidos ou a recolher, extra-apuracao
 ([^{]*)~i', $str, $match);        
         if (!empty($match)) {
             $i = explode("\n", trim($match[1]));
+            //Modelo PDF 1 
             $a = explode(" ", trim($i[0]));
-            $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-            $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
-            $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
-            $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
-            $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[12]));
+            if (count($a) > 11 && !empty($a[12])) {
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[12]));
+
+                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
+                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
+                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[12]));
+            } 
+
+            //modelo PDF 2
+            $p = explode(" ", $i[1]);
+            if (count($a) == 7) {
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[4]));
+
+                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
+                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
+                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[4]));
+            }
+
+            //Modelo PDF 3
+            if (count($a) > 11 && !isset($a[12])) {
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
+
+                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
+                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
+                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
+            } 
+
+            //Modelo PDF 4
+            $q = explode(" ", $i[2]);
+            if (count($a) == 5 && count($q) > 1) {
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $p[1]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[3]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $q[1]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $q[2]));
+
+                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $p[1]));
+                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[3]));
+                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $q[1]));
+                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $q[2]));
+            }
+
+            //Modelo PDF 5
+            if (count($a) > 11 && !empty($a[11]) && !isset($a[12])) {
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
+
+                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
+                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
+                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
+            }
             
-            $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-            $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
-            $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
-            $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
-            $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[12]));
+            //Modelo PDF 6
+            if (isset($fill['vlr_recibo_5']) && $fill['vlr_recibo_5'] == 'r$') {
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[5]));
+
+                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
+                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
+                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[5]));
+            }
+
+            if (empty($fill)) {
+                return false;
+            }
+
+            foreach ($fill as $x => $index) {
+                $valid = $this->numero($index);
+                if (!is_numeric($valid)) {
+                    return false;    
+                }
+            }
+            
             $fill['data_aprovacao'] = date('Y-m-d H:i:s');
             $fill['status'] = 3;
+            //debug3
+            //echo "<PrE>";
+            //print_r($fill);exit;
+        } else {
+            return false;
         }
 
         if ($save) {
-            $atividade = Atividade::FindOrFail($idAtividade);
 
             $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$atividade->regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$atividade->estemp->id. " AND B.Regra_geral = 'N') limit 1";
 
@@ -4311,7 +4513,7 @@ juros de mora
         return $dados;
     }
 
-    private function validateGeral($file, $id, $checkTXT = false, $checkPDF = false)
+    private function validateGeral($file, $id, $checkTXT = false, $checkPDF = false, $checkDOC = false)
     {
         $validations = array();
         $atividade = Atividade::findOrFail($id);
@@ -4345,6 +4547,11 @@ juros de mora
                     }
                     if ($checkPDF) {
                         if ($valid == 'pdf') {
+                            return true;
+                        }
+                    }
+                    if ($checkDOC) {
+                        if (substr($valid, 0,3) == 'doc') {
                             return true;
                         }
                     }
@@ -4382,6 +4589,11 @@ juros de mora
                             return true;
                         }
                     }
+                    if ($checkDOC) {
+                        if (substr($valid, 0,3) == 'doc') {
+                            return true;
+                        }
+                    }
 
                     if (isset($validations[$valid]) && empty($validations[$valid])) {
                         $validations[$valid] = true;
@@ -4390,7 +4602,7 @@ juros de mora
             }
         }
 
-        if ($checkPDF || $checkTXT) {
+        if ($checkPDF || $checkTXT || $checkDOC) {
             return false;
         }
 

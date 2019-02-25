@@ -28,6 +28,7 @@ class Atividade extends Model
         'retificacao_id',
         'data_aprovacao',
         'usuario_aprovador',
+        'usuario_entregador',
         'vlr_recibo_1',
         'vlr_recibo_2',
         'vlr_recibo_3',

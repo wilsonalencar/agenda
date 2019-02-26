@@ -233,6 +233,7 @@ class GuiaicmsController extends Controller
                 $input['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $input['JUROS_MORA']));
                 $input['TAXA'] = str_replace(',', '.', str_replace('.', '', $input['TAXA']));
                 $input['ACRESC_FINANC'] = str_replace(',', '.', str_replace('.', '', $input['ACRESC_FINANC']));
+                $input['CODBARRAS'] = trim($this->numero($input['CODBARRAS']));
 
                 $guiaicms->fill($input);
                 $guiaicms->save();

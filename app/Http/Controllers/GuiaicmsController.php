@@ -1467,6 +1467,16 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             }
         }
 
+        if (empty($icms['CODBARRAS'])) {
+            preg_match('~29 - matricula([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $icms['VLR_TOTAL'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[1])));
+                $codbarras = str_replace('-', '', str_replace(' ', '', $i[3]));
+                $icms['CODBARRAS'] = trim($codbarras);
+            }
+        }
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

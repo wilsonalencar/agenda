@@ -468,7 +468,7 @@ class GuiaicmsController extends Controller
 
             if (!empty($icmsarray)) {
                 foreach ($icmsarray as $key => $icms) {
-                    if (empty($icms) || count($icms) <= 7) {
+                    if (empty($icms) || count($icms) < 6) {
                         $this->createCritica(1, 0, 8, $value['arquivo'], 'Não foi possível ler o arquivo', 'N');
                         continue;
                     }
@@ -1422,6 +1422,13 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['COD_RECEITA'] = $this->numero($i[2]);
         }
 
+        preg_match('~05 - inscricao estadual/cgc/cpf([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode("\n", trim($i[0]));
+            $icms['IE'] = $this->numero($a[0]);
+        }
+
         preg_match('~06 - referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
@@ -1452,8 +1459,7 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[4]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
-        if (empty($icms['VLR_TOTAL'])) {
+        if ($icms['MULTA_MORA_INFRA'] > $icms['VLR_RECEITA']) {
             preg_match('~29 - matricula([^{]*)~i', $str, $match);
             if (!empty($match)) {
                 $i = explode("\n", trim($match[1]));
@@ -1476,6 +1482,11 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
                 $icms['CODBARRAS'] = trim($codbarras);
             }
         }
+
+        
+        if ($icms['VLR_TOTAL'] == $icms['MULTA_MORA_INFRA']) {
+            $icms['MULTA_MORA_INFRA'] = '0.00';            
+        }        
 
         fclose($handle);
         $icmsarray = array();

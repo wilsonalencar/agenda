@@ -479,8 +479,6 @@ class EntregaService {
                             'limite' => $data_limite,
                             'tipo_geracao' => 'A',
                             'regra_id' => $regra->id,
-                            'Data_cronograma' => date('Y-m-d H:i:s'),
-                            'data_atividade' => date('Y-m-d H:i:s'),
                             'Resp_cronograma' => $id_user
                         );
                     }
@@ -535,14 +533,25 @@ class EntregaService {
                 } 
 
                 $val['Resp_cronograma'] =$id_user;
-                $val['Data_cronograma'] = date('Y-m-d H:i:s');
-                $val['data_atividade'] = date('Y-m-d H:i:s');
+                $data = date('Y-m-d H:i:s');
+                $estab = Estabelecimento::findorFail($val['estemp_id']);
+                while ($this->checkFeriado($data, $estab->municipio->uf, true, $val['periodo_apuracao'], $val['id_usuario_analista'])) {
+                    $data = $this->checkFeriado($data,$estab->municipio->uf, false, $val['periodo_apuracao'], $val['id_usuario_analista']);
+                }
+
+                $data_atividade = $this->getPrevisao($regra->tributo->id, $val['periodo_apuracao'], $estab->municipio->uf, $val['emp_id']);
+                while ($this->checkFeriado($data_atividade, $estab->municipio->uf, true, $val['periodo_apuracao'], $val['id_usuario_analista'])) {
+                    $data_atividade = $this->checkFeriado($data,$estab->municipio->uf, false, $val['periodo_apuracao'], $val['id_usuario_analista']);
+                }
+                
+                $val['Data_cronograma'] = $data;
+                $val['data_atividade'] = $data_atividade;
                 
                 if ($val['estemp_id'] > 0) {
                     $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
                         if (!empty($estabelecimento_tempo)) {
                             $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                            $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                            $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['Id_usuario_analista']);
                     }
                 }
 
@@ -567,6 +576,18 @@ class EntregaService {
 
         return $generate;
 
+    }
+
+    private function getPrevisao($tributo, $periodo_apuracao, $uf, $emp_id)
+    {
+        $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$periodo_apuracao.'" AND A.Tributo_id = '.$tributo.' AND A.uf = "'.$uf.'" AND A.empresa_id = "'.$emp_id.'"');
+
+        $data = $data_carga[0]->Data_prev_carga;
+        if (!empty($data_carga)) {
+            $data = date('Y-m-d', strtotime("+1 days",strtotime($data)));
+        }
+
+        return $data;
     }
 
     private function loadAnalista($val)
@@ -613,10 +634,10 @@ class EntregaService {
 
                     $var['Qtde_estab'] = count($this->qtd_estabs[$tributo][$Municipio->uf]);
 
-                    $tempo = $this->getTempo($tributo, $Municipio->uf);
+                    $tempo = $this->getTempo($tributo, $Municipio->uf, $atividade['emp_id'], $atividade['estemp_id'], $atividade['Id_usuario_analista']);
                     $var['Tempo_total'] = $tempo * $var['Qtde_estab'];
 
-                    $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$atividade['periodo_apuracao'].'" AND A.Tributo_id = '.$var['Tributo_id']);
+                    $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$atividade['periodo_apuracao'].'" AND A.Tributo_id = '.$var['Tributo_id'].' AND A.uf = "'.$var['uf'].'" AND A.empresa_id = "'.$atividade['emp_id'].'"');
 
                     if (!empty($data_carga) && $generate) {
                         
@@ -687,16 +708,21 @@ class EntregaService {
         return $dateInterval->days;
     }
 
-    public function getTempo($tributo, $uf)
+    public function getTempo($tributo, $uf, $emp_id, $estemp_id, $id_usuario_analista)
     {
         $tempo = 0;
         $tributo_tempo = DB::select('SELECT A.Qtd_minutos FROM tempoatividade A where A.Tributo_id ='.$tributo.' AND A.UF ="'.$uf.'"');
-        
         if (!empty($tributo_tempo)) {
             $tempo = $tributo_tempo[0]->Qtd_minutos;
         }
+        
+        $excessao = DB::select('SELECT A.Qtd_minutos FROM Tempoexcecao A where A.Tributo_id ='.$tributo.' AND A.Empresa_id ="'.$emp_id.'" AND A.Estab_id = "'.$estemp_id.'" AND A.Id_usuarioanalista = "'.$id_usuario_analista.'"');
 
-    return $tempo;
+        if (!empty($excessao)) {
+            $tempo = $excessao[0]->Qtd_minutos;
+        }
+
+        return $tempo;
     }
 
 
@@ -1261,7 +1287,6 @@ class EntregaService {
     }
 
     public function generateMonthlyCronActivities($periodo_apuracao,$cnpj_empresa) {
-
         // Activate auto activity generation
         $generate = true;
         //
@@ -1405,8 +1430,6 @@ class EntregaService {
                             'limite' => $data_limite,
                             'tipo_geracao' => 'A',
                             'regra_id' => $regra->id,
-                            'Data_cronograma' => date('Y-m-d H:i:s'),
-                            'data_atividade' => date('Y-m-d H:i:s'),
                             'Resp_cronograma' => $id_user
                         );
 
@@ -1423,6 +1446,20 @@ class EntregaService {
                             $val['estemp_type'] = 'estab';
                         }
 
+                        $data = date('Y-m-d H:i:s');
+                        $estab = Estabelecimento::findorFail($val['estemp_id']);
+                        while ($this->checkFeriado($data, $estab->municipio->uf, true, $val['periodo_apuracao'], $val['id_usuario_analista'])) {
+                            $data = $this->checkFeriado($data,$estab->municipio->uf, false, $val['periodo_apuracao'], $val['id_usuario_analista']);
+                        }
+
+                        $data_atividade = $this->getPrevisao($regra->tributo->id, $val['periodo_apuracao'], $estab->municipio->uf, $val['emp_id']);
+                        while ($this->checkFeriado($data_atividade, $estab->municipio->uf, true, $val['periodo_apuracao'], $val['id_usuario_analista'])) {
+                            $data_atividade = $this->checkFeriado($data,$estab->municipio->uf, false, $val['periodo_apuracao'], $val['id_usuario_analista']);
+                        }
+                        
+                        $val['Data_cronograma'] = $data;
+                        $val['data_atividade'] = $data_atividade;
+
                         $analista = $this->loadAnalista($val);
 
                         if (!empty($analista)) {
@@ -1433,7 +1470,7 @@ class EntregaService {
                             $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
                             if (!empty($estabelecimento_tempo)) {
                                 $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                                $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                                $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['Id_usuario_analista']);
                             }
                         }
 
@@ -1517,14 +1554,27 @@ class EntregaService {
                             }
 
                             $val['Resp_cronograma'] = $id_user;
-                            $val['Data_cronograma'] = date('Y-m-d H:i:s');
-                            $val['data_atividade'] = date('Y-m-d H:i:s');
+
+                            $data = date('Y-m-d H:i:s');
+                            $estab = Estabelecimento::findorFail($val['estemp_id']);
+                            while ($this->checkFeriado($data, $estab->municipio->uf, true, $val['periodo_apuracao'], $val['id_usuario_analista'])) {
+                                $data = $this->checkFeriado($data,$estab->municipio->uf, false, $val['periodo_apuracao'], $val['id_usuario_analista']);
+                            }
+
+                            $data_atividade = $this->getPrevisao($regra->tributo->id, $val['periodo_apuracao'], $estab->municipio->uf, $val['emp_id']);
+                            while ($this->checkFeriado($data_atividade, $estab->municipio->uf, true, $val['periodo_apuracao'], $val['id_usuario_analista'])) {
+                                $data_atividade = $this->checkFeriado($data,$estab->municipio->uf, false, $val['periodo_apuracao'], $val['id_usuario_analista']);
+                            }
+                            
+                            $val['Data_cronograma'] = $data;
+                            $val['data_atividade'] = $data_atividade;
+
                             
                             if ($val['estemp_id'] > 0) {
                             $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
                                 if (!empty($estabelecimento_tempo)) {
                                     $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                                    $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf);
+                                    $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['Id_usuario_analista']);
                                 }
                             }
 
@@ -1562,6 +1612,61 @@ class EntregaService {
     return $generate;
     }
 
+    private function checkFeriado($data, $uf, $check = false, $periodo_apuracao, $id_usuario_analista)
+    {
+        $invalid = false;
+        $feriados = $this->getFeriadosNacionais();
+        if ($uf == 'SP') {
+            $busca_estaduais = FeriadoEstadual::where('uf', $uf)->get();
+        } else {
+            $busca_estaduais = FeriadoEstadual::where('uf', $uf)->orWhere('uf', 'SP')->get();
+        }
+
+        $return_date = substr($data, 0,10);
+
+        $check_date = date('d-m', strtotime($return_date));
+        foreach ($feriados as $name_fN => $data_nacional) {
+            if ($check_date == $data_nacional) {
+                $invalid = true;
+            }
+        }
+
+        if (!empty($busca_estaduais)) {
+            foreach ($busca_estaduais as $key => $feriados_estaduais) {
+                $a = explode(';', $feriados_estaduais->datas);
+                if (!empty($a)) {
+                    foreach ($a as $x => $k) {
+                        if ($k == $check_date) {
+                            $invalid = true; 
+                        }
+                    }
+                }
+            }
+        }
+
+        $a = Carbon::createFromFormat('Y-m-d', $return_date);
+        if ($a->isWeekEnd()) {
+            $invalid = true;
+        }
+
+        $periodo_apuracao = str_replace('/', '', $periodo_apuracao);
+        $p = DB::Select('SELECT A.ID FROM dataextra A INNER JOIN dataextraanalista B ON A.id = B.Dataextra_id WHERE A.data = "'.$return_date.'" AND B.Id_usuarioanalista = '.$id_usuario_analista.' AND A.periodo_apuracao ="'.$periodo_apuracao.'"');
+        
+        if (!empty($p)) {
+            $invalid = false;
+        }
+
+        if ($check) {
+            return $invalid;
+        }
+
+        if ($invalid) {
+            $return_date = date('Y-m-d', strtotime("+1 days",strtotime($return_date)));
+        }
+
+        return $return_date;
+    }
+
     private function setPriority($array)
     {
         $priority = array();
@@ -1594,9 +1699,15 @@ class EntregaService {
                     
                     $cronograma = CronogramaAtividade::where('id',$single_priority['id'])->first();
                     if (!empty($cronograma)) {
+
                         $time += $cronograma->tempo;
                         if ($time > 480) {
+
                             $data = date('Y-m-d', strtotime("+1 days",strtotime($data)));
+                            while ($this->checkFeriado($data, $cronograma->estemp->municipio->uf, true, $cronograma->periodo_apuracao, $cronograma->id_usuario_analista)) {
+                                $data = $this->checkFeriado($data, $cronograma->estemp->municipio->uf, false, $cronograma->periodo_apuracao, $cronograma->id_usuario_analista);
+                            }
+
                             $time -= 480;
                             $cronograma->data_atividade = $data;
                             $cronograma->save();
@@ -1616,7 +1727,7 @@ class EntregaService {
 
             $Regra = Regra::findorFail($one['regra_id']);
 
-            $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$one['periodo_apuracao'].'" AND A.Tributo_id = '.$Regra->tributo_id);
+            $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$one['periodo_apuracao'].'" AND A.Tributo_id = '.$Regra->tributo_id.' AND A.uf = "'.$one['uf'].'" AND A.empresa_id = "'.$one['emp_id'].'"');
         }
 
         if (!empty($data_carga)) {

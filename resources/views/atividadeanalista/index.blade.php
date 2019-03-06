@@ -17,23 +17,24 @@
         <thead>
             <tr>
                 <th>Empresa</th>
-                <th>Analista</th>
+                <th>Analista(s)</th>
                 <th>Tributo</th>
-                <th>Estabelecimento</th>
+                <th>Regra Geral</th>
+                <th>UF</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
         @if (!empty($table))
             @foreach ($table as $key => $value)  
-
+            <?php $identificador = $value['Emp_id'].'-'.$value['Tributo_id'].'-'.$value['Regra_geral'].'-'.$value['UF']; ?>
             <tr>
                <td><?php echo $value['razao_social']; ?></td>
                <td><?php echo $value['name']; ?></td>
                <td><?php echo $value['nome']; ?></td>
-               <td><?php echo $value['estabelecimento']; ?></td>
-               <td><a href="{{ route('atividadesanalista.editRLT', $value['id']) }}" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
-               </td>
+               <td><?php echo $value['Regra_geral'] == 'S' ? 'Sim' : 'Não' ; ?></td>
+               <td><?php echo $value['UF']; ?></td>
+               <td><a href="{{ route('atividadesanalista.editRLT', $identificador) }}" class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
             </tr> 
             @endforeach
         @endif 

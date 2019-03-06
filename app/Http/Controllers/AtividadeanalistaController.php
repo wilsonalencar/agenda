@@ -7,6 +7,7 @@ use App\Models\AtividadeAnalista;
 use App\Models\AtividadeAnalistaFilial;
 use App\Models\Tributo;
 use App\Models\Empresa;
+use App\Models\Estabelecimento;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Event;
@@ -38,25 +39,19 @@ class AtividadeanalistaController extends Controller
         $user = User::findOrFail(Auth::user()->id);
 
     	$query = 'SELECT 
-                        A.id,
-                        C.name,
+                        GROUP_CONCAT((C.name) SEPARATOR " - ") as name,
                         B.razao_social,
                         G.nome,
-                        GROUP_CONCAT((SELECT 
-                                    E.codigo
-                                FROM
-                                    estabelecimentos E
-                                WHERE
-                                    E.id = D.Id_estabelecimento)
-                            SEPARATOR " - ") as estabelecimento
+                        A.Regra_geral,
+                        A.UF,
+                        A.Emp_id,
+                        A.Tributo_id
                     FROM
                         atividadeanalista A
                             INNER JOIN
                         empresas B ON A.Emp_id = B.id
                             INNER JOIN
                         users C ON A.Id_usuario_analista = C.id
-                            LEFT JOIN
-                        atividadeanalistafilial D ON (D.Id_atividadeanalista = A.id)
                             INNER JOIN 
                         tributos G ON A.Tributo_id = G.id';
 
@@ -65,8 +60,7 @@ class AtividadeanalistaController extends Controller
                         B.id = '.$this->s_emp->id.'';
         }
 
-        $query .= ' GROUP BY C.name , B.razao_social , A.id, G.nome';
-
+        $query .= ' GROUP BY B.razao_social, G.nome';
         $table = DB::select($query);
 
         $table = json_decode(json_encode($table),true);
@@ -383,13 +377,9 @@ class AtividadeanalistaController extends Controller
     public function create()
     {
     	//carregando dados da tela
-        $ids = '4,6';
-        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
-        $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
+        $usuarios = User::selectRaw("name, id")->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
-
 
         return view('atividadeanalista.adicionar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios);
     }
@@ -404,69 +394,182 @@ class AtividadeanalistaController extends Controller
     {
         $situation = 'status';
         $message = 'Registro inserido com sucesso';
-        $ids = '4,6';
-        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
-        $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
+        $usuarios = User::selectRaw("name, id")->orderby('name', 'asc')->lists('name','id');
         $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
         $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
         $var = array();
         $input = $request->all();
-        if (!empty($input['Tributo_id'])) {
-            foreach ($input['Tributo_id'] as $key => $value) {
-                $var[$key]['Emp_id'] = $input['Emp_id'];
-                $var[$key]['Tributo_id'] = $value;
-                $var[$key]['Id_usuario_analista']= $input['Id_usuario_analista'];
-                $var[$key]['Regra_geral'] = $input['Regra_geral'];
-            }
-        }
+        
+        if (!empty($input)) {
 
-        if (is_array($var)) {
-            foreach ($var as $k => $v) {
-                if (!$this->validation($v)) {
-                    return redirect()->back()->with('alert', 'Já existe esta atividade para este analista.');
+            $estabelecimentos = array();
+            if (!empty($input['uf'])) {
+                $estabelecimentos = Estabelecimento::LoadByUf($input['uf'], $input['Emp_id']);
+            }
+
+            if (empty($estabelecimentos)) {
+                 return redirect()->back()->with('alert', 'Não existem estabelecimentos para essa UF + Empresa.');
+            }
+
+            if (empty($input['Id_usuario_analista'])) {
+                return redirect()->back()->with('alert', 'Ao menos um usuário deve ser selecionado.');
+            }
+
+            if (empty($input['Tributo_id'])) {
+                return redirect()->back()->with('alert', 'Ao menos um Tributo deve ser selecionado.');
+            }
+
+            if ($input['Regra_geral'] == 'S' && count($input['Id_usuario_analista']) > 1) {
+                return redirect()->back()->with('alert', 'Não é possível ter mais de um analista responsável por todos os estabelecimentos da empresa.');
+            }
+
+            if (!empty($input['Tributo_id'])) {
+                foreach ($input['Tributo_id'] as $key => $value) {
+                    $var[$key]['Emp_id'] = $input['Emp_id'];
+                    $var[$key]['Tributo_id'] = $value;
+                    $var[$key]['Regra_geral'] = $input['Regra_geral'];
+                    $var[$key]['uf'] = strtoupper($input['uf']);
+                    if ($input['Regra_geral'] == 'S') {
+                        $var[$key]['Id_usuario_analista'] = $input['Id_usuario_analista'][0];
+                    }
                 }
-                $create = AtividadeAnalista::create($v);
-                $dados = AtividadeAnalista::findOrFail($create->id);
             }
+
+            if ($input['Regra_geral'] == 'N') {
+                $final_array = array();
+                if (!empty($var) && !empty($input['Id_usuario_analista'])) {
+                    foreach ($input['Id_usuario_analista'] as $index => $id_user) {
+                        foreach ($var as $x => $k) {
+                            $var[$x]['Id_usuario_analista'] = $id_user;
+                        }
+
+                        $final_array[] = $var;
+                    }
+                }
+
+                if (count($final_array) > 1) {
+                    $qtd_analistas = count($final_array);
+                    $qtd_analistas_c = count($final_array);
+                    $qtd_estabs = count($estabelecimentos);
+                    $to_own = floor($qtd_estabs/$qtd_analistas);
+                    $arr_analistas = array();
+                    while ($qtd_analistas > 0) {
+                        $arr_analistas[] = $to_own;
+                        $qtd_analistas--;
+                    }
+
+                    while (array_sum($arr_analistas) < $qtd_estabs) {
+                        $arr_analistas[0] = $arr_analistas[0]+1;
+                    }
+                   
+                    foreach ($arr_analistas as $x => $analista_single) {
+                        $estab_for_analyst[$x] = array();
+                        $a = 0;
+                        foreach ($estabelecimentos as $indexing => $estabelecimento) {
+                            
+                            $estab_for_analyst[$x][$indexing]['Id_estabelecimento'] = $estabelecimento['id'];
+                            unset($estabelecimentos[$indexing]);
+                            $a++;
+
+                            if ($a == $analista_single) {
+                                break;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            if (empty($final_array)) {
+                $final_array[] = $var;
+            }
+
+            foreach ($final_array as $x => $var) {
+                foreach ($var as $k => $v) {
+
+                    if (count($final_array) == 1) {
+                        $v['Regra_geral'] = 'S';
+                    }
+
+                    if (!$this->validation($v)) {
+                        return redirect()->back()->with('alert', 'Já existem analista(s) cadastrado(s) para essa atividade.');
+                    }  
+
+                    $create = AtividadeAnalista::create($v);
+                    if ($v['Regra_geral'] == 'N') {
+                        $v['Estabelecimentos'] = $estab_for_analyst[$x];
+                        foreach ($v['Estabelecimentos'] as $kk => $create_register) {
+                            $create_register['Id_atividadeanalista'] = $create->id;
+                            AtividadeAnalistaFilial::Create($create_register);
+                        }
+                    }
+                }
+            }
+            
+            return redirect()->back()->with('status', 'Analista(s) cadastrado(s)  com sucesso.');
+
         }
 
-        $cnpjs = DB::table('atividadeanalistafilial')
-                ->join('estabelecimentos', 'atividadeanalistafilial.Id_estabelecimento', '=', 'estabelecimentos.id')
-                ->select('atividadeanalistafilial.id', 'atividadeanalistafilial.Id_estabelecimento', 'estabelecimentos.cnpj', 'estabelecimentos.codigo')
-                ->where('atividadeanalistafilial.Id_atividadeanalista', $create->id)
-                ->get();
-
-        $cnpjs = json_decode(json_encode($cnpjs),true);
-
-        return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);
+        return view('atividadeanalista.adicionar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios);
     }
 
     public function validation($array)
     {
-        $find = DB::table('atividadeanalista')->select('*')->where('Id_usuario_analista', $array['Id_usuario_analista'])->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->get();
-       
-        $find = json_decode(json_encode($find),true);
+        if ($array['Regra_geral'] == 'N') {
+            $find = DB::table('atividadeanalista')->select('*')->where('Id_usuario_analista', $array['Id_usuario_analista'])->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->where('uf', $array['uf'])->get();
+        } else {
+            $find = DB::table('atividadeanalista')->select('*')->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->where('uf', $array['uf'])->get();            
+        }
 
+        $find = json_decode(json_encode($find),true);
         if (count($find) > 0) {
             return false;
         }
 
-    return true;
+        if ($array['Regra_geral'] == 'N') {
+            $find = DB::table('atividadeanalista')->select('*')->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->where('uf', $array['uf'])->where('Regra_geral', 'S')->get();
+        }
+        
+        $find = json_decode(json_encode($find),true);
+        if (count($find) > 0) {
+            return false;
+        }
+
+        return true;
     }
 
-    public function validationEdit($array)
+    public function validationEdit($array, $input)
     {
-        $id = explode(',', $array['id']);
-        $find = DB::table('atividadeanalista')->select('*')->where('Id_usuario_analista', $array['Id_usuario_analista'])->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->whereNotIn('id', $id)->get();
-       
-        $find = json_decode(json_encode($find),true);
+        $atividades = AtividadeAnalista::where('Emp_id', $input['old_empid'])->where('Tributo_id', $input['old_tributoid'])->where('Regra_geral', $input['old_regrageral'])->where('uf', $input['old_uf'])->get();
 
+        $str = array();
+        if (!empty($atividades)) {
+            foreach ($atividades as $x => $k) {
+                $str[] = $k->id;
+            }
+        }
+
+        if ($array['Regra_geral'] == 'N') {
+            $find = DB::table('atividadeanalista')->select('*')->where('Id_usuario_analista', $array['Id_usuario_analista'])->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->where('uf', $array['uf'])->whereNotIn('id', $str)->get();
+        } else {
+            $find = DB::table('atividadeanalista')->select('*')->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->where('uf', $array['uf'])->whereNotIn('id', $str)->get();            
+        }
+
+        $find = json_decode(json_encode($find),true);
         if (count($find) > 0) {
             return false;
         }
 
-    return true;
+        if ($array['Regra_geral'] == 'N') {
+            $find = DB::table('atividadeanalista')->select('*')->where('Tributo_id', $array['Tributo_id'])->where('Emp_id', $array['Emp_id'])->where('uf', $array['uf'])->where('Regra_geral', 'S')->whereNotIn('id', $str)->get();
+        }
+        
+        $find = json_decode(json_encode($find),true);
+        if (count($find) > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -490,46 +593,141 @@ class AtividadeanalistaController extends Controller
     {
         $situation = 'status';
         $message = 'Registro atualizado com sucesso';
-        //carregando dados da tela 
-        $ids = '4,6';
-        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
-        $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
-        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
-        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
-        $input = $request->all();        
-        $cnpjs = DB::table('atividadeanalistafilial')
-                ->join('estabelecimentos', 'atividadeanalistafilial.Id_estabelecimento', '=', 'estabelecimentos.id')
-                ->select('atividadeanalistafilial.Id_estabelecimento','atividadeanalistafilial.id' ,'estabelecimentos.cnpj', 'estabelecimentos.codigo')
-                ->where('atividadeanalistafilial.Id_atividadeanalista', $input['id'])
-                ->get();
-        
-        $cnpjs = json_decode(json_encode($cnpjs),true);
+
         $var = array();
-        if (!empty($input['Tributo_id'])) {
-            foreach ($input['Tributo_id'] as $x => $v) {
-                $var[$x]['Emp_id'] = $input['Emp_id'];
-                $var[$x]['Tributo_id'] = $v;
-                $var[$x]['Id_usuario_analista'] = $input['Id_usuario_analista'];
-                $var[$x]['Regra_geral'] = $input['Regra_geral'];
-                $var[$x]['id'] = $input['id'];
+        $input = $request->all();
+
+        if (!empty($input)) {
+
+            $estabelecimentos = array();
+            if (!empty($input['uf'])) {
+                $estabelecimentos = Estabelecimento::LoadByUf($input['uf'], $input['Emp_id']);
             }
-        }
-        if (is_array($var) && !empty($var)) {
-            foreach ($var as $key => $value) {
-                if (!$this->validationEdit($value)) {
-                    $situation = 'error';
-                    $message = 'Já existe atividade para o analista selecionado';
-                    $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($value['id'])),true);
-                    return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);
+
+            if (empty($estabelecimentos)) {
+                 return redirect()->back()->with('alert', 'Não existem estabelecimentos para essa UF + Empresa.');
+            }
+
+            if (empty($input['Id_usuario_analista'])) {
+                return redirect()->back()->with('alert', 'Ao menos um usuário deve ser selecionado.');
+            }
+
+            if (empty($input['Tributo_id'])) {
+                return redirect()->back()->with('alert', 'Ao menos um Tributo deve ser selecionado.');
+            }
+
+            if ($input['Regra_geral'] == 'S' && count($input['Id_usuario_analista']) > 1) {
+                return redirect()->back()->with('alert', 'Não é possível ter mais de um analista responsável por todos os estabelecimentos da empresa.');
+            }
+
+            if (!empty($input['Tributo_id'])) {
+                foreach ($input['Tributo_id'] as $key => $value) {
+                    $var[$key]['Emp_id'] = $input['Emp_id'];
+                    $var[$key]['Tributo_id'] = $value;
+                    $var[$key]['Regra_geral'] = $input['Regra_geral'];
+                    $var[$key]['uf'] = strtoupper($input['uf']);
+                    if ($input['Regra_geral'] == 'S') {
+                        $var[$key]['Id_usuario_analista'] = $input['Id_usuario_analista'][0];
+                    }
                 }
-                $Atividade = AtividadeAnalista::findOrFail($value['id']);
-                $Atividade->fill($value)->save();
+            }
+
+            if ($input['Regra_geral'] == 'N') {
+                $final_array = array();
+                if (!empty($var) && !empty($input['Id_usuario_analista'])) {
+                    foreach ($input['Id_usuario_analista'] as $index => $id_user) {
+                        foreach ($var as $x => $k) {
+                            $var[$x]['Id_usuario_analista'] = $id_user;
+                        }
+
+                        $final_array[] = $var;
+                    }
+                }
+
+                if (count($final_array) > 1) {
+                    $qtd_analistas = count($final_array);
+                    $qtd_analistas_c = count($final_array);
+                    $qtd_estabs = count($estabelecimentos);
+                    $to_own = floor($qtd_estabs/$qtd_analistas);
+                    $arr_analistas = array();
+                    while ($qtd_analistas > 0) {
+                        $arr_analistas[] = $to_own;
+                        $qtd_analistas--;
+                    }
+
+                    while (array_sum($arr_analistas) < $qtd_estabs) {
+                        $arr_analistas[0] = $arr_analistas[0]+1;
+                    }
+                   
+                    foreach ($arr_analistas as $x => $analista_single) {
+                        $estab_for_analyst[$x] = array();
+                        $a = 0;
+                        foreach ($estabelecimentos as $indexing => $estabelecimento) {
+                            
+                            $estab_for_analyst[$x][$indexing]['Id_estabelecimento'] = $estabelecimento['id'];
+                            unset($estabelecimentos[$indexing]);
+                            $a++;
+
+                            if ($a == $analista_single) {
+                                break;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            if (empty($final_array)) {
+                $final_array[] = $var;
+            }
+            $a = 1;
+            foreach ($final_array as $x => $var) {
+                foreach ($var as $k => $v) {
+
+
+                    if (count($final_array) == 1) {
+                        $v['Regra_geral'] = 'S';
+                    }
+
+                    if (!$this->validationEdit($v, $input)) {
+                        return redirect()->back()->with('alert', 'Já existem analista(s) cadastrado(s) para essa atividade.');
+                    }  
+
+                    if ($a) {
+                        $this->clearOlder($input, $a);
+                    }
+
+                    $a = 0;
+
+                    $create = AtividadeAnalista::create($v);
+                    if ($v['Regra_geral'] == 'N') {
+                        $v['Estabelecimentos'] = $estab_for_analyst[$x];
+                        foreach ($v['Estabelecimentos'] as $kk => $create_register) {
+                            $create_register['Id_atividadeanalista'] = $create->id;
+                            AtividadeAnalistaFilial::Create($create_register);
+                        }
+                    }
+                }
+            }
+
+            $situation = 'status';
+            $message = 'Registro alterado com sucesso';
+        }
+
+        return redirect()->route('atividadesanalista.index')->with($situation, $message);
+    }
+
+
+    private function clearOlder($input, $delete)
+    {
+        $atividades = AtividadeAnalista::where('Emp_id', $input['old_empid'])->where('Tributo_id', $input['old_tributoid'])->where('Regra_geral', $input['old_regrageral'])->where('uf', $input['old_uf'])->get();
+
+        if (!empty($atividades) && $delete) {
+            foreach ($atividades as $x => $k) {
+                AtividadeAnalistaFilial::where('Id_atividadeanalista', $k->id)->delete();
+                AtividadeAnalista::destroy($k->id);
             }
         }
-        $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($input['id'])),true);
-    
-        return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs);
     }
 
     /**
@@ -540,30 +738,32 @@ class AtividadeanalistaController extends Controller
      */
     public function editRLT(Request $request)
     {
-        $situation = 'status';
-        $message = 'Registro carregado com sucesso';
         foreach ($request->all() as $key => $value) {
-            $privateid = $key; 
+            $identificador = $key; 
         }
-        //carregando dados da tela 
-        $ids = '4,6';
-        $user_ids = DB::select('select user_id from role_user where role_id in ('.$ids.')');
-        $user_ids = json_decode(json_encode($user_ids),true);
-        $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
-        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
-        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
-        $cnpjs = DB::table('atividadeanalistafilial')
-                ->join('estabelecimentos', 'atividadeanalistafilial.Id_estabelecimento', '=', 'estabelecimentos.id')
-                ->select('atividadeanalistafilial.Id_estabelecimento','atividadeanalistafilial.id' ,'estabelecimentos.cnpj', 'estabelecimentos.codigo')
-                ->where('atividadeanalistafilial.Id_atividadeanalista', $privateid)
-                ->get();
-        
-        $cnpjs = json_decode(json_encode($cnpjs),true);
 
-        $Atividade = AtividadeAnalista::findOrFail($privateid);
-        $dados = json_decode(json_encode(AtividadeAnalista::findOrFail($privateid)),true);
-    
-        return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with($situation, $message)->with('dados', $dados)->with('cnpjs', $cnpjs)->with('returning', true);
+        $params = array();
+        if (!empty($identificador)) {
+            $params = explode('-', $identificador);
+        }
+
+        $atividade = AtividadeAnalista::where('Emp_id', $params[0])->where('Tributo_id', $params[1])->where('Regra_geral', $params[2])->where('uf', $params[3])->get();
+
+        $selected_users = array();
+        foreach ($atividade as $x => $k) {
+            $selected_users[] = $k->Id_usuario_analista;
+        }
+
+        $selected_empresa = $params[0];
+        $selected_tributo = $params[1];
+        $selected_regra_geral = $params[2]; 
+        $selected_uf = $params[3];
+
+        $usuarios = User::selectRaw("name, id")->orderby('name', 'asc')->lists('name','id');
+        $tributos = Tributo::selectRaw("nome, id")->orderby('nome', 'asc')->lists('nome','id');
+        $empresas = Empresa::selectRaw("razao_social, id")->orderby('razao_social', 'asc')->lists('razao_social','id');
+
+        return view('atividadeanalista.editar')->withTributos($tributos)->withEmpresas($empresas)->withUsuarios($usuarios)->with('selected_users', $selected_users)->with('selected_uf', $selected_uf)->with('selected_regra_geral', $selected_regra_geral)->with('selected_tributo', $selected_tributo)->with('selected_empresa', $selected_empresa)->with('returning', true);
     }
 
     /**

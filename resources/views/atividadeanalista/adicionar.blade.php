@@ -46,7 +46,14 @@
 <div class="form-group">
     <div style="width:50%">
     {!! Form::label('Id_usuario_analista', 'Analista', ['class' => 'control-label'] )  !!}
-    {!!  Form::select('Id_usuario_analista', $usuarios, array(), ['class' => 'form-control s2']) !!}
+    {!!  Form::select('Id_usuario_analista[]', $usuarios, array(), ['class' => 'form-control s2_multi', 'multiple' => 'multiple']) !!}
+    </div>
+</div>
+
+<div class="form-group">
+    <div style="width:5%">
+    {!! Form::label('UF', 'UF', ['class' => 'control-label'] )  !!}
+    {!!  Form::text('uf', NULL, ['class' => 'form-control', 'maxlength' => 2]) !!}
     </div>
 </div>
 

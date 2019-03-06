@@ -152,7 +152,7 @@ class CalendariosController extends Controller
     {
         $feriados = $this->eService->getFeriadosNacionais();
         $feriados_estaduais = $this->eService->getFeriadosEstaduais();
-
+        
         return view('feriados.index')->with('feriados',$feriados)->with('estaduais',$feriados_estaduais);
     }
 

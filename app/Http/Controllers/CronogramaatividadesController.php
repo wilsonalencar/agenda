@@ -179,10 +179,24 @@ class CronogramaatividadesController extends Controller
         $usuarios = User::selectRaw("name, id")->whereIN("id", $user_ids)->orderby('name', 'asc')->lists('name','id');
         $input = $request->all();
         $dados = DB::table('cronogramamensal')->leftjoin('cronogramaatividades', 'cronogramamensal.id', '=', 'cronogramaatividades.cronograma_mensal')->selectRaw('cronogramamensal.*, GROUP_CONCAT(cronogramaatividades.Id_usuario_analista SEPARATOR ", ") AS analistas');
-        if (!empty($input)) {
+
+        if (!empty($input['periodo_apuracao'])) {
             $periodo = str_replace('/', '', $input['periodo_apuracao']);
             $dados = $dados->where('cronogramamensal.periodo_apuracao', '=', $periodo);
         }
+
+        if (!empty($input['uf'])) {
+            $dados = $dados->where('cronogramamensal.uf', '=', $input['uf']);
+        }
+
+        if (!empty($input['empresas'])) {
+            $dados = $dados->whereIn('cronogramamensal.Empresa_id', $input['empresas']);
+        }
+
+        if (!empty($input['tributos'])) {
+            $dados = $dados->whereIn('cronogramamensal.Tributo_id', $input['tributos']);
+        }
+
         // $dados = $dados->orderby('Empresa_id', '=', str_replace('/', '', $input['periodo_apuracao']));
         $dados = $dados->groupBy('cronogramamensal.id')->get();
         $array = array();
@@ -244,7 +258,11 @@ class CronogramaatividadesController extends Controller
 
     public function loadPlanejamento()
     {
-        return view('cronogramaatividades.Loadplanejamento');
+        $empresas = Empresa::selectRaw("razao_social, id")->lists('razao_social','id');
+        $tributos = Tributo::selectRaw("nome, id")->lists('nome','id');
+        $uf = Municipio::distinct('UF')->orderBy('UF')->selectRaw("UF, UF")->lists('UF','UF');
+
+        return view('cronogramaatividades.Loadplanejamento')->withempresas($empresas)->withtributos($tributos)->withuf($uf);
     }
     
     public function alterar(Request $request)
@@ -508,10 +526,6 @@ class CronogramaatividadesController extends Controller
             return redirect()->back()->with('status', 'Favor informar ambas as datas');
         }
 
-        if (!isset($input['empresas_selected']) || empty($input['empresas_selected'])) {
-            return redirect()->back()->with('status', 'Favor informar a(s) empresa(s)');
-        }
-
         $input['data_inicio'] = implode("/", array_reverse(explode("-", $input['data_inicio']))); 
         $input['data_fim'] = implode("/", array_reverse(explode("-", $input['data_fim']))); 
 
@@ -537,13 +551,6 @@ class CronogramaatividadesController extends Controller
         }
         $string['Datas'] = substr($string['Datas'], 0, -1);
 
-        //empresas
-        $string['emps'] = '';
-        foreach ($input['empresas_selected'] as $k => $v) {
-            $string['emps'] .= $v.",";
-        }
-        $string['emps'] = substr($string['emps'], 0, -1);
-        
         //analistas
         $string['analista_selected'] = '';
         if (!empty($input['analista_selected'])) {
@@ -553,6 +560,14 @@ class CronogramaatividadesController extends Controller
             $string['analista_selected'] = substr($string['analista_selected'], 0, -1);
         }
 
+        $string['emps'] = '';
+        if (!empty($input['empresas_selected'])) {
+            foreach ($input['empresas_selected'] as $k => $v) {
+                $string['emps'] .= $v.",";
+            }
+            $string['emps'] = substr($string['emps'], 0, -1);
+        }
+        
         $string['estabelecimentos'] = '';
         if (!empty($input['estabelecimento_selected'])) {
             foreach ($input['estabelecimento_selected'] as $k => $v) {
@@ -580,6 +595,17 @@ class CronogramaatividadesController extends Controller
         $query = "SELECT 
                     DATE_FORMAT(A.data_atividade, '%d/%m/%Y %H:%i:%s') as limite,
                     B.codigo as codigo,
+                    B.id as estemp_id,
+                    A.emp_id,
+                    A.regra_id,
+                    A.periodo_apuracao,
+                    D.nome as nome_tributo,
+                    D.tipo as tipo_tributo,
+                    MUN.uf,
+                    MUN.nome as nome_municipio,
+                    B.insc_estadual as insc_estadual,
+                    B.insc_municipal as insc_municipal,
+                    EMP.razao_social as razao_social,
                     B.cnpj as CNPJ,
                     D.nome as Tributo,
                     A.descricao as Atividade,
@@ -590,17 +616,24 @@ class CronogramaatividadesController extends Controller
                 INNER JOIN 
                     estabelecimentos B on A.estemp_id = B.id
                 INNER JOIN 
+                    municipios MUN on B.cod_municipio = MUN.codigo
+                INNER JOIN 
                     regras C on A.regra_id = C.id
                 INNER JOIN 
                     tributos D on C.tributo_id = D.id
+                INNER JOIN 
+                    empresas EMP on A.emp_id = EMP.id
                 LEFT JOIN 
                     users E on A.Id_usuario_analista = E.id ";
         
         $query .= " WHERE DATE_FORMAT(A.data_atividade, '%Y-%m-%d') in (".$string['Datas'].") ";
-        $query .= " AND A.emp_id in (".$string['emps'].") ";
 
         if (!empty($string['analista_selected']) && !$user->hasRole('analyst')) {
             $query .= " AND A.Id_usuario_analista in (".$string['analista_selected'].") ";
+        }
+
+        if (!empty($string['empresas_selected'])) {
+            $query .= " AND A.emp_id in (".$string['emps'].") ";
         }
 
         if (!empty($string['estabelecimentos'])) {
@@ -621,7 +654,57 @@ class CronogramaatividadesController extends Controller
 
         $dados = DB::select($query);
 
+    if (!empty($dados)) {
+        foreach ($dados as $key => $value) {
+            $atividade = Atividade::where('emp_id', $value->emp_id)->where('estemp_id', $value->estemp_id)->where('periodo_apuracao', $value->periodo_apuracao)->where('regra_id', $value->regra_id)->first();
+
+            $dados[$key]->filename = $atividade->id.'_'.$value->codigo.'_'.$this->getTributo($value->nome_tributo).'_'.$atividade->periodo_apuracao.'_'.$value->uf;
+            $dados[$key]->id_atividade = $atividade->id;   
+            switch ($atividade->status) {
+                case '1':
+                    $dados[$key]->status = 'Não efetuada';
+                    break;
+                case '2':
+                    $dados[$key]->status = 'Em Aprovação';
+                    break;
+                case '3':
+                    $dados[$key]->status = 'Entregue';
+                    break;
+                default:
+                    $dados[$key]->status = $dados[$key]->status;
+                    break;
+            }
+        }
+    }
+
     return view('cronogramaatividades.ConsultaCronograma')->with('dados',$dados);
+    }
+
+    private function getTributo($nomeTributo)
+    {
+       if ($nomeTributo == "SPED FISCAL") {
+           return "SPEDFISCAL";
+       }
+       if ($nomeTributo == "EFD CONTRIBUIÇÕES") {
+           return "EFD";
+       }
+       if ($nomeTributo == "ICMS ST") {
+          return "ICMSST";
+       }
+       if ($nomeTributo == "GIA ST") {
+          return "GIAST";
+       }
+       if ($nomeTributo == "DCTF WEB") {
+          return "DCTFWEB";
+       }
+       if ($nomeTributo == "LIVRO FISCAL") {
+          return "LIVROFISCAL";
+       }
+       if ($nomeTributo == "DESONERAÇÃO FOLHA") {
+          return "DESONERACAO";
+       }
+
+       return $nomeTributo;
     }
 
     public function ChecklistCron(Request $request)

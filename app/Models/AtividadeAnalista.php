@@ -13,6 +13,12 @@ class AtividadeAnalista extends Model
         'Emp_id',
         'Tributo_id',
         'Id_usuario_analista',
-        'Regra_geral'
+        'Regra_geral',
+        'uf'
     ];
+
+    public function usuario()
+    {
+        return $this->belongsTo('App\Models\User','Id_usuario_analista');
+    }
 }

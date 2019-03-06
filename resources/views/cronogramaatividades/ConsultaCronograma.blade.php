@@ -12,36 +12,51 @@
 <?php
 $data = date('d/m/Y H:i:s');
 ?>
+<h4>Realizar download de Excel</h4>
 <div class="table-default table-responsive">
-    <table class="table display" id="dataTables-example">
+    <table class="table display" id="dataTables-example" style="display: none">
         <thead>
             <tr class="top-table">
                 <th>Data Atividade</th>
                 <th>Filial</th>
-                <th>CNPJ</th>
+                <th>ID Atividade</th>
+                <th>Descrição Atividade</th>
+                <th>UF</th>
                 <th>Tributo</th>
-                <th>Atividade</th>
+                <th>Frente</th>
                 <th>Analista</th>
+                <th>Empresa</th>
+                <th>CNPJ</th>
+                <th>Inscrição Estadual</th>
+                <th>Inscrição Municipal</th>
+                <th>Município</th>
                 <th>Status</th>
+                <th>Nome Arquivo a entregar</th>
             </tr>
         </thead>
         <tbody>
-        <?php
+        <?php 
         if (!empty($dados)) {
-            foreach ($dados as $key => $value) {
-              $cor[1] = 'red';
-              $cor[2] = 'yellow';
-              $cor[3] = 'green';
-        ?>          
+          foreach ($dados as $key => $value) { ?>          
+  
         <tr>
             <td><?php echo $value->limite; ?></td>
             <td><?php echo $value->codigo; ?></td>
-            <td><?php echo mask($value->CNPJ, '##.###.###/####-##'); ?></td>
-            <td><?php echo $value->Tributo; ?></td>
+            <td><?php echo $value->id_atividade; ?></td>
             <td><?php echo $value->Atividade; ?></td>
+            <td><?php echo $value->uf; ?></td>
+            <td><?php echo $value->nome_tributo; ?></td>
+            <td><?php echo $value->tipo_tributo; ?></td>
             <td><?php echo $value->UsuarioAnalista; ?></td>
-            <td style="background-color: <?php echo $cor[$value->status]; ?>"><?php echo status($value->status); ?></td>
+            <td><?php echo $value->razao_social; ?></td>
+            <td><?php echo mask($value->CNPJ, '##.###.###/####-##'); ?></td>
+            <td><?php echo $value->insc_estadual; ?></td>
+            <td><?php echo $value->insc_municipal; ?></td>
+            <td><?php echo $value->nome_municipio; ?></td>
+            <td><?php echo $value->status; ?></td>
+            <td><?php echo $value->filename; ?></td>
         </tr>
+  
         <?php } } ?>
         </tbody>
     </table>
@@ -55,60 +70,16 @@ $('#dataTables-example').dataTable({
         language: {                        
             "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
-        dom: 'l<"leftBtn"B>frtip',
+        dom: '<"Btn"B>',
         "bSort": false,
         paging: false,
         buttons: [
              {
                 extend: 'excelHtml5',
                 exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6]
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
                 }
-             },
-             {
-                extend: 'pdfHtml5',
-                exportOptions: {
-                   columns: [ 0, 1, 2, 3, 4, 5, 6]
-                },
-                "autoWidth": true,
-                customize: function ( doc ) {
-                  doc.pageMargins = [90,60,20,30];
-                  doc.defaultStyle.fontSize = 10;
-                  doc.styles.tableHeader.fontSize = 12;
-                      doc['header']=(function() {
-                      return {
-                        columns: [
-                          {
-                            alignment: 'left',
-                            image: logo,
-                            width: 60
-                          },
-                          {
-                            alignment: 'right',
-                            text: '<?php echo $data; ?>',
-                            fontSize: 10
-                          }
-                        ],
-                        margin: 20  
-                      }
-                    });
-                    doc['footer']=(function(currentPage, pageCount) {
-                      return {
-                        columns: [
-                          {
-                            alignment: 'right',
-                            text:'Página : ' + currentPage.toString() + ' de ' + pageCount,
-                            fontSize: 10
-                          }
-                        ]
-                      }
-                    });
-                },
-
-                title:'Consulta Atividades',
-                orientation: 'landscape',
-                pageSize: 'A4'
-             },
+             }
          ]
     });  
 </script>

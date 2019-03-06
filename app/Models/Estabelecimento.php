@@ -56,4 +56,15 @@ class Estabelecimento extends Model
     {
         return $this->belongsToMany('App\Models\Regra');
     }
+
+    public static function LoadByUf($uf, $emp_id)
+    {
+        $uf = strtolower($uf);
+
+        $estabelecimentos = Estabelecimento::where('empresa_id', $emp_id)->whereHas('municipio', function($query) use ($uf) {
+            $query->where('uf', $uf); 
+        })->get()->toArray();
+       
+        return $estabelecimentos;
+    }
 }

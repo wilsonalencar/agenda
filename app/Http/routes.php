@@ -268,7 +268,7 @@ Route::group(['middleware' => ['web','auth','role:supervisor|admin|owner|analyst
     Route::get('Atividade_Analista/adicionar', array('as'=>'atividadesanalista.adicionar', 'uses'=>'AtividadeanalistaController@create'));
     Route::post('Atividade_Analista/store', array('as'=>'atividadesanalista.store', 'uses'=>'AtividadeanalistaController@store'));
     Route::get('Atividade_Analista/store', array('as'=>'atividadesanalista.store', 'uses'=>'AtividadeanalistaController@store'));
-    Route::post('Atividade_Analista/edit', array('as'=>'atividadesanalista.edit', 'uses'=>'AtividadeanalistaController@edit'));
+    Route::post('Atividade_Analista/editRLT', array('as'=>'atividadesanalista.edit', 'uses'=>'AtividadeanalistaController@edit'));
     Route::get('Atividade_Analista/', array('as'=>'atividadesanalista.index', 'uses'=>'AtividadeanalistaController@index'));
     Route::get('Atividade_Analista/editRLT', array('as'=>'atividadesanalista.editRLT', 'uses'=>'AtividadeanalistaController@editRLT'));
     Route::post('Atividade_Analista/filial', array('as'=>'atividadesanalistafilial.store', 'uses'=>'AtividadeanalistafilialController@store'));

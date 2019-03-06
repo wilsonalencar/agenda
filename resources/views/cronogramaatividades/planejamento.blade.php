@@ -115,9 +115,21 @@ $(document).ready(function (){
         "searchPlaceholder": "Pesquisar registro específico",
         "url": "//cdn.datatables.net/plug-ins/1.10.9/i18n/Portuguese-Brasil.json"
         },
-        dom: "lfrtip",
-        processing: true,
-        stateSave: true
+        dom: "<B>frtpl",
+        buttons: [
+             {
+                extend: 'excelHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+                }
+             },
+             {
+                extend: 'csvHtml5',
+                exportOptions: {
+                   columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+                }
+             }
+         ]
     });        
 });
 

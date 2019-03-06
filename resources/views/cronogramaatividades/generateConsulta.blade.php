@@ -62,6 +62,9 @@ jQuery(function($){
     $('input[name="periodo_apuracao"]').mask("99/9999");
 });
 
+$('select').select2();
+
+
 </script>
 @stop
 <footer>

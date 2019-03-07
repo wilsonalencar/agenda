@@ -4502,10 +4502,12 @@ juros de mora
                 }
             }
 
-            if (empty($fill['usuario_aprovador'])) {
+            if (empty($fill['usuario_aprovador']) || !isset($fill['usuario_aprovador'])) {
                 $fill['usuario_aprovador'] = 112;
             }
 
+            $fill['data_aprovacao'] = date('Y-m-d H:i:s');
+            
             $atividade->fill($fill); 
             $atividade->save(); 
         }
@@ -4655,29 +4657,29 @@ juros de mora
 
     private function LoadNomeTributo($nomeTributo)
     {
-       if ($nomeTributo == "SPEDFISCAL") {
+        $nomeTributo = $this->letras($nomeTributo);
+        if ($nomeTributo == "SPEDFISCAL") {
            return "SPED FISCAL";
-       }
-       if ($nomeTributo == "EFD") {
+        }
+        if ($nomeTributo == "EFD") {
            return "EFD CONTRIBUIÇÕES";
-       }
-       if ($nomeTributo == "ICMSST") {
+        }
+        if ($nomeTributo == "ICMSST") {
           return "ICMS ST";
-       }
-       if ($nomeTributo == "GIAST") {
+        }
+        if ($nomeTributo == "GIAST") {
           return "GIA ST";
-       }
-       if ($nomeTributo == "DCTFWEB") {
+        }
+        if ($nomeTributo == "DCTFWEB") {
           return "DCTF WEB";
-       }
-       if ($nomeTributo == "LIVROFISCAL") {
+        }
+        if ($nomeTributo == "LIVROFISCAL") {
           return "LIVRO FISCAL";
-       }
-       if ($nomeTributo == "DESONERACAO") {
+        }
+        if ($nomeTributo == "DESONERACAO") {
           return "DESONERAÇÃO FOLHA";
-       }
-
-       return $nomeTributo;
+        }
+        return $nomeTributo;
     }
 
     private function checkTribAtividade($id_atividade, $id_tributo)
@@ -4966,6 +4968,11 @@ juros de mora
             $atividade->status = 2;
         } else {
             $atividade->usuario_aprovador = $user_aprovador;
+            
+            if (empty($atividade->usuario_aprovador)) {
+                $atividade->usuario_aprovador = 112;
+            }
+
             $atividade->data_aprovacao = date('Y-m-d H:i:s');
             $atividade->status = 3;
         }

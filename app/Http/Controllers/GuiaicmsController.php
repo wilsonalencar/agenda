@@ -4502,7 +4502,7 @@ juros de mora
                 }
             }
 
-            if (empty($fill['usuario_aprovador']) || !isset($fill['usuario_aprovador'])) {
+            if (empty($fill['usuario_aprovador']) || !isset($fill['usuario_aprovador']) || $atividade->emp_id == 7) {
                 $fill['usuario_aprovador'] = 112;
             }
 
@@ -4969,7 +4969,7 @@ juros de mora
         } else {
             $atividade->usuario_aprovador = $user_aprovador;
             
-            if (empty($atividade->usuario_aprovador)) {
+            if (empty($atividade->usuario_aprovador) || $atividade->emp_id == 7) {
                 $atividade->usuario_aprovador = 112;
             }
 

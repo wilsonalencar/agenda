@@ -1989,6 +1989,69 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAT';
         }
 
+        preg_match('~receita ([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $icms['COD_RECEITA'] = trim($this->numero($i[0]));
+        }
+        
+        preg_match('~vencimento
+([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $valorData = $i[0];
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+            $referencia = date('m/Y', strtotime($data_vencimento));
+            $k = explode('/', $referencia);
+            $k[0] = $k[0]-1;
+            if ($k[0] == 0) {
+                $k[1] = $k[1] - 1;
+            }
+            if (strlen($k[0]) == 1) {
+                $k[0] = '0'.$k[0];
+            }
+            $icms['REFERENCIA'] = $k[0].'/'.$k[1];
+        }
+        
+        preg_match('~
+valor do documento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+            $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[0])));
+        }
+
+
+        preg_match('~
+valor do documento([^{]*)~i', $str, $match);
+       if (!empty($match)) {
+           $i = explode('
+', trim($match[1]));
+           $codbarras = '';
+           foreach ($i as $k => $x) {
+              if (strlen($x) == 13) {
+                  $codbarras .= $this->numero($x);
+              }
+              if (strlen($codbarras) != 36) {
+                  if ($k == 14) {
+                      break;
+                  }
+              }
+              if ($k == 16) {
+                  break;
+              }
+          }
+
+           $icms['CODBARRAS'] = trim($codbarras);
+       }
+        
+        if (isset($icms['COD_RECEITA']) && trim($icms['COD_RECEITA']) == 1245) {
+            $icms['IMPOSTO'] = 'SEFAZ';
+       } 
+
         preg_match('~03 - receita([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode('
@@ -2034,7 +2097,7 @@ valor total([^{]*)~i', $str, $match);
             $codbarras = str_replace('-', '', str_replace(' ', '', $i[4]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
-
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;

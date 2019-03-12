@@ -4237,7 +4237,6 @@ juros de mora
         $res = $zip->open($fileName, \ZipArchive::CREATE);
         if($res === true){
             foreach ($f as $in => $name) {
-
                 if (!is_file($name['path'])) {
                     $name['path'] = $name['path'].'/';
                     $name['filename'] = $name['filename'].'/';
@@ -4293,7 +4292,8 @@ juros de mora
                         $destino .= 'uploaded/';
                         $arrayDelete['pasta'][$in]['path'] = $name['path']; 
                         $arrayDelete['pasta'][$in]['filename'] = $name['filename']; 
-                        $arrayDelete['pasta'][$in]['destino'] = $destino.$name['filename'];
+                        $arrayDelete['pasta'][$in]['destino'] = $destino;
+                        $arrayDelete['pasta'][$in]['pastaname'] = $name['filename'];
                     }
                 }
 
@@ -4301,28 +4301,34 @@ juros de mora
         }
 
         $zip->close();
+
         if (!empty($arrayDelete)) {
             foreach ($arrayDelete as $chave => $single) {
                 if (is_array($single) && $chave === 'pasta') {
                    foreach ($single as $p => $mostsingle) {
                         
                         $creationpath = $mostsingle['destino'].$mostsingle['pastaname'];
-                     
-                        if (!is_dir($creationpath)) {
+                        $verifypath = str_replace('uploaded', 'entregar', $creationpath);
+                        
+                        if (!is_dir($creationpath) && !is_file($verifypath)) {
                             mkdir($creationpath, 0777);
                         }
-                     
-                        $creationpath = $creationpath.'/';
-                        $currentFile = $creationpath.'/'.$mostsingle['filename'];
+                        
+                        $currentFile = $creationpath;
+                        if (!is_file($verifypath)) {
+                            $creationpath = $creationpath.'/';
+                            $currentFile = $creationpath.'/'.$mostsingle['filename'];
+                        }
                         copy($mostsingle['path'], $currentFile);
                         unlink($mostsingle['path']);
                     }
 
-                    if ($this->checkDiretorio($mostsingle['raiz'])) {
-                        @rmdir($mostsingle['raiz']);
+                    if (isset($mostsingle['raiz'])) {
+                        if ($this->checkDiretorio($mostsingle['raiz'])) {
+                            @rmdir($mostsingle['raiz']);
+                        }
                     }
                 }
-                
                 if (!is_array($single)) {
                     copy($single['path'], $single['destino']);
                     unlink($single['path']);
@@ -4340,7 +4346,7 @@ juros de mora
             $this->upload($data);
         }
     }
-
+    
     private function checkDiretorio($diretorio)
     {
        $verify = array();

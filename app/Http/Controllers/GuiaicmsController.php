@@ -287,7 +287,7 @@ class GuiaicmsController extends Controller
                             if (empty($arrayNameFile[2])) {
                                 continue;
                             }
-                            if ($this->letras($arrayNameFile[2]) != 'ICMS' && $this->letras($arrayNameFile[2]) != 'DIFAL' && $this->letras($arrayNameFile[2]) != 'ANTECIPADOICMS' && $this->letras($arrayNameFile[2]) != 'TAXA' && $this->letras($arrayNameFile[2]) != 'PROTEGE' && $this->letras($arrayNameFile[2]) != 'UNIVERSIDADE' && $this->letras($arrayNameFile[2]) != 'FITUR' && $this->letras($arrayNameFile[2]) != 'FECP' && $this->letras($arrayNameFile[2]) != 'FEEF') {
+                            if ($this->letras($arrayNameFile[2]) != 'ICMS' && $this->letras($arrayNameFile[2]) != 'DIFAL' && $this->letras($arrayNameFile[2]) != 'ANTECIPADO' && $this->letras($arrayNameFile[2]) != 'TAXA' && $this->letras($arrayNameFile[2]) != 'PROTEGE' && $this->letras($arrayNameFile[2]) != 'UNIVERSIDADE' && $this->letras($arrayNameFile[2]) != 'FITUR' && $this->letras($arrayNameFile[2]) != 'FECP' && $this->letras($arrayNameFile[2]) != 'FEEF' && $this->letras($arrayNameFile[2]) != 'ICMSST') {
                                 continue;
                             }
 
@@ -641,8 +641,8 @@ class GuiaicmsController extends Controller
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -758,8 +758,8 @@ modelo aprovada pela portaria nº 085/2002([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -826,6 +826,37 @@ modelo aprovada pela portaria nº 085/2002([^{]*)~i', $str, $match);
             $icms['CODBARRAS'] = str_replace('-', '', str_replace(' ', '', $i[0]));
         }
 
+        if (!isset($icms['VLR_TOTAL'])) {
+            preg_match('~06-principal([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[0]);
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[1])));
+            }
+
+            preg_match('~07-multa([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[0]);
+                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+            }
+
+            preg_match('~08-juros([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[0]);
+                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+            }
+
+            preg_match('~09-correcao monetaria 10-total([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[0]);
+                $icms['ACRESC_FINANC'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[2])));
+            }
+        }
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -861,8 +892,8 @@ modelo aprovada pela portaria nº 085/2002([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -1005,8 +1036,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -1150,8 +1181,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -1378,8 +1409,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -1391,6 +1422,13 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $i = explode('
 ', trim($match[1]));
             $icms['COD_RECEITA'] = $this->numero($i[2]);
+        }
+
+        preg_match('~05 - inscricao estadual/cgc/cpf([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode(' ', trim($match[1]));
+            $a = explode("\n", trim($i[0]));
+            $icms['IE'] = $this->numero($a[0]);
         }
 
         preg_match('~06 - referencia([^{]*)~i', $str, $match);
@@ -1411,16 +1449,46 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
 
         preg_match('~29 - matricula([^{]*)~i', $str, $match);
         if (!empty($match)) {
-            $i = explode('
-', trim($match[1]));
+            $i = explode("\n", trim($match[1]));
+            
             $a = explode(' ', $i[0]);
+            $b = explode(' ', $i[1]);
+            
             $icms['VLR_RECEITA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[0])));
             $icms['JUROS_MORA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[1])));
-            $icms['MULTA_MORA_INFRA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[2])));
-            $icms['VLR_TOTAL'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[1])));
-            $codbarras = str_replace('-', '', str_replace(' ', '', $i[3]));
+            $icms['MULTA_MORA_INFRA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $b[0])));
+            $icms['VLR_TOTAL'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[2])));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[4]));
             $icms['CODBARRAS'] = trim($codbarras);
         }
+        if ($icms['MULTA_MORA_INFRA'] > $icms['VLR_RECEITA']) {
+            preg_match('~29 - matricula([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[0]);
+                $icms['VLR_RECEITA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[0])));
+                $icms['JUROS_MORA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[1])));
+                $icms['MULTA_MORA_INFRA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[2])));
+                $icms['VLR_TOTAL'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[1])));
+                $codbarras = str_replace('-', '', str_replace(' ', '', $i[3]));
+                $icms['CODBARRAS'] = trim($codbarras);
+            }
+        }
+
+        if (empty($icms['CODBARRAS'])) {
+            preg_match('~29 - matricula([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $icms['VLR_TOTAL'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[1])));
+                $codbarras = str_replace('-', '', str_replace(' ', '', $i[3]));
+                $icms['CODBARRAS'] = trim($codbarras);
+            }
+        }
+
+        
+        if ($icms['VLR_TOTAL'] == $icms['MULTA_MORA_INFRA']) {
+            $icms['MULTA_MORA_INFRA'] = '0.00';            
+        }        
 
         fclose($handle);
         $icmsarray = array();
@@ -1462,8 +1530,8 @@ cnpj/cpf/insc. est.:([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -1569,8 +1637,8 @@ receita ([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -1673,7 +1741,7 @@ receita([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
             $icms['IMPOSTO'] = 'SEFAC';
         }
 
@@ -1691,7 +1759,7 @@ numero do documento([^{]*)~i', $str, $match);
             $icms['IE'] = trim($this->numero($i[0]));
         }
         
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS'){
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST'){
 
         preg_match('~
 valor total
@@ -1800,8 +1868,8 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -1915,7 +1983,7 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
             $icms['IMPOSTO'] = 'SEFAC';
         }
 
@@ -1984,8 +2052,54 @@ valor do documento([^{]*)~i', $str, $match);
         
         if (isset($icms['COD_RECEITA']) && trim($icms['COD_RECEITA']) == 1245) {
             $icms['IMPOSTO'] = 'SEFAZ';
+       } 
+
+        preg_match('~03 - receita([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['COD_RECEITA'] = $this->numero($i[2]);
         }
 
+        preg_match('~06 - referencia([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $icms['REFERENCIA'] = trim($i[0]);
+        }
+
+        preg_match('~07 - data de vencimento([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            $valorData = trim($i[0]);
+            $data_vencimento = str_replace('/', '-', $valorData);
+            $icms['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+        }
+
+        preg_match('~05 - inscricao estadual/cgc/cpf([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode("\n", trim($match[1]));
+            $icms['IE'] = $this->numero($i[0]);
+        }
+
+        preg_match('~29 - matricula([^{]*)~i', $str, $match);
+        if (!empty($match)) {
+            $i = explode('
+', trim($match[1]));
+            
+            $a = explode(' ', $i[0]);
+            $b = explode(' ', $i[1]);
+            $c = explode(' ', $i[2]);
+            
+            $icms['VLR_RECEITA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[0])));
+            $icms['JUROS_MORA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $a[1])));
+            $icms['MULTA_MORA_INFRA'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $b[0])));
+            $icms['VLR_TOTAL'] = str_replace('r$', '', str_replace(',', '.', str_replace('.', '', $i[2])));
+            $codbarras = str_replace('-', '', str_replace(' ', '', $i[4]));
+            $icms['CODBARRAS'] = trim($codbarras);
+        }
+        
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -2035,9 +2149,9 @@ valor do documento([^{]*)~i', $str, $match);
             $icms[1]['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms[0]['IMPOSTO'] = 'SEFAC';
-            $icms[1]['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms[0]['IMPOSTO'] = 'SEFAB';
+            $icms[1]['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -2179,7 +2293,9 @@ periodo ref.([^{]*)~i', $str, $match);
         }
         }
 
-        if (!empty($this->letras($icms[0]['VLR_RECEITA']))) {
+        if (isset($icms[0]['VLR_RECEITA'])) {
+        $check = $this->letras($icms[0]['VLR_RECEITA']);
+        if (!empty($check)) {
             preg_match('~total
 
 r\$([^{]*)~i', $str, $match);
@@ -2188,27 +2304,32 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[4])));
         }
+        }   
         }
 
-        if (empty($icms[0]['IE'])) {
-            preg_match('~numero([^{]*)~i', $str, $match);
-            if (!empty($match)) {
-                $i = explode("\n", trim($match[1]));
-                $a = explode(' ', $i[0]);
-                $icms[0]['IE'] = trim($this->numero($a[1]));
+        if (isset($icms[0]['IE'])) {
+            if (empty($icms[0]['IE'])) {
+                preg_match('~numero([^{]*)~i', $str, $match);
+                if (!empty($match)) {
+                    $i = explode("\n", trim($match[1]));
+                    $a = explode(' ', $i[0]);
+                    $icms[0]['IE'] = trim($this->numero($a[1]));
+                }
             }
         }
 
-        if (strlen($icms[0]['VLR_RECEITA'] > 11)) {
-            preg_match('~valor([^{]*)~i', $str, $match);
-            if (!empty($match)) {
-                $i = explode(" ", trim($match[1]));
-                $a = explode("\n", trim($i[0]));
-                $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
-                $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+        if (isset($icms[0]['VLR_RECEITA'])) {
+            if (strlen($icms[0]['VLR_RECEITA'] > 11)) {
+                preg_match('~valor([^{]*)~i', $str, $match);
+                if (!empty($match)) {
+                    $i = explode(" ", trim($match[1]));
+                    $a = explode("\n", trim($i[0]));
+                    $icms[0]['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+                    $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($a[0])));
+                }
             }
         }
-
+        
         preg_match('~mes ano de referencia([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $i = explode("\n", trim($match[1]));
@@ -2221,24 +2342,26 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '',trim($i[21])));
         }
 
-        if (strlen($icms[0]['REFERENCIA']) != 7) {
-            preg_match('~validade([^{]*)~i', $str, $match);
-            if (!empty($match)) {
-                $i = explode(' ', trim($match[1]));
-                $valorData = substr($i[0], 0,12);
-                $data_vencimento = str_replace('/', '-', $valorData);
-                $icms[0]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-                $icms[1]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
-                $referencia = date('m/Y', strtotime($data_vencimento));
-                $k = explode('/', $referencia);
-                $k[0] = $k[0]-1;
-                if ($k[0] == 0) {
-                    $k[1] = $k[1] - 1;
+        if (isset($icms[0]['REFERENCIA'])) {
+            if (strlen($icms[0]['REFERENCIA']) != 7) {
+                preg_match('~validade([^{]*)~i', $str, $match);
+                if (!empty($match)) {
+                    $i = explode(' ', trim($match[1]));
+                    $valorData = substr($i[0], 0,12);
+                    $data_vencimento = str_replace('/', '-', $valorData);
+                    $icms[0]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                    $icms[1]['DATA_VENCTO'] = date('Y-m-d', strtotime($data_vencimento));
+                    $referencia = date('m/Y', strtotime($data_vencimento));
+                    $k = explode('/', $referencia);
+                    $k[0] = $k[0]-1;
+                    if ($k[0] == 0) {
+                        $k[1] = $k[1] - 1;
+                    }
+                    if (strlen($k[0]) == 1) {
+                        $k[0] = '0'.$k[0];
+                    }
+                    $icms[0]['REFERENCIA'] = $k[0].'/'.$k[1];
                 }
-                if (strlen($k[0]) == 1) {
-                    $k[0] = '0'.$k[0];
-                }
-                $icms[0]['REFERENCIA'] = $k[0].'/'.$k[1];
             }
         }
     
@@ -2311,8 +2434,8 @@ r\$([^{]*)~i', $str, $match);
         if ($this->letras($file_content[2]) == 'DIFAL') {
             $icms['IMPOSTO'] = 'SEFAZ';
         }
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
             $icms['IMPOSTO'] = 'SEFAT';
@@ -2562,8 +2685,8 @@ r\$([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -2707,8 +2830,8 @@ r\$([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -2771,6 +2894,26 @@ data de vencimento
             $icms['CODBARRAS'] = trim($codbarras);
         }
 
+
+        if (!isset($icms['CODBARRAS'])) {
+            preg_match('~os valores e informacoes foram fornecidos pelo contribuinte pagar no banco do brasil, bancoob, bradesco, itau, rendimento, santander ou sicredi([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+
+                foreach ($i as $k => $x) {
+                    if (strlen($this->numero($x)) == 48) {
+                        $codbarras = $this->numero($x); 
+                    }
+                    if ($k == 7) {
+                        break;
+                    }
+                }
+                
+                $icms['CODBARRAS'] = trim($codbarras);
+            }            
+        }
+        
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -2811,8 +2954,8 @@ data de vencimento
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -2926,8 +3069,8 @@ data de vencimento
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -3029,8 +3172,8 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -3213,7 +3356,7 @@ valor total([^{]*)~i', $str, $match);
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
             $icms['IMPOSTO'] = 'SEFAC';
         }
 
@@ -3345,8 +3488,8 @@ data de emissao
             $icms['IMPOSTO'] = 'SEFAZ';
         }
 
-        if ($this->letras($file_content[2]) == 'ANTECIPADOICMS') {
-            $icms['IMPOSTO'] = 'SEFAC';
+        if ($this->letras($file_content[2]) == 'ANTECIPADO' || $this->letras($file_content[2]) == 'ICMSST') {
+            $icms['IMPOSTO'] = 'SEFAB';
         }
 
         if ($this->letras($file_content[2]) ==  'TAXA' || $this->letras($file_content[2]) ==  'PROTEGE' || $this->letras($file_content[2]) ==  'FECP' || $this->letras($file_content[2]) ==  'FEEF' || $this->letras($file_content[2]) ==  'UNIVERSIDADE' || $this->letras($file_content[2]) ==  'FITUR') {
@@ -4848,7 +4991,7 @@ juros de mora
             $this->upload($data);
         }
     }
-
+    
     private function checkDiretorio($diretorio)
     {
        $verify = array();

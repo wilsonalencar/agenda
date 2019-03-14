@@ -715,6 +715,69 @@ modelo aprovada pela portaria nº 085/2002([^{]*)~i', $str, $match);
            $icms['CODBARRAS'] = $codbarras;
        }
 
+       if (empty($icms['CODBARRAS'])) {
+            preg_match('~modelo aprovada pela portaria([^{]*)~i', $str, $match);
+           if (!empty($match)) {
+               $i = explode("\n", trim($match[1]));
+               $codbarras = str_replace('-', '', str_replace(' ', '', $i[1]));
+               $icms['CODBARRAS'] = $codbarras;
+           }           
+       }
+
+       if (!is_numeric($icms['VLR_RECEITA'])) {
+
+            preg_match('~21 - periodo ref.([^{]*)~i', $str, $match);        
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $icms['REFERENCIA'] = trim($i[0]);
+            }
+
+            preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[6]);
+                $icms['VLR_RECEITA'] = str_replace(',', '.', str_replace('.', '', trim($a[0])));
+            }
+
+            preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[6]);
+                $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', trim($a[3])));
+            }
+
+            preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $a = explode(' ', $i[6]);
+                $icms['MULTA_MORA_INFRA'] = str_replace(',', '.', str_replace('.', '', trim($a[2])));
+            }
+
+            preg_match('~40 - autenticacao mecanica([^{]*)~i', $str, $match);        
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $icms['VLR_TOTAL'] = str_replace(',', '.', str_replace('.', '', trim($i[7])));
+            }
+
+
+            preg_match('~modelo aprovada pela portaria([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+               $i = explode("\n", trim($match[1]));
+               $codbarras = str_replace('-', '', str_replace(' ', '', $i[2]));
+               $icms['CODBARRAS'] = $codbarras;
+            }  
+
+       }
+        $v = $this->numero($icms['REFERENCIA']);
+        if (empty($v)) {
+            preg_match('~21 - periodo ref.([^{]*)~i', $str, $match);        
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $icms['REFERENCIA'] = trim($i[0]);
+            } 
+        }
+
+
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -3631,6 +3694,25 @@ juros de mora
 ',$string);
         if(strlen($string[0]) != 2)
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $string[0]));
+        }
+        
+        $v = $this->numero($icms['IE']);
+        if (empty($v)) {
+             //inscricao estadual
+            preg_match('~inscricao estadual([^{]*)~i', $str, $match);
+            if (!empty($match)) {
+                $k = explode("\n", trim($match[1]));
+                $icms['IE'] = $this->numero(trim($k[2]));
+            }   
+        }
+
+        if (!isset($icms['VLR_RECEITA']) || empty($icms['VLR_RECEITA'])) {
+            preg_match('~valor da receita \(nominal ou corrigida\)([^{]*)~i', $str, $match);
+
+            if (!empty($match)) {
+                $i = explode("\n", trim($match[1]));
+                $icms['VLR_RECEITA'] = str_replace(',', '.', trim(str_replace('.', '', $i[2])));;
+            }
         }
         
         fclose($handle);

@@ -4617,6 +4617,7 @@ juros de mora
             
             $fill['data_aprovacao'] = date('Y-m-d H:i:s');
             $fill['status'] = 3;
+            $fill['usuario_aprovador'] = 112;
             //debug3
             //echo "<PrE>";
             //print_r($fill);exit;
@@ -4645,10 +4646,7 @@ juros de mora
                 }
             }
 
-            if (empty($fill['usuario_aprovador']) || !isset($fill['usuario_aprovador']) || $atividade->emp_id == 7) {
-                $fill['usuario_aprovador'] = 112;
-            }
-
+            $fill['usuario_aprovador'] = 112;
             $fill['data_aprovacao'] = date('Y-m-d H:i:s');
             
             $atividade->fill($fill); 
@@ -5095,7 +5093,6 @@ juros de mora
         $user_aprovador = '';
         if (!empty($idanalistas)) {
             foreach ($idanalistas as $k => $analista) {
-                $atividade->usuario_entregador = $analista->id;
                 $user_aprovador = $analista->id;
             }
         }
@@ -5105,20 +5102,16 @@ juros de mora
         }
 
         $atividade->arquivo_entrega = $data['image'];
+        $atividade->usuario_entregador = $user_aprovador;    
+        $atividade->data_entrega = date("Y-m-d H:i:s");
+        $atividade->status = 2;
 
-        if ($atividade->regra->tributo->id != 1) {
-            $atividade->data_entrega = date("Y-m-d H:i:s");
-            $atividade->status = 2;
-        } else {
-            $atividade->usuario_aprovador = $user_aprovador;
-            
-            if (empty($atividade->usuario_aprovador) || $atividade->emp_id == 7) {
-                $atividade->usuario_aprovador = 112;
-            }
-
+        if($atividade->regra->tributo->id == 1 ) {
+            $atividade->usuario_aprovador = 112;
             $atividade->data_aprovacao = date('Y-m-d H:i:s');
             $atividade->status = 3;
         }
+
         $atividade->save();
     }    
 }

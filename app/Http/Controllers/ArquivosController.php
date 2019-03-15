@@ -205,34 +205,35 @@ class ArquivosController extends Controller
 
         if($filter_cnpj = $request->get('cnpj')){
 
-            if (substr($filter_cnpj, -6, 4) == '0001') {
-                $estemp = Empresa::select('id')->where('cnpj', $filter_cnpj)->get();
-                $type = 'emp';
-            } else {
+            // if (substr($filter_cnpj, -6, 4) == '0001') {
+            //     $estemp = Empresa::select('id')->where('cnpj', $filter_cnpj)->get();
+            //     $type = 'emp';
+            // } else {
                 $estemp = Estabelecimento::select('id')->where('cnpj', $filter_cnpj)->get();
                 $type = 'estab';
-            }
+            // }
 
             if (sizeof($estemp) > 0) {
-                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type', $type);
+                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type',$type);
             } else {
                 $atividades = new Collection();
             }
 
         }
 
+
         if($filter_codigo = $request->get('codigo')){
 
-            $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
-            $type = 'emp';
-
-            if (sizeof($estemp)==0) { 
-                $estemp = Estabelecimento::select('id')->where('codigo','like','%'.$filter_codigo)->get();
+            // if ($filter_codigo == '1001') {
+            //     $estemp = Empresa::select('id')->where('codigo', $filter_codigo)->get();
+            //     $type = 'emp';
+            // } else {
+                $estemp = Estabelecimento::select('id')->where('codigo','=',$filter_codigo)->get();
                 $type = 'estab';
-            }
+            // }
 
             if (sizeof($estemp)>0) {
-                $atividades = $atividades->whereIn('estemp_id', $estemp)->where('estemp_type',$type);
+                $atividades = $atividades->where('estemp_id', $estemp[0]->id)->where('estemp_type',$type);
             } else {
                 $atividades = new Collection();
             }

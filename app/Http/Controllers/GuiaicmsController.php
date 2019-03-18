@@ -4344,10 +4344,12 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'txt') {
-                        $formated[$counter]['path'] = $file.'/'.$k;
-                        $formated[$counter]['file'] = $k;
-                        $counter++;
+                    if (isset($exp[1])) {
+                        if (strtolower($exp[1]) == 'txt') {
+                            $formated[$counter]['path'] = $file.'/'.$k;
+                            $formated[$counter]['file'] = $k;
+                            $counter++;
+                        }
                     }
                 }
             }
@@ -4360,10 +4362,12 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'txt') {
-                        $formated[$counter]['path'] = $file;
-                        $formated[$counter]['file'] = $k;
-                        $counter++;
+                    if (isset($exp[1])) {
+                        if (strtolower($exp[1]) == 'txt') {
+                            $formated[$counter]['path'] = $file;
+                            $formated[$counter]['file'] = $k;
+                            $counter++;
+                        }
                     }
                 }
             }
@@ -4458,10 +4462,12 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'pdf') {
-                        $formated[$counter]['path'] = $file.'/'.$k;
-                        $formated[$counter]['file'] = $k;
-                        $counter++;
+                    if (isset($exp[1])) {
+                        if (strtolower($exp[1]) == 'pdf') {
+                            $formated[$counter]['path'] = $file.'/'.$k;
+                            $formated[$counter]['file'] = $k;
+                            $counter++;
+                        }
                     }
                 }
             }
@@ -4498,10 +4504,12 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'pdf') {
-                        $formated[$counter]['path'] = $file;
-                        $formated[$counter]['file'] = $k;
-                        $counter++;
+                    if (isset($exp[1])) {
+                        if (strtolower($exp[1]) == 'pdf') {
+                            $formated[$counter]['path'] = $file;
+                            $formated[$counter]['file'] = $k;
+                            $counter++;
+                        }
                     }
                 }
             }
@@ -4758,7 +4766,9 @@ juros de mora
                 foreach ($validation as $kk => $value_value) {
                     if (strlen($value_value) > 2) {
                         $exp = explode('.',$value_value);
-                        $file_extensions[] = strtolower($exp[1]);
+                        if (isset($exp[1])) {
+                            $file_extensions[] = strtolower($exp[1]);
+                        }
                     }        
                 }    
             }
@@ -4798,7 +4808,9 @@ juros de mora
             if (!empty($validation)) {
                 foreach ($validation as $kk => $value_value) {
                     $exp = explode('.',$value_value);
-                    $file_extensions[] = strtolower($exp[1]);
+                    if (isset($exp[1])) {
+                        $file_extensions[] = strtolower($exp[1]);
+                    }
                 }    
             }
 

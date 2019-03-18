@@ -4248,60 +4248,59 @@ juros de mora
                 $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Está faltando o arquivo com extensão '.$return, 'N');
                 continue;
             }
-
-            if (!$this->validateGeral($file, $AtividadeID, false, false, true)) {
-                $existsTXT = $this->validateGeral($file, $AtividadeID, true);
-                if ($existsTXT) {
-                    $checkTXTvalue_read = $this->checkTXTvalue($file, $AtividadeID);
-                    if ($checkTXTvalue_read == 'error-read') {
-                        $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Contém arquivos TXT ou PDF que não atende o lay-out de leitura.', 'N');
-                        continue;
-                    }
-
-                    $checkTXTvalue = $this->checkTXTvalue($file, $AtividadeID);
-                    if (!is_numeric($checkTXTvalue)) {
-                        $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do TXT '.$checkTXTvalue.' não confere com CNPJ da filial da atividade.', 'N');
-                        continue;
-                    }
-
-                    $checkTXTvalue_2 = $this->checkTXTvalue($file, $AtividadeID, true);
-                    if (!is_numeric($checkTXTvalue_2)) {
-                       $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'PERÍODO do TXT '.$checkTXTvalue_2.' não confere com Período da atividade.', 'N');
-                       continue;
-                    }
-
-                    $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
-                    if ($existsPDF) {
-
-                        $checkPDFvalue_read = $this->checkPDFvalue($file, $AtividadeID);
-                        if ($checkPDFvalue_read == 'error-read') {
-                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível ler o arquivo '.$fileexploded, 'N');
+            if ($IdTributo == 1) {
+                if (!$this->validateGeral($file, $AtividadeID, false, false, true)) {
+                    $existsTXT = $this->validateGeral($file, $AtividadeID, true);
+                    if ($existsTXT) {
+                        $checkTXTvalue_read = $this->checkTXTvalue($file, $AtividadeID);
+                        if ($checkTXTvalue_read == 'error-read') {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Contém arquivos TXT ou PDF que não atende o lay-out de leitura.', 'N');
                             continue;
                         }
 
-                        $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
-                        if (!is_numeric($checkPDFvalue)) {
-                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Aprovação: Existem mais de um arquivo PDF, não é possível identificar qual dos arquivos é o recibo.', 'N');
+                        $checkTXTvalue = $this->checkTXTvalue($file, $AtividadeID);
+                        if (!is_numeric($checkTXTvalue)) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do TXT '.$checkTXTvalue.' não confere com CNPJ da filial da atividade.', 'N');
                             continue;
                         }
 
-                        $checkPDFvalue_2 = $this->checkPDFvalue($file, $AtividadeID, true);
-                        if (!is_numeric($checkPDFvalue_2)) {
-                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do Recibo não confere com CNPJ da filial da atividade.', 'N');
-                            continue;
+                        $checkTXTvalue_2 = $this->checkTXTvalue($file, $AtividadeID, true);
+                        if (!is_numeric($checkTXTvalue_2)) {
+                           $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'PERÍODO do TXT '.$checkTXTvalue_2.' não confere com Período da atividade.', 'N');
+                           continue;
                         }
 
-                        $checkPDFvalue_3 = $this->checkPDFvalue($file, $AtividadeID, false, true);
-                        if (!is_numeric($checkPDFvalue_3)) {
-                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período do Recibo não confere com o período da atividade.', 'N');
-                            continue;
-                        }
+                        $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
+                        if ($existsPDF) {
 
-                        if ($IdTributo == 1) {
+                            $checkPDFvalue_read = $this->checkPDFvalue($file, $AtividadeID);
+                            if ($checkPDFvalue_read == 'error-read') {
+                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível ler o arquivo '.$fileexploded, 'N');
+                                continue;
+                            }
+
+                            $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
+                            if (!is_numeric($checkPDFvalue)) {
+                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Aprovação: Existem mais de um arquivo PDF, não é possível identificar qual dos arquivos é o recibo.', 'N');
+                                continue;
+                            }
+
+                            $checkPDFvalue_2 = $this->checkPDFvalue($file, $AtividadeID, true);
+                            if (!is_numeric($checkPDFvalue_2)) {
+                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do Recibo não confere com CNPJ da filial da atividade.', 'N');
+                                continue;
+                            }
+
+                            $checkPDFvalue_3 = $this->checkPDFvalue($file, $AtividadeID, false, true);
+                            if (!is_numeric($checkPDFvalue_3)) {
+                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período do Recibo não confere com o período da atividade.', 'N');
+                                continue;
+                            }
+
                             $this->checkPDFvalue($file, $AtividadeID, false, false, true);
-                        }
-                    } 
-                }     
+                        } 
+                    }     
+                }
             }
             
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;

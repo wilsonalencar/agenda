@@ -528,8 +528,9 @@ class EntregaService {
                 $val['emp_id'] = $estab->empresa_id;
 
                 $analista = $this->loadAnalista($val);
+                $analista = 108;
                 if (!empty($analista)) {
-                    $val['Id_usuario_analista'] = $analista;
+                    $val['id_usuario_analista'] = $analista;
                 } 
 
                 $val['Resp_cronograma'] =$id_user;
@@ -551,7 +552,7 @@ class EntregaService {
                     $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
                         if (!empty($estabelecimento_tempo)) {
                             $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                            $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['Id_usuario_analista']);
+                            $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['id_usuario_analista']);
                     }
                 }
 
@@ -634,7 +635,7 @@ class EntregaService {
 
                     $var['Qtde_estab'] = count($this->qtd_estabs[$tributo][$Municipio->uf]);
 
-                    $tempo = $this->getTempo($tributo, $Municipio->uf, $atividade['emp_id'], $atividade['estemp_id'], $atividade['Id_usuario_analista']);
+                    $tempo = $this->getTempo($tributo, $Municipio->uf, $atividade['emp_id'], $atividade['estemp_id'], $atividade['id_usuario_analista']);
                     $var['Tempo_total'] = $tempo * $var['Qtde_estab'];
 
                     $data_carga = DB::Select('SELECT A.Data_prev_carga FROM previsaocarga A WHERE A.periodo_apuracao = "'.$atividade['periodo_apuracao'].'" AND A.Tributo_id = '.$var['Tributo_id'].' AND A.uf = "'.$var['uf'].'" AND A.empresa_id = "'.$atividade['emp_id'].'"');
@@ -1463,14 +1464,13 @@ class EntregaService {
                         $analista = $this->loadAnalista($val);
 
                         if (!empty($analista)) {
-                            $val['Id_usuario_analista'] = $analista;
+                            $val['id_usuario_analista'] = $analista;
                         } 
-
                         if ($val['estemp_id'] > 0) {
                             $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
                             if (!empty($estabelecimento_tempo)) {
                                 $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                                $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['Id_usuario_analista']);
+                                $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['id_usuario_analista']);
                             }
                         }
 
@@ -1550,9 +1550,8 @@ class EntregaService {
                             }
                             $analista = $this->loadAnalista($val);
                             if (!empty($analista)) {
-                                $val['Id_usuario_analista'] = $analista;
+                                $val['id_usuario_analista'] = $analista;
                             }
-
                             $val['Resp_cronograma'] = $id_user;
 
                             $data = date('Y-m-d H:i:s');
@@ -1574,7 +1573,7 @@ class EntregaService {
                             $estabelecimento_tempo = Estabelecimento::find($val['estemp_id']);
                                 if (!empty($estabelecimento_tempo)) {
                                     $uf_cron = Municipio::find($estabelecimento_tempo->cod_municipio);
-                                    $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['Id_usuario_analista']);
+                                    $val['tempo'] = $this->getTempo($regra->tributo->id, $uf_cron->uf, $val['emp_id'], $val['estemp_id'], $val['id_usuario_analista']);
                                 }
                             }
 

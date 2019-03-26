@@ -4072,6 +4072,7 @@ juros de mora
 
     public function jobAtividades()
     {
+        set_time_limit(0);
         $a = explode('/', $_SERVER['SCRIPT_FILENAME']);
         $path = '';
 
@@ -4248,7 +4249,7 @@ juros de mora
                 $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Está faltando o arquivo com extensão '.$return, 'N');
                 continue;
             }
-            if ($IdTributo == 1) {
+            if ($IdTributo == 1 || $IdTributo == 18 || $IdTributo = 28) {
                 if (!$this->validateGeral($file, $AtividadeID, false, false, true)) {
                     $existsTXT = $this->validateGeral($file, $AtividadeID, true);
                     if ($existsTXT) {
@@ -4269,43 +4270,48 @@ juros de mora
                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'PERÍODO do TXT '.$checkTXTvalue_2.' não confere com Período da atividade.', 'N');
                            continue;
                         }
-
-                        $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
-                        if ($existsPDF) {
-
-                            $checkPDFvalue_read = $this->checkPDFvalue($file, $AtividadeID);
-                            if ($checkPDFvalue_read == 'error-read') {
-                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível ler o arquivo '.$fileexploded, 'N');
-                                continue;
-                            }
-
-                            $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
-                            if (!is_numeric($checkPDFvalue)) {
-                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Aprovação: Existem mais de um arquivo PDF, não é possível identificar qual dos arquivos é o recibo.', 'N');
-                                continue;
-                            }
-
-                            $checkPDFvalue_2 = $this->checkPDFvalue($file, $AtividadeID, true);
-                            if (!is_numeric($checkPDFvalue_2)) {
-                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ do Recibo não confere com CNPJ da filial da atividade.', 'N');
-                                continue;
-                            }
-
-                            $checkPDFvalue_3 = $this->checkPDFvalue($file, $AtividadeID, false, true);
-                            if (!is_numeric($checkPDFvalue_3)) {
-                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período do Recibo não confere com o período da atividade.', 'N');
-                                continue;
-                            }
-
-                            $this->checkPDFvalue($file, $AtividadeID, false, false, true);
-                        } 
                     }     
+
+                    $existsPDF = $this->validateGeral($file, $AtividadeID, false, true);
+                    if ($existsPDF) {
+
+                        $checkPDFvalue_read = $this->checkPDFvalue($file, $AtividadeID);
+
+                        if ($checkPDFvalue_read == 'error-uf') {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível encontrar a UF no arquivo : '.$fileexploded, 'N');
+                            continue;
+                        }
+
+                        if ($checkPDFvalue_read == 'error-read') {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível ler o arquivo '.$fileexploded, 'N');
+                            continue;
+                        }
+
+                        $checkPDFvalue = $this->checkPDFvalue($file, $AtividadeID);
+                        if (!is_numeric($checkPDFvalue)) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Aprovação: Existem mais de um arquivo PDF, não é possível identificar qual dos arquivos é o recibo.', 'N');
+                            continue;
+                        }
+
+                        $checkPDFvalue_2 = $this->checkPDFvalue($file, $AtividadeID, true);
+                        if (!is_numeric($checkPDFvalue_2)) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'CNPJ|IE do arquivo '.$fileexploded.' não confere com CNPJ|IE da filial da atividade.', 'N');
+                            continue;
+                        }
+
+                        $checkPDFvalue_3 = $this->checkPDFvalue($file, $AtividadeID, false, true);
+                        if (!is_numeric($checkPDFvalue_3)) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Período do '.$fileexploded.' não confere com o período da atividade.', 'N');
+                            continue;
+                        }
+
+                        $this->checkPDFvalue($file, $AtividadeID, false, false, true);
+                    } 
                 }
             }
-            
             $arr[$AtividadeID][$K]['filename'] = $fileexploded;
             $arr[$AtividadeID][$K]['path'] = $file;
-            $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;   
+            $arr[$AtividadeID][$K]['atividade'] = $AtividadeID;
         }
 
         if (!empty($arr)) {
@@ -4372,6 +4378,11 @@ juros de mora
         $atividade = Atividade::findOrFail($id);
         if (!empty($formated)) {
             foreach ($formated as $single_key => $single_formated) {
+                
+                if (!file_exists($single_formated['path'])) {
+                    continue;
+                }
+
                 $handle = fopen($single_formated['path'], "r");
                 if (filesize($single_formated['path']) == 0) {
                     return 'error-read';    
@@ -4467,22 +4478,43 @@ juros de mora
             }
 
             $atividade = Atividade::findOrFail($id);
+            
+            $explode = explode('_', $formated[0]['file']);
+            
+            $UF = '';
+            if (!empty($explode[4])) 
+                $UF = substr($explode[4], 0, 2);
+            
+            $validateUF = DB::select("select count(1) as countUF FROM municipios WHERE uf = '".$UF."'");
+            if (empty($UF) || !$validateUF[0]->countUF) {
+                return 'error-uf';
+            }
+
             $pdf = $this->readRecibo($formated[0]['path'], $save, $id);
             if (!$pdf) {
                 return 'error-read';
             }
 
-            if ($atividade->regra->tributo->id == 1) {
+            if ($atividade->regra->tributo->id == 1 || $atividade->regra->tributo->id == 18 || $atividade->regra->tributo->id == 28) {
                 if ($periodo) {
-                    if ($pdf['periodo_apuracao'] != $atividade->periodo_apuracao) {
+                    if ($pdf['REFERENCIA'] != $atividade->periodo_apuracao) {
                         return 'error';
                     }
                 }
 
                 if ($cnpj) {
-                    if ($pdf['cnpj'] != $atividade->estemp->cnpj) {
-                        return 'error';
+                    if (isset($pdf['CNPJ']) && !empty($pdf['CNPJ'])) {
+                        if ($pdf['CNPJ'] != $atividade->estemp->cnpj) {
+                            return 'error';
+                        }
+                    } else {
+                        if (isset($pdf['IE']) && !empty($pdf['IE'])) {
+                            if ($pdf['IE'] != $atividade->estemp->insc_estadual) {
+                                return 'error';
+                            }   
+                        }
                     }
+                    return 'error';
                 }
 
                 if (count($formated) > 1) {
@@ -4512,17 +4544,26 @@ juros de mora
                 return 'error-read';
             }
 
-            if ($atividade->regra->tributo->id == 1) {
+            if ($atividade->regra->tributo->id == 1 || $atividade->regra->tributo->id == 18 || $atividade->regra->tributo->id == 28) {
                 if ($periodo) {
-                    if ($pdf['periodo_apuracao'] != $atividade->periodo_apuracao) {
+                    if ($pdf['REFERENCIA'] != $atividade->periodo_apuracao) {
                         return 'error';
                     }
                 }
 
                 if ($cnpj) {
-                    if ($pdf['cnpj'] != $atividade->estemp->cnpj) {
-                        return 'error';
+                    if (isset($pdf['CNPJ']) && !empty($pdf['CNPJ'])) {
+                        if ($pdf['CNPJ'] != $atividade->estemp->cnpj) {
+                            return 'error';
+                        }
+                    } else {
+                        if (isset($pdf['IE']) && !empty($pdf['IE'])) {
+                            if ($pdf['IE'] != $atividade->estemp->insc_estadual) {
+                                return 'error';
+                            }   
+                        }
                     }
+                    return 'error';
                 }
 
                 if (count($formated) > 1) {
@@ -4549,24 +4590,123 @@ juros de mora
                 $caminho1_result .= $value.'/';
             }
         }
+
         $caminho1_result = $caminho1_result.$arquivonome;
         $A = shell_exec($funcao.$path.' '.$caminho1_result);
 
         $arr = array();
         $arr['arquivotxt'] = $arquivonome; 
         $arr['pathtxt'] = $caminho1_result;
+        $arr['arquivo'] = str_replace('txt', 'pdf', $arquivonome);
+
+        $fields = explode('_', $arr['arquivo']);
         
+        if (!isset($fields[4])) {
+            unlink($arr['pathtxt']);
+            return false;
+        }
+
+        $uf = substr($fields[4], 0,2);
+        
+        if ($uf == 'SP') {
+            $icmsarray = $this->icmsSP($arr);
+        }
+
+        if ($uf == 'RJ') {
+            $icmsarray = $this->icmsRJ($arr);   
+        }
+
+        if ($uf == 'RS') {
+            $icmsarray = $this->icmsRS($arr);
+        }  
+
+        if ($uf == 'AL') {
+            $icmsarray = $this->icmsAL($arr);
+        }  
+
+        if ($uf == 'DF') {
+            $icmsarray = $this->icmsDF($arr);
+        }
+        
+        if ($uf == 'PA') {
+            $icmsarray = $this->icmsPA($arr);
+        }
+
+        if ($uf == 'GO') {
+            $icmsarray = $this->icmsGO($arr);
+        }  
+        
+        if ($uf == 'ES') {
+            $icmsarray = $this->icmsES($arr);
+        }
+        
+        if ($uf == 'PB') {
+            $icmsarray = $this->icmsPB($arr);
+        }
+
+        if ($uf == 'SE') {
+            $icmsarray = $this->icmsSE($arr);
+        }
+        
+        if ($uf == 'BA') {
+            $icmsarray = $this->icmsBA($arr);
+        }
+
+        if ($uf == 'RN') {
+            $icmsarray = $this->icmsRN($arr);
+        }
+
+        if ($uf == 'PE') {
+            $icmsarray = $this->icmsPE($arr);
+        }
+
+        if ($uf == 'MA') {
+           $icmsarray = $this->icmsMA($arr);
+        }
+
+        if ($uf == 'MG') {
+            $icmsarray = $this->icmsMG($arr);
+        }
+
+        if ($uf == 'CE') {
+            $icmsarray = $this->icmsCE($arr);
+        }
+
+        if ($uf == 'PI') {
+           $icmsarray = $this->icmsPI($arr);
+        }
+
+        if ($uf == 'PR') {
+           $icmsarray = $this->icmsPR($arr);
+        }
+
+        if ($uf == 'MS') {
+            $icmsarray = $this->icmsMS($arr);
+        }
+
+        if ($uf == 'MT') {
+           $icmsarray = $this->icmsMT($arr);
+        }
+
+        /*
         $handle = fopen($arr['pathtxt'], "r");
         $contents = fread($handle, filesize($arr['pathtxt']));
         $str = 'foo '.$contents.' bar';
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
-        $dados = array();
-        $fill = array();
+        */
 
+        if (!isset($icmsarray[0])) {
+            unlink($arr['pathtxt']);
+            return false;
+        }
+
+        $dados = $icmsarray[0];
+        $fill = array();
         $atividade = Atividade::FindOrFail($idAtividade);
 
+        /*
         preg_match('~cnpj/cpf:([^{]*)~i', $str, $match);        
         if (!empty($match)) {
             $i = explode(" ", trim($match[1]));
@@ -4579,15 +4719,12 @@ juros de mora
             $a = explode("\n", trim($i[0]));
             $dados['periodo_apuracao'] = substr($this->numero($a[0]), -6);
         }
-
-        if (empty($dados)) {
-            return false;
-        }
+        */
         
         //Debug2 de recibo
         //echo "<PrE>";
         //print_r($dados);exit;
-
+        /*
         preg_match('~periodo de apuracao valor total dos debitos por saidas e prestacoes com debito do imposto valor total dos creditos por entradas e aquisicoes com credito do imposto valor total do icms a recolher valor total do saldo credor a transportar para o periodo seguinte valor recolhidos ou a recolher, extra-apuracao
 ([^{]*)~i', $str, $match);        
         if (!empty($match)) {
@@ -4705,36 +4842,32 @@ juros de mora
         } else {
             return false;
         }
-
+        */
         if ($save) {
 
-            $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$atividade->regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$atividade->estemp->id. " AND B.Regra_geral = 'N') limit 1";
+            $atividade->status = 3;
+            $atividade->usuario_aprovador = 112;
+            $atividade->data_aprovacao = date('Y-m-d H:i:s');            
+                
+            $exploded = explode('_', $arr['arquivo']);
+            $exploded[2] = $this->letras($exploded[2]);
 
-            $retornodaquery = DB::select($query);
-
-            $sql = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B where B.Tributo_id = " .$atividade->regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND B.Regra_geral = 'S') limit 1";
-            
-            $queryGeral = DB::select($sql);
-
-            $idanalistas = $retornodaquery;
-            if (empty($retornodaquery)) {
-                $idanalistas = $queryGeral;   
-            }
-            $fill['usuario_aprovador'] = '';
-            if (!empty($idanalistas)) {
-                foreach ($idanalistas as $k => $analista) {
-                    $fill['usuario_aprovador'] = $analista->id;
-                }
+            if (strtoupper($exploded[2]) == 'ICMS' || strtoupper($exploded[2]) == 'DIFAL') {
+                $atividade->vlr_recibo_1 += $dados['VLR_TOTAL'];
             }
 
-            $fill['usuario_aprovador'] = 112;
-            $fill['data_aprovacao'] = date('Y-m-d H:i:s');
-            
-            $atividade->fill($fill); 
+            if (strtoupper($exploded[2]) == 'ICMSST' || strtoupper($exploded[2]) == 'ANTECIPADO') {
+                $atividade->vlr_recibo_2 += $dados['VLR_TOTAL'];
+            }
+
+            if (strtoupper($exploded[2]) == 'TAXA' || strtoupper($exploded[2]) == 'PROTEGE' || strtoupper($exploded[2]) == 'FECP' || strtoupper($exploded[2]) == 'FEEF' || strtoupper($exploded[2]) == 'UNIVERSIDADE' || strtoupper($exploded[2]) == 'FITUR') {
+                $atividade->vlr_recibo_3 += $dados['VLR_TOTAL'];
+            }
+
             $atividade->save(); 
         }
 
-        fclose($handle);
+        //fclose($handle);
         unlink($arr['pathtxt']);
         return $dados;
     }

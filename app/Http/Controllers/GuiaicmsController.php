@@ -4255,7 +4255,12 @@ juros de mora
                     if ($existsTXT) {
                         $checkTXTvalue_read = $this->checkTXTvalue($file, $AtividadeID);
                         if ($checkTXTvalue_read == 'error-read') {
-                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Contém arquivos TXT ou PDF que não atende o lay-out de leitura.', 'N');
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Contém arquivos TXT que não atendem o lay-out de leitura.', 'N');
+                            continue;
+                        }
+
+                        if ($checkTXTvalue_read == 'error-signature' && $IdTributo == 1) {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Arquivo Sped TXT sem assinatura.', 'N');
                             continue;
                         }
 
@@ -4282,8 +4287,31 @@ juros de mora
                             continue;
                         }
 
+                        if ($checkPDFvalue_read == 'error-space') {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Elimine o espaço no nome do arquivo ou no nome da pasta : '.$fileexploded, 'N');
+                            continue;
+                        }
+
+                        if ($IdTributo == 1) {
+                            $checkPDFRecibos = $this->hasRecibo($file);
+                            if ($checkPDFRecibos == 'error') {
+                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Recibo PDF não encontrado', 'N');
+                                continue;
+                            }
+
+                            if ($checkPDFRecibos == 'error-multiple') {
+                                $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Só é permitido ter um Recibo', 'N');
+                                continue;
+                            }
+                        }
+
                         if ($checkPDFvalue_read == 'error-read') {
                             $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível ler o arquivo '.$fileexploded, 'N');
+                            continue;
+                        }
+
+                        if ($checkPDFvalue_read == 'error-read-guia') {
+                            $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível ler a guia '.$fileexploded, 'N');
                             continue;
                         }
 
@@ -4321,6 +4349,76 @@ juros de mora
             }
         }
     }   
+
+    private function hasRecibo($file)
+    {
+        if (is_dir($file)) {
+            $formated = array();
+            $files = scandir($file);
+            $counter = 0;
+            foreach ($files as $x => $k) {
+                if (strlen($k) > 2) {
+                    $exp = explode('.',$k);
+                    if (strtolower($exp[1]) == 'pdf') {
+                        $formated[$counter]['path'] = $file.'/'.$k;
+                        $formated[$counter]['file'] = $k;
+                        $counter++;
+                    }
+                }
+            }
+
+            if (!$this->checkPathSpace($formated[0]['path'])) {
+                return 'error-space';
+            }
+
+            if (!empty($formated)) {
+                foreach ($formated as $x => $files) {
+                    if (!$this->isRecibo($files['path'])) {
+                        unlink($formated[$x]);
+                    }
+                }
+            }
+        }
+
+        if (!is_dir($file)) {
+            $formated = array();
+            $files = $this->getFilesByAtividadeId($id, $file);
+            $counter = 0;
+            foreach ($files as $x => $k) {
+                if (strlen($k) > 2) {
+                    $exp = explode('.',$k);
+                    if (strtolower($exp[1]) == 'pdf') {
+                        $formated[$counter]['path'] = $file;
+                        $formated[$counter]['file'] = $k;
+                        $counter++;
+                    }
+                }
+            }
+
+            $atividade = Atividade::findOrFail($id);
+            if (!$this->checkPathSpace($formated[0]['path'])) {
+                return 'error-space';
+            }
+
+            if (!empty($formated)) {
+                foreach ($formated as $x => $files) {
+                    if (!$this->isRecibo($files['path'])) {
+                        unlink($formated[$x]);
+                    }
+                }
+            }
+        }
+
+        if (empty($formated)) {
+            return 'error';
+        }
+
+        if (count($formated) > 1) {
+            return 'error-multiple';
+        }
+
+        return 'not-error';
+    }
 
     private function checkSubPath($file)
     {
@@ -4377,18 +4475,17 @@ juros de mora
         
         $atividade = Atividade::findOrFail($id);
         if (!empty($formated)) {
-            foreach ($formated as $single_key => $single_formated) {
-                
-                if (!file_exists($single_formated['path'])) {
-                    continue;
-                }
 
-                $handle = fopen($single_formated['path'], "r");
-                if (filesize($single_formated['path']) == 0) {
+            //Validação de TXT
+            $validateQuantity = 0;
+            foreach ($formated as $most_key => $formated_unic) {
+            
+                $handle = fopen($formated_unic['path'], "r");
+                if (filesize($formated_unic['path']) == 0) {
                     return 'error-read';    
                 }
 
-                $contents = fread($handle, filesize($single_formated['path']));
+                $contents = fread($handle, filesize($formated_unic['path']));
                 if (empty($contents)) {
                     return 'error-read';    
                 }
@@ -4398,9 +4495,28 @@ juros de mora
                     return 'error-read';
                 }
 
-                //debug1
-                //echo "<Pre>";
-                //print_r($exploded_rows);exit;
+                $lastIndex = $exploded_rows[count($exploded_rows) - 1];
+                if (strlen($lastIndex) > 150) {
+                    $validateQuantity++;
+                }
+
+                fclose($handle);
+            }
+            
+            if (!$validateQuantity) {
+                return 'error-signature';
+            }
+
+            //Leitura de TXT
+            foreach ($formated as $single_key => $single_formated) {
+                
+                if (!file_exists($single_formated['path'])) {
+                    continue;
+                }
+
+                $handle = fopen($single_formated['path'], "r");
+                $contents = fread($handle, filesize($single_formated['path']));
+                $exploded_rows = explode("\n", utf8_encode($contents));
 
                 if ($atividade->regra->tributo->id == 1) {
 
@@ -4490,9 +4606,20 @@ juros de mora
                 return 'error-uf';
             }
 
-            $pdf = $this->readRecibo($formated[0]['path'], $save, $id);
-            if (!$pdf) {
-                return 'error-read';
+            if (!$this->checkPathSpace($formated[0]['path'])) {
+                return 'error-space';
+            }
+
+            if ($this->isRecibo($formated[0]['path'])) {
+                $pdf = $this->readRecibo($formated[0]['path'], $save, $id, true);
+                if (!$pdf) {
+                    return 'error-read';
+                }
+            } else {
+                $pdf = $this->readRecibo($formated[0]['path'], $save, $id);
+                if (!$pdf) {
+                    return 'error-read-guia';
+                }
             }
 
             if ($atividade->regra->tributo->id == 1 || $atividade->regra->tributo->id == 18 || $atividade->regra->tributo->id == 28) {
@@ -4539,9 +4666,20 @@ juros de mora
             }
 
             $atividade = Atividade::findOrFail($id);
-            $pdf = $this->readRecibo($formated[0]['path'], $save, $id);
-            if (!$pdf) {
-                return 'error-read';
+            if (!$this->checkPathSpace($formated[0]['path'])) {
+                return 'error-space';
+            }
+
+            if ($this->isRecibo($formated[0]['path'])) {
+                $pdf = $this->readRecibo($formated[0]['path'], $save, $id, true);
+                if (!$pdf && $atividade->regra->tributo->id == 1) {
+                    return 'error-read';
+                }
+            } else {
+                $pdf = $this->readRecibo($formated[0]['path'], $save, $id);
+                if (!$pdf) {
+                    return 'error-read-guia';
+                }
             }
 
             if ($atividade->regra->tributo->id == 1 || $atividade->regra->tributo->id == 18 || $atividade->regra->tributo->id == 28) {
@@ -4575,12 +4713,55 @@ juros de mora
         return '1';
     }
 
-    private function readRecibo($path, $save = false, $idAtividade = false)
+    private function isRecibo($path)
     {
+        $dados = array();
         $funcao = 'pdftotext.exe ';
-        
         $filetxt = str_replace('.pdf', '.txt', $path);
+        $caminho1 = explode('/', $filetxt);
+        $caminho1_result = '';
+        foreach ($caminho1 as $key => $value) {
+            $arquivonome = $value;
+            $key++;
+            if (isset($caminho1[$key])) {
+                $caminho1_result .= $value.'/';
+            }
+        }
+
+        $caminho1_result = $caminho1_result.$arquivonome;
+        $A = shell_exec($funcao.$path.' '.$caminho1_result);
+
+        $arr = array();
+        $arr['arquivotxt'] = $arquivonome; 
+        $arr['pathtxt'] = $caminho1_result;
+        $arr['arquivo'] = str_replace('txt', 'pdf', $arquivonome);
         
+        $dados = $this->loadRecibo($arr);
+     
+        unlink($arr['pathtxt']);
+        if (!empty($dados) && isset($dados['vlr_recibo_1'])) {
+            return true;
+        }
+        return false;
+    }
+
+    private function checkPathSpace($name)
+    {
+        $a = explode('/', $name);
+        foreach ($a as $x => $namefile) {}
+
+        $p = explode(' ', $namefile);
+        if (count($p) > 1) {
+            return false;
+        }
+        return true;
+    }
+
+    private function readRecibo($path, $save = false, $idAtividade = false, $isRecibo = false)
+    {
+        $dados = array();
+        $funcao = 'pdftotext.exe ';
+        $filetxt = str_replace('.pdf', '.txt', $path);
         $caminho1 = explode('/', $filetxt);
         $caminho1_result = '';
         foreach ($caminho1 as $key => $value) {
@@ -4599,15 +4780,57 @@ juros de mora
         $arr['pathtxt'] = $caminho1_result;
         $arr['arquivo'] = str_replace('txt', 'pdf', $arquivonome);
 
-        $fields = explode('_', $arr['arquivo']);
+        $fill = array();
+        $atividade = Atividade::FindOrFail($idAtividade);
         
-        if (!isset($fields[4])) {
-            unlink($arr['pathtxt']);
-            return false;
+        if ($isRecibo) {
+            $dados = $this->loadRecibo($arr);
+        } else {
+            $dados = $this->loadGuia($arr);
         }
 
+        if ($save) {
+
+            $atividade->status = 3;
+            $atividade->usuario_aprovador = 112;
+            $atividade->data_aprovacao = date('Y-m-d H:i:s');            
+                
+            $exploded = explode('_', $arr['arquivo']);
+            $exploded[2] = $this->letras($exploded[2]);
+
+            if ($isRecibo) {
+                $atividade->vlr_recibo_1 = $dados['vlr_recibo_1'];
+                $atividade->vlr_recibo_2 = $dados['vlr_recibo_2'];
+                $atividade->vlr_recibo_3 = $dados['vlr_recibo_3'];
+                $atividade->vlr_recibo_4 = $dados['vlr_recibo_4']; 
+                $atividade->vlr_recibo_5 = $dados['vlr_recibo_5'];
+            } else {
+                if (strtoupper($exploded[2]) == 'ICMS' || strtoupper($exploded[2]) == 'DIFAL') {
+                    $atividade->vlr_recibo_1 += $dados['VLR_TOTAL'];
+                }
+
+                if (strtoupper($exploded[2]) == 'ICMSST' || strtoupper($exploded[2]) == 'ANTECIPADO') {
+                    $atividade->vlr_recibo_2 += $dados['VLR_TOTAL'];
+                }
+
+                if (strtoupper($exploded[2]) == 'TAXA' || strtoupper($exploded[2]) == 'PROTEGE' || strtoupper($exploded[2]) == 'FECP' || strtoupper($exploded[2]) == 'FEEF' || strtoupper($exploded[2]) == 'UNIVERSIDADE' || strtoupper($exploded[2]) == 'FITUR') {
+                    $atividade->vlr_recibo_3 += $dados['VLR_TOTAL'];
+                }
+            }
+
+            $atividade->save(); 
+        }
+
+        unlink($arr['pathtxt']);
+        return $dados;
+    }
+
+    private function loadGuia($arr)
+    {
+        $dados = array();
+        $fields = explode('_', $arr['arquivo']);
         $uf = substr($fields[4], 0,2);
-        
+
         if ($uf == 'SP') {
             $icmsarray = $this->icmsSP($arr);
         }
@@ -4688,43 +4911,36 @@ juros de mora
            $icmsarray = $this->icmsMT($arr);
         }
 
-        /*
+        if (isset($icmsarray[0])) {
+            $dados = $icmsarray[0];
+        }
+
+        return $dados;
+    }
+
+    private function loadRecibo($arr)
+    {
+        $dados = array();
         $handle = fopen($arr['pathtxt'], "r");
         $contents = fread($handle, filesize($arr['pathtxt']));
         $str = 'foo '.$contents.' bar';
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);
         $str = strtolower($str);
-        */
-
-        if (!isset($icmsarray[0])) {
-            unlink($arr['pathtxt']);
-            return false;
-        }
-
-        $dados = $icmsarray[0];
-        $fill = array();
-        $atividade = Atividade::FindOrFail($idAtividade);
-
-        /*
+        
         preg_match('~cnpj/cpf:([^{]*)~i', $str, $match);        
         if (!empty($match)) {
             $i = explode(" ", trim($match[1]));
-            $dados['cnpj'] = trim($this->numero($i[0]));
+            $dados['CNPJ'] = trim($this->numero($i[0]));
         }
 
         preg_match('~periodo:([^{]*)~i', $str, $match);        
         if (!empty($match)) {
             $i = explode(" ", trim($match[1]));
             $a = explode("\n", trim($i[0]));
-            $dados['periodo_apuracao'] = substr($this->numero($a[0]), -6);
+            $dados['REFERENCIA'] = substr($this->numero($a[0]), -6);
         }
-        */
-        
-        //Debug2 de recibo
-        //echo "<PrE>";
-        //print_r($dados);exit;
-        /*
+
         preg_match('~periodo de apuracao valor total dos debitos por saidas e prestacoes com debito do imposto valor total dos creditos por entradas e aquisicoes com credito do imposto valor total do icms a recolher valor total do saldo credor a transportar para o periodo seguinte valor recolhidos ou a recolher, extra-apuracao
 ([^{]*)~i', $str, $match);        
         if (!empty($match)) {
@@ -4737,12 +4953,6 @@ juros de mora
                 $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
                 $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
                 $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[12]));
-
-                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
-                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
-                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
-                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[12]));
             } 
 
             //modelo PDF 2
@@ -4753,12 +4963,6 @@ juros de mora
                 $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
                 $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
                 $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[4]));
-
-                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
-                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
-                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
-                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[4]));
             }
 
             //Modelo PDF 3
@@ -4768,12 +4972,6 @@ juros de mora
                 $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
                 $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
                 $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
-
-                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
-                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
-                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
-                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
             } 
 
             //Modelo PDF 4
@@ -4784,12 +4982,6 @@ juros de mora
                 $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[3]));
                 $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $q[1]));
                 $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $q[2]));
-
-                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $p[1]));
-                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[3]));
-                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $q[1]));
-                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $q[2]));
             }
 
             //Modelo PDF 5
@@ -4799,76 +4991,34 @@ juros de mora
                 $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
                 $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
                 $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
-
-                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
-                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
-                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $a[10]));
-                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $a[11]));
             }
             
             //Modelo PDF 6
-            if (isset($fill['vlr_recibo_5']) && $fill['vlr_recibo_5'] == 'r$') {
+            if (isset($dados['vlr_recibo_5']) && $dados['vlr_recibo_5'] == 'r$' && isset($a[6])) {
                 $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
                 $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
                 $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
                 $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
                 $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[5]));
-
-                $fill['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
-                $fill['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
-                $fill['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $p[1]));
-                $fill['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $p[3]));
-                $fill['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $p[5]));
             }
-
-            if (empty($fill)) {
-                return false;
-            }
-
-            foreach ($fill as $x => $index) {
-                $valid = $this->numero($index);
-                if (!is_numeric($valid)) {
-                    return false;    
-                }
-            }
-            
-            $fill['data_aprovacao'] = date('Y-m-d H:i:s');
-            $fill['status'] = 3;
-            $fill['usuario_aprovador'] = 112;
-            //debug3
-            //echo "<PrE>";
-            //print_r($fill);exit;
-        } else {
-            return false;
-        }
-        */
-        if ($save) {
-
-            $atividade->status = 3;
-            $atividade->usuario_aprovador = 112;
-            $atividade->data_aprovacao = date('Y-m-d H:i:s');            
+            //Modelo PDF 7
+            if (isset($dados['vlr_recibo_5']) && $dados['vlr_recibo_5'] == 'r$' && !isset($a[6])) {
+                $one = explode(' ', $i[0]);
+                $two = explode(' ', $i[1]);
+                $three = explode(' ', $i[2]);
                 
-            $exploded = explode('_', $arr['arquivo']);
-            $exploded[2] = $this->letras($exploded[2]);
-
-            if (strtoupper($exploded[2]) == 'ICMS' || strtoupper($exploded[2]) == 'DIFAL') {
-                $atividade->vlr_recibo_1 += $dados['VLR_TOTAL'];
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $one[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $two[1]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $two[3]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $three[1]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $three[3]));
             }
-
-            if (strtoupper($exploded[2]) == 'ICMSST' || strtoupper($exploded[2]) == 'ANTECIPADO') {
-                $atividade->vlr_recibo_2 += $dados['VLR_TOTAL'];
-            }
-
-            if (strtoupper($exploded[2]) == 'TAXA' || strtoupper($exploded[2]) == 'PROTEGE' || strtoupper($exploded[2]) == 'FECP' || strtoupper($exploded[2]) == 'FEEF' || strtoupper($exploded[2]) == 'UNIVERSIDADE' || strtoupper($exploded[2]) == 'FITUR') {
-                $atividade->vlr_recibo_3 += $dados['VLR_TOTAL'];
-            }
-
-            $atividade->save(); 
+            fclose($handle);
+        } else {
+            fclose($handle);    
+            unlink($arr['pathtxt']);
         }
-
-        //fclose($handle);
-        unlink($arr['pathtxt']);
+        
         return $dados;
     }
 

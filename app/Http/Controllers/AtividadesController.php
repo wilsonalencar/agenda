@@ -365,7 +365,10 @@ class AtividadesController extends Controller
         $Googl = new Googl($key);
         foreach ($array as $L => $F) {
             $arr[$L]['texto'] = $F['texto'];
-            $arr[$L]['link'] = $Googl->shorten($F['link']);
+            $arr[$L]['link'] = @$Googl->shorten($F['link']);
+            if (empty($arr[$L]['link'])) {
+                $arr[$L]['link'] = $F['link'];
+            }
         }
 
         $dados = array('dados' => $arr, 'emails' => array($email_1, $email_2, $email_3));

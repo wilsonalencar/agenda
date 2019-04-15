@@ -539,7 +539,7 @@ class GuiaicmsController extends Controller
                     $destino = str_replace('/imported', '', $value['path']);
                     if (file_exists($destino)) {
                         copy($destino, $value['path']);
-                        unlink($destino);
+                        //unlink($destino);
                     }
                 }
             }
@@ -3698,7 +3698,10 @@ juros de mora
             $icms['JUROS_MORA'] = str_replace(',', '.', str_replace('.', '', $string[0]));
         }
         
-        $v = $this->numero($icms['IE']);
+        $v = '';
+        if (isset($icms['IE'])) {
+            $v = $this->numero($icms['IE']);
+        }
         if (empty($v)) {
              //inscricao estadual
             preg_match('~inscricao estadual([^{]*)~i', $str, $match);
@@ -4142,7 +4145,7 @@ juros de mora
 
         if (!empty($clear)) {
             foreach ($clear as $key => $valuetoclear) {
-                @rmdir($valuetoclear);
+                //@rmdir($valuetoclear);
             }
         }
     }
@@ -4281,7 +4284,6 @@ juros de mora
                     if ($existsPDF) {
 
                         $checkPDFvalue_read = $this->checkPDFvalue($file, $AtividadeID);
-
                         if ($checkPDFvalue_read == 'error-uf') {
                             $this->createCriticaEntrega($empresaraizid, $estemp_id, $IdTributo, $fileexploded, 'Não foi possível encontrar a UF no arquivo : '.$fileexploded, 'N');
                             continue;
@@ -4374,7 +4376,7 @@ juros de mora
             if (!empty($formated)) {
                 foreach ($formated as $x => $files) {
                     if (!$this->isRecibo($files['path'])) {
-                        unlink($formated[$x]);
+                        //unlink($formated[$x]);
                     }
                 }
             }
@@ -4403,7 +4405,7 @@ juros de mora
             if (!empty($formated)) {
                 foreach ($formated as $x => $files) {
                     if (!$this->isRecibo($files['path'])) {
-                        unlink($formated[$x]);
+                        //unlink($formated[$x]);
                     }
                 }
             }
@@ -4448,7 +4450,7 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'txt') {
+                    if (isset($exp[1]) && strtolower($exp[1]) == 'txt') {
                         $formated[$counter]['path'] = $file.'/'.$k;
                         $formated[$counter]['file'] = $k;
                         $counter++;
@@ -4464,7 +4466,7 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'txt') {
+                    if (isset($exp[1]) && strtolower($exp[1]) == 'txt') {
                         $formated[$counter]['path'] = $file;
                         $formated[$counter]['file'] = $k;
                         $counter++;
@@ -4585,7 +4587,7 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'pdf') {
+                    if (isset($exp[1]) && strtolower($exp[1]) == 'pdf') {
                         $formated[$counter]['path'] = $file.'/'.$k;
                         $formated[$counter]['file'] = $k;
                         $counter++;
@@ -4602,8 +4604,10 @@ juros de mora
                 $UF = substr($explode[4], 0, 2);
             
             $validateUF = DB::select("select count(1) as countUF FROM municipios WHERE uf = '".$UF."'");
-            if (empty($UF) || !$validateUF[0]->countUF) {
-                return 'error-uf';
+            if (!$this->isRecibo($formated[0]['path'])) {
+                if (empty($UF) || !$validateUF[0]->countUF) {
+                    return 'error-uf';
+                }
             }
 
             if (!$this->checkPathSpace($formated[0]['path'])) {
@@ -4657,7 +4661,7 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'pdf') {
+                    if (isset($exp[1]) && strtolower($exp[1]) == 'pdf') {
                         $formated[$counter]['path'] = $file;
                         $formated[$counter]['file'] = $k;
                         $counter++;
@@ -4666,6 +4670,17 @@ juros de mora
             }
 
             $atividade = Atividade::findOrFail($id);
+            $UF = '';
+            if (!empty($explode[4])) 
+                $UF = substr($explode[4], 0, 2);
+            
+            $validateUF = DB::select("select count(1) as countUF FROM municipios WHERE uf = '".$UF."'");
+            if (!$this->isRecibo($formated[0]['path'])) {
+                if (empty($UF) || !$validateUF[0]->countUF) {
+                    return 'error-uf';
+                }
+            }
+
             if (!$this->checkPathSpace($formated[0]['path'])) {
                 return 'error-space';
             }
@@ -4736,11 +4751,13 @@ juros de mora
         $arr['pathtxt'] = $caminho1_result;
         $arr['arquivo'] = str_replace('txt', 'pdf', $arquivonome);
         
-        $dados = $this->loadRecibo($arr);
-     
-        unlink($arr['pathtxt']);
-        if (!empty($dados) && isset($dados['vlr_recibo_1'])) {
-            return true;
+        if ($this->checkPathSpace($path)) {
+            $dados = $this->loadRecibo($arr);
+         
+            //unlink($arr['pathtxt']);
+            if (!empty($dados) && isset($dados['vlr_recibo_1'])) {
+                return true;
+            }
         }
         return false;
     }
@@ -4821,7 +4838,7 @@ juros de mora
             $atividade->save(); 
         }
 
-        unlink($arr['pathtxt']);
+        //unlink($arr['pathtxt']);
         return $dados;
     }
 
@@ -5016,7 +5033,7 @@ juros de mora
             fclose($handle);
         } else {
             fclose($handle);    
-            unlink($arr['pathtxt']);
+            //unlink($arr['pathtxt']);
         }
         
         return $dados;
@@ -5284,7 +5301,7 @@ juros de mora
                         } else {
                             $name['path'] =substr($this->limpaWay($name['path']), 0, -1);
                             if ($this->checkDiretorio($name['path'])) {
-                                @rmdir($name['path']);
+                                //@rmdir($name['path']);
                             }
                         }
                     }
@@ -5331,23 +5348,23 @@ juros de mora
                             $currentFile = $creationpath.'/'.$mostsingle['filename'];
                         }
                         copy($mostsingle['path'], $currentFile);
-                        unlink($mostsingle['path']);
+                        //unlink($mostsingle['path']);
                     }
 
                     if (isset($mostsingle['raiz'])) {
                         if ($this->checkDiretorio($mostsingle['raiz'])) {
-                            @rmdir($mostsingle['raiz']);
+                            //@rmdir($mostsingle['raiz']);
                         }
                     }
                 }
                 if (!is_array($single)) {
                     copy($single['path'], $single['destino']);
-                    unlink($single['path']);
+                    //unlink($single['path']);
                 }
                 
                 if(is_array($single) && is_numeric($chave)){
                     copy($single['path'], $single['destino']);
-                    unlink($single['path']);
+                    //unlink($single['path']);
                 }
             }
         }
@@ -5442,7 +5459,7 @@ juros de mora
 
         $destinationPath .='/';
         copy($data['image'], $destinationPath.$data['image']);
-        unlink($data['image']);
+        //unlink($data['image']);
 
         
         $query = "select A.id FROM users A where A.id IN (select B.id_usuario_analista FROM atividadeanalista B inner join atividadeanalistafilial C on B.id = C.Id_atividadeanalista where B.Tributo_id = " .$regra->tributo->id. " and B.Emp_id = " .$atividade->emp_id. " AND C.Id_atividadeanalista = B.id AND C.Id_estabelecimento = " .$estemp->id. " AND B.Regra_geral = 'N') limit 1";

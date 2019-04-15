@@ -34,7 +34,7 @@ class PagesController extends Controller
     {
         Session::forget('seid');
         Session::forget('seidLogo');
-        return response()->redirectTo('http://dev.platform');
+        return response()->redirectTo('http://homo-bravoplataforma.bravobpo.com.br');
     }
 
     public function aprovacao (Request $request = null)

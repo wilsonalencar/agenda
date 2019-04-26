@@ -2440,9 +2440,11 @@ r\$([^{]*)~i', $str, $match);
             $icms[0]['VLR_TOTAL'] = $vlr_total;
         }
 
-        $ano = substr($file_content[3], -4);
-        $mes = substr($file_content[3], 0,2);
-        $icms[0]['REFERENCIA'] = $mes.'/'.$ano;
+        if (empty($icms[0]['REFERENCIA'])) {
+            $ano = substr($file_content[3], -4);
+            $mes = substr($file_content[3], 0,2);
+            $icms[0]['REFERENCIA'] = $mes.'/'.$ano;
+        }
         
         if (substr($icms[0]['REFERENCIA'], 0,2) == '00') {
             preg_match('~periodo ref.([^{]*)~i', $str, $match);

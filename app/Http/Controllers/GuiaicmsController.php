@@ -4949,11 +4949,36 @@ juros de mora
         return $dados;
     }
 
+    private function sendMailError($error, $file)
+    {
+        $query = "select id FROM users where id IN (select user_id FROM role_user where role_id = 2 )";
+        $admins = DB::select($query);
+        
+        $subject = "Erro Upload – ".date('d/m/Y h:i:s');
+        $text = 'O arquivo '.$file.' gerou o erro abaixo, que impossibilitou a continuação do processamento do upload de arquivos no horário agendado. <hr /> <hr /> '.$error;
+
+        $data = array('subject'=>$subject,'messageLines'=>$text);
+        
+        set_time_limit(0);
+        if (!empty($admins)) {
+            foreach($admins as $row) {
+                $user = User::findOrFail($row->id);
+                $this->eService->sendMail($user, $data, 'emails.notificacao-erro-upload', false);
+            }
+        }     
+    }
+
     private function loadRecibo($arr, $delete = false)
     {
         $dados = array();
-        $handle = fopen($arr['pathtxt'], "r");
-        $contents = fread($handle, filesize($arr['pathtxt']));
+        try {
+            $handle = fopen($arr['pathtxt'], "r");
+            $contents = fread($handle, filesize($arr['pathtxt']));
+        } catch (\Exception $e) {
+            $this->sendMailError($e->getMessage(), $arr['arquivo']);
+            exit();
+        }
+
         $str = 'foo '.$contents.' bar';
         $str = utf8_encode($str);
         $str = preg_replace(array("/(á|à|ã|â|ä)/","/(Á|À|Ã|Â|Ä)/","/(é|è|ê|ë)/","/(É|È|Ê|Ë)/","/(í|ì|î|ï)/","/(Í|Ì|Î|Ï)/","/(ó|ò|õ|ô|ö)/","/(Ó|Ò|Õ|Ô|Ö)/","/(ú|ù|û|ü)/","/(Ú|Ù|Û|Ü)/","/(ñ)/","/(Ñ)/","/(ç)/","/(Ç)/","/(ª)/","/(°)/"),explode(" ","a A e E i I o O u U n N c C um um"),$str);

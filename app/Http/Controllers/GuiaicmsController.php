@@ -779,7 +779,6 @@ modelo aprovada pela portaria nº 085/2002([^{]*)~i', $str, $match);
             } 
         }
 
-
         fclose($handle);
         $icmsarray = array();
         $icmsarray[0] = $icms;
@@ -3564,12 +3563,15 @@ data de emissao
             $icms['IMPOSTO'] = 'SEFAT';
         }
 
+
         //inscricao estadual
         preg_match('~inscricao estadual([^{]*)~i', $str, $match);
         if (!empty($match)) {
             $a = explode("\n", trim($match[1]));
             $i = explode(' ', trim($a[0]));
-            $icms['IE'] = trim(str_replace(".", "", $i[1]));
+            if (!empty($i[1])) {
+                $icms['IE'] = trim(str_replace(".", "", $i[1]));
+            }
         }
 
         //razão social
@@ -4367,7 +4369,7 @@ juros de mora
             foreach ($files as $x => $k) {
                 if (strlen($k) > 2) {
                     $exp = explode('.',$k);
-                    if (strtolower($exp[1]) == 'pdf') {
+                    if (!empty($exp[1]) && strtolower($exp[1]) == 'pdf') {
                         $formated[$counter]['path'] = $file.'/'.$k;
                         $formated[$counter]['file'] = $k;
                         $counter++;
@@ -4379,10 +4381,12 @@ juros de mora
                 return 'error-space';
             }
 
+
             if (!empty($formated)) {
                 foreach ($formated as $x => $files) {
+            
                     if (!$this->isRecibo($files['path'])) {
-                        unlink($formated[$x]);
+                        unset($formated[$x]);
                     }
                 }
             }
@@ -4411,7 +4415,7 @@ juros de mora
             if (!empty($formated)) {
                 foreach ($formated as $x => $files) {
                     if (!$this->isRecibo($files['path'])) {
-                        unlink($formated[$x]);
+                        unset($formated[$x]);
                     }
                 }
             }
@@ -4499,12 +4503,15 @@ juros de mora
                 }
 
                 $exploded_rows = explode("\n", utf8_encode($contents));
+
                 if (count($exploded_rows) < 10) {
                     return 'error-read';
                 }
 
-                $lastIndex = $exploded_rows[count($exploded_rows) - 1];
-                if (strlen($lastIndex) > 150) {
+                foreach ($exploded_rows as $k => $last_index) {  }
+
+                $lastIndex = strlen($last_index);
+                if ($lastIndex > 200) {
                     $validateQuantity++;
                 }
 
@@ -4646,7 +4653,7 @@ juros de mora
                             }
                         }
 
-                        if (isset($pdf['IE']) && !empty($pdf['IE'])) {
+                        if (isset($pdf['IE']) && !empty($pdf['IE']) && empty($pdf['CNPJ'])) {
                             if ($pdf['IE'] != $atividade->estemp->insc_estadual) {
                                 return 'error';
                             }   
@@ -4828,7 +4835,7 @@ juros de mora
                 $atividade->vlr_recibo_4 = $dados['vlr_recibo_4']; 
                 $atividade->vlr_recibo_5 = $dados['vlr_recibo_5'];
             } else {
-                if (strtoupper($exploded[2]) == 'ICMS' || strtoupper($exploded[2]) == 'DIFAL') {
+                if (strtoupper($exploded[2]) == 'ICMS') {
                     $atividade->vlr_recibo_1 += $dados['VLR_TOTAL'];
                 }
 
@@ -5072,12 +5079,31 @@ juros de mora
                 $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $three[1]));
                 $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $three[3]));
             }
+            //Modelo PDF 8
+            if (count($a) == 9 && !isset($a[11])) {
+                $other = explode(' ', $i[1]);
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $a[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $a[6]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $a[8]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $other[1]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $other[3]));
+            }
+             //Modelo PDF 9
+            if (count($a) == 5 && !isset($a[8])) {
+                $one = explode(' ', $i[0]);
+                $values = explode(' ', $i[1]);
+                $dados['vlr_recibo_1'] = str_replace(',', '.', str_replace('.', '', $one[4]));
+                $dados['vlr_recibo_2'] = str_replace(',', '.', str_replace('.', '', $values[1]));
+                $dados['vlr_recibo_3'] = str_replace(',', '.', str_replace('.', '', $values[3]));
+                $dados['vlr_recibo_4'] = str_replace(',', '.', str_replace('.', '', $values[5]));
+                $dados['vlr_recibo_5'] = str_replace(',', '.', str_replace('.', '', $values[6]));
+            }
             fclose($handle);
         } else {
             fclose($handle);    
             unlink($arr['pathtxt']);
         }
-        
+
         return $dados;
     }
 
@@ -5389,6 +5415,7 @@ juros de mora
                             $creationpath = $creationpath.'/';
                             $currentFile = $creationpath.'/'.$mostsingle['filename'];
                         }
+
                         copy($mostsingle['path'], $currentFile);
                         unlink($mostsingle['path']);
                     }
@@ -5407,6 +5434,22 @@ juros de mora
                 if(is_array($single) && is_numeric($chave)){
                     copy($single['path'], $single['destino']);
                     unlink($single['path']);
+                }
+
+                $destino = $mostsingle['destino'].'/'.$mostsingle['pastaname'];
+                $convert_txt = array();
+                foreach ($single as $index_array => $nome_arquivo) {
+                    $convert_txt = substr($nome_arquivo['filename'], 0, -3);
+                    $convert_txt .= 'txt';
+
+                    if (is_dir($destino)) {
+                        $files = scandir($destino);
+                        foreach ($files as $arr => $arquivo) {
+                            if ($arquivo == $convert_txt) {
+                                unlink($destino.$arquivo);
+                            }
+                        }
+                    }
                 }
             }
         }

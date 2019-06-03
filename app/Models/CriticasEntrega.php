@@ -26,4 +26,9 @@ class CriticasEntrega extends Model
         'Enviado'
     ];
 
+    public static function NoDuplicity()
+    {
+        CriticasEntrega::whereRaw('DATE_FORMAT(criticasentrega.Data_critica, "%Y-%m-%d") = "'.date('Y-m-d').'"')->delete();
+    }
+
 }
